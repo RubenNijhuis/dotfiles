@@ -1,0 +1,5 @@
+{
+    "editor.fontFamily": "'Hack Nerd Font Mono', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "terminal.integrated.fontLigatures.enabled": true
+}

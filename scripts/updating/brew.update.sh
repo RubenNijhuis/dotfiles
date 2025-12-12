@@ -1,0 +1,1 @@
+brew bundle dump --file=~/dotfiles/Brewfile
