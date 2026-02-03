@@ -1,5 +1,5 @@
 {
-    "editor.fontFamily": "'Hack Nerd Font Mono', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontFamily": "'Fira Code', Menlo, Monaco, 'Courier New', monospace",
     "editor.fontLigatures": true,
     "terminal.integrated.fontLigatures.enabled": true,
     "workbench.sideBar.location": "right",
@@ -13,5 +13,6 @@
     "editor.minimap.enabled": false,
     "editor.renderWhitespace": "all",
     "chat.viewSessions.orientation": "stacked",
-    "claudeCode.preferredLocation": "panel"
+    "claudeCode.preferredLocation": "panel",
+    "editor.formatOnSave": true
 }
