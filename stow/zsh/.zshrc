@@ -47,3 +47,6 @@ source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # ----- Local overrides (not committed) -----
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
+
+# Ensure clean exit code
+return 0 2>/dev/null || true
