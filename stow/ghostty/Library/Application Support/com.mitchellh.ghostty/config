@@ -1,0 +1,6 @@
+font-family = Fira Code
+font-size = 14
+window-padding-x = 8
+window-padding-y = 8
+cursor-style = bar
+shell-integration = zsh

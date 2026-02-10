@@ -1,1 +1,7 @@
+.DS_Store
 .idea
+local/*
+!local/.gitkeep
+*.local
+*.secret
+.env

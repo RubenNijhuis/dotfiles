@@ -1,0 +1,28 @@
+tap "krishkrosh/apps"
+
+# Browsers
+cask "firefox"
+cask "helium-browser"
+cask "zen"
+
+# Communication
+cask "discord"
+cask "signal"
+cask "whatsapp"
+
+# Media & Creative
+cask "affinity"
+cask "iina"
+cask "rekordbox"
+cask "sonos"
+cask "spotify"
+cask "steam"
+
+# Productivity
+cask "dropbox"
+cask "krishkrosh/apps/trackweight"
+
+# Other
+cask "arduino-ide"
+cask "processing"
+cask "mailsy"

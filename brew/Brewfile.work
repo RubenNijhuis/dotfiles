@@ -1,0 +1,14 @@
+# Development
+brew "dive"
+brew "dotnet@8"
+cask "dbeaver-community"
+cask "orbstack"
+cask "rider"
+cask "yaak"
+cask "gcloud-cli"
+
+# Communication & Productivity
+cask "figma"
+cask "linear-linear"
+cask "meetingbar"
+cask "slack"
