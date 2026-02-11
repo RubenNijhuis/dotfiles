@@ -117,6 +117,33 @@ fi
 mkdir -p "$HOME/personal" "$HOME/work"
 success "Created ~/personal and ~/work directories"
 
+# --- 10. Migrate and setup SSH keys ---
+echo ""
+echo "==> SSH and GPG Setup"
+
+# Check for existing keys that need migration
+if [[ -f ~/.ssh/id_ed25519 && ! -f ~/.ssh/id_ed25519_personal ]]; then
+    echo ""
+    echo "Found existing SSH key that needs migration"
+    read -rp "Migrate ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal? [y/N] " migrate_ssh
+    if [[ "${migrate_ssh:-N}" =~ ^[Yy] ]]; then
+        bash "$DOTFILES/scripts/migrate-ssh-keys.sh"
+    fi
+fi
+
+# Offer to generate new keys
+echo ""
+read -rp "Generate SSH keys for Git? [y/N] " setup_ssh
+if [[ "${setup_ssh:-N}" =~ ^[Yy] ]]; then
+    bash "$DOTFILES/templates/ssh/generate-keys.sh"
+fi
+
+echo ""
+read -rp "Generate GPG key for commit signing? [y/N] " setup_gpg
+if [[ "${setup_gpg:-N}" =~ ^[Yy] ]]; then
+    bash "$DOTFILES/templates/gpg/generate-keys.sh"
+fi
+
 # --- Done ---
 echo ""
 echo -e "${GREEN}========================================${NC}"
@@ -127,3 +154,14 @@ echo "Next steps:"
 echo "  - Open a new terminal to load the new shell config"
 echo "  - Edit ~/.gitconfig-work with your work email"
 echo "  - Add machine-specific config to ~/.config/shell/local.sh"
+if [[ "${setup_ssh:-N}" =~ ^[Yy] ]]; then
+    echo "  - Add SSH public keys to GitHub/GitLab"
+    echo "    Personal: pbcopy < ~/.ssh/id_ed25519_personal.pub"
+    if [[ "$PROFILE" == "work" ]]; then
+        echo "    Work: pbcopy < ~/.ssh/id_ed25519_work.pub"
+    fi
+fi
+if [[ "${setup_gpg:-N}" =~ ^[Yy] ]]; then
+    echo "  - Add GPG public key to GitHub/GitLab (see templates/gpg/README.md)"
+    echo "  - Update signingkey in git configs: make gpg-info"
+fi

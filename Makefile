@@ -20,3 +20,18 @@ unstow: ## Unstow all config packages
 
 macos: ## Apply macOS defaults
 	@bash $(DOTFILES)/macos/defaults.sh
+
+ssh-info: ## Display SSH key information and status
+	@bash $(DOTFILES)/scripts/ssh-info.sh
+
+gpg-info: ## Display GPG key information and Git signing config
+	@bash $(DOTFILES)/scripts/gpg-info.sh
+
+ssh-setup: ## Generate SSH keys for current profile
+	@bash $(DOTFILES)/templates/ssh/generate-keys.sh
+
+gpg-setup: ## Generate GPG key and configure Git signing
+	@bash $(DOTFILES)/templates/gpg/generate-keys.sh
+
+migrate-ssh: ## Migrate existing SSH keys to new naming
+	@bash $(DOTFILES)/scripts/migrate-ssh-keys.sh

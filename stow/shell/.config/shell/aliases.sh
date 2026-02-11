@@ -9,7 +9,7 @@ alias ll="eza -la --icons --git"
 alias lt="eza --tree --level=2"
 
 # Search
-alias lookup="history | grep"
+alias lookup="history | grep "
 
 # Git shortcuts
 alias g="git"

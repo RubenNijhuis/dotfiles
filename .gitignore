@@ -5,3 +5,25 @@ local/*
 *.local
 *.secret
 .env
+.claude
+
+# SSH - keep config, ignore keys and sensitive data
+stow/ssh/.ssh/id_*
+stow/ssh/.ssh/*.pub
+stow/ssh/.ssh/known_hosts*
+stow/ssh/.ssh/config.d/local.conf
+
+# GPG - keep config, ignore keys and trust database
+stow/gpg/.gnupg/*.gpg
+stow/gpg/.gnupg/*.kbx
+stow/gpg/.gnupg/random_seed
+stow/gpg/.gnupg/trustdb.gpg
+stow/gpg/.gnupg/private-keys-v1.d/
+stow/gpg/.gnupg/openpgp-revocs.d/
+stow/gpg/.gnupg/S.*
+stow/gpg/.gnupg/.gpg-v21-migrated
+
+# Vim - keep config, ignore runtime files
+stow/vim/.vim/plugged/
+stow/vim/.vim/.netrwhist
+stow/vim/.config/nvim/plugged/

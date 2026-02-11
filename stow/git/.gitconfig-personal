@@ -1,2 +1,6 @@
 [user]
     email = contact@rubennijhuis.com
+	signingkey = # Set after generating GPG key
+
+[commit]
+	gpgsign = true

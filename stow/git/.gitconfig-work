@@ -1,2 +1,6 @@
 [user]
     email = ruben@work.com
+	signingkey = # Set after generating GPG key
+
+[commit]
+	gpgsign = true

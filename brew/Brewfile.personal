@@ -25,4 +25,4 @@ cask "krishkrosh/apps/trackweight"
 # Other
 cask "arduino-ide"
 cask "processing"
-cask "mailsy"
+brew "mailsy"

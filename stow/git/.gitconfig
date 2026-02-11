@@ -10,6 +10,9 @@
 [core]
     excludesFile = ~/.gitignore_global
 
+[gpg]
+	program = /opt/homebrew/bin/gpg
+
 [credential]
     helper = osxkeychain
 
