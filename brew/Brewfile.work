@@ -1,6 +1,8 @@
 # Development
 brew "dive"
 brew "dotnet@8"
+brew "mycli"
+brew "pgcli"
 cask "dbeaver-community"
 cask "orbstack"
 cask "rider"

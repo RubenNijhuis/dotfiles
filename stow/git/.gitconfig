@@ -8,6 +8,15 @@
 
 [core]
 	excludesFile = ~/.gitignore_global
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
 
 [gpg]
 	program = /opt/homebrew/bin/gpg
@@ -23,3 +32,8 @@
 
 [push]
 	autoSetupRemote = true
+
+[alias]
+	lg = log --graph --oneline --all --decorate
+	undo = reset HEAD~1 --soft
+	amend = commit --amend --no-edit
