@@ -33,10 +33,12 @@ dotfiles/
 │   └── bat/        # bat config
 ├── templates/      # Setup guides and key generation scripts
 │   ├── ssh/        # SSH key setup guide and generator
-│   └── gpg/        # GPG key setup guide and generator
+│   ├── gpg/        # GPG key setup guide and generator
+│   └── launchd/    # LaunchD agent templates for scheduled tasks
 ├── brew/           # Brewfile.common, Brewfile.personal, Brewfile.work
 ├── macos/          # macOS defaults script
 ├── scripts/        # Helper scripts (stow, update, ssh-info, gpg-info, etc.)
+├── docs/           # Extended documentation and examples
 ├── assets/         # Wallpapers, etc.
 └── local/          # Machine-specific overrides (gitignored)
 ```
@@ -115,6 +117,55 @@ make gpg-info
 3. Commits are automatically signed in all repositories
 
 See `templates/ssh/README.md` and `templates/gpg/README.md` for detailed documentation.
+
+## Automation with LaunchD
+
+Automated scheduled tasks using macOS's native LaunchD system (superior to cron).
+
+### Quick Start
+
+**Install all scheduled tasks:**
+```bash
+~/dotfiles/scripts/install-launchd-agents.sh
+```
+
+**Install specific task:**
+```bash
+~/dotfiles/scripts/install-launchd-agent.sh obsidian-sync
+```
+
+**List installed tasks:**
+```bash
+~/dotfiles/scripts/list-launchd-agents.sh
+```
+
+### Current Automated Tasks
+
+- **Obsidian Sync** (`obsidian-sync`): Daily git backup of Obsidian vault at 8 PM
+  - Auto-commits and pushes changes
+  - Logs: `~/.local/log/obsidian-sync.log`
+  - Manual run: `~/dotfiles/scripts/sync-obsidian.sh`
+
+### Adding New Scheduled Tasks
+
+It's trivial to add new scheduled tasks! See `templates/launchd/README.md` for:
+- Complete step-by-step guide
+- Common scheduling patterns (daily, weekly, intervals, specific days)
+- Script templates (logging, error handling, git sync, cleanup, health checks)
+- Troubleshooting guide
+- Quick reference commands
+
+See `docs/launchd-examples.md` for 10 complete working examples:
+- Database backups
+- Multi-repository git sync
+- Downloads folder cleanup
+- System health monitoring
+- Time Machine verification
+- Homebrew auto-updates
+- Log rotation
+- API health checks
+- Screenshot organization
+- Battery monitoring
 
 ### Vim/Neovim
 
