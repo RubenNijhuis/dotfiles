@@ -7,6 +7,9 @@ local/*
 .env
 .claude
 
+# Backups
+.dotfiles-backup/
+
 # SSH - keep config, ignore keys and sensitive data
 stow/ssh/.ssh/id_*
 stow/ssh/.ssh/*.pub

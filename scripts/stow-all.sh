@@ -5,6 +5,11 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "$0")/.." && pwd)"
 STOW_DIR="$DOTFILES/stow"
 
+# Backup existing files before stowing
+if [[ -f "$DOTFILES/scripts/backup-dotfiles.sh" ]]; then
+  bash "$DOTFILES/scripts/backup-dotfiles.sh"
+fi
+
 # Clean up old manual symlinks (from pre-stow setup)
 OLD_SYMLINKS=(
     "$HOME/.zshrc"
@@ -32,7 +37,14 @@ done
 for pkg_dir in "$STOW_DIR"/*/; do
     pkg="$(basename "$pkg_dir")"
     echo "Stowing: $pkg"
-    stow -d "$STOW_DIR" -t "$HOME" "$pkg"
+
+    if stow -d "$STOW_DIR" -t "$HOME" "$pkg" 2>&1; then
+        echo "  ✓ $pkg stowed successfully"
+    else
+        echo "  ✗ Failed to stow $pkg"
+        echo "  Run 'make unstow' and try again, or check for conflicts"
+        exit 1
+    fi
 done
 
 echo "All packages stowed."

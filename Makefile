@@ -35,3 +35,12 @@ gpg-setup: ## Generate GPG key and configure Git signing
 
 migrate-ssh: ## Migrate existing SSH keys to new naming
 	@bash $(DOTFILES)/scripts/migrate-ssh-keys.sh
+
+backup: ## Backup current dotfiles before modifications
+	@bash $(DOTFILES)/scripts/backup-dotfiles.sh
+
+restore: ## Restore from latest backup
+	@bash $(DOTFILES)/scripts/restore-backup.sh
+
+brew-sync: ## Sync manually installed packages to Brewfiles
+	@bash $(DOTFILES)/scripts/sync-brew.sh

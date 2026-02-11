@@ -67,7 +67,22 @@ fi
 if ! command -v brew &>/dev/null; then
     step "Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+
+    # Use correct path based on architecture
+    if [[ "$ARCH" == "arm64" ]]; then
+        BREW_PREFIX="/opt/homebrew"
+    else
+        BREW_PREFIX="/usr/local"
+    fi
+
+    eval "$($BREW_PREFIX/bin/brew shellenv)"
+
+    # Validate brew is actually functional
+    if ! command -v brew &>/dev/null; then
+        echo -e "${RED}✗ Homebrew installation failed${NC}"
+        exit 1
+    fi
+    success "Homebrew installed and validated"
 else
     success "Homebrew already installed"
 fi

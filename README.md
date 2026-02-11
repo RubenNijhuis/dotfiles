@@ -57,6 +57,46 @@ make gpg-info      # Display GPG configuration and signing status
 make ssh-setup     # Generate SSH keys for current profile
 make gpg-setup     # Generate GPG key and configure signing
 make migrate-ssh   # Migrate existing SSH keys to new naming
+make backup        # Backup current dotfiles before modifications
+make restore       # Restore from latest backup
+make brew-sync     # Sync manually installed packages to Brewfiles
+```
+
+## Prerequisites
+
+- macOS 13.0+ (Ventura or later) or Linux
+- 500MB+ free disk space (for Homebrew packages)
+- GitHub/GitLab account (for SSH/GPG keys)
+- 15-20 minutes for fresh install
+
+## Brewfile Management
+
+This setup uses split Brewfiles for better organization:
+- `Brewfile.common` - Shared packages across all profiles
+- `Brewfile.personal` - Personal-only packages
+- `Brewfile.work` - Work-specific packages
+
+### Workflow
+
+**Install from Brewfiles:**
+```bash
+make install  # Installs common + profile-specific packages
+```
+
+**Add new packages:**
+```bash
+# Option 1: Add to Brewfile manually, then install
+echo 'brew "wget"' >> brew/Brewfile.common
+brew bundle --file=brew/Brewfile.common
+
+# Option 2: Install first, then sync to Brewfile
+brew install wget
+make brew-sync  # Prompts which Brewfile to add to
+```
+
+**Update all packages:**
+```bash
+make update  # Updates Homebrew, Node, global packages, re-stows configs
 ```
 
 ## Personal / Work Split
@@ -191,3 +231,53 @@ No plugins, no complexity - just sensible defaults for quick edits.
    stow/mytool/.config/mytool/config
    ```
 2. Run `make stow` — this creates `~/.config/mytool/config` as a symlink.
+
+## Troubleshooting
+
+**Stow conflicts ("existing target" errors)**:
+```bash
+make unstow && make stow
+# Or manually remove conflicting files first
+```
+
+**Homebrew not found after install**:
+```bash
+# Apple Silicon:
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Intel:
+eval "$(/usr/local/bin/brew shellenv)"
+```
+
+**Undo recent changes**:
+```bash
+make restore  # Restores from latest backup
+```
+
+**Install script fails partway**:
+The install script is idempotent - you can safely re-run `./install.sh` to continue where it left off.
+
+## FAQ
+
+**Can I re-run the install script?**
+Yes! The install script is idempotent and safe to re-run. It will skip already-installed components and create backups before modifying files.
+
+**How do I add new packages?**
+```bash
+# Install the package
+brew install wget
+
+# Sync to appropriate Brewfile
+make brew-sync
+
+# Commit the change
+git add brew/ && git commit -m "Add wget"
+```
+
+**Can I install only specific configs?**
+```bash
+stow -d stow -t ~ zsh git  # Only zsh and git
+```
+
+**What if I already have dotfiles?**
+The install script creates backups in `~/.dotfiles-backup/` before modifying files. You can restore with `make restore`.
