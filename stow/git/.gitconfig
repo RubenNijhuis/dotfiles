@@ -1,23 +1,25 @@
 [user]
-    name = Ruben Nijhuis
+	name = Ruben Nijhuis
+	email = contact@rubennijhuis.com
+	signingkey = DE4CA08C47F3ED87
 
-[includeIf "gitdir:~/personal/"]
-    path = ~/.gitconfig-personal
+[commit]
+	gpgsign = true
 
 [core]
-    excludesFile = ~/.gitignore_global
+	excludesFile = ~/.gitignore_global
 
 [gpg]
 	program = /opt/homebrew/bin/gpg
 
 [credential]
-    helper = osxkeychain
+	helper = osxkeychain
 
 [init]
-    defaultBranch = main
+	defaultBranch = main
 
 [pull]
-    rebase = true
+	rebase = true
 
 [push]
-    autoSetupRemote = true
+	autoSetupRemote = true

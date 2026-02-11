@@ -152,7 +152,6 @@ echo -e "${GREEN}========================================${NC}"
 echo ""
 echo "Next steps:"
 echo "  - Open a new terminal to load the new shell config"
-echo "  - Edit ~/.gitconfig-work with your work email"
 echo "  - Add machine-specific config to ~/.config/shell/local.sh"
 if [[ "${setup_ssh:-N}" =~ ^[Yy] ]]; then
     echo "  - Add SSH public keys to GitHub/GitLab"

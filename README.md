@@ -59,12 +59,12 @@ make migrate-ssh   # Migrate existing SSH keys to new naming
 
 ## Personal / Work Split
 
-**Git identity** — automatic via directory convention:
-- Repos in `~/personal/` use your personal email
-- Repos in `~/work/` use your work email
-- Configured via `includeIf` in `.gitconfig`
+**Git identity** — single email for all development:
+- All repos use `contact@rubennijhuis.com`
+- GPG signing enabled by default
 
-**Brew packages** — separate Brewfiles per profile, selected at install time.
+**Brew packages** — separate Brewfiles per profile (personal/work), selected at install time.
+This is where the real split happens - work profile doesn't install Steam, personal does, etc.
 
 **Shell overrides** — add machine-specific config to `~/.config/shell/local.sh` (gitignored).
 
