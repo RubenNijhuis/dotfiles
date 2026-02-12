@@ -53,3 +53,6 @@ migrate-dev-dryrun: ## Preview Developer migration
 
 migrate-dev: ## Migrate ~/Developer to new structure
 	@bash $(DOTFILES)/scripts/migrate-developer-structure.sh
+
+complete-migration: ## Complete the Developer directory migration
+	@bash $(DOTFILES)/scripts/complete-migration.sh
