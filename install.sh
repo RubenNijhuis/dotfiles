@@ -129,8 +129,13 @@ if [[ "$OS" == "Darwin" ]]; then
 fi
 
 # --- 9. Create directory structure ---
-mkdir -p "$HOME/personal" "$HOME/work"
-success "Created ~/personal and ~/work directories"
+mkdir -p "$HOME/Developer/personal/projects" \
+         "$HOME/Developer/personal/experiments" \
+         "$HOME/Developer/personal/learning" \
+         "$HOME/Developer/work/projects" \
+         "$HOME/Developer/work/clients" \
+         "$HOME/Developer/archive"
+success "Created ~/Developer structure"
 
 # --- 10. Migrate and setup SSH keys ---
 echo ""

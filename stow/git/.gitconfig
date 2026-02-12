@@ -37,3 +37,11 @@
 	lg = log --graph --oneline --all --decorate
 	undo = reset HEAD~1 --soft
 	amend = commit --amend --no-edit
+
+# Automatic work/personal detection by directory
+[includeIf "gitdir:~/Developer/work/"]
+	path = ~/.gitconfig-work
+[includeIf "gitdir:~/Developer/personal/"]
+	path = ~/.gitconfig-personal
+[includeIf "gitdir:~/Developer/archive/"]
+	path = ~/.gitconfig-personal

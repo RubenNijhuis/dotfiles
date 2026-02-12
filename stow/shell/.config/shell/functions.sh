@@ -9,10 +9,57 @@ fe() {
     file=$(fd --type f | fzf --preview 'bat --color=always {}') && ${EDITOR} "${file}"
 }
 
-# Quick project switcher (uses ~/personal and ~/work)
+# Quick project switcher (searches ~/Developer with fd + fzf)
 proj() {
     local project
-    project=$(fd --type d --max-depth 2 . ~/personal ~/work 2>/dev/null | fzf) && cd "${project}"
+    project=$(fd --type d --max-depth 4 . \
+        ~/Developer/personal/projects \
+        ~/Developer/personal/experiments \
+        ~/Developer/personal/learning \
+        ~/Developer/work/projects \
+        ~/Developer/work/clients \
+        2>/dev/null | fzf --preview 'echo {} && echo "" && git -C {} log -1 --oneline 2>/dev/null || echo "Not a git repo"') \
+    && cd "${project}"
+}
+
+# Category-specific shortcuts
+devp() { cd ~/Developer/personal/projects && ls -la; }
+deve() { cd ~/Developer/personal/experiments && ls -la; }
+devl() { cd ~/Developer/personal/learning && ls -la; }
+devw() { cd ~/Developer/work && ls -la; }
+deva() { cd ~/Developer/archive && ls -la; }
+
+# Create new project with template
+newproj() {
+    local name="$1"
+    local type="${2:-experiment}"
+    local category="${3:-personal}"
+
+    if [[ -z "$name" ]]; then
+        echo "Usage: newproj <name> [type] [category]"
+        echo "Types: experiment, project"
+        echo "Categories: personal, work"
+        return 1
+    fi
+
+    # Transform to kebab-case
+    name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr ' ' '-')
+
+    # Determine location
+    local basedir="$HOME/Developer/$category"
+    if [[ "$type" == "experiment" ]]; then
+        local target="$basedir/experiments/$name"
+    else
+        local target="$basedir/projects/$name"
+    fi
+
+    mkdir -p "$target"
+    cd "$target"
+    git init
+    echo "# $name" > README.md
+    git add README.md
+    git commit -m "Initial commit"
+    echo "✓ Created $name in $target"
 }
 
 # Git branch checkout with fzf

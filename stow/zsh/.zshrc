@@ -50,3 +50,10 @@ source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
+# End of LM Studio CLI section
+
+# OpenClaw Completion
+source "/Users/rubennijhuis/.openclaw/completions/openclaw.zsh"

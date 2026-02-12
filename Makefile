@@ -44,3 +44,12 @@ restore: ## Restore from latest backup
 
 brew-sync: ## Sync manually installed packages to Brewfiles
 	@bash $(DOTFILES)/scripts/sync-brew.sh
+
+validate-repos: ## Check repos are safe to migrate
+	@bash $(DOTFILES)/scripts/validate-repos.sh
+
+migrate-dev-dryrun: ## Preview Developer migration
+	@bash $(DOTFILES)/scripts/migrate-developer-structure.sh --dry-run
+
+migrate-dev: ## Migrate ~/Developer to new structure
+	@bash $(DOTFILES)/scripts/migrate-developer-structure.sh
