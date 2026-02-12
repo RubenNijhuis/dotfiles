@@ -5,7 +5,7 @@ This guide walks you through migrating from the old flat `~/Developer/repositori
 ## Overview
 
 **What this migration does:**
-- Reorganizes 43 repositories into categorized structure (projects/experiments/learning/archive)
+- Reorganizes 44 repositories into categorized structure (projects/experiments/learning/archive)
 - Renames all repos to kebab-case for consistency
 - Sets up automatic SSH key selection based on directory
 - Preserves all git history and remotes
@@ -20,7 +20,7 @@ Before: ~/Developer/repositories/     After: ~/Developer/
 ├── Projects/                         │   └── learning/      (2 repos)
 ├── Portfolio22                       ├── work/
 ├── SRC-API                           │   └── clients/
-└── ... (43 repos, mixed naming)      │       └── celebratix/ (4 repos)
+└── ... (44 repos, mixed naming)      │       └── celebratix/ (4 repos)
                                       └── archive/
                                           └── codam/         (17 repos)
 ```
@@ -104,13 +104,13 @@ make validate-repos
 ```
 ==> Validating repositories in ~/Developer/repositories/
 
-Checking 43 repositories...
+Checking 44 repositories...
 
 ✓ All repositories validated successfully!
 
 Summary:
-  Total repositories: 43
-  Clean repositories: 43
+  Total repositories: 44
+  Clean repositories: 44
   Uncommitted changes: 0
   Unpushed commits: 0
   Stashed changes: 0
@@ -158,7 +158,7 @@ Archive - Codam (17 repos):
   ... (16 more)
 
 Migration summary:
-  Total repos: 43
+  Total repos: 44
   Personal projects: 11
   Personal experiments: 11
   Personal learning: 2
@@ -197,7 +197,7 @@ Creating directory structure...
 ✓ Created ~/Developer/work/clients
 ✓ Created ~/Developer/archive
 
-Migrating Personal Projects (11/43)...
+Migrating Personal Projects (11/44)...
   ✓ Moved portfolio22
   ✓ Moved src-api
   ...
@@ -205,7 +205,7 @@ Migrating Personal Projects (11/43)...
 Migration complete!
 
 Summary:
-  Total repos migrated: 43
+  Total repos migrated: 44
   Personal projects: 11
   Personal experiments: 11
   Personal learning: 2
@@ -219,13 +219,13 @@ Backup location: ~/Developer-backup-20260212-153045
 
 ### Step 1: Verify Repo Count
 
-Ensure all 43 repos were migrated:
+Ensure all 44 repos were migrated:
 
 ```bash
 find ~/Developer -name ".git" -type d | wc -l
 ```
 
-**Expected:** `43`
+**Expected:** `44`
 
 ### Step 2: Test Personal Repo
 

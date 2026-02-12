@@ -10,7 +10,8 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Find all git repositories
-REPOS_DIR="${1:-$HOME/Developer/repositories}"
+# Default to new organized structure, but accept custom path as argument
+REPOS_DIR="${1:-$HOME/Developer}"
 
 if [[ ! -d "$REPOS_DIR" ]]; then
   echo -e "${RED}Error: Directory not found: $REPOS_DIR${NC}"

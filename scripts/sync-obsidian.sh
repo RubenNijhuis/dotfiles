@@ -5,7 +5,7 @@
 
 set -e
 
-VAULT_PATH="$HOME/Developer/repositories/obsidian-store"
+VAULT_PATH="$HOME/Developer/personal/projects/obsidian-store"
 LOG_FILE="$HOME/.local/log/obsidian-sync.log"
 
 # Ensure log directory exists
