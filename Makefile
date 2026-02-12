@@ -56,3 +56,16 @@ migrate-dev: ## Migrate ~/Developer to new structure
 
 complete-migration: ## Complete the Developer directory migration
 	@bash $(DOTFILES)/scripts/complete-migration.sh
+
+openclaw-setup: ## Configure OpenClaw after stowing (requires phone number)
+	@bash $(DOTFILES)/templates/openclaw/setup-openclaw.sh
+
+openclaw-info: ## Display OpenClaw status and configuration
+	@echo "OpenClaw Status:"
+	@openclaw models status 2>/dev/null || echo "  Not configured or not running"
+	@echo ""
+	@echo "Gateway:"
+	@launchctl list | grep openclaw || echo "  Gateway not loaded"
+	@echo ""
+	@echo "Reminders:"
+	@openclaw cron list 2>/dev/null || echo "  No reminders"

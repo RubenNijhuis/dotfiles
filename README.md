@@ -30,7 +30,8 @@ dotfiles/
 │   ├── git/        # .gitconfig with personal/work split
 │   ├── ghostty/    # Terminal config
 │   ├── vscode/     # VS Code settings
-│   └── bat/        # bat config
+│   ├── bat/        # bat config
+│   └── openclaw/   # OpenClaw AI agent config (LM Studio, reminders, WhatsApp)
 ├── templates/      # Setup guides and key generation scripts
 │   ├── ssh/        # SSH key setup guide and generator
 │   ├── gpg/        # GPG key setup guide and generator
@@ -60,6 +61,8 @@ make migrate-ssh   # Migrate existing SSH keys to new naming
 make backup        # Backup current dotfiles before modifications
 make restore       # Restore from latest backup
 make brew-sync     # Sync manually installed packages to Brewfiles
+make openclaw-setup # Configure OpenClaw with phone number
+make openclaw-info # Show OpenClaw status
 ```
 
 ## Prerequisites
@@ -97,6 +100,49 @@ make brew-sync  # Prompts which Brewfile to add to
 **Update all packages:**
 ```bash
 make update  # Updates Homebrew, Node, global packages, re-stows configs
+```
+
+## OpenClaw Configuration
+
+OpenClaw is configured with:
+- **Local LM Studio** as primary model (privacy-first)
+- **WhatsApp integration** for messaging
+- **Reminder system** via cron jobs
+- **Custom workspace docs** (AGENTS.md, SOUL.md, TOOLS.md)
+
+### First-Time Setup
+
+After cloning and stowing:
+
+```bash
+# 1. Install OpenClaw
+brew install openclaw-cli
+
+# 2. Start LM Studio and load models
+# Open LM Studio > Developer > Start Server
+
+# 3. Configure OpenClaw with your phone
+make openclaw-setup
+# Enter phone number when prompted: +31XXXXXXXXX
+
+# 4. Test
+openclaw agent --message "Hello!" --to "+31XXXXXXXXX"
+```
+
+### Quick Commands
+
+```bash
+# Status
+openclaw doctor                 # Health check
+openclaw models status          # Model configuration
+
+# Reminders
+remind 16:00 "Check cables"     # Set reminder at 4pm
+remind +30m "Take break"        # Reminder in 30 min
+openclaw cron list              # View all reminders
+
+# Messaging
+openclaw message send --channel whatsapp --target "+31XX" --message "Hi"
 ```
 
 ## Personal / Work Split
