@@ -53,6 +53,8 @@ make update        # Update brew + re-stow
 make stow          # Stow all packages
 make unstow        # Unstow all packages
 make macos         # Apply macOS defaults
+make doctor        # Run comprehensive system health check
+make doctor-quick  # Quick health check (skip optional checks)
 make ssh-info      # Display SSH key information and status
 make gpg-info      # Display GPG configuration and signing status
 make ssh-setup     # Generate SSH keys for current profile
@@ -340,6 +342,70 @@ No plugins, no complexity - just sensible defaults for quick edits.
    ```
 2. Run `make stow` — this creates `~/.config/mytool/config` as a symlink.
 
+## System Health Check
+
+Run a comprehensive diagnostic to verify your dotfiles setup:
+
+```bash
+make doctor        # Full diagnostic (all checks)
+make doctor-quick  # Quick check (skip LaunchD and Homebrew)
+```
+
+The doctor command validates:
+- ✓ **Stow configuration** - All 9 packages properly symlinked
+- ✓ **SSH setup** - Keys exist with correct permissions (600)
+- ✓ **GPG configuration** - Secret key and commit signing enabled
+- ✓ **Git conditional includes** - Automatic work/personal key selection
+- ✓ **Shell configuration** - Functions and aliases properly defined
+- ✓ **Developer directory** - Structure complete with repo counts
+- ✓ **Runtime environments** - Node.js (fnm) and Bun installed
+- ⚠ **LaunchD agents** - Scheduled tasks running (optional check)
+- ⚠ **Homebrew** - Package status and updates (optional check)
+
+**Example output:**
+```
+System Health Check
+===================
+
+✓ Stow Configuration
+  9/9 packages properly symlinked, no broken symlinks found
+
+✓ SSH Configuration
+  Personal key: ~/.ssh/id_ed25519_personal (600)
+  ⚠ Work key: not configured (optional)
+  SSH config includes: 4 loaded
+  SSH agent: 2 keys loaded
+
+✓ Git Configuration
+  Conditional includes: working
+  Personal repos: using id_ed25519_personal
+  Work repos: using id_ed25519_work
+
+✓ Developer Directory
+  Structure: complete
+  Repositories: 44 total
+    - personal/projects: 11
+    - personal/experiments: 11
+    - personal/learning: 2
+    - work/clients: 4
+    - archive: 17
+
+Summary
+-------
+9 checks passed
+
+Suggested fixes:
+- Update packages: brew upgrade
+```
+
+Any issues will be reported with actionable fix suggestions.
+
+**When to run doctor:**
+- After initial installation (`./install.sh`)
+- After migration (`make migrate-dev`)
+- When troubleshooting issues
+- Before committing dotfiles changes
+
 ## Troubleshooting
 
 **Stow conflicts ("existing target" errors)**:
@@ -364,6 +430,11 @@ make restore  # Restores from latest backup
 
 **Install script fails partway**:
 The install script is idempotent - you can safely re-run `./install.sh` to continue where it left off.
+
+**Check system health**:
+```bash
+make doctor  # Comprehensive health check with actionable fixes
+```
 
 ## FAQ
 

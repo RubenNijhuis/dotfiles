@@ -69,3 +69,9 @@ openclaw-info: ## Display OpenClaw status and configuration
 	@echo ""
 	@echo "Reminders:"
 	@openclaw cron list 2>/dev/null || echo "  No reminders"
+
+doctor: ## Run comprehensive system health check
+	@bash $(DOTFILES)/scripts/doctor.sh
+
+doctor-quick: ## Run quick health check (skip optional checks)
+	@bash $(DOTFILES)/scripts/doctor.sh --quick
