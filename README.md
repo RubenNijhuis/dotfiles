@@ -110,6 +110,68 @@ This is where the real split happens - work profile doesn't install Steam, perso
 
 **Shell overrides** — add machine-specific config to `~/.config/shell/local.sh` (gitignored).
 
+## Developer Directory Structure
+
+Projects are organized under `~/Developer/` with automatic work/personal detection:
+
+```
+~/Developer/
+├── personal/
+│   ├── projects/      # Main personal projects
+│   ├── experiments/   # Quick experiments and prototypes
+│   └── learning/      # Learning projects and forks
+├── work/
+│   ├── projects/      # Work projects
+│   └── clients/       # Client-specific multi-repo groups
+└── archive/           # Completed/archived projects
+```
+
+### Automatic Configuration
+
+Git automatically uses the correct SSH key based on directory:
+- **Work repos** (`~/Developer/work/`): Use work SSH key
+- **Personal repos** (`~/Developer/personal/`): Use personal SSH key
+- **Archive** (`~/Developer/archive/`): Use personal SSH key
+
+No manual per-repository configuration needed!
+
+### Quick Navigation
+
+```bash
+proj          # Fuzzy find and jump to any project
+devp          # Jump to personal projects
+deve          # Jump to experiments
+devl          # Jump to learning
+devw          # Jump to work
+deva          # Jump to archive
+
+newproj name [type] [category]  # Create new project
+```
+
+**Examples:**
+```bash
+# Create a new experiment in personal
+newproj quick-test experiment personal
+
+# Create a new project at work
+newproj api-service project work
+
+# Find and jump to any project with fuzzy search
+proj  # Opens fzf with all your projects
+```
+
+### Migration
+
+If migrating from old structure:
+
+```bash
+make validate-repos       # Check all repos are safe
+make migrate-dev-dryrun  # Preview migration
+make migrate-dev         # Execute migration
+```
+
+See `docs/developer-migration.md` for detailed migration guide.
+
 ## SSH & GPG Configuration
 
 ### SSH Keys
