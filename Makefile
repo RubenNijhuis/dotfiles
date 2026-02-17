@@ -4,7 +4,7 @@
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	ai-startup-setup ai-startup-status keychain-check backup-verify
+	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check
 
 DOTFILES := $(shell pwd)
 
@@ -25,6 +25,7 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
 	@printf "\033[36m%-15s\033[0m %s\n" "bootstrap-verify" "Run strict bootstrap reliability verification suite"
 	@printf "\033[36m%-15s\033[0m %s\n" "docs-sync" "Fail if generated CLI docs are stale"
+	@printf "\033[36m%-15s\033[0m %s\n" "launchd-check" "Validate launchd template contracts"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint" "Run maintenance validation checks"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint-full" "Run checks plus sync/update maintenance workflow"
 	@printf "\nRun \033[36mmake help-all\033[0m to see every target.\n"
@@ -237,7 +238,10 @@ docs-generate: ## Regenerate generated documentation artifacts
 docs-sync: ## Verify generated documentation is up to date
 	@bash $(DOTFILES)/scripts/generate-cli-reference.sh --check
 
-maint-check: check-scripts test-scripts docs-sync ## Run all maintenance validation checks
+launchd-check: ## Validate launchd template contracts
+	@bash $(DOTFILES)/scripts/check-launchd-contracts.sh
+
+maint-check: check-scripts test-scripts docs-sync launchd-check ## Run all maintenance validation checks
 
 maint-sync: update brew-sync brew-audit update-repos ## Run maintenance sync/update workflow
 

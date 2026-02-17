@@ -59,6 +59,14 @@ Validate required keychain items listed one service name per line.
 Default config: local/keychain-required.txt
 ```
 
+## `scripts/check-launchd-contracts.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/check-launchd-contracts.sh [--help] [--no-color]
+
+Validate templates/launchd/*.plist against repository launchd contract.
+```
+
 ## `scripts/doctor-notify.sh`
 
 ```text
