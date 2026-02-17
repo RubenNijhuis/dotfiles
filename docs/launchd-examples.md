@@ -18,6 +18,12 @@ For managed built-in agents, prefer:
 ~/dotfiles/scripts/launchd-manager.sh install-all
 ```
 
+Operational status:
+
+```bash
+make ops-status
+```
+
 ## Minimal Script Template
 
 ```bash
@@ -138,4 +144,4 @@ If install fails due to permissions, rerun the command outside sandboxed tooling
 
 - `templates/launchd/README.md`
 - `scripts/launchd-manager.sh`
-- `docs/scripts-reference.md`
+- `docs/reference/cli.md`

@@ -7,7 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>__DOTFILES__/scripts/update-repos.sh</string>
+        <string>__DOTFILES__/scripts/repo-update-notify.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>

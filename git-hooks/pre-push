@@ -83,7 +83,20 @@ fi
 
 printf '\n'
 
-# Check 3: Check for untracked scripts that should be committed
+# Check 3: Ensure generated docs are in sync
+print_section "Checking generated docs..."
+
+if make -s docs-sync >/dev/null 2>&1; then
+  print_success "Generated docs are in sync"
+else
+  print_error "Generated docs are stale"
+  print_info "Run: make docs-generate"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Check 4: Check for untracked scripts that should be committed
 print_section "Checking for untracked scripts..."
 
 UNTRACKED=$(git ls-files --others --exclude-standard | grep -E '\.(sh|bash|zsh)$' || true)
@@ -101,7 +114,7 @@ fi
 
 printf '\n'
 
-# Check 4: Verify no large files are being pushed
+# Check 5: Verify no large files are being pushed
 print_section "Checking for large files..."
 
 LARGE_FILES=""
@@ -127,7 +140,7 @@ fi
 
 printf '\n'
 
-# Check 5: Ensure commit messages are meaningful (check last commit)
+# Check 6: Ensure commit messages are meaningful (check last commit)
 print_section "Checking last commit message..."
 
 LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
@@ -149,7 +162,7 @@ fi
 
 printf '\n'
 
-# Check 6: Verify we're not pushing to protected branches with issues
+# Check 7: Verify we're not pushing to protected branches with issues
 print_section "Checking branch status..."
 
 CURRENT_BRANCH=$(git branch --show-current)

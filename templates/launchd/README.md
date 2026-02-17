@@ -1,6 +1,6 @@
 # LaunchD Automation
 
-Compact reference for scheduled tasks in this repo.
+Canonical launchd automation contract for this repository.
 
 ## Quick Start
 
@@ -28,7 +28,7 @@ Compact reference for scheduled tasks in this repo.
 - `dotfiles-backup`: daily dotfiles backup at 02:00.
 - `dotfiles-doctor`: daily health check + notifications at 09:00.
 - `obsidian-sync`: daily vault sync.
-- `repo-update`: scheduled repository updates.
+- `repo-update`: scheduled repository updates with notification wrapper.
 - `ai-startup-selector`: asks at login whether to start OpenClaw and/or LM Studio.
 
 Templates live in `templates/launchd/com.user.*.plist`.
@@ -39,6 +39,7 @@ Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
 1. Create script: `scripts/<task-name>.sh`.
 2. Make it executable: `chmod +x scripts/<task-name>.sh`.
 3. Create plist template: `templates/launchd/com.user.<task-name>.plist`.
+4. Follow the contract below.
 4. Install with manager:
 ```bash
 ~/dotfiles/scripts/launchd-manager.sh install <task-name>
@@ -47,6 +48,17 @@ Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
 ```bash
 launchctl print gui/$(id -u)/com.user.<task-name>
 ```
+
+## Launchd Contract
+
+Every `com.user.<task>.plist` template must include:
+
+- `<key>Label</key>` with value `com.user.<task>`
+- `<key>ProgramArguments</key>` using `__DOTFILES__` placeholder path
+- `<key>StandardOutPath</key>` and `<key>StandardErrorPath</key>` under `__HOME__/.local/log/`
+- deterministic schedule (`RunAtLoad`, `StartCalendarInterval`, or `StartInterval`)
+
+If a job uses non-standard log names, document them in this file and surface them in `scripts/ops-status.sh`.
 
 ## Minimal Script Template
 
@@ -102,6 +114,16 @@ launchctl print gui/$(id -u)/com.user.<task-name>
 ```
 
 If install fails with permissions, run the command outside sandboxed tooling.
+
+## Operations Commands
+
+```bash
+make backup-setup
+make doctor-setup
+make repo-update-setup
+make ai-startup-setup
+make ops-status
+```
 
 ## More Examples
 

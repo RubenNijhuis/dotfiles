@@ -7,9 +7,7 @@
 
     <key>ProgramArguments</key>
     <array>
-        <string>/bin/bash</string>
-        <string>-c</string>
-        <string>$HOME/dotfiles/scripts/sync-obsidian.sh</string>
+        <string>__DOTFILES__/scripts/sync-obsidian.sh</string>
     </array>
 
     <key>StartCalendarInterval</key>
@@ -21,10 +19,10 @@
     </dict>
 
     <key>StandardOutPath</key>
-    <string>/tmp/obsidian-sync.out</string>
+    <string>__HOME__/.local/log/obsidian-sync.out.log</string>
 
     <key>StandardErrorPath</key>
-    <string>/tmp/obsidian-sync.err</string>
+    <string>__HOME__/.local/log/obsidian-sync.err.log</string>
 
     <key>RunAtLoad</key>
     <false/>

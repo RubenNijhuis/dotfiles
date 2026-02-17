@@ -1,0 +1,5 @@
+# One macOS Keychain service per line.
+# Add only services required by your enabled automations.
+
+# dotfiles.repo-update.webhook-url
+# dotfiles.obsidian.sync-token

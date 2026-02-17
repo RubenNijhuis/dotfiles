@@ -39,15 +39,16 @@ Behavior:
 Checks:
 
 1. `shellcheck -x` on all shell scripts in repo
-2. Brewfile drift warning via `scripts/brew-audit.sh`
-3. Warn on untracked shell scripts
-4. Block large staged files (>1MB)
-5. Warn on weak last commit subject
-6. Branch status summary
+2. Generated docs sync via `make docs-sync`
+3. Brewfile drift warning via `scripts/brew-audit.sh`
+4. Warn on untracked shell scripts
+5. Block large staged files (>1MB)
+6. Warn on weak last commit subject
+7. Branch status summary
 
 Behavior:
 
-- Blocks push only for hard failures (shellcheck failures, large files).
+- Blocks push on hard failures (shellcheck, stale generated docs, large files).
 - Warnings do not block push.
 
 ## Common Commands

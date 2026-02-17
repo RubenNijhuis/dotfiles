@@ -2,7 +2,9 @@
 	migrate-ssh backup restore brew-sync brew-audit validate-repos migrate-dev-dryrun migrate-dev \
 	complete-migration openclaw-setup openclaw-info ai-on doctor doctor-quick update-repos \
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
-	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full
+	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
+	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
+	ai-startup-setup ai-startup-status keychain-check backup-verify
 
 DOTFILES := $(shell pwd)
 
@@ -20,6 +22,9 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
 	@printf "\033[36m%-15s\033[0m %s\n" "backup-status" "Show backup automation status"
 	@printf "\033[36m%-15s\033[0m %s\n" "doctor-status" "Show health monitoring automation status"
+	@printf "\033[36m%-15s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
+	@printf "\033[36m%-15s\033[0m %s\n" "bootstrap-verify" "Run strict bootstrap reliability verification suite"
+	@printf "\033[36m%-15s\033[0m %s\n" "docs-sync" "Fail if generated CLI docs are stale"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint" "Run maintenance validation checks"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint-full" "Run checks plus sync/update maintenance workflow"
 	@printf "\nRun \033[36mmake help-all\033[0m to see every target.\n"
@@ -168,6 +173,47 @@ doctor-status: ## Show health monitoring automation status
 	@echo "Log files:"
 	@ls -lh ~/.local/log/dotfiles-doctor*.log 2>/dev/null || echo "  No logs yet"
 
+repo-update-setup: ## Setup scheduled repository updates via LaunchD
+	@bash $(DOTFILES)/scripts/setup-automation.sh repo-update
+
+repo-update-status: ## Show scheduled repository update automation status
+	@echo "Repository Update Automation Status:"
+	@echo ""
+	@echo "LaunchD Agent:"
+	@launchctl print gui/$$(id -u)/com.user.repo-update >/dev/null 2>&1 && \
+		echo "  com.user.repo-update (loaded)" || echo "  Not loaded"
+	@echo ""
+	@echo "Recent summary:"
+	@tail -12 ~/.local/log/repo-update-summary.log 2>/dev/null || echo "  No runs yet"
+	@echo ""
+	@echo "Log files:"
+	@ls -lh ~/.local/log/repo-update*.log 2>/dev/null || echo "  No logs yet"
+
+ai-startup-setup: ## Setup login AI startup selector via LaunchD
+	@bash $(DOTFILES)/scripts/setup-automation.sh ai-startup
+
+ai-startup-status: ## Show AI startup selector automation status
+	@echo "AI Startup Selector Status:"
+	@echo ""
+	@echo "LaunchD Agent:"
+	@launchctl print gui/$$(id -u)/com.user.ai-startup-selector >/dev/null 2>&1 && \
+		echo "  com.user.ai-startup-selector (loaded)" || echo "  Not loaded"
+	@echo ""
+	@echo "Recent runs:"
+	@tail -12 ~/.local/log/ai-startup-selector.log 2>/dev/null || echo "  No runs yet"
+	@echo ""
+	@echo "Log files:"
+	@ls -lh ~/.local/log/ai-startup-selector*.log 2>/dev/null || echo "  No logs yet"
+
+keychain-check: ## Validate required keychain entries configured in local/keychain-required.txt
+	@bash $(DOTFILES)/scripts/check-keychain.sh
+
+backup-verify: ## Verify backup recency and health status
+	@bash $(DOTFILES)/scripts/doctor.sh --section backup --no-color
+
+ops-status: ## Show consolidated automation and ops health status
+	@bash $(DOTFILES)/scripts/ops-status.sh
+
 check-scripts: ## Run syntax and shellcheck on all scripts
 	@echo "Checking shell script syntax..."
 	@find $(DOTFILES)/scripts -type f -name "*.sh" -print0 | xargs -0 bash -n
@@ -177,11 +223,21 @@ check-scripts: ## Run syntax and shellcheck on all scripts
 
 test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/scripts/tests/smoke-help.sh
+	@bash $(DOTFILES)/scripts/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-parsing.sh
 	@bash $(DOTFILES)/scripts/tests/test-install-checkpoint.sh
 	@echo "✓ Script tests passed"
 
-maint-check: check-scripts test-scripts ## Run all maintenance validation checks
+bootstrap-verify: ## Run strict bootstrap reliability verification suite
+	@bash $(DOTFILES)/scripts/bootstrap-verify.sh
+
+docs-generate: ## Regenerate generated documentation artifacts
+	@bash $(DOTFILES)/scripts/generate-cli-reference.sh
+
+docs-sync: ## Verify generated documentation is up to date
+	@bash $(DOTFILES)/scripts/generate-cli-reference.sh --check
+
+maint-check: check-scripts test-scripts docs-sync ## Run all maintenance validation checks
 
 maint-sync: update brew-sync brew-audit update-repos ## Run maintenance sync/update workflow
 

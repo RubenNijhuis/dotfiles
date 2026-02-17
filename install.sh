@@ -60,6 +60,25 @@ STEP_NAMES=(
   "Final setup"
 )
 
+detect_brew_binary() {
+  if command -v brew &>/dev/null; then
+    command -v brew
+    return 0
+  fi
+
+  if [[ -x "/opt/homebrew/bin/brew" ]]; then
+    echo "/opt/homebrew/bin/brew"
+    return 0
+  fi
+
+  if [[ -x "/usr/local/bin/brew" ]]; then
+    echo "/usr/local/bin/brew"
+    return 0
+  fi
+
+  return 1
+}
+
 usage() {
   cat <<EOF2
 Usage: $0 [options]
@@ -498,7 +517,11 @@ run_step() {
   if [[ $CURRENT_STEP -lt $target_step ]]; then
     step_begin "${STEP_NAMES[$((target_step - 1))]}"
     if $DRY_RUN; then
-      info "DRY RUN: would execute step logic"
+      if [[ "$target_step" -eq 1 ]]; then
+        "$handler"
+      else
+        info "DRY RUN: would execute step logic"
+      fi
     else
       "$handler"
       save_checkpoint
@@ -509,9 +532,30 @@ run_step() {
 
 step_detect_system() {
   success "OS: $OS ($ARCH)"
-  if [[ "$OS" != "Darwin" && "$OS" != "Linux" ]]; then
-    error "Unsupported OS: $OS"
+  if [[ "$OS" != "Darwin" ]]; then
+    error "Unsupported OS: $OS. This repository is macOS-only."
     exit 1
+  fi
+
+  local missing=0
+  local cmd
+  for cmd in osascript launchctl plutil security xcode-select; do
+    if ! command -v "$cmd" &>/dev/null; then
+      error "Missing required macOS command: $cmd"
+      missing=$((missing + 1))
+    fi
+  done
+
+  if [[ $missing -gt 0 ]]; then
+    echo "Required macOS tooling is unavailable. Check Xcode CLT and system path integrity."
+    exit 1
+  fi
+
+  local brew_bin
+  if brew_bin="$(detect_brew_binary)"; then
+    info "Detected Homebrew binary: $brew_bin"
+  else
+    info "Homebrew not detected yet; installer will bootstrap it."
   fi
 }
 
@@ -522,11 +566,6 @@ step_setup_profile() {
 }
 
 step_install_xcode_clt() {
-  if [[ "$OS" != "Darwin" ]]; then
-    success "Skipped (Linux)"
-    return
-  fi
-
   if ! xcode-select -p &>/dev/null; then
     xcode-select --install
     echo "Press enter after Xcode CLT finishes installing."
@@ -537,23 +576,20 @@ step_install_xcode_clt() {
 }
 
 step_install_homebrew() {
-  if ! command -v brew &>/dev/null; then
+  local brew_bin=""
+  brew_bin="$(detect_brew_binary || true)"
+
+  if [[ -z "$brew_bin" ]]; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    local brew_prefix
-    if [[ "$ARCH" == "arm64" ]]; then
-      brew_prefix="/opt/homebrew"
-    else
-      brew_prefix="/usr/local"
-    fi
-
-    eval "$("$brew_prefix/bin/brew" shellenv)"
+    brew_bin="$(detect_brew_binary || true)"
   fi
 
-  if ! command -v brew &>/dev/null; then
+  if [[ -z "$brew_bin" ]]; then
     error "Homebrew installation failed"
     exit 1
   fi
+
+  eval "$("$brew_bin" shellenv)"
   success "Homebrew ready"
 }
 
@@ -592,11 +628,6 @@ step_setup_runtimes() {
 }
 
 step_apply_macos_defaults() {
-  if [[ "$OS" != "Darwin" ]]; then
-    success "Skipped (Linux)"
-    return
-  fi
-
   if [[ "$APPLY_MACOS_DEFAULTS" == "yes" ]]; then
     bash "$DOTFILES/macos/defaults.sh"
     success "macOS defaults applied"

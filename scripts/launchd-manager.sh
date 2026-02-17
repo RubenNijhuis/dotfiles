@@ -20,6 +20,18 @@ AGENTS=(
   "repo-update:Repository updates"
 )
 
+agent_log_file() {
+  local agent_name="$1"
+  case "$agent_name" in
+    dotfiles-doctor)
+      echo "$LOG_DIR/dotfiles-doctor-launchd.out.log"
+      ;;
+    *)
+      echo "$LOG_DIR/${agent_name}.out.log"
+      ;;
+  esac
+}
+
 render_plist_template() {
   local source="$1"
   local destination="$2"
@@ -164,7 +176,7 @@ status_agents() {
       fi
 
       # Show last run if log exists
-      log_file="$LOG_DIR/${name}.out.log"
+      log_file="$(agent_log_file "$name")"
       if [[ -f "$log_file" ]]; then
         last_run=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$log_file" 2>/dev/null || echo "never")
         printf "    "

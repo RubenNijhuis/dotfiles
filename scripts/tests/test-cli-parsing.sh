@@ -31,6 +31,12 @@ assert_exit 1 "bash '$ROOT_DIR/scripts/migrate-developer-structure.sh' --dry-run
 assert_exit 0 "bash '$ROOT_DIR/scripts/restore-backup.sh' --help"
 assert_exit 0 "bash '$ROOT_DIR/scripts/sync-brew.sh' --help"
 assert_exit 0 "bash '$ROOT_DIR/scripts/stow-report.sh' --help"
+assert_exit 0 "bash '$ROOT_DIR/scripts/startup-ai-services.sh' --help"
+assert_exit 1 "bash '$ROOT_DIR/scripts/startup-ai-services.sh' --policy invalid"
+assert_exit 0 "bash '$ROOT_DIR/scripts/generate-cli-reference.sh' --help"
+assert_exit 1 "bash '$ROOT_DIR/scripts/generate-cli-reference.sh' --wat"
+assert_exit 0 "bash '$ROOT_DIR/scripts/bootstrap-verify.sh' --help"
+assert_exit 1 "bash '$ROOT_DIR/scripts/bootstrap-verify.sh' --profile nope --skip-doctor"
 assert_exit 0 "bash '$ROOT_DIR/install.sh' --help"
 assert_exit 1 "bash '$ROOT_DIR/install.sh' --from-step 99"
 

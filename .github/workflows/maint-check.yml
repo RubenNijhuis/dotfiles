@@ -21,3 +21,6 @@ jobs:
 
       - name: Run maintenance checks
         run: make maint-check
+
+      - name: Verify generated docs are current
+        run: make docs-sync
