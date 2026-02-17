@@ -1,0 +1,141 @@
+# EditorConfig - Consistent coding styles across editors
+# https://editorconfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# =============================================================================
+# Default settings for all files
+# =============================================================================
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# =============================================================================
+# Shell Scripts
+# =============================================================================
+[*.{sh,bash,zsh}]
+indent_style = space
+indent_size = 2
+shell_variant = bash
+
+[*.zsh]
+shell_variant = zsh
+
+# =============================================================================
+# Configuration Files
+# =============================================================================
+[{Makefile,*.mk}]
+indent_style = tab
+indent_size = 4
+
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[*.{json,jsonc}]
+indent_style = space
+indent_size = 2
+
+[*.toml]
+indent_style = space
+indent_size = 2
+
+# =============================================================================
+# Programming Languages
+# =============================================================================
+
+# JavaScript / TypeScript
+[*.{js,jsx,ts,tsx,mjs,cjs}]
+indent_style = space
+indent_size = 2
+quote_type = single
+max_line_length = 100
+
+# Python
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 88  # Black formatter default
+
+# Ruby (for Brewfile)
+[{Brewfile,Brewfile.*,*.rb}]
+indent_style = space
+indent_size = 2
+
+# Rust
+[*.rs]
+indent_style = space
+indent_size = 4
+max_line_length = 100
+
+# Go
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# =============================================================================
+# Markup / Documentation
+# =============================================================================
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false  # Preserve trailing spaces for line breaks
+
+[*.{html,htm,xml,svg}]
+indent_style = space
+indent_size = 2
+
+# =============================================================================
+# Styles
+# =============================================================================
+[*.{css,scss,sass,less}]
+indent_style = space
+indent_size = 2
+
+# =============================================================================
+# Git
+# =============================================================================
+[{.gitignore,.gitattributes,.gitmodules}]
+indent_style = space
+indent_size = 2
+
+[COMMIT_EDITMSG]
+max_line_length = 72
+
+# =============================================================================
+# Package Manager Files
+# =============================================================================
+[{package.json,package-lock.json}]
+indent_style = space
+indent_size = 2
+
+[{yarn.lock,pnpm-lock.yaml}]
+indent_style = space
+indent_size = 2
+insert_final_newline = false  # Don't modify lock files
+
+[Cargo.{toml,lock}]
+indent_style = space
+indent_size = 2
+
+[Gemfile{,.lock}]
+indent_style = space
+indent_size = 2
+
+# =============================================================================
+# Special Files
+# =============================================================================
+[LICENSE]
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+
+[*.txt]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false

@@ -1,0 +1,47 @@
+[user]
+	name = Ruben Nijhuis
+	email = contact@rubennijhuis.com
+	signingkey = DE4CA08C47F3ED87
+
+[commit]
+	gpgsign = true
+
+[core]
+	excludesFile = ~/.gitignore_global
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+
+[gpg]
+	program = /opt/homebrew/bin/gpg
+
+[credential]
+	helper = osxkeychain
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+
+[alias]
+	lg = log --graph --oneline --all --decorate
+	undo = reset HEAD~1 --soft
+	amend = commit --amend --no-edit
+
+# Automatic work/personal detection by directory
+[includeIf "gitdir:~/Developer/work/"]
+	path = ~/.gitconfig-work
+[includeIf "gitdir:~/Developer/personal/"]
+	path = ~/.gitconfig-personal
+[includeIf "gitdir:~/Developer/archive/"]
+	path = ~/.gitconfig-personal

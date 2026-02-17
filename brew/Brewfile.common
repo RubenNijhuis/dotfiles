@@ -1,0 +1,111 @@
+# =============================================================================
+# Common Brewfile - Packages shared across all profiles
+# =============================================================================
+# Installed on both personal and work machines
+# Profile-specific packages go in Brewfile.personal or Brewfile.work
+
+# -----------------------------------------------------------------------------
+# Taps
+# -----------------------------------------------------------------------------
+tap "steipete/tap"
+
+# -----------------------------------------------------------------------------
+# Shell & Terminal
+# -----------------------------------------------------------------------------
+brew "zsh-autosuggestions"      # Fish-like autosuggestions
+brew "zsh-syntax-highlighting"  # Syntax highlighting in zsh
+brew "powerlevel10k"             # Fast, flexible zsh theme
+brew "fzf"                       # Fuzzy finder for command line
+brew "gum"                       # Interactive terminal UI components
+brew "zoxide"                    # Smarter cd command (z)
+
+# -----------------------------------------------------------------------------
+# Core CLI Tools
+# -----------------------------------------------------------------------------
+brew "bat"           # Better cat with syntax highlighting
+brew "eza"           # Modern replacement for ls
+brew "grc"           # Colorize command output
+brew "ripgrep"       # Fast grep alternative (rg)
+brew "tree"          # Directory tree visualization
+brew "stow"          # Symlink farm manager (dotfiles)
+brew "gh"            # GitHub CLI
+brew "git"           # Git version control (prefer Homebrew over Apple Git)
+brew "git-delta"     # Better git diffs
+brew "neovim"        # Modern vim
+brew "vim"           # Classic vim (fallback)
+
+# Note: fd and dust not currently installed but available if needed
+# brew "fd"          # Fast find alternative
+# brew "dust"        # Better du (disk usage)
+
+# -----------------------------------------------------------------------------
+# Development Tools
+# -----------------------------------------------------------------------------
+brew "bash"          # Modern bash (macOS ships with old version)
+brew "biome"         # Fast formatter and linter (JS/TS/JSON)
+brew "fnm"           # Fast Node version manager
+brew "lua"           # Lua programming language
+brew "node"          # Node.js (installed via fnm or direct)
+brew "pnpm"          # Fast npm alternative
+brew "ruff"          # Fast Python linter
+brew "rust"          # Rust programming language
+brew "shellcheck"    # Shell script linter
+
+# Note: tsx not currently installed but available if needed
+# brew "tsx"         # TypeScript execution
+
+# -----------------------------------------------------------------------------
+# Security & Privacy
+# -----------------------------------------------------------------------------
+brew "gnupg"         # GPG encryption
+brew "pinentry-mac"  # GPG passphrase entry for macOS
+
+# -----------------------------------------------------------------------------
+# System Utilities
+# -----------------------------------------------------------------------------
+brew "mac-cleanup-go"       # System cleanup utility
+brew "obsidian-cli"         # Obsidian CLI tools
+brew "ollama", restart_service: :changed  # Local LLM runtime
+brew "openclaw-cli"         # OpenClaw AI agent CLI
+
+# -----------------------------------------------------------------------------
+# Fonts
+# -----------------------------------------------------------------------------
+cask "font-fira-code"       # Monospace font with ligatures
+cask "font-hack-nerd-font"  # Patched font with icons
+
+# -----------------------------------------------------------------------------
+# Core Applications
+# -----------------------------------------------------------------------------
+cask "claude"               # Claude AI desktop app
+cask "claude-code"          # Claude Code (coding assistant)
+cask "codex"                # Codex app
+cask "codexbar"             # Menu bar code snippets
+cask "ghostty"              # Fast, feature-rich terminal
+cask "google-chrome"        # Web browser
+cask "lm-studio"            # Local LLM GUI
+cask "obsidian"             # Note-taking and knowledge base
+cask "raycast"              # Spotlight replacement
+cask "visual-studio-code"   # Code editor
+
+# -----------------------------------------------------------------------------
+# VS Code Extensions
+# -----------------------------------------------------------------------------
+vscode "anthropic.claude-code"          # Claude Code integration
+vscode "bradlc.vscode-tailwindcss"      # Tailwind CSS IntelliSense
+vscode "dbaeumer.vscode-eslint"         # ESLint integration
+vscode "eamodio.gitlens"                # Git supercharged
+vscode "biomejs.biome"                  # Biome formatter/linter
+vscode "editorconfig.editorconfig"      # EditorConfig support
+vscode "github.copilot"                 # GitHub Copilot
+vscode "github.copilot-chat"            # Copilot Chat
+vscode "kevinrose.vsc-python-indent"    # Python indentation
+vscode "ms-azuretools.vscode-containers" # Docker containers
+vscode "ms-python.debugpy"              # Python debugger
+vscode "ms-python.python"               # Python support
+vscode "ms-python.vscode-pylance"       # Python language server
+vscode "ms-python.vscode-python-envs"   # Python environments
+vscode "ms-vscode-remote.remote-containers" # Dev containers
+vscode "svelte.svelte-vscode"           # Svelte support
+vscode "tamasfe.even-better-toml"       # TOML support
+vscode "usernamehw.errorlens"           # Inline error highlighting

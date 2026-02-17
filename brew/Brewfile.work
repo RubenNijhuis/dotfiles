@@ -1,0 +1,36 @@
+# =============================================================================
+# Work Brewfile - Work machine packages only
+# =============================================================================
+# Packages specific to work projects and clients
+# Common packages shared with personal go in Brewfile.common
+
+# -----------------------------------------------------------------------------
+# Development Tools
+# -----------------------------------------------------------------------------
+brew "dive"      # Docker image layer explorer
+brew "dotnet@8"  # .NET 8 SDK
+
+# Note: mycli and pgcli not currently in Brewfile but could be added if needed
+# brew "mycli"   # MySQL CLI with autocomplete
+# brew "pgcli"   # PostgreSQL CLI with autocomplete
+
+# -----------------------------------------------------------------------------
+# Development Applications
+# -----------------------------------------------------------------------------
+cask "dbeaver-community"  # Universal database tool
+cask "orbstack"           # Fast Docker Desktop alternative
+cask "rider"              # .NET IDE
+cask "yaak"               # API client
+
+# -----------------------------------------------------------------------------
+# Cloud & Infrastructure
+# -----------------------------------------------------------------------------
+cask "gcloud-cli"  # Google Cloud SDK
+
+# -----------------------------------------------------------------------------
+# Communication & Productivity
+# -----------------------------------------------------------------------------
+cask "figma"          # Design tool
+cask "linear-linear"  # Issue tracking
+cask "meetingbar"     # Calendar in menu bar
+cask "slack"          # Team communication

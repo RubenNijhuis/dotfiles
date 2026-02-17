@@ -1,0 +1,34 @@
+# VS Code Extensions
+# Install with: cat extensions.txt | xargs -L 1 code --install-extension
+
+# AI Tools
+anthropic.claude-code          # Claude Code AI coding assistant
+github.copilot                 # GitHub Copilot AI pair programmer
+github.copilot-chat            # GitHub Copilot chat interface
+
+# Code Quality & Formatting
+biomejs.biome                  # Fast formatter and linter (JS/TS/JSON)
+editorconfig.editorconfig      # EditorConfig support
+dbaeumer.vscode-eslint         # JavaScript/TypeScript linter
+usernamehw.errorlens           # Inline error highlighting
+
+# Git
+eamodio.gitlens                # Git supercharged (blame, history, authorship)
+
+# Language Support - JavaScript/TypeScript
+bradlc.vscode-tailwindcss      # Tailwind CSS IntelliSense
+svelte.svelte-vscode           # Svelte framework support
+
+# Language Support - Python
+ms-python.python               # Full Python language support
+ms-python.vscode-pylance       # Python language server (fast static analysis)
+ms-python.debugpy              # Python debugger
+ms-python.vscode-python-envs   # Python environment management
+kevinrose.vsc-python-indent    # Smart Python indentation
+
+# Language Support - Other
+tamasfe.even-better-toml       # TOML syntax and formatting
+
+# DevOps & Remote
+ms-vscode-remote.remote-containers  # Dev containers support
+ms-azuretools.vscode-containers     # Docker/container support

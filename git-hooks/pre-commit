@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# Pre-commit hook for dotfiles repository
+# Validates shell scripts and prevents common issues
+
+set -euo pipefail
+
+# Get dotfiles root (we're in .git/hooks via symlink, need to go up two levels)
+DOTFILES="$(git rev-parse --show-toplevel)"
+source "$DOTFILES/scripts/lib/output.sh"
+
+# Track if any checks failed
+FAILED=0
+
+# Get list of staged shell scripts (excluding sourced config files)
+STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' | grep -v '\.config/shell/' || true)
+# Get staged JS/TS/JSON files supported by Biome
+STAGED_BIOME_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
+
+if [[ -z "$STAGED_SCRIPTS" ]] && [[ -z "$STAGED_BIOME_FILES" ]]; then
+  exit 0
+fi
+
+print_header "Pre-commit: Validating Shell Scripts"
+
+# Check 1: Shellcheck validation
+if [[ -n "$STAGED_SCRIPTS" ]] && command -v shellcheck &>/dev/null; then
+  print_section "Running shellcheck..."
+
+  while IFS= read -r script; do
+    if [[ -f "$script" ]]; then
+      if shellcheck -x "$script" &>/dev/null; then
+        printf "  "
+        print_success "$script"
+      else
+        printf "  "
+        print_error "$script"
+        shellcheck -x "$script" || true
+        FAILED=1
+      fi
+    fi
+  done <<< "$STAGED_SCRIPTS"
+
+  printf '\n'
+elif [[ -n "$STAGED_SCRIPTS" ]]; then
+  print_warning "shellcheck not installed - skipping validation"
+  print_dim "Install with: brew install shellcheck"
+  printf '\n'
+fi
+
+# Check 2: Executable bit for scripts
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  print_section "Checking executable permissions..."
+
+  while IFS= read -r script; do
+    if [[ -f "$script" ]]; then
+      if [[ -x "$script" ]]; then
+        printf "  "
+        print_success "$script (executable)"
+      else
+        printf "  "
+        print_warning "$script (not executable - fixing)"
+        chmod +x "$script"
+        git add "$script"
+      fi
+    fi
+  done <<< "$STAGED_SCRIPTS"
+
+  printf '\n'
+fi
+
+# Check 3: Shebang validation
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  print_section "Validating shebangs..."
+
+  while IFS= read -r script; do
+    if [[ -f "$script" ]]; then
+      first_line=$(head -n 1 "$script")
+      if [[ "$first_line" =~ ^#!/usr/bin/env\ bash$ ]] || [[ "$first_line" =~ ^#!/bin/bash$ ]]; then
+        printf "  "
+        print_success "$script"
+      else
+        printf "  "
+        print_error "$script (invalid or missing shebang: $first_line)"
+        FAILED=1
+      fi
+    fi
+  done <<< "$STAGED_SCRIPTS"
+
+  printf '\n'
+fi
+
+# Check 4: Biome formatting
+if command -v biome &>/dev/null; then
+  print_section "Checking Biome formatting..."
+
+  if [[ -n "$STAGED_BIOME_FILES" ]]; then
+    BIOME_FIXED=0
+    while IFS= read -r file; do
+      if [[ -f "$file" ]]; then
+        # biome check --write exits non-zero when diagnostics remain; keep commit moving.
+        output="$(biome check --write "$file" 2>&1 || true)"
+        if echo "$output" | grep -q "Fixed"; then
+          BIOME_FIXED=$((BIOME_FIXED + 1))
+          printf "  "
+          print_warning "$file (fixed)"
+          git add "$file"
+        else
+          printf "  "
+          print_success "$file"
+        fi
+      fi
+    done <<< "$STAGED_BIOME_FILES"
+
+    if [[ $BIOME_FIXED -eq 0 ]]; then
+      print_success "All files formatted correctly"
+    else
+      print_success "Fixed $BIOME_FIXED files"
+    fi
+  else
+    print_dim "No JS/TS/JSON files to check"
+  fi
+else
+  print_warning "biome not installed - skipping formatting check"
+  print_dim "Install with: brew install biome"
+fi
+
+printf '\n'
+
+# Check 5: TODO/FIXME markers (warning only)
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  print_section "Checking for TODO/FIXME markers..."
+
+  TODO_COUNT=0
+  while IFS= read -r script; do
+    if [[ -f "$script" ]]; then
+      if grep -nE '(TODO|FIXME|XXX|HACK)' "$script" &>/dev/null; then
+        if [[ $TODO_COUNT -eq 0 ]]; then
+          print_warning "Found TODO/FIXME markers:"
+        fi
+        TODO_COUNT=$((TODO_COUNT + 1))
+        grep -nE '(TODO|FIXME|XXX|HACK)' "$script" | while IFS= read -r line; do
+          printf "    "
+          print_dim "$script: $line"
+        done
+      fi
+    fi
+  done <<< "$STAGED_SCRIPTS"
+
+  if [[ $TODO_COUNT -eq 0 ]]; then
+    print_success "No TODO/FIXME markers found"
+  fi
+
+  printf '\n'
+fi
+
+# Summary
+if [[ $FAILED -eq 1 ]]; then
+  print_error "Pre-commit checks failed"
+  print_info "Fix the errors above and try committing again"
+  exit 1
+else
+  print_success "All pre-commit checks passed"
+  exit 0
+fi

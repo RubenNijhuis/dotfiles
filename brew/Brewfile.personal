@@ -1,0 +1,72 @@
+# =============================================================================
+# Personal Brewfile - Personal machine packages only
+# =============================================================================
+# Packages specific to personal projects and hobbies
+# Common packages shared with work go in Brewfile.common
+
+# -----------------------------------------------------------------------------
+# Taps
+# -----------------------------------------------------------------------------
+tap "krishkrosh/apps"
+
+# -----------------------------------------------------------------------------
+# CLI Tools
+# -----------------------------------------------------------------------------
+brew "mailsy"  # Disposable email CLI
+
+# -----------------------------------------------------------------------------
+# Browsers
+# -----------------------------------------------------------------------------
+cask "firefox"         # Privacy-focused browser
+cask "helium-browser"  # Floating browser window
+cask "zen"             # Minimal browser
+
+# -----------------------------------------------------------------------------
+# Communication
+# -----------------------------------------------------------------------------
+cask "discord"   # Gaming/community chat
+cask "signal"    # Encrypted messaging
+cask "whatsapp"  # Messaging
+
+# -----------------------------------------------------------------------------
+# Media & Entertainment
+# -----------------------------------------------------------------------------
+cask "iina"        # Modern media player
+cask "rekordbox"   # DJ software
+cask "sonos"       # Sonos speaker control
+cask "spotify"     # Music streaming
+cask "steam"       # Gaming platform
+
+# -----------------------------------------------------------------------------
+# Creative Tools
+# -----------------------------------------------------------------------------
+cask "affinity"     # Affinity Designer/Photo suite
+cask "processing"   # Creative coding IDE
+
+# -----------------------------------------------------------------------------
+# Productivity
+# -----------------------------------------------------------------------------
+cask "dropbox"      # Cloud storage
+cask "trackweight"  # Weight tracking (from krishkrosh/apps tap)
+
+# -----------------------------------------------------------------------------
+# Gaming & Other
+# -----------------------------------------------------------------------------
+cask "arduino-ide"  # Arduino development
+cask "epic-games"   # Epic Games launcher
+
+# -----------------------------------------------------------------------------
+# Work Tools (installed on personal machine)
+# -----------------------------------------------------------------------------
+# These are typically in Brewfile.work but are also installed here
+brew "dive"                # Docker image layer explorer
+brew "dotnet@8"            # .NET 8 SDK
+cask "dbeaver-community"   # Universal database tool
+cask "figma"               # Design tool
+cask "gcloud-cli"          # Google Cloud SDK
+cask "linear-linear"       # Issue tracking
+cask "meetingbar"          # Calendar in menu bar
+cask "orbstack"            # Fast Docker Desktop alternative
+cask "rider"               # .NET IDE
+cask "slack"               # Team communication
+cask "yaak"                # API client

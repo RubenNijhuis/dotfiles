@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+# Pre-push hook for dotfiles repository
+# Ensures code quality and repository health before pushing
+
+set -euo pipefail
+
+# Get dotfiles root
+DOTFILES="$(git rev-parse --show-toplevel)"
+source "$DOTFILES/scripts/lib/output.sh"
+
+# Track if any checks failed
+FAILED=0
+
+print_header "Pre-push: Validating Repository"
+
+# Check 1: Run shellcheck on ALL shell scripts (not just staged)
+if command -v shellcheck &>/dev/null; then
+  print_section "Running shellcheck on all scripts..."
+
+  ALL_SCRIPTS=$(find "$DOTFILES" -type f \( -name "*.sh" -o -name "*.bash" \) \
+    -not -path "*/.git/*" \
+    -not -path "*/node_modules/*" 2>/dev/null)
+
+  SCRIPT_COUNT=0
+  FAILED_SCRIPTS=0
+
+  while IFS= read -r script; do
+    if [[ -f "$script" ]]; then
+      SCRIPT_COUNT=$((SCRIPT_COUNT + 1))
+      if ! shellcheck -x "$script" &>/dev/null; then
+        if [[ $FAILED_SCRIPTS -eq 0 ]]; then
+          printf '\n'
+          print_error "Shellcheck failures:"
+        fi
+        FAILED_SCRIPTS=$((FAILED_SCRIPTS + 1))
+        printf "  "
+        print_error "$(basename "$script")"
+        shellcheck -x "$script" 2>&1 | sed 's/^/    /' || true
+        printf '\n'
+        FAILED=1
+      fi
+    fi
+  done <<< "$ALL_SCRIPTS"
+
+  if [[ $FAILED_SCRIPTS -eq 0 ]]; then
+    print_success "All $SCRIPT_COUNT scripts passed shellcheck"
+  else
+    print_error "$FAILED_SCRIPTS/$SCRIPT_COUNT scripts failed shellcheck"
+  fi
+  printf '\n'
+else
+  print_warning "shellcheck not installed - skipping validation"
+  print_dim "Install with: brew install shellcheck"
+  printf '\n'
+fi
+
+# Check 2: Verify Brewfiles are in sync
+print_section "Checking Brewfile sync..."
+
+if command -v brew &>/dev/null; then
+  # Run brew-audit.sh in check mode (just detect issues, don't output full report)
+  BREW_AUDIT="$DOTFILES/scripts/brew-audit.sh"
+
+  if [[ -x "$BREW_AUDIT" ]]; then
+    # Capture output but suppress if everything is OK
+    AUDIT_OUTPUT=$("$BREW_AUDIT" 2>&1 || true)
+
+    # Check if there are undeclared or missing packages
+    if echo "$AUDIT_OUTPUT" | grep -q "Installed but not in Brewfiles" || \
+       echo "$AUDIT_OUTPUT" | grep -q "Declared but not installed"; then
+      print_warning "Brewfiles are out of sync"
+      print_dim "Run: make brew-audit"
+      # Don't fail, just warn (Brewfiles may be intentionally different)
+    else
+      print_success "Brewfiles are in sync"
+    fi
+  else
+    print_dim "brew-audit.sh not executable - skipping"
+  fi
+else
+  print_dim "Homebrew not installed - skipping Brewfile check"
+fi
+
+printf '\n'
+
+# Check 3: Check for untracked scripts that should be committed
+print_section "Checking for untracked scripts..."
+
+UNTRACKED=$(git ls-files --others --exclude-standard | grep -E '\.(sh|bash|zsh)$' || true)
+
+if [[ -n "$UNTRACKED" ]]; then
+  print_warning "Found untracked shell scripts:"
+  while IFS= read -r file; do
+    printf "  "
+    print_dim "$file"
+  done <<< "$UNTRACKED"
+  print_info "Consider adding these to git or .gitignore"
+else
+  print_success "No untracked shell scripts"
+fi
+
+printf '\n'
+
+# Check 4: Verify no large files are being pushed
+print_section "Checking for large files..."
+
+LARGE_FILES=""
+while IFS= read -r file; do
+  [[ -f "$file" ]] || continue
+  if [[ $(wc -c < "$file") -gt 1048576 ]]; then
+    LARGE_FILES+="$file"$'\n'
+  fi
+done <<< "$(git diff --cached --name-only --diff-filter=ACM)"
+
+if [[ -n "$LARGE_FILES" ]]; then
+  print_error "Large files detected (>1MB):"
+  while IFS= read -r file; do
+    size=$(du -h "$file" | cut -f1)
+    printf "  "
+    print_error "$file ($size)"
+  done <<< "$LARGE_FILES"
+  print_info "Consider using Git LFS or excluding from repository"
+  FAILED=1
+else
+  print_success "No large files detected"
+fi
+
+printf '\n'
+
+# Check 5: Ensure commit messages are meaningful (check last commit)
+print_section "Checking last commit message..."
+
+LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+LAST_COMMIT_SHORT=$(echo "$LAST_COMMIT_MSG" | head -n 1)
+
+# Check for common bad commit messages
+if echo "$LAST_COMMIT_SHORT" | grep -qiE '^(wip|temp|fix|update|test)$'; then
+  print_warning "Last commit message might be too generic:"
+  printf "  "
+  print_dim "$LAST_COMMIT_SHORT"
+  print_info "Consider using more descriptive commit messages"
+elif [[ ${#LAST_COMMIT_SHORT} -lt 10 ]]; then
+  print_warning "Last commit message is very short:"
+  printf "  "
+  print_dim "$LAST_COMMIT_SHORT"
+else
+  print_success "Commit message looks good"
+fi
+
+printf '\n'
+
+# Check 6: Verify we're not pushing to protected branches with issues
+print_section "Checking branch status..."
+
+CURRENT_BRANCH=$(git branch --show-current)
+
+if [[ "$CURRENT_BRANCH" == "main" ]] || [[ "$CURRENT_BRANCH" == "master" ]]; then
+  if [[ $FAILED -eq 1 ]]; then
+    print_error "Pushing to $CURRENT_BRANCH with failures"
+    print_info "Fix issues above before pushing to main branch"
+  else
+    print_success "Pushing to $CURRENT_BRANCH - all checks passed"
+  fi
+else
+  print_info "Pushing to branch: $CURRENT_BRANCH"
+fi
+
+printf '\n'
+
+# Summary
+if [[ $FAILED -eq 1 ]]; then
+  print_error "Pre-push checks failed"
+  print_info "Fix the errors above or use --no-verify to skip"
+  printf '\n'
+  exit 1
+else
+  print_success "All pre-push checks passed - ready to push!"
+  printf '\n'
+  exit 0
+fi
