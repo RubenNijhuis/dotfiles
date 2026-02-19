@@ -67,11 +67,11 @@ main() {
     echo ''
   } > "$TMP_FILE"
 
-  append_help_block "install.sh" "bash '$DOTFILES/install.sh' --help"
+  append_help_block "install.sh" "cd '$DOTFILES' && bash 'install.sh' --help"
 
   while IFS= read -r script; do
     script_name="${script#"$DOTFILES"/}"
-    append_help_block "$script_name" "bash '$script' --help"
+    append_help_block "$script_name" "cd '$DOTFILES' && bash '$script_name' --help"
   done < <(
     find "$DOTFILES/scripts" -type f -name '*.sh' \
       -not -path "$DOTFILES/scripts/lib/*" \
