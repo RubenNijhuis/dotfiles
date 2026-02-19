@@ -76,6 +76,7 @@ main() {
     find "$DOTFILES/scripts" -type f -name '*.sh' \
       -not -path "$DOTFILES/scripts/lib/*" \
       -not -path "$DOTFILES/scripts/tests/*" \
+      -not -path "$DOTFILES/scripts/automation/launchd/*" \
       -not -path "$DOTFILES/scripts/health/checks/*" | sort
   )
 

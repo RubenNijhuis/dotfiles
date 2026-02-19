@@ -4,7 +4,7 @@
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check
+	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry
 
 DOTFILES := $(shell pwd)
 
@@ -26,6 +26,7 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "bootstrap-verify" "Run strict bootstrap reliability verification suite"
 	@printf "\033[36m%-15s\033[0m %s\n" "docs-sync" "Fail if generated CLI docs are stale"
 	@printf "\033[36m%-15s\033[0m %s\n" "launchd-check" "Validate launchd template contracts"
+	@printf "\033[36m%-15s\033[0m %s\n" "brew-sync-dry" "Preview brew-sync additions without editing Brewfiles"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint" "Run maintenance validation checks"
 	@printf "\033[36m%-15s\033[0m %s\n" "maint-full" "Run checks plus sync/update maintenance workflow"
 	@printf "\nRun \033[36mmake help-all\033[0m to see every target.\n"
@@ -75,6 +76,9 @@ restore: ## Restore from latest backup
 
 brew-sync: ## Sync manually installed packages to Brewfiles
 	@bash $(DOTFILES)/scripts/maintenance/sync-brew.sh
+
+brew-sync-dry: ## Preview brew-sync additions without editing Brewfiles
+	@bash $(DOTFILES)/scripts/maintenance/sync-brew.sh --dry-run
 
 brew-audit: ## Audit Brewfiles for missing or undeclared packages
 	@bash $(DOTFILES)/scripts/maintenance/brew-audit.sh

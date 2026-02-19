@@ -20,6 +20,7 @@ done < <(
   find "$SCRIPTS_DIR" -type f -name '*.sh' \
     -not -path "$SCRIPTS_DIR/lib/*" \
     -not -path "$SCRIPTS_DIR/tests/*" \
+    -not -path "$SCRIPTS_DIR/automation/launchd/*" \
     -not -path "$SCRIPTS_DIR/health/checks/*" | sort
 )
 

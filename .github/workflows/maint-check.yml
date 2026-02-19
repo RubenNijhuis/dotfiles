@@ -21,5 +21,8 @@ jobs:
       - name: Run maintenance checks
         run: make maint-check
 
+      - name: Run bootstrap verification
+        run: make bootstrap-verify
+
       - name: Verify generated docs are current
         run: make docs-sync
