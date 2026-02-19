@@ -179,6 +179,15 @@ TOTAL_MISSING=0
 [[ -n "$MISSING_CASKS" ]] && TOTAL_MISSING=$((TOTAL_MISSING + $(echo "$MISSING_CASKS" | grep -c .)))
 [[ -n "$MISSING_VSCODE" ]] && TOTAL_MISSING=$((TOTAL_MISSING + $(echo "$MISSING_VSCODE" | grep -c .)))
 
+# Strict drift checks (used by --check) only cover formulae and casks.
+TOTAL_UNDECLARED_STRICT=0
+[[ -n "$UNDECLARED_FORMULAE" ]] && TOTAL_UNDECLARED_STRICT=$((TOTAL_UNDECLARED_STRICT + $(echo "$UNDECLARED_FORMULAE" | grep -c .)))
+[[ -n "$UNDECLARED_CASKS" ]] && TOTAL_UNDECLARED_STRICT=$((TOTAL_UNDECLARED_STRICT + $(echo "$UNDECLARED_CASKS" | grep -c .)))
+
+TOTAL_MISSING_STRICT=0
+[[ -n "$MISSING_FORMULAE" ]] && TOTAL_MISSING_STRICT=$((TOTAL_MISSING_STRICT + $(echo "$MISSING_FORMULAE" | grep -c .)))
+[[ -n "$MISSING_CASKS" ]] && TOTAL_MISSING_STRICT=$((TOTAL_MISSING_STRICT + $(echo "$MISSING_CASKS" | grep -c .)))
+
 if [[ $TOTAL_UNDECLARED -gt 0 ]]; then
   print_warning "$TOTAL_UNDECLARED packages installed but not in Brewfiles"
   print_dim "  Run 'make brew-sync' to add them"
@@ -193,6 +202,10 @@ if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then
   print_success "All packages are in sync!"
 fi
 
-if $CHECK_MODE && { [[ $TOTAL_UNDECLARED -gt 0 ]] || [[ $TOTAL_MISSING -gt 0 ]]; }; then
+if [[ -n "$MISSING_VSCODE" || -n "$UNDECLARED_VSCODE" ]]; then
+  print_warning "VS Code extension drift is warning-only and does not fail --check"
+fi
+
+if $CHECK_MODE && { [[ $TOTAL_UNDECLARED_STRICT -gt 0 ]] || [[ $TOTAL_MISSING_STRICT -gt 0 ]]; }; then
   exit 1
 fi
