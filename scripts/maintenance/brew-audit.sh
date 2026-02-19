@@ -10,18 +10,26 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color]
+Usage: $0 [--help] [--no-color] [--check]
 
 Audit Brewfiles against currently installed formulae, casks, and VS Code extensions.
+
+Options:
+  --check   Exit non-zero when drift is found.
 EOF
 }
 
 parse_args() {
+  CHECK_MODE=false
   show_help_if_requested usage "$@"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --no-color)
+        shift
+        ;;
+      --check)
+        CHECK_MODE=true
         shift
         ;;
       *)
@@ -71,7 +79,7 @@ print_section "Installed but not in Brewfiles:"
 printf '\n'
 
 UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") | \
-  grep -v -E '^(ca-certificates|openssl|python|gettext|gmp|libffi|libyaml|mpdecimal|ncurses|readline|sqlite|xz|zlib|libidn|libsodium|pcre2|gnutls|nettle|libtasn1|p11-kit|unbound|libnghttp2|brotli|c-ares|libuv|libssh2|zstd|lz4|icu4c|llvm|llhttp|simdjson|z3|unibilium|libevent|libgit2|libvterm|lpeg|luajit|luv|msgpack|tree-sitter|utf8proc|libunistring|libusb|npth|libassuan|libgcrypt|libgpg-error|libksba|pinentry|ada-url|fmt|hdrhistogram_c|libnghttp3|libngtcp2|oniguruma|pkgconf|ruby|uvwasi|mlx|mlx-c)' || true)
+  grep -v -E '^(ca-certificates|openssl|python|gettext|gmp|libffi|libyaml|mpdecimal|ncurses|readline|sqlite|xz|zlib|libidn|libsodium|pcre2|gnutls|nettle|libtasn1|p11-kit|unbound|libnghttp2|brotli|c-ares|libuv|libssh2|zstd|lz4|icu4c|llvm|llhttp|simdjson|z3|unibilium|libevent|libgit2|libvterm|lpeg|luajit|luv|msgpack|tree-sitter|utf8proc|libunistring|libusb|npth|libassuan|libgcrypt|libgpg-error|libksba|pinentry|ada-url|fmt|hdrhistogram_c|libnghttp3|libngtcp2|oniguruma|pkgconf|ruby|uvwasi|mlx|mlx-c|libiconv)' || true)
 
 UNDECLARED_CASKS=$(comm -23 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
 
@@ -183,4 +191,8 @@ fi
 
 if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then
   print_success "All packages are in sync!"
+fi
+
+if $CHECK_MODE && { [[ $TOTAL_UNDECLARED -gt 0 ]] || [[ $TOTAL_MISSING -gt 0 ]]; }; then
+  exit 1
 fi

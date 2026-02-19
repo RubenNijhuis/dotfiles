@@ -58,21 +58,16 @@ fi
 print_section "Checking Brewfile sync..."
 
 if command -v brew &>/dev/null; then
-  # Run brew-audit.sh in check mode (just detect issues, don't output full report)
+  # Run brew-audit.sh in check mode to detect drift without brittle text matching.
   BREW_AUDIT="$DOTFILES/scripts/maintenance/brew-audit.sh"
 
   if [[ -x "$BREW_AUDIT" ]]; then
-    # Capture output but suppress if everything is OK
-    AUDIT_OUTPUT=$("$BREW_AUDIT" 2>&1 || true)
-
-    # Check if there are undeclared or missing packages
-    if echo "$AUDIT_OUTPUT" | grep -q "Installed but not in Brewfiles" || \
-       echo "$AUDIT_OUTPUT" | grep -q "Declared but not installed"; then
+    if "$BREW_AUDIT" --check >/dev/null 2>&1; then
+      print_success "Brewfiles are in sync"
+    else
       print_warning "Brewfiles are out of sync"
       print_dim "Run: make brew-audit"
       # Don't fail, just warn (Brewfiles may be intentionally different)
-    else
-      print_success "Brewfiles are in sync"
     fi
   else
     print_dim "brew-audit.sh not executable - skipping"

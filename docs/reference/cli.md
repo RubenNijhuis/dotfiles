@@ -220,9 +220,12 @@ Display SSH key, agent, and config status.
 ## `scripts/maintenance/brew-audit.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/brew-audit.sh [--help] [--no-color]
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/brew-audit.sh [--help] [--no-color] [--check]
 
 Audit Brewfiles against currently installed formulae, casks, and VS Code extensions.
+
+Options:
+  --check   Exit non-zero when drift is found.
 ```
 
 ## `scripts/maintenance/format-all.sh`
