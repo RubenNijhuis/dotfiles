@@ -109,3 +109,7 @@ vscode "ms-vscode-remote.remote-containers" # Dev containers
 vscode "svelte.svelte-vscode"           # Svelte support
 vscode "tamasfe.even-better-toml"       # TOML support
 vscode "usernamehw.errorlens"           # Inline error highlighting
+tap "yakitrak/yakitrak"
+brew "prettier"
+vscode "esbenp.prettier-vscode"
+vscode "foxundermoon.shell-format"
