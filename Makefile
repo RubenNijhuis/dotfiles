@@ -224,6 +224,7 @@ check-scripts: ## Run syntax and shellcheck on all scripts
 
 test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/scripts/tests/smoke-help.sh
+	@bash $(DOTFILES)/scripts/tests/test-array-init.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-parsing.sh
 	@bash $(DOTFILES)/scripts/tests/test-install-checkpoint.sh

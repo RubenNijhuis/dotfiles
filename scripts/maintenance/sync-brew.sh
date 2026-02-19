@@ -61,9 +61,9 @@ echo
 brew bundle dump --file="$TEMP_BREWFILE" --force
 
 # Read existing Brewfiles into arrays
-declare -a COMMON_PACKAGES
-declare -a PROFILE_PACKAGES
-declare -a DECLARED_KEYS
+declare -a COMMON_PACKAGES=()
+declare -a PROFILE_PACKAGES=()
+declare -a DECLARED_KEYS=()
 
 entry_key_from_line() {
   local line="$1"
@@ -119,7 +119,7 @@ while IFS= read -r line; do
 done < "$DOTFILES/brew/Brewfile.$PROFILE"
 
 # Find new packages (in current dump but not in any Brewfile)
-declare -a NEW_PACKAGES
+declare -a NEW_PACKAGES=()
 while IFS= read -r line; do
   # Skip comments and empty lines
   [[ "$line" =~ ^# ]] && continue

@@ -59,9 +59,9 @@ unpushed_count=0
 stashed_count=0
 
 # Arrays to track issues
-declare -a uncommitted_repos
-declare -a unpushed_repos
-declare -a stashed_repos
+declare -a uncommitted_repos=()
+declare -a unpushed_repos=()
+declare -a stashed_repos=()
 
 # Find all git repos recursively
 while IFS= read -r -d '' git_dir; do
