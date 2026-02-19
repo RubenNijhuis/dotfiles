@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke test: ensure every top-level script supports --help.
+# Smoke test: ensure every operational script supports --help.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,7 +16,12 @@ while IFS= read -r script; do
     echo "FAIL: --help failed for $script"
     failed=$((failed + 1))
   fi
-done < <(find "$SCRIPTS_DIR" -maxdepth 1 -type f -name '*.sh' | sort)
+done < <(
+  find "$SCRIPTS_DIR" -type f -name '*.sh' \
+    -not -path "$SCRIPTS_DIR/lib/*" \
+    -not -path "$SCRIPTS_DIR/tests/*" \
+    -not -path "$SCRIPTS_DIR/health/checks/*" | sort
+)
 
 echo "help-smoke: $passed passed, $failed failed"
 

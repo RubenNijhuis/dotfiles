@@ -261,5 +261,5 @@ brew bundle --file=brew/Brewfile.personal
 - `make brew-sync` - Sync installed packages to Brewfiles
 - `make brew-audit` - Check Brewfile sync status
 - `make update` - Update all packages
-- `scripts/sync-brew.sh` - Interactive sync script
-- `scripts/brew-audit.sh` - Audit script source
+- `scripts/maintenance/sync-brew.sh` - Interactive sync script
+- `scripts/maintenance/brew-audit.sh` - Audit script source

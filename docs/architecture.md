@@ -17,7 +17,7 @@ This repository is a strict, macOS-only operations hub for machine bootstrap, do
 ## Directory Responsibilities
 
 - `stow/`: source-of-truth user config packages symlinked into `$HOME`.
-- `scripts/`: operational interfaces, tests, and shared shell helpers.
+- `scripts/`: operational interfaces grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `migration/`, `backup/`, `info/`, `docs/`), plus `lib/` and `tests/`.
 - `templates/launchd/`: managed launch agents and launchd contracts.
 - `templates/local/`: machine-local, untracked override templates.
 - `brew/`: package declarations split by profile (`common`, `personal`, `work`).
@@ -26,7 +26,7 @@ This repository is a strict, macOS-only operations hub for machine bootstrap, do
 
 ## Script Interface Contract
 
-All top-level scripts in `scripts/` must:
+All operational scripts in `scripts/**` (excluding `scripts/lib/` and `scripts/tests/`) must:
 
 - support `--help` and return exit code `0`.
 - reject unknown flags with non-zero exit and usage output.
@@ -48,11 +48,11 @@ Each managed `templates/launchd/com.user.<name>.plist` must include:
 - `StandardErrorPath`: `__HOME__/.local/log/<name>.err.log` (or documented variant)
 - deterministic schedule (`RunAtLoad`, `StartCalendarInterval`, or `StartInterval`)
 
-Install/uninstall/status is handled only via `scripts/launchd-manager.sh`.
+Install/uninstall/status is handled only via `scripts/automation/launchd-manager.sh`.
 
 ## Secrets and Local State
 
-- Secrets: macOS Keychain entries (checked by `scripts/check-keychain.sh`).
+- Secrets: macOS Keychain entries (checked by `scripts/bootstrap/check-keychain.sh`).
 - Non-secret machine values: local untracked files under `local/`.
 - Local templates live in `templates/local/`.
 

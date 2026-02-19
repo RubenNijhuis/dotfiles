@@ -5,7 +5,7 @@
 ```bash
 make doctor
 make doctor-quick
-bash scripts/doctor.sh --section backup --no-color
+bash scripts/health/doctor.sh --section backup --no-color
 ```
 
 ## Expected Result

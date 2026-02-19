@@ -14,8 +14,8 @@
 
 ```bash
 make ops-status
-~/dotfiles/scripts/launchd-manager.sh status
-~/dotfiles/scripts/launchd-manager.sh restart <agent>
+~/dotfiles/scripts/automation/launchd-manager.sh status
+~/dotfiles/scripts/automation/launchd-manager.sh restart <agent>
 ```
 
 ## Config Drift or Broken Links

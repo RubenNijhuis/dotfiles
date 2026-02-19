@@ -36,7 +36,7 @@ make docs-sync        # fail if generated CLI docs are stale
 ```text
 dotfiles/
 ├── stow/            # GNU Stow packages
-├── scripts/         # operational scripts and automation
+├── scripts/         # domain-organized scripts (automation/bootstrap/health/...)
 ├── templates/       # launchd, ssh, gpg, local templates
 ├── brew/            # profile-separated Brewfiles
 ├── docs/            # architecture, runbooks, reference

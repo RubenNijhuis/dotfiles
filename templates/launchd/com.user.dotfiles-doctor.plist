@@ -6,7 +6,7 @@
 	<string>com.user.dotfiles-doctor</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>__DOTFILES__/scripts/doctor-notify.sh</string>
+		<string>__DOTFILES__/scripts/health/doctor-notify.sh</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>

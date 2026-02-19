@@ -604,7 +604,7 @@ step_install_profile_packages() {
 }
 
 step_stow_configs() {
-  bash "$DOTFILES/scripts/stow-all.sh"
+  bash "$DOTFILES/scripts/bootstrap/stow-all.sh"
   success "Configs stowed"
 }
 
@@ -660,7 +660,7 @@ step_final_setup() {
   if [[ -f ~/.ssh/id_ed25519 && ! -f ~/.ssh/id_ed25519_personal ]]; then
     warning "Found existing SSH key that needs migration"
     if $NON_INTERACTIVE || prompt_yes_no "Migrate ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal? [y/N] " "N"; then
-      bash "$DOTFILES/scripts/migrate-ssh-keys.sh" --no-color
+      bash "$DOTFILES/scripts/migration/migrate-ssh-keys.sh" --no-color
     fi
   fi
 
@@ -717,14 +717,14 @@ run_post_install_health_check() {
   if $DRY_RUN; then
     return
   fi
-  if [[ ! -x "$DOTFILES/scripts/doctor.sh" ]]; then
+  if [[ ! -x "$DOTFILES/scripts/health/doctor.sh" ]]; then
     return
   fi
 
   echo ""
   echo -e "${BLUE}Post-install quick health check${NC}"
   set +e
-  bash "$DOTFILES/scripts/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
+  bash "$DOTFILES/scripts/health/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
   local doctor_code=$?
   set -e
 

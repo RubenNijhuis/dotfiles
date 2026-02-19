@@ -59,7 +59,7 @@ print_section "Checking Brewfile sync..."
 
 if command -v brew &>/dev/null; then
   # Run brew-audit.sh in check mode (just detect issues, don't output full report)
-  BREW_AUDIT="$DOTFILES/scripts/brew-audit.sh"
+  BREW_AUDIT="$DOTFILES/scripts/maintenance/brew-audit.sh"
 
   if [[ -x "$BREW_AUDIT" ]]; then
     # Capture output but suppress if everything is OK

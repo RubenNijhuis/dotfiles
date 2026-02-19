@@ -6,21 +6,21 @@ Canonical launchd automation contract for this repository.
 
 ```bash
 # Show available agents
-~/dotfiles/scripts/launchd-manager.sh list
+~/dotfiles/scripts/automation/launchd-manager.sh list
 
 # Install all managed agents
-~/dotfiles/scripts/launchd-manager.sh install-all
+~/dotfiles/scripts/automation/launchd-manager.sh install-all
 
 # Install one agent
-~/dotfiles/scripts/launchd-manager.sh install obsidian-sync
-~/dotfiles/scripts/launchd-manager.sh install ai-startup-selector
+~/dotfiles/scripts/automation/launchd-manager.sh install obsidian-sync
+~/dotfiles/scripts/automation/launchd-manager.sh install ai-startup-selector
 
 # Show loaded status
-~/dotfiles/scripts/launchd-manager.sh status
+~/dotfiles/scripts/automation/launchd-manager.sh status
 
 # Restart or remove one agent
-~/dotfiles/scripts/launchd-manager.sh restart obsidian-sync
-~/dotfiles/scripts/launchd-manager.sh uninstall obsidian-sync
+~/dotfiles/scripts/automation/launchd-manager.sh restart obsidian-sync
+~/dotfiles/scripts/automation/launchd-manager.sh uninstall obsidian-sync
 ```
 
 ## Managed Agents
@@ -42,7 +42,7 @@ Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
 4. Follow the contract below.
 4. Install with manager:
 ```bash
-~/dotfiles/scripts/launchd-manager.sh install <task-name>
+~/dotfiles/scripts/automation/launchd-manager.sh install <task-name>
 ```
 5. Verify:
 ```bash
@@ -58,7 +58,7 @@ Every `com.user.<task>.plist` template must include:
 - `<key>StandardOutPath</key>` and `<key>StandardErrorPath</key>` under `__HOME__/.local/log/`
 - deterministic schedule (`RunAtLoad`, `StartCalendarInterval`, or `StartInterval`)
 
-If a job uses non-standard log names, document them in this file and surface them in `scripts/ops-status.sh`.
+If a job uses non-standard log names, document them in this file and surface them in `scripts/automation/ops-status.sh`.
 
 ## Minimal Script Template
 
@@ -128,4 +128,4 @@ make ops-status
 ## More Examples
 
 - `docs/launchd-examples.md` for end-to-end examples.
-- `scripts/launchd-manager.sh` for the canonical command surface.
+- `scripts/automation/launchd-manager.sh` for the canonical command surface.

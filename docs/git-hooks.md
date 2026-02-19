@@ -40,7 +40,7 @@ Checks:
 
 1. `shellcheck -x` on all shell scripts in repo
 2. Generated docs sync via `make docs-sync`
-3. Brewfile drift warning via `scripts/brew-audit.sh`
+3. Brewfile drift warning via `scripts/maintenance/brew-audit.sh`
 4. Warn on untracked shell scripts
 5. Block large staged files (>1MB)
 6. Warn on weak last commit subject
@@ -96,5 +96,5 @@ git status --short
 - `git-hooks/pre-commit`
 - `git-hooks/pre-push`
 - `git-hooks/install-hooks.sh`
-- `scripts/brew-audit.sh`
+- `scripts/maintenance/brew-audit.sh`
 - `biome.json`

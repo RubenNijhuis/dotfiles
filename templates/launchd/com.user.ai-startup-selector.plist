@@ -7,7 +7,7 @@
 
   <key>ProgramArguments</key>
   <array>
-    <string>__DOTFILES__/scripts/startup-ai-services.sh</string>
+    <string>__DOTFILES__/scripts/automation/startup-ai-services.sh</string>
   </array>
 
   <key>RunAtLoad</key>

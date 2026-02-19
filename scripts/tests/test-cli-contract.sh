@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enforce CLI contract for top-level scripts.
+# Enforce CLI contract for operational scripts.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -32,7 +32,12 @@ while IFS= read -r script; do
     unknown_fail=$((unknown_fail + 1))
   fi
 
-done < <(find "$SCRIPTS_DIR" -maxdepth 1 -type f -name '*.sh' | sort)
+done < <(
+  find "$SCRIPTS_DIR" -type f -name '*.sh' \
+    -not -path "$SCRIPTS_DIR/lib/*" \
+    -not -path "$SCRIPTS_DIR/tests/*" \
+    -not -path "$SCRIPTS_DIR/health/checks/*" | sort
+)
 
 if [[ $help_fail -gt 0 || $unknown_fail -gt 0 ]]; then
   echo "cli-contract: failed (help=$help_fail unknown=$unknown_fail)"

@@ -22,97 +22,10 @@ Options:
   --help, -h                    Show this help message
 ```
 
-## `scripts/backup-dotfiles.sh`
+## `scripts/automation/launchd-manager.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/backup-dotfiles.sh [--help] [--no-color]
-
-Create a timestamped backup of local dotfile files before stow operations.
-```
-
-## `scripts/bootstrap-verify.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap-verify.sh [--help] [--no-color] [--profile <personal|work>] [--skip-doctor]
-
-Runs bootstrap verification:
-  1. install.sh dry-run
-  2. script CLI tests
-  3. docs sync check
-  4. quick doctor check
-```
-
-## `scripts/brew-audit.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/brew-audit.sh [--help] [--no-color]
-
-Audit Brewfiles against currently installed formulae, casks, and VS Code extensions.
-```
-
-## `scripts/check-keychain.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/check-keychain.sh [--help] [--no-color] [--config <path>]
-
-Validate required keychain items listed one service name per line.
-Default config: local/keychain-required.txt
-```
-
-## `scripts/check-launchd-contracts.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/check-launchd-contracts.sh [--help] [--no-color]
-
-Validate templates/launchd/*.plist against repository launchd contract.
-```
-
-## `scripts/doctor-notify.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/doctor-notify.sh [--help] [--no-color] [--full]
-
-Run doctor checks and show a macOS notification when issues are found.
-Defaults to quick mode; use --full for full checks.
-```
-
-## `scripts/doctor.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/doctor.sh [--help] [--quick] [--section <name>] [--no-color]
-```
-
-## `scripts/format-all.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/format-all.sh [--help] [--no-color]
-
-Apply EditorConfig-style cleanup and Biome formatting across the repository.
-```
-
-## `scripts/generate-cli-reference.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/generate-cli-reference.sh [--help] [--no-color] [--check]
-
-Generate docs/reference/cli.md from --help output.
-
-Options:
-  --check    Exit non-zero if generated output differs from committed file.
-```
-
-## `scripts/gpg-info.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/gpg-info.sh [--help] [--no-color]
-
-Display GPG key and signing configuration status.
-```
-
-## `scripts/launchd-manager.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/launchd-manager.sh [--help] [--no-color] <command> [agent-name]
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/launchd-manager.sh [--help] [--no-color] <command> [agent-name]
 
 Commands:
   install <agent>   Install and load a LaunchD agent
@@ -130,87 +43,44 @@ Available agents:
   repo-update          Repository updates
 
 Examples:
-  /Users/rubennijhuis/dotfiles/scripts/launchd-manager.sh install dotfiles-backup
-  /Users/rubennijhuis/dotfiles/scripts/launchd-manager.sh install-all
-  /Users/rubennijhuis/dotfiles/scripts/launchd-manager.sh status
-  /Users/rubennijhuis/dotfiles/scripts/launchd-manager.sh restart dotfiles-doctor
+  /Users/rubennijhuis/dotfiles/scripts/automation/launchd-manager.sh install dotfiles-backup
+  /Users/rubennijhuis/dotfiles/scripts/automation/launchd-manager.sh install-all
+  /Users/rubennijhuis/dotfiles/scripts/automation/launchd-manager.sh status
+  /Users/rubennijhuis/dotfiles/scripts/automation/launchd-manager.sh restart dotfiles-doctor
 ```
 
-## `scripts/migrate-developer-structure.sh`
+## `scripts/automation/ops-status.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/migrate-developer-structure.sh [--dry-run] [--complete]
-
-Modes:
-  --dry-run   Preview standard migration plan without moving repos.
-  --complete  Complete migration for remaining repos in legacy layout.
-```
-
-## `scripts/migrate-ssh-keys.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/migrate-ssh-keys.sh [--help] [--no-color]
-
-Rename ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal.
-```
-
-## `scripts/ops-status.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/ops-status.sh [--help] [--no-color]
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/ops-status.sh [--help] [--no-color]
 
 Show launchd automation health, recent logs, and recent backup activity.
 ```
 
-## `scripts/profile-shell.sh`
+## `scripts/automation/repo-update-notify.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/profile-shell.sh [--help] [--no-color] [--analyze]
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/repo-update-notify.sh [--help] [--no-color] [--dry-run] [path]
 
-Without flags, generates shell profile data.
-With --analyze, reads /tmp/zsh-profile.log and prints analysis.
+Wrapper around scripts/maintenance/update-repos.sh with notification and summary log.
 ```
 
-## `scripts/repo-update-notify.sh`
+## `scripts/automation/setup-automation.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/repo-update-notify.sh [--help] [--no-color] [--dry-run] [path]
-
-Wrapper around scripts/update-repos.sh with notification and summary log.
-```
-
-## `scripts/restore-backup.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/restore-backup.sh [--help] [--no-color] [--dry-run]
-
-Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
-```
-
-## `scripts/setup-automation.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/setup-automation.sh [--help] [--no-color] <backup|doctor|repo-update|ai-startup>
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/setup-automation.sh [--help] [--no-color] <backup|doctor|repo-update|ai-startup>
 
 Examples:
-  /Users/rubennijhuis/dotfiles/scripts/setup-automation.sh backup
-  /Users/rubennijhuis/dotfiles/scripts/setup-automation.sh doctor
-  /Users/rubennijhuis/dotfiles/scripts/setup-automation.sh repo-update
-  /Users/rubennijhuis/dotfiles/scripts/setup-automation.sh ai-startup
+  /Users/rubennijhuis/dotfiles/scripts/automation/setup-automation.sh backup
+  /Users/rubennijhuis/dotfiles/scripts/automation/setup-automation.sh doctor
+  /Users/rubennijhuis/dotfiles/scripts/automation/setup-automation.sh repo-update
+  /Users/rubennijhuis/dotfiles/scripts/automation/setup-automation.sh ai-startup
 ```
 
-## `scripts/ssh-info.sh`
+## `scripts/automation/startup-ai-services.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/ssh-info.sh [--help] [--no-color]
-
-Display SSH key, agent, and config status.
-```
-
-## `scripts/startup-ai-services.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/startup-ai-services.sh [--help] [--no-color] [--yes] [--policy <prompt|both|openclaw|lmstudio|skip>]
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/startup-ai-services.sh [--help] [--no-color] [--yes] [--policy <prompt|both|openclaw|lmstudio|skip>]
 
 Prompt at login to start OpenClaw and/or LM Studio.
 
@@ -219,66 +89,196 @@ Options:
   --policy <value>            Startup mode, defaults to env AI_STARTUP_POLICY or prompt.
 ```
 
-## `scripts/stow-all.sh`
+## `scripts/automation/sync-obsidian.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/stow-all.sh [--help] [--no-color]
-
-Stow all packages from stow/ into $HOME.
-```
-
-## `scripts/stow-report.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/stow-report.sh [--help] [--no-color]
-
-Preview stow operations and report package conflicts.
-```
-
-## `scripts/sync-brew.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/sync-brew.sh [--help] [--no-color] [--dry-run]
-
-Sync manually installed Homebrew packages into tracked Brewfiles.
-```
-
-## `scripts/sync-obsidian.sh`
-
-```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/sync-obsidian.sh [--help] [--no-color] [path]
+Usage: /Users/rubennijhuis/dotfiles/scripts/automation/sync-obsidian.sh [--help] [--no-color] [path]
 
 Sync an Obsidian git repository (default: ~/Developer/personal/projects/obsidian-store).
 ```
 
-## `scripts/unstow-all.sh`
+## `scripts/backup/backup-dotfiles.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/unstow-all.sh [--help] [--no-color]
+Usage: /Users/rubennijhuis/dotfiles/scripts/backup/backup-dotfiles.sh [--help] [--no-color]
+
+Create a timestamped backup of local dotfile files before stow operations.
+```
+
+## `scripts/backup/restore-backup.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/backup/restore-backup.sh [--help] [--no-color] [--dry-run]
+
+Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
+```
+
+## `scripts/bootstrap/bootstrap-verify.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap/bootstrap-verify.sh [--help] [--no-color] [--profile <personal|work>] [--skip-doctor]
+
+Runs bootstrap verification:
+  1. install.sh dry-run
+  2. script CLI tests
+  3. docs sync check
+  4. quick doctor check
+```
+
+## `scripts/bootstrap/check-keychain.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap/check-keychain.sh [--help] [--no-color] [--config <path>]
+
+Validate required keychain items listed one service name per line.
+Default config: local/keychain-required.txt
+```
+
+## `scripts/bootstrap/stow-all.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap/stow-all.sh [--help] [--no-color]
+
+Stow all packages from stow/ into $HOME.
+```
+
+## `scripts/bootstrap/stow-report.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap/stow-report.sh [--help] [--no-color]
+
+Preview stow operations and report package conflicts.
+```
+
+## `scripts/bootstrap/unstow-all.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/bootstrap/unstow-all.sh [--help] [--no-color]
 
 Unstow all packages from stow/ out of $HOME.
 ```
 
-## `scripts/update-repos.sh`
+## `scripts/docs/generate-cli-reference.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/update-repos.sh [--help] [--no-color] [--dry-run] [path]
+Usage: /Users/rubennijhuis/dotfiles/scripts/docs/generate-cli-reference.sh [--help] [--no-color] [--check]
+
+Generate docs/reference/cli.md from --help output.
+
+Options:
+  --check    Exit non-zero if generated output differs from committed file.
+```
+
+## `scripts/health/check-launchd-contracts.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/health/check-launchd-contracts.sh [--help] [--no-color]
+
+Validate templates/launchd/*.plist against repository launchd contract.
+```
+
+## `scripts/health/doctor-notify.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/health/doctor-notify.sh [--help] [--no-color] [--full]
+
+Run doctor checks and show a macOS notification when issues are found.
+Defaults to quick mode; use --full for full checks.
+```
+
+## `scripts/health/doctor.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/health/doctor.sh [--help] [--quick] [--section <name>] [--no-color]
+```
+
+## `scripts/info/gpg-info.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/info/gpg-info.sh [--help] [--no-color]
+
+Display GPG key and signing configuration status.
+```
+
+## `scripts/info/profile-shell.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/info/profile-shell.sh [--help] [--no-color] [--analyze]
+
+Without flags, generates shell profile data.
+With --analyze, reads /tmp/zsh-profile.log and prints analysis.
+```
+
+## `scripts/info/ssh-info.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/info/ssh-info.sh [--help] [--no-color]
+
+Display SSH key, agent, and config status.
+```
+
+## `scripts/maintenance/brew-audit.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/brew-audit.sh [--help] [--no-color]
+
+Audit Brewfiles against currently installed formulae, casks, and VS Code extensions.
+```
+
+## `scripts/maintenance/format-all.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/format-all.sh [--help] [--no-color]
+
+Apply EditorConfig-style cleanup and Biome formatting across the repository.
+```
+
+## `scripts/maintenance/sync-brew.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/sync-brew.sh [--help] [--no-color] [--dry-run]
+
+Sync manually installed Homebrew packages into tracked Brewfiles.
+```
+
+## `scripts/maintenance/update-repos.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/update-repos.sh [--help] [--no-color] [--dry-run] [path]
 
 Update all git repositories under the provided path (default: ~/Developer).
 ```
 
-## `scripts/update.sh`
+## `scripts/maintenance/update.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/update.sh [--help] [--no-color]
+Usage: /Users/rubennijhuis/dotfiles/scripts/maintenance/update.sh [--help] [--no-color]
 
 Update Homebrew packages, runtime tools, and restow configs.
 ```
 
-## `scripts/validate-repos.sh`
+## `scripts/migration/migrate-developer-structure.sh`
 
 ```text
-Usage: /Users/rubennijhuis/dotfiles/scripts/validate-repos.sh [--help] [--no-color] [path]
+Usage: /Users/rubennijhuis/dotfiles/scripts/migration/migrate-developer-structure.sh [--dry-run] [--complete]
+
+Modes:
+  --dry-run   Preview standard migration plan without moving repos.
+  --complete  Complete migration for remaining repos in legacy layout.
+```
+
+## `scripts/migration/migrate-ssh-keys.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/migration/migrate-ssh-keys.sh [--help] [--no-color]
+
+Rename ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal.
+```
+
+## `scripts/migration/validate-repos.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/migration/validate-repos.sh [--help] [--no-color] [path]
 
 Validate git repositories for uncommitted, unpushed, or stashed work.
 Defaults to: $HOME/Developer

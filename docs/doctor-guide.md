@@ -9,8 +9,8 @@ make doctor
 make doctor-quick
 
 # direct script usage
-bash scripts/doctor.sh --no-color
-bash scripts/doctor.sh --section backup --no-color
+bash scripts/health/doctor.sh --no-color
+bash scripts/health/doctor.sh --section backup --no-color
 ```
 
 ## What Doctor Checks
@@ -101,29 +101,29 @@ brew install biome
 ## Section Checks
 
 ```bash
-bash scripts/doctor.sh --section stow --no-color
-bash scripts/doctor.sh --section ssh --no-color
-bash scripts/doctor.sh --section gpg --no-color
-bash scripts/doctor.sh --section git --no-color
-bash scripts/doctor.sh --section shell --no-color
-bash scripts/doctor.sh --section developer --no-color
-bash scripts/doctor.sh --section runtime --no-color
-bash scripts/doctor.sh --section launchd --no-color
-bash scripts/doctor.sh --section homebrew --no-color
-bash scripts/doctor.sh --section vscode --no-color
-bash scripts/doctor.sh --section backup --no-color
-bash scripts/doctor.sh --section biome --no-color
+bash scripts/health/doctor.sh --section stow --no-color
+bash scripts/health/doctor.sh --section ssh --no-color
+bash scripts/health/doctor.sh --section gpg --no-color
+bash scripts/health/doctor.sh --section git --no-color
+bash scripts/health/doctor.sh --section shell --no-color
+bash scripts/health/doctor.sh --section developer --no-color
+bash scripts/health/doctor.sh --section runtime --no-color
+bash scripts/health/doctor.sh --section launchd --no-color
+bash scripts/health/doctor.sh --section homebrew --no-color
+bash scripts/health/doctor.sh --section vscode --no-color
+bash scripts/health/doctor.sh --section backup --no-color
+bash scripts/health/doctor.sh --section biome --no-color
 ```
 
 ## Troubleshooting Doctor Itself
 
 ```bash
 # debug execution
-bash -x scripts/doctor.sh --no-color
+bash -x scripts/health/doctor.sh --no-color
 
 # verify script style/lint
-bash -n scripts/doctor.sh
-shellcheck scripts/doctor.sh
+bash -n scripts/health/doctor.sh
+shellcheck scripts/health/doctor.sh
 ```
 
 ## Related Docs
