@@ -8,6 +8,7 @@
 # Taps
 # -----------------------------------------------------------------------------
 tap "steipete/tap"
+tap "yakitrak/yakitrak"
 
 # -----------------------------------------------------------------------------
 # Shell & Terminal
@@ -67,6 +68,7 @@ brew "mac-cleanup-go"       # System cleanup utility
 brew "obsidian-cli"         # Obsidian CLI tools
 brew "ollama", restart_service: :changed  # Local LLM runtime
 brew "openclaw-cli"         # OpenClaw AI agent CLI
+brew "prettier"
 
 # -----------------------------------------------------------------------------
 # Fonts
@@ -109,7 +111,5 @@ vscode "ms-vscode-remote.remote-containers" # Dev containers
 vscode "svelte.svelte-vscode"           # Svelte support
 vscode "tamasfe.even-better-toml"       # TOML support
 vscode "usernamehw.errorlens"           # Inline error highlighting
-tap "yakitrak/yakitrak"
-brew "prettier"
 vscode "esbenp.prettier-vscode"
 vscode "foxundermoon.shell-format"
