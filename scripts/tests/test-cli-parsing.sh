@@ -4,6 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$ROOT_DIR/scripts/lib/output.sh" "$@"
 
 assert_exit() {
   local expected="$1"
@@ -16,7 +17,7 @@ assert_exit() {
   set -e
 
   if [[ "$code" -ne "$expected" ]]; then
-    echo "FAIL: expected exit $expected, got $code for: $cmd"
+    print_error "expected exit $expected, got $code for: $cmd"
     echo "$output"
     exit 1
   fi
@@ -40,4 +41,4 @@ assert_exit 1 "bash '$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh' --profile 
 assert_exit 0 "bash '$ROOT_DIR/install.sh' --help"
 assert_exit 1 "bash '$ROOT_DIR/install.sh' --from-step 99"
 
-echo "cli-parsing: all checks passed"
+print_success "cli-parsing: all checks passed"

@@ -3,15 +3,16 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$ROOT_DIR/scripts/lib/output.sh" "$@"
 
 fail() {
-  echo "FAIL: $1"
+  print_error "$1"
   exit 1
 }
 
 test_stow_all_idempotent() {
   if ! command -v stow >/dev/null 2>&1; then
-    echo "idempotency(stow): skipped (stow not installed)"
+    print_warning "idempotency(stow): skipped (stow not installed)"
     return 0
   fi
 
@@ -47,7 +48,7 @@ test_stow_all_idempotent() {
   trap - RETURN
   rm -rf "$temp_home"
 
-  echo "idempotency(stow): passed"
+  print_success "idempotency(stow): passed"
 }
 
 test_launchd_manager_idempotent() {
@@ -125,10 +126,10 @@ EOS
   trap - RETURN
   rm -rf "$temp_home" "$temp_bin" "$temp_state"
 
-  echo "idempotency(launchd-manager): passed"
+  print_success "idempotency(launchd-manager): passed"
 }
 
 test_stow_all_idempotent
 test_launchd_manager_idempotent
 
-echo "idempotency: all checks passed"
+print_success "idempotency: all checks passed"

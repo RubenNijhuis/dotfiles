@@ -3,6 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$ROOT_DIR/scripts/lib/output.sh" "$@"
 
 if command -v rg >/dev/null 2>&1; then
   violations=$(rg -n '^declare -a [A-Za-z_][A-Za-z0-9_]*\s*$' "$ROOT_DIR/scripts" \
@@ -15,9 +16,9 @@ else
 fi
 
 if [[ -n "$violations" ]]; then
-  echo "FAIL: uninitialized array declarations found (use declare -a name=())"
+  print_error "uninitialized array declarations found (use declare -a name=())"
   echo "$violations"
   exit 1
 fi
 
-echo "array-init: all array declarations are initialized"
+print_success "array-init: all array declarations are initialized"
