@@ -63,11 +63,48 @@ brew bundle dump --file="$TEMP_BREWFILE" --force
 # Read existing Brewfiles into arrays
 declare -a COMMON_PACKAGES
 declare -a PROFILE_PACKAGES
+declare -a DECLARED_KEYS
+
+entry_key_from_line() {
+  local line="$1"
+  local kind name normalized
+
+  if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)[[:space:]]+\"([^\"]+)\" ]]; then
+    kind="${BASH_REMATCH[1]}"
+    name="${BASH_REMATCH[2]}"
+
+    case "$kind" in
+      tap) normalized="$name" ;;
+      *) normalized="${name##*/}" ;;
+    esac
+
+    printf '%s:%s\n' "$kind" "$normalized"
+    return 0
+  fi
+
+  return 1
+}
+
+array_contains() {
+  local needle="$1"
+  shift
+
+  local item
+  for item in "$@"; do
+    if [[ "$item" == "$needle" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
 
 # Parse Brewfile.common
 while IFS= read -r line; do
   if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
     COMMON_PACKAGES+=("$line")
+    if key=$(entry_key_from_line "$line"); then
+      DECLARED_KEYS+=("$key")
+    fi
   fi
 done < "$DOTFILES/brew/Brewfile.common"
 
@@ -75,6 +112,9 @@ done < "$DOTFILES/brew/Brewfile.common"
 while IFS= read -r line; do
   if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
     PROFILE_PACKAGES+=("$line")
+    if key=$(entry_key_from_line "$line"); then
+      DECLARED_KEYS+=("$key")
+    fi
   fi
 done < "$DOTFILES/brew/Brewfile.$PROFILE"
 
@@ -85,16 +125,13 @@ while IFS= read -r line; do
   [[ "$line" =~ ^# ]] && continue
   [[ -z "$line" ]] && continue
 
-  # Check if package exists in common or profile Brewfile
-  found=false
-  for pkg in "${COMMON_PACKAGES[@]}" "${PROFILE_PACKAGES[@]}"; do
-    if [[ "$line" == "$pkg" ]]; then
-      found=true
-      break
-    fi
-  done
+  # Compare normalized keys so comments/options/tap-qualified names don't
+  # appear as false positives.
+  if ! key=$(entry_key_from_line "$line"); then
+    continue
+  fi
 
-  if [[ "$found" == "false" ]]; then
+  if ! array_contains "$key" "${DECLARED_KEYS[@]}"; then
     NEW_PACKAGES+=("$line")
   fi
 done < "$TEMP_BREWFILE"
