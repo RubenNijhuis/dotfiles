@@ -1,26 +1,49 @@
 #!/usr/bin/env bash
-# Migrate ~/Developer/repositories to categorized structure.
+# Migrate repositories from a legacy layout into a structured Developer tree.
 # Supports:
-#   --dry-run   Preview the planned migration
-#   --complete  Complete migration for remaining repos interactively
+#   --dry-run       Preview the planned migration
+#   --complete      Interactive categorization mode for existing setups
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 SOURCE_DIR="$HOME/Developer/repositories"
 TARGET_DIR="$HOME/Developer"
+RULES_FILE="$ROOT_DIR/local/migration-rules.txt"
+DEFAULT_DESTINATION="personal/projects"
 DRY_RUN=false
 COMPLETE_MODE=false
+NON_INTERACTIVE=false
+BACKUP_DIR=""
 
 usage() {
-  cat << EOF
-Usage: $0 [--dry-run] [--complete]
+  cat <<EOF
+Usage: $0 [options]
 
-Modes:
-  --dry-run   Preview standard migration plan without moving repos.
-  --complete  Complete migration for remaining repos in legacy layout.
+Options:
+  --dry-run                          Preview planned moves without changing files
+  --complete                         Interactive categorization mode for existing setups
+  --source <path>                    Source root containing repositories
+                                     (default: $HOME/Developer/repositories)
+  --target <path>                    Target developer root
+                                     (default: $HOME/Developer)
+  --rules <path>                     Optional pattern rules file
+                                     (default: local/migration-rules.txt if present)
+  --default-destination <subpath>    Fallback target subpath for unmapped repos
+                                     (default: personal/projects)
+  --non-interactive                  Disable prompts (auto/rules only)
+  --help                             Show this help message
+  --no-color                         Disable color output
+
+Rules file format:
+  pattern|destination-subpath
+
+Example:
+  # Move all repos in a legacy Work folder under work/projects
+  Work/*|work/projects
 EOF
 }
 
@@ -28,18 +51,220 @@ to_kebab_case() {
   echo "$1" | tr '[:upper:]' '[:lower:]' | tr '_' '-' | sed 's/[^a-z0-9-]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//'
 }
 
+is_valid_destination() {
+  local destination="$1"
+  [[ -n "$destination" ]] || return 1
+  [[ "$destination" != /* ]] || return 1
+  [[ "$destination" != *".."* ]] || return 1
+  [[ "$destination" =~ ^[a-zA-Z0-9._/-]+$ ]] || return 1
+}
+
+normalize_path() {
+  local path="$1"
+  cd "$path" && pwd
+}
+
+log_move() {
+  local source="$1"
+  local target="$2"
+  if [[ "$DRY_RUN" == "true" ]]; then
+    print_indent "Would move: $source -> $target"
+  else
+    print_indent "Moved: $(basename "$source") -> $target"
+  fi
+}
+
 move_repo() {
   local source="$1"
   local target="$2"
 
+  if [[ -d "$target" ]]; then
+    print_warning "Target already exists, skipping: $target"
+    return 1
+  fi
+
   if [[ "$DRY_RUN" == "true" ]]; then
-    echo "  Would move: $source → $target"
+    log_move "$source" "$target"
     return 0
   fi
 
   mkdir -p "$(dirname "$target")"
   mv "$source" "$target"
-  echo -e "  ${GREEN}✓${NC} Moved: $(basename "$source") → $target"
+  log_move "$source" "$target"
+  return 0
+}
+
+infer_destination() {
+  local rel="$1"
+  local repo_name="$2"
+  local probe
+  probe="$(printf '%s/%s' "$rel" "$repo_name" | tr '[:upper:]' '[:lower:]')"
+
+  case "$probe" in
+    *experiment*|*sandbox*|*spike*)
+      echo "personal/experiments"
+      ;;
+    *learn*|*course*|*tutorial*|*katas*|*advent*)
+      echo "personal/learning"
+      ;;
+    *work*|*client*|*company*|*corp*|*business*)
+      echo "work/projects"
+      ;;
+    *archive*|*legacy*|*old*)
+      echo "archive"
+      ;;
+    *)
+      echo "$DEFAULT_DESTINATION"
+      ;;
+  esac
+}
+
+rule_patterns=()
+rule_destinations=()
+
+load_rules() {
+  local file="$1"
+  if [[ ! -f "$file" ]]; then
+    return 0
+  fi
+
+  while IFS='|' read -r raw_pattern raw_destination; do
+    [[ -n "${raw_pattern// /}" ]] || continue
+    [[ "${raw_pattern#\#}" != "$raw_pattern" ]] && continue
+    [[ -n "${raw_destination// /}" ]] || continue
+
+    local pattern destination
+    pattern="$(echo "$raw_pattern" | sed 's/[[:space:]]*$//')"
+    destination="$(echo "$raw_destination" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+    if ! is_valid_destination "$destination"; then
+      print_error "Invalid destination in rules file: $destination"
+      exit 1
+    fi
+
+    rule_patterns+=("$pattern")
+    rule_destinations+=("$destination")
+  done < "$file"
+
+  print_info "Loaded ${#rule_patterns[@]} migration rule(s) from $file"
+}
+
+resolve_by_rules() {
+  local rel="$1"
+  local repo_name="$2"
+  local probe
+  probe="${rel%/}/$repo_name"
+
+  local i
+  for ((i = 0; i < ${#rule_patterns[@]}; i++)); do
+    # shellcheck disable=SC2053 # Intentional glob match against user-provided pattern.
+    if [[ "$probe" == ${rule_patterns[$i]} ]]; then
+      echo "${rule_destinations[$i]}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+prompt_destination() {
+  local rel="$1"
+  local repo_name="$2"
+  local suggested="$3"
+  local choice=""
+
+  print_warning "Unmapped repo: ${rel%/}/$repo_name"
+  printf '  Suggested: %s\n' "$suggested"
+  echo "  1) personal/projects"
+  echo "  2) personal/experiments"
+  echo "  3) personal/learning"
+  echo "  4) work/projects"
+  echo "  5) work/clients"
+  echo "  6) archive"
+  echo "  7) custom subpath"
+
+  read -rp "Choice [1-7, Enter=suggested]: " choice
+  case "${choice:-}" in
+    "") echo "$suggested" ;;
+    1) echo "personal/projects" ;;
+    2) echo "personal/experiments" ;;
+    3) echo "personal/learning" ;;
+    4) echo "work/projects" ;;
+    5) echo "work/clients" ;;
+    6) echo "archive" ;;
+    7)
+      read -rp "Custom subpath (relative to target): " custom
+      echo "$custom"
+      ;;
+    *)
+      print_warning "Invalid choice; using suggested destination"
+      echo "$suggested"
+      ;;
+  esac
+}
+
+resolve_destination() {
+  local rel="$1"
+  local repo_name="$2"
+
+  local by_rule=""
+  if by_rule="$(resolve_by_rules "$rel" "$repo_name")"; then
+    echo "$by_rule"
+    return 0
+  fi
+
+  local suggested
+  suggested="$(infer_destination "$rel" "$repo_name")"
+
+  if [[ "$COMPLETE_MODE" == "true" && "$NON_INTERACTIVE" != "true" ]]; then
+    local selected
+    selected="$(prompt_destination "$rel" "$repo_name" "$suggested")"
+    if ! is_valid_destination "$selected"; then
+      print_warning "Invalid destination '$selected'; using suggested '$suggested'"
+      echo "$suggested"
+      return 0
+    fi
+    echo "$selected"
+    return 0
+  fi
+
+  echo "$suggested"
+}
+
+create_backup() {
+  if [[ "$DRY_RUN" == "true" ]]; then
+    return
+  fi
+
+  BACKUP_DIR="${SOURCE_DIR%/}-backup-$(date +%Y%m%d-%H%M%S)"
+  print_section "Creating migration backup"
+  cp -R "$SOURCE_DIR" "$BACKUP_DIR"
+  print_success "Backup created: $BACKUP_DIR"
+}
+
+prepare_target_layout() {
+  if [[ "$DRY_RUN" == "true" ]]; then
+    return
+  fi
+
+  mkdir -p "$TARGET_DIR/personal/projects"
+  mkdir -p "$TARGET_DIR/personal/experiments"
+  mkdir -p "$TARGET_DIR/personal/learning"
+  mkdir -p "$TARGET_DIR/work/projects"
+  mkdir -p "$TARGET_DIR/work/clients"
+  mkdir -p "$TARGET_DIR/archive"
+}
+
+cleanup_source_if_empty() {
+  if [[ "$DRY_RUN" == "true" ]]; then
+    return
+  fi
+
+  find "$SOURCE_DIR" -type d -empty -delete 2>/dev/null || true
+  if [[ -d "$SOURCE_DIR" ]] && [[ -z "$(ls -A "$SOURCE_DIR")" ]]; then
+    rmdir "$SOURCE_DIR"
+    print_success "Removed empty source directory: $SOURCE_DIR"
+  fi
 }
 
 parse_args() {
@@ -53,15 +278,39 @@ parse_args() {
         COMPLETE_MODE=true
         shift
         ;;
-      -h|--help)
-        usage
-        exit 0
+      --source)
+        SOURCE_DIR="${2:-}"
+        [[ -n "$SOURCE_DIR" ]] || { print_error "--source requires a value"; exit 1; }
+        shift 2
+        ;;
+      --target)
+        TARGET_DIR="${2:-}"
+        [[ -n "$TARGET_DIR" ]] || { print_error "--target requires a value"; exit 1; }
+        shift 2
+        ;;
+      --rules)
+        RULES_FILE="${2:-}"
+        [[ -n "$RULES_FILE" ]] || { print_error "--rules requires a value"; exit 1; }
+        shift 2
+        ;;
+      --default-destination)
+        DEFAULT_DESTINATION="${2:-}"
+        [[ -n "$DEFAULT_DESTINATION" ]] || { print_error "--default-destination requires a value"; exit 1; }
+        shift 2
+        ;;
+      --non-interactive)
+        NON_INTERACTIVE=true
+        shift
         ;;
       --no-color)
         shift
         ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
       *)
-        echo -e "${RED}Unknown argument: $1${NC}"
+        print_error "Unknown argument: $1"
         usage
         exit 1
         ;;
@@ -69,346 +318,104 @@ parse_args() {
   done
 
   if [[ "$DRY_RUN" == "true" && "$COMPLETE_MODE" == "true" ]]; then
-    echo -e "${RED}Cannot combine --dry-run with --complete${NC}"
+    print_error "Cannot combine --dry-run with --complete"
     usage
     exit 1
   fi
-}
 
-ensure_legacy_source_exists() {
-  if [[ ! -d "$SOURCE_DIR" ]]; then
-    echo -e "${RED}Error: Source directory not found: $SOURCE_DIR${NC}"
+  if ! is_valid_destination "$DEFAULT_DESTINATION"; then
+    print_error "Invalid --default-destination: $DEFAULT_DESTINATION"
     exit 1
   fi
-}
 
-create_standard_backup() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    return
+  if [[ -d "$SOURCE_DIR" ]]; then
+    SOURCE_DIR="$(normalize_path "$SOURCE_DIR")"
   fi
 
-  BACKUP_DIR="$HOME/Developer-backup-$(date +%Y%m%d-%H%M%S)"
-  echo -e "${BLUE}Creating backup...${NC}"
-  cp -r "$HOME/Developer" "$BACKUP_DIR"
-  echo -e "${GREEN}✓${NC} Backup created: $BACKUP_DIR"
-  echo ""
-}
-
-prepare_target_layout() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    return
-  fi
-
-  mkdir -p "$TARGET_DIR/personal/projects"
-  mkdir -p "$TARGET_DIR/personal/experiments"
-  mkdir -p "$TARGET_DIR/personal/learning"
-  mkdir -p "$TARGET_DIR/work/projects"
-  mkdir -p "$TARGET_DIR/work/clients/celebratix"
-  mkdir -p "$TARGET_DIR/archive/codam"
-}
-
-cleanup_legacy_tree() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    return
-  fi
-
-  echo -e "${BLUE}Cleaning up empty directories...${NC}"
-  find "$SOURCE_DIR" -type d -empty -delete 2>/dev/null || true
-  if [[ -d "$SOURCE_DIR" ]] && [[ -z "$(ls -A "$SOURCE_DIR")" ]]; then
-    rmdir "$SOURCE_DIR"
-    echo -e "${GREEN}✓${NC} Removed empty $SOURCE_DIR"
-  elif [[ -d "$SOURCE_DIR" ]]; then
-    echo -e "${YELLOW}⚠${NC} $SOURCE_DIR still contains files:"
-    ls -la "$SOURCE_DIR"
-  fi
-  echo ""
-}
-
-print_standard_summary() {
-  echo -e "${BLUE}Verification:${NC}"
-  total_repos=$(find "$TARGET_DIR" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  echo "Total repositories in new structure: $total_repos"
-  echo ""
-
-  if [[ "$DRY_RUN" == "true" ]]; then
-    echo -e "${YELLOW}DRY RUN COMPLETE${NC}"
-    echo "Run without --dry-run to execute migration"
-  else
-    echo -e "${GREEN}✓ Migration complete!${NC}"
-    echo ""
-    echo "Next steps:"
-    echo "  1. Verify: find ~/Developer -name .git -type d | wc -l"
-    echo "  2. Test: proj (should list all projects)"
-    echo "  3. Test: cd ~/Developer/personal/projects/portfolio22 && git fetch"
-    echo "  4. Test: cd ~/Developer/work/clients/celebratix/celebratix-backend && git fetch"
-    echo "  5. If all good: make complete-migration"
-    echo ""
-    echo "Backup location: $BACKUP_DIR"
+  if [[ -d "$TARGET_DIR" ]]; then
+    TARGET_DIR="$(normalize_path "$TARGET_DIR")"
   fi
 }
 
-run_standard_migration() {
-  if [[ "$DRY_RUN" == "true" ]]; then
-    echo -e "${YELLOW}DRY RUN MODE - No files will be moved${NC}"
-    echo ""
-  fi
-
+run_migration() {
   if [[ ! -d "$SOURCE_DIR" ]]; then
-    if [[ "$DRY_RUN" == "true" ]]; then
-      echo -e "${GREEN}✓${NC} No legacy source found at $SOURCE_DIR"
-      echo "Migration preview not needed on this machine."
-      exit 0
-    fi
-    ensure_legacy_source_exists
+    print_success "No source directory found at $SOURCE_DIR"
+    print_info "Nothing to migrate on this machine."
+    return 0
   fi
 
-  echo -e "${BLUE}Developer Directory Migration${NC}"
-  echo "=============================="
+  local repo_count
+  repo_count=$(find "$SOURCE_DIR" -type d -name '.git' | wc -l | tr -d ' ')
+  if [[ "$repo_count" -eq 0 ]]; then
+    print_success "No git repositories found under $SOURCE_DIR"
+    return 0
+  fi
+
+  print_header "Developer Repository Migration"
+  print_key_value "Source" "$SOURCE_DIR"
+  print_key_value "Target" "$TARGET_DIR"
+  print_key_value "Mode" "$([ "$COMPLETE_MODE" == "true" ] && echo "interactive" || echo "auto")"
+  print_key_value "Dry run" "$DRY_RUN"
+  print_key_value "Repositories found" "$repo_count"
   echo ""
 
-  create_standard_backup
+  load_rules "$RULES_FILE"
+  create_backup
   prepare_target_layout
 
-  echo -e "${BLUE}Migration Plan:${NC}"
-  echo ""
+  local moved=0
+  local skipped=0
+  local failed=0
 
-  echo -e "${YELLOW}Work - Celebratix (4 repos):${NC}"
-  if [[ -d "$SOURCE_DIR/Celebratix" ]]; then
-    for repo in "$SOURCE_DIR/Celebratix"/*; do
-      if [[ -d "$repo" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/work/clients/celebratix/$kebab_name"
-        move_repo "$repo" "$target"
-      fi
-    done
-  else
-    echo "  Celebratix directory not found"
-  fi
-  echo ""
+  while IFS= read -r -d '' gitdir; do
+    local source_repo rel repo_name destination target_repo
+    source_repo="$(dirname "$gitdir")"
+    rel="${source_repo#"$SOURCE_DIR"/}"
+    repo_name="$(basename "$source_repo")"
 
-  echo -e "${YELLOW}Personal Projects (11 repos):${NC}"
-  personal_projects=(
-    "Interesting-Websites"
-    "Portfolio22"
-    "Reusable-Components"
-    "SRC-API"
-    "node-sdk-server"
-    "obsidian-store"
-    "rubennijhuis"
-    "dotfiles"
-    "Advent-Of-Code"
-    "Socket-Room-Manager"
-    "vockhuis-gl"
-  )
-
-  for proj in "${personal_projects[@]}"; do
-    if [[ -d "$SOURCE_DIR/$proj" ]]; then
-      kebab_name="$(to_kebab_case "$proj")"
-      target="$TARGET_DIR/personal/projects/$kebab_name"
-      move_repo "$SOURCE_DIR/$proj" "$target"
+    if [[ "$source_repo" == "$TARGET_DIR"* ]]; then
+      skipped=$((skipped + 1))
+      continue
     fi
-  done
-  echo ""
 
-  echo -e "${YELLOW}Personal Experiments (11 repos):${NC}"
-  if [[ -d "$SOURCE_DIR/Experiments" ]]; then
-    for repo in "$SOURCE_DIR/Experiments"/*; do
-      if [[ -d "$repo" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/personal/experiments/$kebab_name"
-        move_repo "$repo" "$target"
-      fi
-    done
+    destination="$(resolve_destination "$rel" "$repo_name")"
+    target_repo="$TARGET_DIR/$destination/$(to_kebab_case "$repo_name")"
+
+    if [[ "$source_repo" == "$target_repo" ]]; then
+      skipped=$((skipped + 1))
+      continue
+    fi
+
+    if move_repo "$source_repo" "$target_repo"; then
+      moved=$((moved + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done < <(find "$SOURCE_DIR" -type d -name '.git' -print0)
+
+  cleanup_source_if_empty
+
+  echo ""
+  print_section "Migration Summary"
+  print_key_value "Moved" "$moved"
+  print_key_value "Skipped" "$skipped"
+  print_key_value "Failed" "$failed"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    print_warning "Dry run complete. Re-run without --dry-run to execute."
   else
-    echo "  Experiments directory not found"
-  fi
-  echo ""
-
-  echo -e "${YELLOW}Personal Learning (2 repos):${NC}"
-  if [[ -d "$SOURCE_DIR/Projects/the-farmer-was-replaced" ]]; then
-    kebab_name="$(to_kebab_case "the-farmer-was-replaced")"
-    target="$TARGET_DIR/personal/learning/$kebab_name"
-    move_repo "$SOURCE_DIR/Projects/the-farmer-was-replaced" "$target"
-  fi
-
-  if [[ -d "$SOURCE_DIR/effect/cheffect" ]]; then
-    target="$TARGET_DIR/personal/learning/cheffect"
-    move_repo "$SOURCE_DIR/effect/cheffect" "$target"
-  fi
-  echo ""
-
-  echo -e "${YELLOW}Archive - Codam (17 repos):${NC}"
-  if [[ -d "$SOURCE_DIR/Codam" ]]; then
-    for repo in "$SOURCE_DIR/Codam"/*; do
-      if [[ -d "$repo/.git" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/archive/codam/$kebab_name"
-        move_repo "$repo" "$target"
-      fi
-    done
-  else
-    echo "  Codam directory not found"
-  fi
-  echo ""
-
-  cleanup_legacy_tree
-  print_standard_summary
-}
-
-move_repo_safely_with_checks() {
-  local source="$1"
-  local target="$2"
-  local repo_name
-  repo_name="$(basename "$source")"
-
-  echo -e "${BLUE}Moving:${NC} $repo_name"
-  echo "  From: $source"
-  echo "  To: $target"
-
-  if [[ -d "$target" ]]; then
-    echo -e "${YELLOW}  ⚠ Target already exists - skipping (possible duplicate)${NC}"
-    return
-  fi
-
-  cd "$source"
-  if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-    echo -e "${RED}  ✗ Has uncommitted changes - commit first!${NC}"
-    return 1
-  fi
-
-  if git log --branches --not --remotes 2>/dev/null | head -n 1 | grep -q .; then
-    echo -e "${YELLOW}  ⚠ Has unpushed commits - consider pushing first${NC}"
-    read -rp "  Continue anyway? [y/N] " confirm
-    if [[ ! "${confirm:-N}" =~ ^[Yy] ]]; then
+    [[ -n "$BACKUP_DIR" ]] && print_key_value "Backup" "$BACKUP_DIR"
+    if [[ "$failed" -gt 0 ]]; then
+      print_warning "Migration finished with failures. Review warnings above."
       return 1
     fi
+    print_success "Migration finished successfully"
   fi
-
-  mkdir -p "$(dirname "$target")"
-  mv "$source" "$target"
-
-  cd "$target"
-  if git status &>/dev/null; then
-    echo -e "${GREEN}  ✓ Moved successfully${NC}"
-  else
-    echo -e "${RED}  ✗ Git verification failed!${NC}"
-    return 1
-  fi
-
-  echo ""
-}
-
-run_completion_migration() {
-  if [[ ! -d "$SOURCE_DIR" ]]; then
-    echo -e "${GREEN}✓${NC} No old repositories directory found - migration already complete!"
-    exit 0
-  fi
-
-  echo -e "${BLUE}==>${NC} Completing Developer Directory Migration"
-  echo ""
-
-  repo_count=$(find "$SOURCE_DIR" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  if [[ "$repo_count" -eq 0 ]]; then
-    echo -e "${GREEN}✓${NC} No repos found in old location"
-    echo "Cleaning up empty directories..."
-    rm -rf "$SOURCE_DIR"
-    echo -e "${GREEN}✓${NC} Migration complete!"
-    exit 0
-  fi
-
-  echo -e "${YELLOW}Found $repo_count unmigrated repo(s)${NC}"
-  echo ""
-
-  if [[ -d "$SOURCE_DIR/Projects" ]]; then
-    echo -e "${BLUE}Processing Projects folder...${NC}"
-    for repo in "$SOURCE_DIR/Projects"/*; do
-      if [[ -d "$repo/.git" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/personal/projects/$kebab_name"
-        move_repo_safely_with_checks "$repo" "$target" || true
-      fi
-    done
-  fi
-
-  if [[ -d "$SOURCE_DIR/effect" ]]; then
-    echo -e "${BLUE}Processing effect folder...${NC}"
-    for repo in "$SOURCE_DIR/effect"/*; do
-      if [[ -d "$repo/.git" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/personal/learning/$kebab_name"
-        move_repo_safely_with_checks "$repo" "$target" || true
-      fi
-    done
-  fi
-
-  if [[ -d "$SOURCE_DIR/Celebratix" ]]; then
-    echo -e "${BLUE}Processing Celebratix folder...${NC}"
-    for repo in "$SOURCE_DIR/Celebratix"/*; do
-      if [[ -d "$repo/.git" ]]; then
-        repo_name="$(basename "$repo")"
-        kebab_name="$(to_kebab_case "$repo_name")"
-        target="$TARGET_DIR/work/clients/celebratix/$kebab_name"
-        move_repo_safely_with_checks "$repo" "$target" || true
-      fi
-    done
-  fi
-
-  for repo in "$SOURCE_DIR"/*; do
-    if [[ -d "$repo/.git" ]]; then
-      repo_name="$(basename "$repo")"
-      echo -e "${YELLOW}Found unmapped repo: $repo_name${NC}"
-      echo "Where should this go?"
-      echo "  1) personal/projects"
-      echo "  2) personal/experiments"
-      echo "  3) personal/learning"
-      echo "  4) work/projects"
-      echo "  5) archive"
-      read -rp "Choice [1-5]: " choice
-
-      kebab_name="$(to_kebab_case "$repo_name")"
-      case "$choice" in
-        1) target="$TARGET_DIR/personal/projects/$kebab_name" ;;
-        2) target="$TARGET_DIR/personal/experiments/$kebab_name" ;;
-        3) target="$TARGET_DIR/personal/learning/$kebab_name" ;;
-        4) target="$TARGET_DIR/work/projects/$kebab_name" ;;
-        5) target="$TARGET_DIR/archive/$kebab_name" ;;
-        *) echo "Skipped"; continue ;;
-      esac
-
-      move_repo_safely_with_checks "$repo" "$target" || true
-    fi
-  done
-
-  echo -e "${BLUE}Cleaning up empty directories...${NC}"
-  find "$SOURCE_DIR" -type d -empty -delete 2>/dev/null || true
-  if [[ -d "$SOURCE_DIR" ]] && [[ -z "$(ls -A "$SOURCE_DIR")" ]]; then
-    rmdir "$SOURCE_DIR"
-    echo -e "${GREEN}✓${NC} Removed empty repositories directory"
-  elif [[ -d "$SOURCE_DIR" ]]; then
-    echo -e "${YELLOW}⚠${NC} repositories directory still has content:"
-    ls -la "$SOURCE_DIR"
-  fi
-
-  echo ""
-  echo -e "${GREEN}✓${NC} Migration completion finished!"
-  echo ""
-  echo "Verify with:"
-  echo "  find ~/Developer -name '.git' -type d | wc -l"
-  echo "  proj"
 }
 
 main() {
   parse_args "$@"
-  if [[ "$COMPLETE_MODE" == "true" ]]; then
-    run_completion_migration
-  else
-    run_standard_migration
-  fi
+  run_migration
 }
 
 main "$@"

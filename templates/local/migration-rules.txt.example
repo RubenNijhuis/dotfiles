@@ -1,0 +1,10 @@
+# Pattern-based migration overrides.
+# Format: pattern|destination-subpath
+# Matching uses shell globs against: <relative-source-path>/<repo-name>
+#
+# Examples:
+# Work/*|work/projects
+# Clients/*|work/clients
+# Experiments/*|personal/experiments
+# Learning/*|personal/learning
+# Legacy/*|archive

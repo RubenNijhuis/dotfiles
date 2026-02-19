@@ -87,13 +87,13 @@ brew-audit: ## Audit Brewfiles for missing or undeclared packages
 validate-repos: ## Check repos are safe to migrate
 	@bash $(DOTFILES)/scripts/migration/validate-repos.sh
 
-migrate-dev-dryrun: ## Preview Developer migration
+migrate-dev-dryrun: ## Preview repository migration from legacy source to target tree
 	@bash $(DOTFILES)/scripts/migration/migrate-developer-structure.sh --dry-run
 
-migrate-dev: ## Migrate ~/Developer to new structure
+migrate-dev: ## Run automatic repository migration (rule-based)
 	@bash $(DOTFILES)/scripts/migration/migrate-developer-structure.sh
 
-complete-migration: ## Complete the Developer directory migration
+complete-migration: ## Run interactive migration mode for remaining repos
 	@bash $(DOTFILES)/scripts/migration/migrate-developer-structure.sh --complete
 
 openclaw-setup: ## Configure OpenClaw after stowing (use PHONE_NUMBER=+31...)

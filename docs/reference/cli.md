@@ -276,11 +276,29 @@ Update Homebrew packages, runtime tools, and restow configs.
 ## `scripts/migration/migrate-developer-structure.sh`
 
 ```text
-Usage: scripts/migration/migrate-developer-structure.sh [--dry-run] [--complete]
+Usage: scripts/migration/migrate-developer-structure.sh [options]
 
-Modes:
-  --dry-run   Preview standard migration plan without moving repos.
-  --complete  Complete migration for remaining repos in legacy layout.
+Options:
+  --dry-run                          Preview planned moves without changing files
+  --complete                         Interactive categorization mode for existing setups
+  --source <path>                    Source root containing repositories
+                                     (default: /Users/rubennijhuis/Developer/repositories)
+  --target <path>                    Target developer root
+                                     (default: /Users/rubennijhuis/Developer)
+  --rules <path>                     Optional pattern rules file
+                                     (default: local/migration-rules.txt if present)
+  --default-destination <subpath>    Fallback target subpath for unmapped repos
+                                     (default: personal/projects)
+  --non-interactive                  Disable prompts (auto/rules only)
+  --help                             Show this help message
+  --no-color                         Disable color output
+
+Rules file format:
+  pattern|destination-subpath
+
+Example:
+  # Move all repos in a legacy Work folder under work/projects
+  Work/*|work/projects
 ```
 
 ## `scripts/migration/migrate-ssh-keys.sh`
