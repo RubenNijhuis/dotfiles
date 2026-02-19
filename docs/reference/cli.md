@@ -177,6 +177,19 @@ Usage: /Users/rubennijhuis/dotfiles/scripts/health/check-launchd-contracts.sh [-
 Validate templates/launchd/*.plist against repository launchd contract.
 ```
 
+## `scripts/health/doctor-ci.sh`
+
+```text
+Usage: /Users/rubennijhuis/dotfiles/scripts/health/doctor-ci.sh [--help] [--no-color] [--profile <personal|work>]
+
+Run deterministic CI health checks:
+  1. check-scripts
+  2. test-scripts
+  3. launchd-check
+  4. docs-sync
+  5. install.sh dry-run
+```
+
 ## `scripts/health/doctor-notify.sh`
 
 ```text

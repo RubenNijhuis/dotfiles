@@ -4,7 +4,7 @@
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry
+	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry doctor-ci
 
 DOTFILES := $(shell pwd)
 
@@ -24,6 +24,7 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "doctor-status" "Show health monitoring automation status"
 	@printf "\033[36m%-15s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
 	@printf "\033[36m%-15s\033[0m %s\n" "bootstrap-verify" "Run strict bootstrap reliability verification suite"
+	@printf "\033[36m%-15s\033[0m %s\n" "doctor-ci" "Run deterministic CI health checks"
 	@printf "\033[36m%-15s\033[0m %s\n" "docs-sync" "Fail if generated CLI docs are stale"
 	@printf "\033[36m%-15s\033[0m %s\n" "launchd-check" "Validate launchd template contracts"
 	@printf "\033[36m%-15s\033[0m %s\n" "brew-sync-dry" "Preview brew-sync additions without editing Brewfiles"
@@ -229,6 +230,7 @@ check-scripts: ## Run syntax and shellcheck on all scripts
 test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/scripts/tests/smoke-help.sh
 	@bash $(DOTFILES)/scripts/tests/test-array-init.sh
+	@bash $(DOTFILES)/scripts/tests/test-idempotency.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-parsing.sh
 	@bash $(DOTFILES)/scripts/tests/test-install-checkpoint.sh
@@ -236,6 +238,9 @@ test-scripts: ## Run lightweight script behavior tests
 
 bootstrap-verify: ## Run strict bootstrap reliability verification suite
 	@bash $(DOTFILES)/scripts/bootstrap/bootstrap-verify.sh
+
+doctor-ci: ## Run deterministic CI health checks
+	@bash $(DOTFILES)/scripts/health/doctor-ci.sh
 
 docs-generate: ## Regenerate generated documentation artifacts
 	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh
