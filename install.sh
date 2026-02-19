@@ -446,11 +446,7 @@ collect_preferences() {
     choose_profile "$default_profile"
   fi
 
-  if [[ "$OS" == "Darwin" ]]; then
-    APPLY_MACOS_DEFAULTS=$(resolve_preference "$MACOS_PREF" "no" "Apply macOS defaults?")
-  else
-    APPLY_MACOS_DEFAULTS="no"
-  fi
+  APPLY_MACOS_DEFAULTS=$(resolve_preference "$MACOS_PREF" "no" "Apply macOS defaults?")
 
   SETUP_SSH=$(resolve_preference "$SSH_PREF" "no" "Generate SSH keys for Git?")
   SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Generate GPG key for commit signing?")
