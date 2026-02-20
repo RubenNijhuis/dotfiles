@@ -4,7 +4,8 @@
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry doctor-ci
+	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
+	cleanup-dotfiles-backups
 
 DOTFILES := $(shell pwd)
 
@@ -20,6 +21,7 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "openclaw-info" "Display OpenClaw status and configuration"
 	@printf "\033[36m%-15s\033[0m %s\n" "openclaw-setup" "Configure OpenClaw (requires PHONE_NUMBER=...)"
 	@printf "\033[36m%-15s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
+	@printf "\033[36m%-15s\033[0m %s\n" "cleanup-dotfiles-backups" "Remove old ~/dotfiles.backup.* directories"
 	@printf "\033[36m%-15s\033[0m %s\n" "backup-status" "Show backup automation status"
 	@printf "\033[36m%-15s\033[0m %s\n" "doctor-status" "Show health monitoring automation status"
 	@printf "\033[36m%-15s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
@@ -71,6 +73,9 @@ migrate-ssh: ## Migrate existing SSH keys to new naming
 
 backup: ## Backup current dotfiles before modifications
 	@bash $(DOTFILES)/scripts/backup/backup-dotfiles.sh
+
+cleanup-dotfiles-backups: ## Remove old ~/dotfiles.backup.* directories
+	@bash $(DOTFILES)/scripts/maintenance/cleanup-dotfiles-backups.sh
 
 restore: ## Restore from latest backup
 	@bash $(DOTFILES)/scripts/backup/restore-backup.sh

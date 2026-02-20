@@ -241,6 +241,14 @@ Options:
   --check   Exit non-zero when drift is found.
 ```
 
+## `scripts/maintenance/cleanup-dotfiles-backups.sh`
+
+```text
+Usage: scripts/maintenance/cleanup-dotfiles-backups.sh [--help] [--no-color] [--dry-run]
+
+Remove directories matching $HOME/dotfiles.backup.*.
+```
+
 ## `scripts/maintenance/format-all.sh`
 
 ```text
