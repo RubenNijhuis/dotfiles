@@ -44,7 +44,7 @@ unsetopt EXTENDEDGLOB
 
 **Solution:** Cache the prefix in a variable
 ```zsh
-export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 ```
 
@@ -193,7 +193,7 @@ zsh
 ### Syntax Highlighting Not Loading
 Background loading may fail if there are errors. Check manually:
 ```bash
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source "${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 ```
 
 ### Slow Startup After System Update

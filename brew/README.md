@@ -16,7 +16,7 @@ brew/
 
 ### Brewfile.common
 **Packages used on both personal and work machines:**
-- Shell & Terminal tools (zsh plugins, Starship, Atuin, fzf, zoxide)
+- Shell & Terminal tools (zsh plugins, Starship, Atuin, fzf, zoxide, ghq, sesh)
 - Core CLI tools (bat, eza, ripgrep, etc.)
 - Development tools (fnm, pnpm, shellcheck, rust)
 - Security (gnupg, pinentry-mac)

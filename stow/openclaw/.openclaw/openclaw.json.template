@@ -70,7 +70,7 @@
         "mistralai/devstral-small-2-2512": {},
         "lmstudio/mistralai/devstral-small-2-2512": {}
       },
-      "workspace": "/Users/rubennijhuis/.openclaw/workspace",
+      "workspace": "__OPENCLAW_HOME__/workspace",
       "compaction": {
         "mode": "safeguard"
       },

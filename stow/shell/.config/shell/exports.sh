@@ -1,9 +1,15 @@
 # shellcheck shell=bash
-export EDITOR="code --wait"
-export VISUAL="code --wait"
+export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+export DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
+export DOTFILES_OPENCLAW_HOME="${DOTFILES_OPENCLAW_HOME:-$HOME/.openclaw}"
+export DOTFILES_LMSTUDIO_HOME="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
+export DOTFILES_EDITOR="${DOTFILES_EDITOR:-code --wait}"
+export DOTFILES_OBSIDIAN_REPO_PATH="${DOTFILES_OBSIDIAN_REPO_PATH:-$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store}"
+
+export EDITOR="$DOTFILES_EDITOR"
+export VISUAL="$DOTFILES_EDITOR"
 export LANG="en_US.UTF-8"
 export BUN_INSTALL="$HOME/.bun"
-export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 
 # Homebrew
 export HOMEBREW_NO_ENV_HINTS=1

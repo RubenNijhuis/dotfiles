@@ -4,7 +4,7 @@
 
 # Cache brew prefix (avoid subprocess on every shell startup)
 if [[ -z "$HOMEBREW_PREFIX" ]]; then
-  export HOMEBREW_PREFIX="/opt/homebrew"
+  export HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
 fi
 
 # ----- Completions (cached) -----
@@ -74,9 +74,12 @@ fi
 # Ensure clean exit code
 return 0 2>/dev/null || true
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
-# End of LM Studio CLI section
+# LM Studio CLI
+if [[ -d "${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin" ]]; then
+  export PATH="$PATH:${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin"
+fi
 
-# OpenClaw Completion
-source "/Users/rubennijhuis/.openclaw/completions/openclaw.zsh"
+# OpenClaw shell integration
+if [[ -f "$HOME/.config/shell/openclaw.sh" ]]; then
+  source "$HOME/.config/shell/openclaw.sh"
+fi

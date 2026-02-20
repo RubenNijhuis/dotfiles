@@ -282,9 +282,9 @@ Options:
   --dry-run                          Preview planned moves without changing files
   --complete                         Interactive categorization mode for existing setups
   --source <path>                    Source root containing repositories
-                                     (default: /Users/rubennijhuis/Developer/repositories)
+                                     (default: $DOTFILES_DEVELOPER_ROOT/repositories)
   --target <path>                    Target developer root
-                                     (default: /Users/rubennijhuis/Developer)
+                                     (default: $DOTFILES_DEVELOPER_ROOT)
   --rules <path>                     Optional pattern rules file
                                      (default: local/migration-rules.txt if present)
   --default-destination <subpath>    Fallback target subpath for unmapped repos

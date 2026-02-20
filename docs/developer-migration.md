@@ -7,8 +7,8 @@ This repo supports two migration scenarios:
 
 ## Defaults
 
-- Source: `$HOME/Developer/repositories`
-- Target: `$HOME/Developer`
+- Source: `$DOTFILES_DEVELOPER_ROOT/repositories`
+- Target: `$DOTFILES_DEVELOPER_ROOT`
 - Default destination: `personal/projects`
 - Optional rules file: `local/migration-rules.txt`
 
@@ -29,8 +29,8 @@ make complete-migration
 
 ```bash
 scripts/migration/migrate-developer-structure.sh \
-  --source "$HOME/Developer/repositories" \
-  --target "$HOME/Developer" \
+  --source "$DOTFILES_DEVELOPER_ROOT/repositories" \
+  --target "$DOTFILES_DEVELOPER_ROOT" \
   --rules "local/migration-rules.txt" \
   --default-destination "personal/projects"
 ```

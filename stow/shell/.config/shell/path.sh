@@ -1,15 +1,17 @@
 # shellcheck shell=bash disable=SC2206
 # PATH construction - order matters (first match wins)
 typeset -U PATH  # Remove duplicates
+_brew_prefix="${HOMEBREW_PREFIX:-${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}}"
+_lmstudio_home="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
 
 path=(
     "$HOME/.bun/bin"
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
+    "$_brew_prefix/bin"
+    "$_brew_prefix/sbin"
     "/usr/local/bin"
     "/usr/local/sbin"
-    "$HOME/.lmstudio/bin"
-    "/opt/homebrew/opt/dotnet@8/bin"
+    "$_lmstudio_home/bin"
+    "$_brew_prefix/opt/dotnet@8/bin"
     "$HOME/.dotnet/tools"
     "$HOME/.local/bin"
     $path

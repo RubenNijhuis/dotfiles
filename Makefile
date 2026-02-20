@@ -128,7 +128,7 @@ doctor: ## Run comprehensive system health check
 doctor-quick: ## Run quick health check (skip optional checks)
 	@bash $(DOTFILES)/scripts/health/doctor.sh --quick
 
-update-repos: ## Update all git repositories in ~/Developer
+update-repos: ## Update all git repositories in $DOTFILES_DEVELOPER_ROOT
 	@bash $(DOTFILES)/scripts/maintenance/update-repos.sh
 
 hooks: ## Install git hooks for code quality checks

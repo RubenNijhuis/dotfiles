@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Doctor checks: core environment and configuration checks.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../../lib/env.sh"
+dotfiles_load_env "$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 developer_root() {
-  printf '%s\n' "${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+  printf '%s\n' "$DOTFILES_DEVELOPER_ROOT"
 }
 
 check_stow() {

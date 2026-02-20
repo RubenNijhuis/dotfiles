@@ -13,23 +13,23 @@
     <true/>
     <key>ProgramArguments</key>
     <array>
-      <string>/opt/homebrew/bin/node</string>
-      <string>/opt/homebrew/opt/openclaw-cli/libexec/lib/node_modules/openclaw/dist/index.js</string>
+      <string>__HOMEBREW_PREFIX__/bin/node</string>
+      <string>__HOMEBREW_PREFIX__/opt/openclaw-cli/libexec/lib/node_modules/openclaw/dist/index.js</string>
       <string>gateway</string>
       <string>--port</string>
       <string>18789</string>
     </array>
     
     <key>StandardOutPath</key>
-    <string>/Users/rubennijhuis/.openclaw/logs/gateway.log</string>
+    <string>__HOME__/.openclaw/logs/gateway.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/rubennijhuis/.openclaw/logs/gateway.err.log</string>
+    <string>__HOME__/.openclaw/logs/gateway.err.log</string>
     <key>EnvironmentVariables</key>
     <dict>
     <key>HOME</key>
-    <string>/Users/rubennijhuis</string>
+    <string>__HOME__</string>
     <key>PATH</key>
-    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <string>__HOMEBREW_PREFIX__/bin:/usr/local/bin:/usr/bin:/bin</string>
     <key>OPENCLAW_GATEWAY_PORT</key>
     <string>18789</string>
     <key>OPENCLAW_GATEWAY_TOKEN</key>

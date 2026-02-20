@@ -20,6 +20,9 @@ brew "fzf"                       # Fuzzy finder for command line
 brew "gum"                       # Interactive terminal UI components
 brew "zoxide"                    # Smarter cd command (z)
 brew "atuin"                     # Shell history with search UI (local-only mode)
+brew "ghq"                       # Git repository manager for local checkouts
+brew "sesh"                      # Terminal session manager (zoxide/fzf driven)
+brew "fd"                        # Fast find alternative
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools
@@ -36,8 +39,7 @@ brew "git-delta"     # Better git diffs
 brew "neovim"        # Modern vim
 brew "vim"           # Classic vim (fallback)
 
-# Note: fd and dust not currently installed but available if needed
-# brew "fd"          # Fast find alternative
+# Note: dust not currently installed but available if needed
 # brew "dust"        # Better du (disk usage)
 
 # -----------------------------------------------------------------------------

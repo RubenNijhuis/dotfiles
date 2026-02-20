@@ -4,7 +4,12 @@
 
 set -euo pipefail
 
-OPENCLAW_DIR="$HOME/.openclaw"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
+source "$DOTFILES/scripts/lib/env.sh"
+dotfiles_load_env "$DOTFILES"
+
+OPENCLAW_DIR="$DOTFILES_OPENCLAW_HOME"
 PHONE_NUMBER="${1:-}"
 
 if [ -z "$PHONE_NUMBER" ]; then
@@ -26,6 +31,7 @@ if [ ! -f "$OPENCLAW_DIR/openclaw.json" ]; then
   # Replace placeholders
   sed -i '' "s/PHONE_NUMBER_PLACEHOLDER/$PHONE_NUMBER/g" "$OPENCLAW_DIR/openclaw.json"
   sed -i '' "s/GATEWAY_TOKEN_PLACEHOLDER/$GATEWAY_TOKEN/g" "$OPENCLAW_DIR/openclaw.json"
+  sed -i '' "s|__OPENCLAW_HOME__|$OPENCLAW_DIR|g" "$OPENCLAW_DIR/openclaw.json"
 
   echo "✓ openclaw.json created"
   echo "  Phone: $PHONE_NUMBER"

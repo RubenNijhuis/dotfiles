@@ -7,6 +7,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/env.sh"
+dotfiles_load_env "$DOTFILES"
 source "$SCRIPT_DIR/launchd/common.sh"
 source "$SCRIPT_DIR/launchd/commands.sh"
 

@@ -23,6 +23,18 @@ _project_search_roots() {
 }
 
 _project_roots() {
+    if command -v ghq >/dev/null 2>&1; then
+        local ghq_repos
+        ghq_repos="$(ghq list -p 2>/dev/null || true)"
+        if [[ -n "$ghq_repos" ]]; then
+            # Prefer ghq-managed repositories when available.
+            while read -r repo; do
+                [[ -d "$repo/.git" ]] && printf '%s\n' "$repo"
+            done <<< "$ghq_repos"
+            return 0
+        fi
+    fi
+
     local roots
     roots="$(_project_search_roots)"
     [[ -n "$roots" ]] || return 0

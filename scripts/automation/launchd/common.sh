@@ -32,16 +32,17 @@ render_plist_template() {
   local destination="$2"
   local escaped_dotfiles
   local escaped_home
+  local escaped_homebrew_prefix
 
   escaped_dotfiles=$(printf '%s\n' "$DOTFILES" | sed 's/[\/&]/\\&/g')
   escaped_home=$(printf '%s\n' "$HOME" | sed 's/[\/&]/\\&/g')
+  escaped_homebrew_prefix=$(printf '%s\n' "${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}" | sed 's/[\/&]/\\&/g')
 
-  # Support both placeholder templates and older hardcoded paths.
+  # Render placeholder-based templates.
   sed \
     -e "s|__DOTFILES__|$escaped_dotfiles|g" \
     -e "s|__HOME__|$escaped_home|g" \
-    -e "s|/Users/rubennijhuis/dotfiles|$escaped_dotfiles|g" \
-    -e "s|/Users/rubennijhuis|$escaped_home|g" \
+    -e "s|__HOMEBREW_PREFIX__|$escaped_homebrew_prefix|g" \
     "$source" > "$destination"
 }
 

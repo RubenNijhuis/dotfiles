@@ -9,9 +9,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/env.sh"
+dotfiles_load_env "$ROOT_DIR"
 
-SOURCE_DIR="$HOME/Developer/repositories"
-TARGET_DIR="$HOME/Developer"
+SOURCE_DIR="$DOTFILES_DEVELOPER_ROOT/repositories"
+TARGET_DIR="$DOTFILES_DEVELOPER_ROOT"
 RULES_FILE="$ROOT_DIR/local/migration-rules.txt"
 DEFAULT_DESTINATION="personal/projects"
 DRY_RUN=false
@@ -27,9 +29,9 @@ Options:
   --dry-run                          Preview planned moves without changing files
   --complete                         Interactive categorization mode for existing setups
   --source <path>                    Source root containing repositories
-                                     (default: $HOME/Developer/repositories)
+                                     (default: \$DOTFILES_DEVELOPER_ROOT/repositories)
   --target <path>                    Target developer root
-                                     (default: $HOME/Developer)
+                                     (default: \$DOTFILES_DEVELOPER_ROOT)
   --rules <path>                     Optional pattern rules file
                                      (default: local/migration-rules.txt if present)
   --default-destination <subpath>    Fallback target subpath for unmapped repos

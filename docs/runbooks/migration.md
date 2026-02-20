@@ -36,5 +36,5 @@ make complete-migration
 
 ```bash
 make doctor
-find "$HOME/Developer" -name '.git' -type d | wc -l
+find "${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}" -name '.git' -type d | wc -l
 ```

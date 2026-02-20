@@ -5,14 +5,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/env.sh"
+dotfiles_load_env "$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 UPDATED=0
 FAILED=0
 SKIPPED=0
 UP_TO_DATE=0
-REPOS_DIR="$HOME/Developer"
 DRY_RUN=false
-DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 
 LOG_DIR="$HOME/.local/log"
 LOG_FILE="$LOG_DIR/repo-updates-$(date +%Y-%m-%d).log"

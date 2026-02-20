@@ -6,9 +6,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/env.sh"
+dotfiles_load_env "$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
-VAULT_PATH="$DEVELOPER_ROOT/personal/projects/obsidian-store"
+VAULT_PATH="$DOTFILES_OBSIDIAN_REPO_PATH"
 LOG_FILE="$HOME/.local/log/obsidian-sync.log"
 
 usage() {

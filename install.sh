@@ -4,8 +4,10 @@
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+source "$DOTFILES/scripts/lib/env.sh"
+dotfiles_load_env "$DOTFILES"
 PROFILE_FILE="$HOME/.config/dotfiles-profile"
-DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 PREFERENCES_FILE="$HOME/.config/dotfiles-install-preferences"
 INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
 CHECKPOINT_FILE="$HOME/.config/dotfiles-install-checkpoint"

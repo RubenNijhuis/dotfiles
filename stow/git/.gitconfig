@@ -19,7 +19,7 @@
 	line-numbers = true
 
 [gpg]
-	program = /opt/homebrew/bin/gpg
+	program = gpg
 
 [credential]
 	helper = osxkeychain
@@ -39,9 +39,9 @@
 	amend = commit --amend --no-edit
 
 # Automatic work/personal detection by directory
-[includeIf "gitdir:~/Developer/work/"]
+[includeIf "gitdir:**/work/**"]
 	path = ~/.gitconfig-work
-[includeIf "gitdir:~/Developer/personal/"]
+[includeIf "gitdir:**/personal/**"]
 	path = ~/.gitconfig-personal
-[includeIf "gitdir:~/Developer/archive/"]
+[includeIf "gitdir:**/archive/**"]
 	path = ~/.gitconfig-personal
