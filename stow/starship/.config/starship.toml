@@ -1,59 +1,70 @@
 add_newline = false
 command_timeout = 1000
 scan_timeout = 30
+palette = "ghostty_clean"
 format = "$directory$git_branch$git_status$nodejs$python$dotnet$bun$docker_context$kubernetes$cmd_duration$line_break$character"
 
 [directory]
 truncation_length = 4
 truncate_to_repo = true
-style = "blue"
+style = "bold sky"
 
 [git_branch]
 symbol = " "
-style = "purple"
+style = "lavender"
 
 [git_status]
-style = "yellow"
+style = "amber"
 format = '([\[$all_status$ahead_behind\]]($style) )'
 
 [nodejs]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "green"
+style = "emerald"
 
 [python]
 symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "yellow"
+style = "amber"
 
 [dotnet]
 symbol = "󰪮 "
 format = "via [$symbol($version )]($style)"
-style = "blue"
+style = "sky"
 
 [bun]
-symbol = "🥟 "
+symbol = " "
 format = "via [$symbol($version )]($style)"
-style = "red"
+style = "peach"
 
 [docker_context]
 symbol = " "
 format = "on [$symbol$context]($style) "
-style = "blue"
+style = "sky"
 only_with_files = true
 
 [kubernetes]
 symbol = "⎈ "
 format = "on [$symbol$context( ($namespace))]($style) "
-style = "cyan"
+style = "teal"
 disabled = false
 
 [cmd_duration]
 min_time = 500
 format = "took [$duration]($style) "
-style = "dimmed white"
+style = "muted"
 
 [character]
-success_symbol = "[❯](green)"
+success_symbol = "[❯](emerald)"
 error_symbol = "[❯](red)"
-vicmd_symbol = "[❮](green)"
+vicmd_symbol = "[❮](lavender)"
+
+[palettes.ghostty_clean]
+sky = "#7aa2f7"
+lavender = "#bb9af7"
+emerald = "#9ece6a"
+amber = "#e0af68"
+peach = "#ff9e64"
+teal = "#7dcfff"
+muted = "#9aa5ce"
+red = "#f7768e"
