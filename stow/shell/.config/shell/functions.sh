@@ -50,6 +50,7 @@ _project_roots() {
 _project_menu() {
     _project_roots | while read -r repo; do
         local ts rel date name scope display dev_root_rel
+        [[ -n "$repo" && -d "$repo" ]] || continue
         ts=$(git -C "$repo" log -1 --format=%ct 2>/dev/null || true)
         [[ -n "$ts" ]] || ts=$(stat -f %m "$repo" 2>/dev/null || echo 0)
         rel="${repo/#$HOME\//~/}"
@@ -60,7 +61,7 @@ _project_menu() {
         date=$(date -r "$ts" "+%Y-%m-%d" 2>/dev/null || echo "unknown")
         display="$(printf '%-28.28s  %-34.34s  %s' "$name" "$scope" "$date")"
         printf '%s\t%s\t%s\n' "$ts" "$repo" "$display"
-    done | sort -t$'\t' -k1,1nr | cut -f2-
+    done | sort -t$'\t' -k1,1nr | cut -f2- | awk 'NF'
 }
 
 _sync_project_repo() {
@@ -108,7 +109,7 @@ proj() {
     selected=$(printf '%s\n' "$options" | fzf --prompt='project> ' --height=80% --layout=reverse \
         --delimiter=$'\t' --with-nth=2 \
         --header=$'name                         scope                              updated' \
-        --preview 'repo=$(echo {} | cut -f1); echo "$repo"; echo ""; git -C "$repo" log -1 --oneline 2>/dev/null || echo "No commits"; echo ""; git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"')
+        --preview 'repo=$(echo {} | cut -f1); echo "repo: $repo"; git -C "$repo" log -1 --oneline 2>/dev/null || echo "last commit: none"; changes=$(git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"); if [[ -n "$changes" ]]; then echo "$changes"; else echo "working tree: clean"; fi')
     [[ -n "$selected" ]] || return
     project=$(echo "$selected" | cut -f1)
 
