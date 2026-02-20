@@ -4,7 +4,8 @@ Documentation for shell startup performance improvements.
 
 ## Current Performance
 
-**Optimized startup time:** ~50ms (measured with `time zsh -i -c exit`)
+**Optimized startup time target:** ~40-60ms on Starship backend (measured with `time zsh -i -c exit`)
+**Fallback startup time target:** ~50-80ms on p10k backend (depends on gitstatus state)
 
 ### Before Optimization
 - **Total:** ~250ms
@@ -61,6 +62,20 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 ```
 
 **Impact:** Removes ~20ms from critical path
+
+### 4. Prompt Backend Switching
+**Goal:** Use Starship by default while keeping p10k rollback.
+
+```zsh
+export DOTFILES_PROMPT_BACKEND="${DOTFILES_PROMPT_BACKEND:-starship}"
+```
+
+- Default backend: `starship`
+- Rollback backend: `p10k`
+- Rollback command:
+  ```bash
+  export DOTFILES_PROMPT_BACKEND=p10k
+  ```
 
 ## Profiling Tools
 
@@ -153,11 +168,11 @@ zsh -i -c 'zmodload zsh/zprof; source ~/.zshrc; zprof'
 
 ### Comparison
 ```bash
-# Before optimization
+# Default backend (Starship)
 for i in {1..10}; do time zsh -i -c exit; done 2>&1 | grep real
 
-# After optimization
-for i in {1..10}; do time zsh -i -c exit; done 2>&1 | grep real
+# Fallback backend (Powerlevel10k)
+for i in {1..10}; do DOTFILES_PROMPT_BACKEND=p10k time zsh -i -c exit; done 2>&1 | grep real
 ```
 
 ## Cache Management
@@ -196,4 +211,16 @@ source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 Homebrew prefix may have changed. Update `HOMEBREW_PREFIX` in `.zshrc`:
 ```bash
 brew --prefix  # Check actual path
+```
+
+### Prompt Backend or Gitstatus Errors
+If you see p10k `gitstatus` errors in non-interactive checks:
+```bash
+# Use default Starship backend
+unset DOTFILES_PROMPT_BACKEND
+exec zsh
+
+# Or force fallback explicitly when needed
+export DOTFILES_PROMPT_BACKEND=p10k
+exec zsh
 ```

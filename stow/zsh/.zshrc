@@ -1,7 +1,11 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Prompt backend selector (default: starship, fallback: p10k).
+# Roll back with: export DOTFILES_PROMPT_BACKEND=p10k
+export DOTFILES_PROMPT_BACKEND="${DOTFILES_PROMPT_BACKEND:-starship}"
+
+# Enable Powerlevel10k instant prompt only when p10k backend is active.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+if [[ "$DOTFILES_PROMPT_BACKEND" == "p10k" ]] && [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
@@ -50,6 +54,9 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 eval "$(fnm env --use-on-cd --shell zsh)"
 eval "$(zoxide init zsh)"
 eval "$(fzf --zsh)"
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
 
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
@@ -64,8 +71,12 @@ source ~/.config/shell/aliases.sh
 source ~/.config/shell/functions.sh
 
 # ----- Prompt -----
-source "$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+if [[ "$DOTFILES_PROMPT_BACKEND" == "starship" ]] && command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+else
+  source "$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
+  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+fi
 
 # ----- Local overrides (not committed) -----
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh

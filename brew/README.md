@@ -16,7 +16,7 @@ brew/
 
 ### Brewfile.common
 **Packages used on both personal and work machines:**
-- Shell & Terminal tools (zsh plugins, fzf, zoxide)
+- Shell & Terminal tools (zsh plugins, Starship, Atuin, fzf, zoxide)
 - Core CLI tools (bat, eza, ripgrep, etc.)
 - Development tools (fnm, pnpm, shellcheck, rust)
 - Security (gnupg, pinentry-mac)
@@ -195,7 +195,7 @@ Normal! Personal machine may have work tools installed. Options:
 
 **Shell & Terminal** - Tools you use every shell session
 - Affects daily workflow efficiency
-- Includes completions, themes, fuzzy finders
+- Includes completions, prompt backends, history tooling, fuzzy finders
 
 **Core CLI Tools** - Replace or enhance standard Unix tools
 - bat > cat, eza > ls, ripgrep > grep
