@@ -83,6 +83,7 @@ fe() {
 # Quick project launcher (recently active repos + sync + editor open)
 proj() {
     local selected project
+    # shellcheck disable=SC2016
     selected=$(_project_menu | fzf --prompt='project> ' --height=80% --layout=reverse \
         --preview 'repo=$(echo {} | awk "{print \$2}"); repo=${repo/#\~/$HOME}; echo "$repo"; echo ""; git -C "$repo" log -1 --oneline 2>/dev/null || echo "No commits"; echo ""; git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"')
     [[ -n "$selected" ]] || return
