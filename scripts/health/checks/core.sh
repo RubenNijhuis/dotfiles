@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Doctor checks: core environment and configuration checks.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../../lib/env.sh"
-dotfiles_load_env "$(cd "$SCRIPT_DIR/../../.." && pwd)"
+CORE_CHECKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$CORE_CHECKS_DIR/../../lib/env.sh"
+dotfiles_load_env "$(cd "$CORE_CHECKS_DIR/../../.." && pwd)"
 
 developer_root() {
   printf '%s\n' "$DOTFILES_DEVELOPER_ROOT"
@@ -292,6 +292,7 @@ check_developer() {
   echo ""
 
   local issues=0
+  local warnings=0
   local details=""
 
   local dev_root
@@ -336,13 +337,39 @@ check_developer() {
   details+="  - work/clients: $work\n  "
   details+="  - archive: $archive"
 
+  # Detect multiple unique dotfiles clones to prevent stow ownership conflicts.
+  local canonical_paths=""
+  local unique_count=0
+  local candidate canonical
+  for candidate in "$HOME/dotfiles" "$dev_root/personal/projects/dotfiles"; do
+    if [[ -d "$candidate/.git" ]]; then
+      canonical="$(cd "$candidate" 2>/dev/null && pwd -P || true)"
+      if [[ -n "$canonical" ]] && ! grep -qxF "$canonical" <<< "$canonical_paths"; then
+        canonical_paths+="${canonical}"$'\n'
+        unique_count=$((unique_count + 1))
+      fi
+    fi
+  done
+
+  if [[ $unique_count -gt 1 ]]; then
+    warnings=$((warnings + 1))
+    details+="\n  ⚠ Multiple dotfiles clones detected:"
+    while IFS= read -r canonical; do
+      [[ -n "$canonical" ]] || continue
+      details+="\n    - $canonical"
+    done <<< "$canonical_paths"
+    add_suggestion "Keep one clone only to avoid stow ownership conflicts"
+  fi
+
   # Check old structure removed
   if [[ -d "$dev_root/repositories" ]]; then
     details+="\n  ⚠ Old repositories/ folder still exists"
     add_suggestion "Complete migration: make complete-migration"
   fi
 
-  if [[ $issues -eq 0 ]]; then
+  if [[ $issues -eq 0 ]] && [[ $warnings -gt 0 ]]; then
+    record_result "Developer Directory" 1 "$details"
+  elif [[ $issues -eq 0 ]]; then
     record_result "Developer Directory" 0 "$details"
   else
     record_result "Developer Directory" 2 "$details"

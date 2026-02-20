@@ -96,9 +96,16 @@ fe() {
 
 # Quick project launcher (recently active repos + sync + editor open)
 proj() {
-    local selected project
+    local selected project options
+    options="$(_project_menu)"
+    if [[ -z "$options" ]]; then
+        echo "No repositories found."
+        echo "Set DOTFILES_DEVELOPER_ROOT or initialize ghq repositories."
+        return 1
+    fi
+
     # shellcheck disable=SC2016
-    selected=$(_project_menu | fzf --prompt='project> ' --height=80% --layout=reverse \
+    selected=$(printf '%s\n' "$options" | fzf --prompt='project> ' --height=80% --layout=reverse \
         --delimiter=$'\t' --with-nth=2 \
         --header=$'name                         scope                              updated' \
         --preview 'repo=$(echo {} | cut -f1); echo "$repo"; echo ""; git -C "$repo" log -1 --oneline 2>/dev/null || echo "No commits"; echo ""; git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"')
