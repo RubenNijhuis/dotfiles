@@ -2,7 +2,7 @@ add_newline = false
 command_timeout = 1000
 scan_timeout = 30
 palette = "ghostty_clean"
-format = "$directory$git_branch$git_status$nodejs$python$dotnet$bun$docker_context$kubernetes$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$python$dotnet$bun$kubernetes$cmd_duration$line_break$character"
 
 [directory]
 truncation_length = 4
@@ -16,11 +16,6 @@ style = "lavender"
 [git_status]
 style = "amber"
 format = '([\[$all_status$ahead_behind\]]($style) )'
-
-[nodejs]
-symbol = " "
-format = "via [$symbol($version )]($style)"
-style = "emerald"
 
 [python]
 symbol = " "
@@ -36,12 +31,6 @@ style = "sky"
 symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "peach"
-
-[docker_context]
-symbol = " "
-format = "on [$symbol$context]($style) "
-style = "sky"
-only_with_files = true
 
 [kubernetes]
 symbol = "⎈ "
