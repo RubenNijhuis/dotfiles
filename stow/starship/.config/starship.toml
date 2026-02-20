@@ -1,5 +1,7 @@
 add_newline = false
-format = "$directory$git_branch$git_status$cmd_duration$line_break$character"
+command_timeout = 1000
+scan_timeout = 30
+format = "$directory$git_branch$git_status$nodejs$python$dotnet$bun$docker_context$kubernetes$cmd_duration$line_break$character"
 
 [directory]
 truncation_length = 4
@@ -13,6 +15,38 @@ style = "purple"
 [git_status]
 style = "yellow"
 format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[nodejs]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "green"
+
+[python]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "yellow"
+
+[dotnet]
+symbol = "󰪮 "
+format = "via [$symbol($version )]($style)"
+style = "blue"
+
+[bun]
+symbol = "🥟 "
+format = "via [$symbol($version )]($style)"
+style = "red"
+
+[docker_context]
+symbol = " "
+format = "on [$symbol$context]($style) "
+style = "blue"
+only_with_files = true
+
+[kubernetes]
+symbol = "⎈ "
+format = "on [$symbol$context( ($namespace))]($style) "
+style = "cyan"
+disabled = false
 
 [cmd_duration]
 min_time = 500
