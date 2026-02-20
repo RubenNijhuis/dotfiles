@@ -94,7 +94,7 @@ Options:
 ```text
 Usage: scripts/automation/sync-obsidian.sh [--help] [--no-color] [path]
 
-Sync an Obsidian git repository (default: ~/Developer/personal/projects/obsidian-store).
+Sync an Obsidian git repository (default: $DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store).
 ```
 
 ## `scripts/backup/backup-dotfiles.sh`
@@ -262,7 +262,7 @@ Sync manually installed Homebrew packages into tracked Brewfiles.
 ```text
 Usage: scripts/maintenance/update-repos.sh [--help] [--no-color] [--dry-run] [path]
 
-Update all git repositories under the provided path (default: ~/Developer).
+Update all git repositories under the provided path (default: $DOTFILES_DEVELOPER_ROOT).
 ```
 
 ## `scripts/maintenance/update.sh`
@@ -315,6 +315,6 @@ Rename ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal.
 Usage: scripts/migration/validate-repos.sh [--help] [--no-color] [path]
 
 Validate git repositories for uncommitted, unpushed, or stashed work.
-Defaults to: $HOME/Developer
+Defaults to: $DOTFILES_DEVELOPER_ROOT
 ```
 

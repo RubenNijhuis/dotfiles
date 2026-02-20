@@ -7,14 +7,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
-VAULT_PATH="$HOME/Developer/personal/projects/obsidian-store"
+DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+VAULT_PATH="$DEVELOPER_ROOT/personal/projects/obsidian-store"
 LOG_FILE="$HOME/.local/log/obsidian-sync.log"
 
 usage() {
   cat <<EOF2
 Usage: $0 [--help] [--no-color] [path]
 
-Sync an Obsidian git repository (default: ~/Developer/personal/projects/obsidian-store).
+Sync an Obsidian git repository (default: \$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store).
 EOF2
 }
 

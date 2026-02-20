@@ -12,6 +12,7 @@ SKIPPED=0
 UP_TO_DATE=0
 REPOS_DIR="$HOME/Developer"
 DRY_RUN=false
+DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 
 LOG_DIR="$HOME/.local/log"
 LOG_FILE="$LOG_DIR/repo-updates-$(date +%Y-%m-%d).log"
@@ -21,11 +22,12 @@ usage() {
   cat <<EOF2
 Usage: $0 [--help] [--no-color] [--dry-run] [path]
 
-Update all git repositories under the provided path (default: ~/Developer).
+Update all git repositories under the provided path (default: \$DOTFILES_DEVELOPER_ROOT).
 EOF2
 }
 
 parse_args() {
+  REPOS_DIR="$DEVELOPER_ROOT"
   show_help_if_requested usage "$@"
 
   while [[ $# -gt 0 ]]; do

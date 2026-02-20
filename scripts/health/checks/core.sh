@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Doctor checks: core environment and configuration checks.
 
+developer_root() {
+  printf '%s\n' "${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+}
+
 check_stow() {
   printf '%sChecking Stow Configuration...%s\n\n' "${BLUE}" "${NC}"
 
@@ -171,9 +175,12 @@ check_git() {
     add_suggestion "Re-stow git config: cd $DOTFILES && make stow"
   fi
 
+  local dev_root
+  dev_root="$(developer_root)"
+
   # Test in personal repo (if exists)
-  if [[ -d "$HOME/Developer/personal/projects/dotfiles/.git" ]]; then
-    cd "$HOME/Developer/personal/projects/dotfiles" || return 1
+  if [[ -d "$dev_root/personal/projects/dotfiles/.git" ]]; then
+    cd "$dev_root/personal/projects/dotfiles" || return 1
     local ssh_cmd=$(git config core.sshCommand || echo "")
     if [[ "$ssh_cmd" == *"id_ed25519_personal"* ]]; then
       details+="Personal repos: using id_ed25519_personal\n  "
@@ -185,8 +192,8 @@ check_git() {
   fi
 
   # Test in work repo (if exists)
-  if [[ -d "$HOME/Developer/work/clients" ]]; then
-    local work_repo=$(find "$HOME/Developer/work/clients" -name ".git" -type d | head -1)
+  if [[ -d "$dev_root/work/clients" ]]; then
+    local work_repo=$(find "$dev_root/work/clients" -name ".git" -type d | head -1)
     if [[ -n "$work_repo" ]]; then
       cd "$(dirname "$work_repo")" || return 1
       local ssh_cmd=$(git config core.sshCommand || echo "")
@@ -284,13 +291,16 @@ check_developer() {
   local issues=0
   local details=""
 
+  local dev_root
+  dev_root="$(developer_root)"
+
   # Check structure exists
   local dirs=(
-    "$HOME/Developer/personal/projects"
-    "$HOME/Developer/personal/experiments"
-    "$HOME/Developer/personal/learning"
-    "$HOME/Developer/work/clients"
-    "$HOME/Developer/archive"
+    "$dev_root/personal/projects"
+    "$dev_root/personal/experiments"
+    "$dev_root/personal/learning"
+    "$dev_root/work/clients"
+    "$dev_root/archive"
   )
 
   local missing=0
@@ -305,16 +315,16 @@ check_developer() {
   else
     details+="Structure: $missing directories missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Create structure: mkdir -p ~/Developer/{personal/{projects,experiments,learning},work/clients,archive}"
+    add_suggestion "Create structure: mkdir -p \"$dev_root\"/{personal/{projects,experiments,learning},work/clients,archive}"
   fi
 
   # Count repos per category
-  local total=$(find "$HOME/Developer" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_projects=$(find "$HOME/Developer/personal/projects" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_experiments=$(find "$HOME/Developer/personal/experiments" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_learning=$(find "$HOME/Developer/personal/learning" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local work=$(find "$HOME/Developer/work" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local archive=$(find "$HOME/Developer/archive" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local total=$(find "$dev_root" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local personal_projects=$(find "$dev_root/personal/projects" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local personal_experiments=$(find "$dev_root/personal/experiments" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local personal_learning=$(find "$dev_root/personal/learning" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local work=$(find "$dev_root/work" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local archive=$(find "$dev_root/archive" -name ".git" -type d 2>/dev/null | wc -l | xargs)
 
   details+="Repositories: $total total\n  "
   details+="  - personal/projects: $personal_projects\n  "
@@ -324,7 +334,7 @@ check_developer() {
   details+="  - archive: $archive"
 
   # Check old structure removed
-  if [[ -d "$HOME/Developer/repositories" ]]; then
+  if [[ -d "$dev_root/repositories" ]]; then
     details+="\n  ⚠ Old repositories/ folder still exists"
     add_suggestion "Complete migration: make complete-migration"
   fi

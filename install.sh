@@ -5,6 +5,7 @@ set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 PROFILE_FILE="$HOME/.config/dotfiles-profile"
+DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 PREFERENCES_FILE="$HOME/.config/dotfiles-install-preferences"
 INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
 CHECKPOINT_FILE="$HOME/.config/dotfiles-install-checkpoint"
@@ -633,19 +634,19 @@ step_apply_macos_defaults() {
 }
 
 step_final_setup() {
-  mkdir -p "$HOME/Developer/personal/projects" \
-           "$HOME/Developer/personal/experiments" \
-           "$HOME/Developer/personal/learning" \
-           "$HOME/Developer/work/projects" \
-           "$HOME/Developer/work/clients" \
-           "$HOME/Developer/archive"
-  success "Created ~/Developer structure"
+  mkdir -p "$DEVELOPER_ROOT/personal/projects" \
+           "$DEVELOPER_ROOT/personal/experiments" \
+           "$DEVELOPER_ROOT/personal/learning" \
+           "$DEVELOPER_ROOT/work/projects" \
+           "$DEVELOPER_ROOT/work/clients" \
+           "$DEVELOPER_ROOT/archive"
+  success "Created developer structure at $DEVELOPER_ROOT"
 
-  if [[ -d "$HOME/Developer/repositories" ]]; then
+  if [[ -d "$DEVELOPER_ROOT/repositories" ]]; then
     local legacy_repo_count
-    legacy_repo_count=$(find "$HOME/Developer/repositories" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+    legacy_repo_count=$(find "$DEVELOPER_ROOT/repositories" -name ".git" -type d 2>/dev/null | wc -l | xargs)
     if [[ "$legacy_repo_count" -gt 0 ]]; then
-      warning "Detected legacy ~/Developer/repositories with $legacy_repo_count repo(s)"
+      warning "Detected legacy $DEVELOPER_ROOT/repositories with $legacy_repo_count repo(s)"
       echo "  Run migration after install:"
       echo "    make migrate-dev-dryrun"
       echo "    make migrate-dev"

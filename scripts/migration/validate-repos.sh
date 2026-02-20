@@ -11,12 +11,12 @@ usage() {
 Usage: $0 [--help] [--no-color] [path]
 
 Validate git repositories for uncommitted, unpushed, or stashed work.
-Defaults to: \$HOME/Developer
+Defaults to: \$DOTFILES_DEVELOPER_ROOT
 EOF
 }
 
 parse_args() {
-  REPOS_DIR="$HOME/Developer"
+  REPOS_DIR="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 
   show_help_if_requested usage "$@"
 
