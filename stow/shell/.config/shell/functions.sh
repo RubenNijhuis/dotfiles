@@ -97,7 +97,7 @@ fe() {
 
 # Quick project launcher (recently active repos + sync + editor open)
 proj() {
-    local selected project options
+    local project options
     options="$(_project_menu)"
     if [[ -z "$options" ]]; then
         echo "No repositories found."
@@ -106,15 +106,18 @@ proj() {
     fi
 
     # shellcheck disable=SC2016
-    selected=$(printf '%s\n' "$options" | fzf --prompt='project> ' --height=80% --layout=reverse \
+    project=$(printf '%s\n' "$options" | fzf --prompt='project> ' --height=80% --layout=reverse \
         --delimiter=$'\t' --with-nth=2 \
+        --accept-nth=1 \
         --header=$'name                         scope                              updated' \
-        --preview 'repo=$(echo {} | cut -f1); echo "repo: $repo"; git -C "$repo" log -1 --oneline 2>/dev/null || echo "last commit: none"; changes=$(git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"); if [[ -n "$changes" ]]; then echo "$changes"; else echo "working tree: clean"; fi')
-    [[ -n "$selected" ]] || return
-    project=$(echo "$selected" | cut -f1)
+        --preview 'repo={1}; echo "repo: $repo"; git -C "$repo" log -1 --oneline 2>/dev/null || echo "last commit: none"; changes=$(git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"); if [[ -n "$changes" ]]; then echo "$changes"; else echo "working tree: clean"; fi')
+    [[ -n "$project" ]] || return
+    if [[ ! -d "$project" ]]; then
+        echo "Invalid selection: $project"
+        return 1
+    fi
 
     _sync_project_repo "$project"
-    [[ -n "$project" ]] || return
     cd "${project}" || return
 
     if [[ -n "${EDITOR:-}" ]]; then
