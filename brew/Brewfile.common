@@ -15,7 +15,6 @@ tap "yakitrak/yakitrak"
 # -----------------------------------------------------------------------------
 brew "zsh-autosuggestions"      # Fish-like autosuggestions
 brew "zsh-syntax-highlighting"  # Syntax highlighting in zsh
-brew "powerlevel10k"             # Fast, flexible zsh theme
 brew "starship"                  # Cross-shell prompt (primary backend)
 brew "fzf"                       # Fuzzy finder for command line
 brew "gum"                       # Interactive terminal UI components

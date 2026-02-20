@@ -4,8 +4,7 @@ Documentation for shell startup performance improvements.
 
 ## Current Performance
 
-**Optimized startup time target:** ~40-60ms on Starship backend (measured with `time zsh -i -c exit`)
-**Fallback startup time target:** ~50-80ms on p10k backend (depends on gitstatus state)
+**Optimized startup time target:** ~40-60ms on Starship (measured with `time zsh -i -c exit`)
 
 ### Before Optimization
 - **Total:** ~250ms
@@ -63,19 +62,12 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 **Impact:** Removes ~20ms from critical path
 
-### 4. Prompt Backend Switching
-**Goal:** Use Starship by default while keeping p10k rollback.
+### 4. Starship Prompt
+**Goal:** Keep prompt rendering fast and stable with a single backend.
 
 ```zsh
-export DOTFILES_PROMPT_BACKEND="${DOTFILES_PROMPT_BACKEND:-starship}"
+eval "$(starship init zsh)"
 ```
-
-- Default backend: `starship`
-- Rollback backend: `p10k`
-- Rollback command:
-  ```bash
-  export DOTFILES_PROMPT_BACKEND=p10k
-  ```
 
 ## Profiling Tools
 
@@ -168,11 +160,8 @@ zsh -i -c 'zmodload zsh/zprof; source ~/.zshrc; zprof'
 
 ### Comparison
 ```bash
-# Default backend (Starship)
+# Starship
 for i in {1..10}; do time zsh -i -c exit; done 2>&1 | grep real
-
-# Fallback backend (Powerlevel10k)
-for i in {1..10}; do DOTFILES_PROMPT_BACKEND=p10k time zsh -i -c exit; done 2>&1 | grep real
 ```
 
 ## Cache Management
@@ -213,14 +202,6 @@ Homebrew prefix may have changed. Update `HOMEBREW_PREFIX` in `.zshrc`:
 brew --prefix  # Check actual path
 ```
 
-### Prompt Backend or Gitstatus Errors
-If you see p10k `gitstatus` errors in non-interactive checks:
-```bash
-# Use default Starship backend
-unset DOTFILES_PROMPT_BACKEND
-exec zsh
-
-# Or force fallback explicitly when needed
-export DOTFILES_PROMPT_BACKEND=p10k
-exec zsh
-```
+### Starship Warning Under TERM=dumb
+If your command runner sets `TERM=dumb`, Starship may print a warning in non-interactive checks.
+This does not affect normal Ghostty sessions (`TERM=xterm-256color`).

@@ -1,13 +1,4 @@
-# Prompt backend selector (default: starship, fallback: p10k).
-# Roll back with: export DOTFILES_PROMPT_BACKEND=p10k
-export DOTFILES_PROMPT_BACKEND="${DOTFILES_PROMPT_BACKEND:-starship}"
-
-# Enable Powerlevel10k instant prompt only when p10k backend is active.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ "$DOTFILES_PROMPT_BACKEND" == "p10k" ]] && [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# Starship is the primary and only prompt backend.
 
 # ----- Performance: Cache expensive operations -----
 
@@ -71,11 +62,10 @@ source ~/.config/shell/aliases.sh
 source ~/.config/shell/functions.sh
 
 # ----- Prompt -----
-if [[ "$DOTFILES_PROMPT_BACKEND" == "starship" ]] && command -v starship >/dev/null 2>&1; then
+if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 else
-  source "$HOMEBREW_PREFIX/share/powerlevel10k/powerlevel10k.zsh-theme"
-  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+  PROMPT='%n@%m %1~ %# '
 fi
 
 # ----- Local overrides (not committed) -----

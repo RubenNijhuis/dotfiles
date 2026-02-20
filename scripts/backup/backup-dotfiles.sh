@@ -44,7 +44,6 @@ FILES_TO_BACKUP=(
   "$HOME/.zshrc"
   "$HOME/.zprofile"
   "$HOME/.zshenv"
-  "$HOME/.p10k.zsh"
   "$HOME/.gitconfig"
   "$HOME/.gitignore_global"
   "$HOME/.vimrc"

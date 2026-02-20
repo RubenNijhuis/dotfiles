@@ -195,7 +195,7 @@ Normal! Personal machine may have work tools installed. Options:
 
 **Shell & Terminal** - Tools you use every shell session
 - Affects daily workflow efficiency
-- Includes completions, prompt backends, history tooling, fuzzy finders
+- Includes completions, prompt tooling, history tooling, fuzzy finders
 
 **Core CLI Tools** - Replace or enhance standard Unix tools
 - bat > cat, eza > ls, ripgrep > grep

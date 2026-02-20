@@ -55,7 +55,6 @@ cleanup_old_symlinks() {
     "$HOME/.zshrc"
     "$HOME/.zprofile"
     "$HOME/.zshenv"
-    "$HOME/.p10k.zsh"
     "$HOME/.gitconfig"
     "$HOME/.gitconfig-personal"
     "$HOME/.gitconfig-work"
