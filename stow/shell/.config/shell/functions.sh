@@ -97,16 +97,16 @@ fe() {
 
 # Quick project launcher (recently active repos + sync + editor open)
 proj() {
-    local project options
-    options="$(_project_menu)"
-    if [[ -z "$options" ]]; then
+    local project menu_entries
+    menu_entries="$(_project_menu)"
+    if [[ -z "$menu_entries" ]]; then
         echo "No repositories found."
         echo "Set DOTFILES_DEVELOPER_ROOT or initialize ghq repositories."
         return 1
     fi
 
     # shellcheck disable=SC2016
-    project=$(printf '%s\n' "$options" | fzf --prompt='project> ' --height=80% --layout=reverse \
+    project=$(printf '%s\n' "$menu_entries" | fzf --prompt='project> ' --height=80% --layout=reverse \
         --delimiter=$'\t' --with-nth=2 \
         --accept-nth=1 \
         --header=$'name                         scope                              updated' \
