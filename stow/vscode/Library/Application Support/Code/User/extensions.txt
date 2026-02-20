@@ -3,7 +3,6 @@
 
 # AI Tools
 anthropic.claude-code          # Claude Code AI coding assistant
-github.copilot                 # GitHub Copilot AI pair programmer
 github.copilot-chat            # GitHub Copilot chat interface
 
 # Code Quality & Formatting

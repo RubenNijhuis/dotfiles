@@ -63,19 +63,18 @@ All settings are in `stow/vscode/Library/Application Support/Code/User/settings.
 
 ## Installed Extensions
 
-All 18 extensions are documented in `extensions.txt` and declared in `brew/Brewfile.common`.
+All 17 extensions are documented in `extensions.txt` and declared in `brew/Brewfile.common`.
 
-### AI Tools (3 extensions)
+### AI Tools (2 extensions)
 
 | Extension | Purpose |
 |-----------|---------|
 | `anthropic.claude-code` | Claude Code AI coding assistant |
-| `github.copilot` | GitHub Copilot AI pair programmer |
 | `github.copilot-chat` | GitHub Copilot chat interface |
 
-**Why both Claude Code and Copilot?**
+**Why both Claude Code and Copilot Chat?**
 - Claude Code: Better for complex reasoning, refactoring, architecture
-- Copilot: Better for inline completions, boilerplate code
+- Copilot Chat: Better for in-editor suggestions and quick code assistance
 - Complementary tools, not redundant
 
 ### Code Quality & Formatting (4 extensions)

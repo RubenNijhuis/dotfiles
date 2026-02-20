@@ -101,7 +101,6 @@ vscode "dbaeumer.vscode-eslint"         # ESLint integration
 vscode "eamodio.gitlens"                # Git supercharged
 vscode "biomejs.biome"                  # Biome formatter/linter
 vscode "editorconfig.editorconfig"      # EditorConfig support
-vscode "github.copilot"                 # GitHub Copilot
 vscode "github.copilot-chat"            # Copilot Chat
 vscode "kevinrose.vsc-python-indent"    # Python indentation
 vscode "ms-azuretools.vscode-containers" # Docker containers
