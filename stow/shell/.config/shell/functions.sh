@@ -40,12 +40,14 @@ _project_roots() {
 
 _project_menu() {
     _project_roots | while read -r repo; do
-        local ts rel date
+        local ts rel date name scope
         ts=$(git -C "$repo" log -1 --format=%ct 2>/dev/null || true)
         [[ -n "$ts" ]] || ts=$(stat -f %m "$repo" 2>/dev/null || echo 0)
         rel="${repo/#$HOME\//~/}"
+        name="$(basename "$repo")"
+        scope="$(echo "$rel" | sed -E 's#^~/Developer/##; s#/[^/]+$##')"
         date=$(date -r "$ts" "+%Y-%m-%d" 2>/dev/null || echo "unknown")
-        printf '%s\t%s\t%s\n' "$ts" "$date" "$rel"
+        printf '%s\t%s\t%s\t%s\t%s\n' "$ts" "$repo" "$name" "$scope" "$date"
     done | sort -t$'\t' -k1,1nr | cut -f2-
 }
 
@@ -85,10 +87,10 @@ proj() {
     local selected project
     # shellcheck disable=SC2016
     selected=$(_project_menu | fzf --prompt='project> ' --height=80% --layout=reverse \
-        --preview 'repo=$(echo {} | awk "{print \$2}"); repo=${repo/#\~/$HOME}; echo "$repo"; echo ""; git -C "$repo" log -1 --oneline 2>/dev/null || echo "No commits"; echo ""; git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"')
+        --delimiter=$'\t' --with-nth=2,3,4 \
+        --preview 'repo=$(echo {} | cut -f1); echo "$repo"; echo ""; git -C "$repo" log -1 --oneline 2>/dev/null || echo "No commits"; echo ""; git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"')
     [[ -n "$selected" ]] || return
-    project=$(echo "$selected" | awk '{print $2}')
-    project="${project/#\~/$HOME}"
+    project=$(echo "$selected" | cut -f1)
 
     _sync_project_repo "$project"
     [[ -n "$project" ]] || return
