@@ -8,44 +8,43 @@ _list_files() {
     fi
 }
 
-_list_project_dirs() {
-    local roots=(
-        "$HOME/Developer/personal/projects"
-        "$HOME/Developer/personal/experiments"
-        "$HOME/Developer/personal/learning"
-        "$HOME/Developer/work/projects"
-        "$HOME/Developer/work/clients"
-    )
+_developer_root() {
+    printf '%s\n' "${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+}
 
-    if command -v fd >/dev/null 2>&1; then
-        fd --type d --max-depth 4 . "${roots[@]}" 2>/dev/null
-    else
-        find "${roots[@]}" -mindepth 1 -maxdepth 4 -type d 2>/dev/null
-    fi
+_project_search_roots() {
+    local dev_root
+    dev_root="$(_developer_root)"
+
+    [[ -d "$dev_root" ]] || return 0
+
+    # Discover project categories dynamically (e.g., personal/* and work/*).
+    find "$dev_root"/personal "$dev_root"/work -mindepth 1 -maxdepth 1 -type d 2>/dev/null
 }
 
 _project_roots() {
-    local roots=(
-        "$HOME/Developer/personal/projects"
-        "$HOME/Developer/personal/experiments"
-        "$HOME/Developer/personal/learning"
-        "$HOME/Developer/work/projects"
-        "$HOME/Developer/work/clients"
-    )
+    local roots
+    roots="$(_project_search_roots)"
+    [[ -n "$roots" ]] || return 0
 
-    find "${roots[@]}" -mindepth 1 -maxdepth 4 -name .git -type d 2>/dev/null | while read -r gitdir; do
-        dirname "$gitdir"
-    done
+    while read -r root; do
+        [[ -d "$root" ]] || continue
+        find "$root" -mindepth 1 -maxdepth 4 -name .git -type d 2>/dev/null | while read -r gitdir; do
+            dirname "$gitdir"
+        done
+    done <<< "$roots"
 }
 
 _project_menu() {
     _project_roots | while read -r repo; do
-        local ts rel date name scope display
+        local ts rel date name scope display dev_root_rel
         ts=$(git -C "$repo" log -1 --format=%ct 2>/dev/null || true)
         [[ -n "$ts" ]] || ts=$(stat -f %m "$repo" 2>/dev/null || echo 0)
         rel="${repo/#$HOME\//~/}"
         name="$(basename "$repo")"
-        scope="$(echo "$rel" | sed -E 's#^~/Developer/##; s#/[^/]+$##')"
+        dev_root_rel="$(_developer_root)"
+        dev_root_rel="${dev_root_rel/#$HOME\//~/}"
+        scope="$(echo "$rel" | sed -E "s#^$dev_root_rel/##; s#/[^/]+\$##")"
         date=$(date -r "$ts" "+%Y-%m-%d" 2>/dev/null || echo "unknown")
         display="$(printf '%-28.28s  %-34.34s  %s' "$name" "$scope" "$date")"
         printf '%s\t%s\t%s\n' "$ts" "$repo" "$display"
@@ -108,11 +107,11 @@ proj() {
 project() { proj "$@"; }
 
 # Category-specific shortcuts
-devp() { cd ~/Developer/personal/projects || return; ls -la; }
-deve() { cd ~/Developer/personal/experiments || return; ls -la; }
-devl() { cd ~/Developer/personal/learning || return; ls -la; }
-devw() { cd ~/Developer/work || return; ls -la; }
-deva() { cd ~/Developer/archive || return; ls -la; }
+devp() { cd "$(_developer_root)/personal/projects" || return; ls -la; }
+deve() { cd "$(_developer_root)/personal/experiments" || return; ls -la; }
+devl() { cd "$(_developer_root)/personal/learning" || return; ls -la; }
+devw() { cd "$(_developer_root)/work" || return; ls -la; }
+deva() { cd "$(_developer_root)/archive" || return; ls -la; }
 
 # Create new project with template
 newproj() {
@@ -131,7 +130,7 @@ newproj() {
     name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr ' ' '-')
 
     # Determine location
-    local basedir="$HOME/Developer/$category"
+    local basedir="$(_developer_root)/$category"
     if [[ "$type" == "experiment" ]]; then
         local target="$basedir/experiments/$name"
     else
