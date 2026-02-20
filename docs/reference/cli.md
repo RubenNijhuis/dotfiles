@@ -36,7 +36,6 @@ Commands:
   restart <agent>   Restart a running agent
 
 Available agents:
-  ai-startup-selector  Prompt at login to start OpenClaw/LM Studio
   dotfiles-backup      Automated daily backups
   dotfiles-doctor      Daily health monitoring
   obsidian-sync        Obsidian vault synchronization
@@ -68,25 +67,12 @@ Wrapper around scripts/maintenance/update-repos.sh with notification and summary
 ## `scripts/automation/setup-automation.sh`
 
 ```text
-Usage: scripts/automation/setup-automation.sh [--help] [--no-color] <backup|doctor|repo-update|ai-startup>
+Usage: scripts/automation/setup-automation.sh [--help] [--no-color] <backup|doctor|repo-update>
 
 Examples:
   scripts/automation/setup-automation.sh backup
   scripts/automation/setup-automation.sh doctor
   scripts/automation/setup-automation.sh repo-update
-  scripts/automation/setup-automation.sh ai-startup
-```
-
-## `scripts/automation/startup-ai-services.sh`
-
-```text
-Usage: scripts/automation/startup-ai-services.sh [--help] [--no-color] [--yes] [--policy <prompt|both|openclaw|lmstudio|skip>]
-
-Prompt at login to start OpenClaw and/or LM Studio.
-
-Options:
-  --yes                       Non-interactive mode (uses --policy).
-  --policy <value>            Startup mode, defaults to env AI_STARTUP_POLICY or prompt.
 ```
 
 ## `scripts/automation/sync-obsidian.sh`

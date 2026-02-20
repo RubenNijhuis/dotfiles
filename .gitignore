@@ -30,17 +30,3 @@ stow/gpg/.gnupg/.gpg-v21-migrated
 stow/vim/.vim/plugged/
 stow/vim/.vim/.netrwhist
 stow/vim/.config/nvim/plugged/
-
-# OpenClaw - keep config templates, ignore secrets and runtime
-stow/openclaw/.openclaw/openclaw.json
-!stow/openclaw/.openclaw/openclaw.json.template
-stow/openclaw/.openclaw/agents/**/auth-profiles.json
-stow/openclaw/.openclaw/credentials/
-stow/openclaw/.openclaw/identity/
-stow/openclaw/.openclaw/devices/
-stow/openclaw/.openclaw/logs/
-stow/openclaw/.openclaw/media/
-stow/openclaw/.openclaw/sessions/
-stow/openclaw/.openclaw/cron/jobs.json
-stow/openclaw/.openclaw/*.secret
-stow/openclaw/.openclaw/*.env

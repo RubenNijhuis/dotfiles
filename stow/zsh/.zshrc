@@ -55,6 +55,11 @@ fi
 # OrbStack
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
+# LM Studio CLI
+if [[ -d "${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin" ]]; then
+  export PATH="$PATH:${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin"
+fi
+
 # ----- Shell config modules -----
 source ~/.config/shell/path.sh
 source ~/.config/shell/exports.sh
@@ -73,13 +78,3 @@ fi
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
-
-# LM Studio CLI
-if [[ -d "${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin" ]]; then
-  export PATH="$PATH:${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin"
-fi
-
-# OpenClaw shell integration
-if [[ -f "$HOME/.config/shell/openclaw.sh" ]]; then
-  source "$HOME/.config/shell/openclaw.sh"
-fi

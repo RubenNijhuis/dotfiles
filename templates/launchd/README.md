@@ -13,7 +13,6 @@ Canonical launchd automation contract for this repository.
 
 # Install one agent
 ~/dotfiles/scripts/automation/launchd-manager.sh install obsidian-sync
-~/dotfiles/scripts/automation/launchd-manager.sh install ai-startup-selector
 
 # Show loaded status
 ~/dotfiles/scripts/automation/launchd-manager.sh status
@@ -29,7 +28,6 @@ Canonical launchd automation contract for this repository.
 - `dotfiles-doctor`: daily health check + notifications at 09:00.
 - `obsidian-sync`: daily vault sync.
 - `repo-update`: scheduled repository updates with notification wrapper.
-- `ai-startup-selector`: asks at login whether to start OpenClaw and/or LM Studio.
 
 Templates live in `templates/launchd/com.user.*.plist`.
 Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
@@ -121,7 +119,6 @@ If install fails with permissions, run the command outside sandboxed tooling.
 make backup-setup
 make doctor-setup
 make repo-update-setup
-make ai-startup-setup
 make ops-status
 ```
 

@@ -32,8 +32,6 @@ assert_exit 1 "bash '$ROOT_DIR/scripts/migration/migrate-developer-structure.sh'
 assert_exit 0 "bash '$ROOT_DIR/scripts/backup/restore-backup.sh' --help"
 assert_exit 0 "bash '$ROOT_DIR/scripts/maintenance/sync-brew.sh' --help"
 assert_exit 0 "bash '$ROOT_DIR/scripts/bootstrap/stow-report.sh' --help"
-assert_exit 0 "bash '$ROOT_DIR/scripts/automation/startup-ai-services.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/automation/startup-ai-services.sh' --policy invalid"
 assert_exit 0 "bash '$ROOT_DIR/scripts/docs/generate-cli-reference.sh' --help"
 assert_exit 1 "bash '$ROOT_DIR/scripts/docs/generate-cli-reference.sh' --wat"
 assert_exit 0 "bash '$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh' --help"

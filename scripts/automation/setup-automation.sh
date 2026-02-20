@@ -12,13 +12,12 @@ TARGET=""
 
 usage() {
   cat <<EOF2
-Usage: $0 [--help] [--no-color] <backup|doctor|repo-update|ai-startup>
+Usage: $0 [--help] [--no-color] <backup|doctor|repo-update>
 
 Examples:
   $0 backup
   $0 doctor
   $0 repo-update
-  $0 ai-startup
 EOF2
 }
 
@@ -30,7 +29,7 @@ parse_args() {
       --no-color)
         shift
         ;;
-      backup|doctor|repo-update|ai-startup)
+      backup|doctor|repo-update)
         TARGET="$1"
         shift
         ;;
@@ -177,41 +176,6 @@ setup_repo_update() {
   printf '\n'
 }
 
-setup_ai_startup() {
-  print_header "Setting Up AI Startup Selector Automation"
-
-  local log_dir="$HOME/.local/log"
-  mkdir -p "$log_dir"
-
-  printf '\n'
-  print_section "Installing LaunchD agent..."
-  if "$LAUNCHD_MANAGER" install ai-startup-selector; then
-    printf "  "
-    print_success "AI startup selector installed"
-  else
-    printf "  "
-    print_error "Failed to install AI startup selector"
-    exit 1
-  fi
-
-  printf '\n'
-  print_section "Verification:"
-  if launchctl print "gui/$(id -u)/com.user.ai-startup-selector" >/dev/null 2>&1; then
-    printf "  "
-    print_success "Agent is running"
-  else
-    printf "  "
-    print_error "Agent failed to load"
-    exit 1
-  fi
-
-  printf '\n'
-  print_info "Selector runs at login and prompts for OpenClaw/LM Studio startup."
-  print_info "Logs: $log_dir/ai-startup-selector.log"
-  print_info "Check status: make ai-startup-status"
-  printf '\n'
-}
-
 main() {
   parse_args "$@"
 
@@ -224,7 +188,6 @@ main() {
     backup) setup_backup ;;
     doctor) setup_doctor ;;
     repo-update) setup_repo_update ;;
-    ai-startup) setup_ai_startup ;;
   esac
 }
 

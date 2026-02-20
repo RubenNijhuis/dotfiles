@@ -8,7 +8,6 @@ LOG_DIR="$HOME/.local/log"
 
 # Available agents
 AGENTS=(
-  "ai-startup-selector:Prompt at login to start OpenClaw/LM Studio"
   "dotfiles-backup:Automated daily backups"
   "dotfiles-doctor:Daily health monitoring"
   "obsidian-sync:Obsidian vault synchronization"

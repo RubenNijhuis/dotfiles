@@ -61,8 +61,6 @@ main() {
   show_recent_log "doctor err" "$HOME/.local/log/dotfiles-doctor-launchd.err.log"
   show_recent_log "repo update out" "$HOME/.local/log/repo-update.out.log"
   show_recent_log "repo update err" "$HOME/.local/log/repo-update.err.log"
-  show_recent_log "ai startup out" "$HOME/.local/log/ai-startup-selector.out.log"
-  show_recent_log "ai startup err" "$HOME/.local/log/ai-startup-selector.err.log"
 
   print_section "Backup recency"
   latest_backup=$(find "$HOME/.dotfiles-backup" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1 || true)

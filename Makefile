@@ -1,10 +1,10 @@
 .PHONY: help help-all install update stow unstow macos ssh-info gpg-info ssh-setup gpg-setup \
 	migrate-ssh backup restore brew-sync brew-audit validate-repos migrate-dev-dryrun migrate-dev \
-	complete-migration openclaw-setup openclaw-info ai-on doctor doctor-quick update-repos \
+	complete-migration doctor doctor-quick update-repos \
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	ai-startup-setup ai-startup-status keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
+	keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
 	cleanup-dotfiles-backups
 
 DOTFILES := $(shell pwd)
@@ -17,9 +17,6 @@ help: ## Show common commands
 	@printf "\033[36m%-15s\033[0m %s\n" "doctor" "Run comprehensive system health check"
 	@printf "\033[36m%-15s\033[0m %s\n" "doctor-quick" "Run quick health check (skip optional checks)"
 	@printf "\033[36m%-15s\033[0m %s\n" "format" "Format all files according to EditorConfig"
-	@printf "\033[36m%-15s\033[0m %s\n" "ai-on" "Start OpenClaw gateway and LM Studio server"
-	@printf "\033[36m%-15s\033[0m %s\n" "openclaw-info" "Display OpenClaw status and configuration"
-	@printf "\033[36m%-15s\033[0m %s\n" "openclaw-setup" "Configure OpenClaw (requires PHONE_NUMBER=...)"
 	@printf "\033[36m%-15s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
 	@printf "\033[36m%-15s\033[0m %s\n" "cleanup-dotfiles-backups" "Remove old ~/dotfiles.backup.* directories"
 	@printf "\033[36m%-15s\033[0m %s\n" "backup-status" "Show backup automation status"
@@ -101,32 +98,6 @@ migrate-dev: ## Run automatic repository migration (rule-based)
 complete-migration: ## Run interactive migration mode for remaining repos
 	@bash $(DOTFILES)/scripts/migration/migrate-developer-structure.sh --complete
 
-openclaw-setup: ## Configure OpenClaw after stowing (use PHONE_NUMBER=+31...)
-	@if [ -z "$${PHONE_NUMBER:-}" ]; then \
-		echo "Usage: make openclaw-setup PHONE_NUMBER=+31XXXXXXXXX"; \
-		exit 1; \
-	fi
-	@bash $(DOTFILES)/templates/openclaw/setup-openclaw.sh "$$PHONE_NUMBER"
-
-openclaw-info: ## Display OpenClaw status and configuration
-	@echo "OpenClaw Status:"
-	@openclaw models status 2>/dev/null || echo "  Not configured or not running"
-	@echo ""
-	@echo "Gateway:"
-	@launchctl list | grep openclaw || echo "  Gateway not loaded"
-	@echo ""
-	@echo "Reminders:"
-	@openclaw cron list 2>/dev/null || echo "  No reminders"
-
-ai-on: ## Start OpenClaw gateway and LM Studio server
-	@echo "Starting OpenClaw gateway..."
-	@openclaw gateway start 2>/dev/null || true
-	@echo "Starting LM Studio server..."
-	@lms server start
-	@echo ""
-	@echo "Service status:"
-	@openclaw gateway status 2>/dev/null | sed -n '1,24p' || true
-
 doctor: ## Run comprehensive system health check
 	@bash $(DOTFILES)/scripts/health/doctor.sh
 
@@ -199,22 +170,6 @@ repo-update-status: ## Show scheduled repository update automation status
 	@echo ""
 	@echo "Log files:"
 	@ls -lh ~/.local/log/repo-update*.log 2>/dev/null || echo "  No logs yet"
-
-ai-startup-setup: ## Setup login AI startup selector via LaunchD
-	@bash $(DOTFILES)/scripts/automation/setup-automation.sh ai-startup
-
-ai-startup-status: ## Show AI startup selector automation status
-	@echo "AI Startup Selector Status:"
-	@echo ""
-	@echo "LaunchD Agent:"
-	@launchctl print gui/$$(id -u)/com.user.ai-startup-selector >/dev/null 2>&1 && \
-		echo "  com.user.ai-startup-selector (loaded)" || echo "  Not loaded"
-	@echo ""
-	@echo "Recent runs:"
-	@tail -12 ~/.local/log/ai-startup-selector.log 2>/dev/null || echo "  No runs yet"
-	@echo ""
-	@echo "Log files:"
-	@ls -lh ~/.local/log/ai-startup-selector*.log 2>/dev/null || echo "  No logs yet"
 
 keychain-check: ## Validate required keychain entries configured in local/keychain-required.txt
 	@bash $(DOTFILES)/scripts/bootstrap/check-keychain.sh

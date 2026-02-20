@@ -102,17 +102,6 @@ stow_packages() {
         print_dim "    $filtered_output"
       fi
     else
-      # OpenClaw workspace files are often already materialized; treat as non-fatal.
-      if [[ "$pkg" == "openclaw" ]] && [[ "$stow_output" == *"would cause conflicts"* ]]; then
-        print_warning "$pkg skipped (existing local workspace files)"
-        filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
-        if [[ -n "$filtered_output" ]]; then
-          print_dim "    $filtered_output"
-        fi
-        skipped_count=$((skipped_count + 1))
-        continue
-      fi
-
       print_error "$pkg failed"
       filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
       if [[ -n "$filtered_output" ]]; then
