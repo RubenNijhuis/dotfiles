@@ -1,0 +1,21 @@
+# Shellcheck configuration for dotfiles
+
+# Disable SC1091: Not following sourced files
+# We use dynamic sourcing and shellcheck can't always follow the paths
+disable=SC1091
+
+# Disable SC2155: Declare and assign separately (style preference)
+# We prefer the concise form: local var=$(command)
+disable=SC2155
+
+# Disable SC2126: Consider using grep -c (style preference)
+# Both forms are acceptable
+disable=SC2126
+
+# Disable SC1083: Literal braces in @{upstream}
+# This is valid git syntax
+disable=SC1083
+
+# Disable SC2001: Prefer ${var//search/replace} (style preference)
+# Both sed and parameter expansion are acceptable
+disable=SC2001

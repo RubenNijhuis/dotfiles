@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+# Pre-push hook for dotfiles repository
+# Ensures code quality and repository health before pushing
+
+set -euo pipefail
+
+# Get dotfiles root
+DOTFILES="$(git rev-parse --show-toplevel)"
+source "$DOTFILES/scripts/lib/output.sh"
+LINT_SHELL="$DOTFILES/scripts/maintenance/lint-shell.sh"
+HOOK_CHECKS="$DOTFILES/scripts/maintenance/hook-checks.sh"
+
+# Track if any checks failed
+FAILED=0
+
+print_header "Pre-push: Validating Repository"
+
+# Check 1: Lint shell scripts (shared with Make/CI)
+print_section "Running shell lint..."
+if [[ -x "$LINT_SHELL" ]]; then
+  if ! "$LINT_SHELL" --no-color; then
+    FAILED=1
+  fi
+else
+  print_error "Missing lint script: $LINT_SHELL"
+  FAILED=1
+fi
+printf '\n'
+
+# Check 2: Verify Brewfiles are in sync
+print_section "Checking Brewfile sync..."
+
+if command -v brew &>/dev/null; then
+  # Run brew-audit.sh in check mode to detect drift without brittle text matching.
+  BREW_AUDIT="$DOTFILES/scripts/maintenance/brew-audit.sh"
+
+  if [[ -x "$BREW_AUDIT" ]]; then
+    if "$BREW_AUDIT" --check >/dev/null 2>&1; then
+      print_success "Brewfiles are in sync"
+    else
+      print_warning "Brewfiles are out of sync"
+      print_dim "Run: make brew-audit"
+      # Don't fail, just warn (Brewfiles may be intentionally different)
+    fi
+  else
+    print_dim "brew-audit.sh not executable - skipping"
+  fi
+else
+  print_dim "Homebrew not installed - skipping Brewfile check"
+fi
+
+printf '\n'
+
+# Check 3: Ensure generated docs are in sync
+if [[ -x "$HOOK_CHECKS" ]]; then
+  if ! "$HOOK_CHECKS" --no-color docs-sync; then
+    FAILED=1
+  fi
+else
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Check 4: Check for untracked scripts that should be committed
+if [[ -x "$HOOK_CHECKS" ]]; then
+  "$HOOK_CHECKS" --no-color untracked-shell || true
+else
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Check 5: Verify no large files are being pushed
+STAGED_FILES=()
+while IFS= read -r file; do
+  [[ -n "$file" ]] || continue
+  STAGED_FILES+=("$file")
+done < <(git diff --cached --name-only --diff-filter=ACM)
+if [[ -x "$HOOK_CHECKS" ]]; then
+  if ! "$HOOK_CHECKS" --no-color large-files "${STAGED_FILES[@]}"; then
+    FAILED=1
+  fi
+else
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Check 6: Ensure commit messages are meaningful (check last commit)
+if [[ -x "$HOOK_CHECKS" ]]; then
+  "$HOOK_CHECKS" --no-color commit-message || true
+else
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Check 7: Verify we're not pushing to protected branches with issues
+if [[ -x "$HOOK_CHECKS" ]]; then
+  branch_failed=false
+  if [[ $FAILED -eq 1 ]]; then
+    branch_failed=true
+  fi
+  if ! "$HOOK_CHECKS" --no-color branch-status "$branch_failed"; then
+    FAILED=1
+  fi
+else
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  FAILED=1
+fi
+
+printf '\n'
+
+# Summary
+if [[ $FAILED -eq 1 ]]; then
+  print_error "Pre-push checks failed"
+  print_info "Fix the errors above or use --no-verify to skip"
+  printf '\n'
+  exit 1
+else
+  print_success "All pre-push checks passed - ready to push!"
+  printf '\n'
+  exit 0
+fi
