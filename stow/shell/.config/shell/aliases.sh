@@ -5,9 +5,11 @@ alias ...="cd ../.."
 
 # Modern CLI replacements
 alias cat="bat"
-alias ls="eza"
+alias ls="eza --icons"
+alias l="eza -la --icons"
+alias la="eza -la --icons"
 alias ll="eza -la --icons --git"
-alias lt="eza --tree --level=2"
+alias lt="eza --tree --level=2 --icons"
 
 # Search
 alias lookup="history | grep "
