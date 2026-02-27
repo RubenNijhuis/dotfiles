@@ -11,11 +11,15 @@ osascript -e 'tell application "System Preferences" to quit' 2>/dev/null || true
 
 # === Finder ===
 defaults write com.apple.finder AppleShowAllExtensions -bool true
+defaults write com.apple.finder AppleShowAllFiles -bool true
 defaults write com.apple.finder ShowPathbar -bool true
 defaults write com.apple.finder ShowStatusBar -bool true
 defaults write com.apple.finder _FXShowPosixPathInTitle -bool true
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"  # Search current folder
 defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"  # Default to list view
+defaults write com.apple.finder NewWindowTarget -string "PfHm"
+defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/"
 
 # === Dock ===
 defaults write com.apple.dock autohide -bool true
@@ -23,6 +27,37 @@ defaults write com.apple.dock autohide-delay -float 0
 defaults write com.apple.dock show-recents -bool false
 defaults write com.apple.dock tilesize -int 48
 defaults write com.apple.dock minimize-to-application -bool true
+defaults write com.apple.dock orientation -string "left"
+defaults write com.apple.dock mineffect -string "scale"
+defaults write com.apple.dock mru-spaces -bool false
+
+if command -v dockutil >/dev/null 2>&1; then
+    dockutil --no-restart --remove all
+    dock_apps=(
+        "/Applications/Zen.app"
+        "/Applications/Rider.app"
+        "/Applications/Visual Studio Code.app"
+        "/Applications/OrbStack.app"
+        "/Applications/Ghostty.app"
+        "/Applications/DBeaver.app"
+        "/Applications/Linear.app"
+        "/Applications/Obsidian.app"
+        "/Applications/Slack.app"
+        "/Applications/WhatsApp.app"
+        "/Applications/Spotify.app"
+        "/Applications/Figma.app"
+        "/Applications/LM Studio.app"
+        "/Applications/Claude.app"
+        "/Applications/Codex.app"
+        "/System/Applications/System Settings.app"
+    )
+
+    for app_path in "${dock_apps[@]}"; do
+        if [[ -e "$app_path" ]]; then
+            dockutil --no-restart --add "$app_path"
+        fi
+    done
+fi
 
 # === Keyboard ===
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false  # Enable key repeat
@@ -35,11 +70,22 @@ defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
+# === Global UI ===
+defaults write NSGlobalDomain AppleShowScrollBars -string "Automatic"
+defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
+defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
+
 # === Screenshots ===
 defaults write com.apple.screencapture location -string "$HOME/Desktop/Screenshots"
 defaults write com.apple.screencapture type -string "png"
 defaults write com.apple.screencapture disable-shadow -bool true
 mkdir -p "$HOME/Desktop/Screenshots"
+
+# === Security & Privacy ===
+defaults write com.apple.screensaver askForPassword -int 1
+defaults write com.apple.screensaver askForPasswordDelay -int 0
+defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
 # === Touch ID for sudo ===
 if [[ -f /etc/pam.d/sudo_local.template ]]; then
