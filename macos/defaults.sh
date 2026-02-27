@@ -57,6 +57,10 @@ if command -v dockutil >/dev/null 2>&1; then
             dockutil --no-restart --add "$app_path"
         fi
     done
+
+    if [[ -d "$HOME/Downloads" ]]; then
+        dockutil --no-restart --add "$HOME/Downloads" --view grid --display stack --sort dateadded --section others
+    fi
 fi
 
 # === Keyboard ===
@@ -65,14 +69,20 @@ defaults write NSGlobalDomain KeyRepeat -int 2
 defaults write NSGlobalDomain InitialKeyRepeat -int 15
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 defaults write NSGlobalDomain NSAutomaticCapitalizationEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
+defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 
 # === Trackpad ===
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightClick -bool true
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+defaults write NSGlobalDomain ContextMenuGesture -int 1
 
 # === Global UI ===
 defaults write NSGlobalDomain AppleShowScrollBars -string "Automatic"
 defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
 
@@ -86,6 +96,10 @@ mkdir -p "$HOME/Desktop/Screenshots"
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
+
+# === Filesystem visibility ===
+chflags nohidden "$HOME/Library" 2>/dev/null || true
 
 # === Touch ID for sudo ===
 if [[ -f /etc/pam.d/sudo_local.template ]]; then
