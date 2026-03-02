@@ -116,3 +116,5 @@ vscode "tamasfe.even-better-toml"       # TOML support
 vscode "usernamehw.errorlens"           # Inline error highlighting
 vscode "esbenp.prettier-vscode"
 vscode "foxundermoon.shell-format"
+brew "qrencode"
+brew "signal-cli"
