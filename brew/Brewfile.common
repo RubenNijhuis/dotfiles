@@ -76,8 +76,9 @@ brew "prettier"
 # -----------------------------------------------------------------------------
 # Fonts
 # -----------------------------------------------------------------------------
-cask "font-fira-code"       # Monospace font with ligatures
-cask "font-hack-nerd-font"  # Patched font with icons
+cask "font-fira-code"            # Monospace font with ligatures
+cask "font-fira-code-nerd-font"  # Nerd Font variant (icons for Neovim)
+cask "font-hack-nerd-font"       # Patched font with icons
 
 # -----------------------------------------------------------------------------
 # Core Applications

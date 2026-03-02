@@ -1,0 +1,20 @@
+# Dock apps — one path per line.
+# Copy to local/dock-apps.txt and customize.
+# Lines starting with # and blank lines are ignored.
+
+/Applications/Zen.app
+/Applications/Rider.app
+/Applications/Visual Studio Code.app
+/Applications/OrbStack.app
+/Applications/Ghostty.app
+/Applications/DBeaver.app
+/Applications/Linear.app
+/Applications/Obsidian.app
+/Applications/Slack.app
+/Applications/WhatsApp.app
+/Applications/Spotify.app
+/Applications/Figma.app
+/Applications/LM Studio.app
+/Applications/Claude.app
+/Applications/Codex.app
+/System/Applications/System Settings.app

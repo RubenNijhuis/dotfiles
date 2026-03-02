@@ -26,7 +26,9 @@ stow/gpg/.gnupg/openpgp-revocs.d/
 stow/gpg/.gnupg/S.*
 stow/gpg/.gnupg/.gpg-v21-migrated
 
-# Vim - keep config, ignore runtime files
+# Vim/Neovim - keep config, ignore runtime files
 stow/vim/.vim/plugged/
 stow/vim/.vim/.netrwhist
 stow/vim/.config/nvim/plugged/
+stow/vim/.config/nvim/plugin/
+stow/vim/.config/nvim/.luarc.json

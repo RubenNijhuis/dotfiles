@@ -11,7 +11,7 @@ path=(
     "/usr/local/bin"
     "/usr/local/sbin"
     "$_lmstudio_home/bin"
-    "$_brew_prefix/opt/dotnet@8/bin"
+    "$_brew_prefix/opt/dotnet@${DOTFILES_DOTNET_VERSION:-8}/bin"
     "$HOME/.dotnet/tools"
     "$HOME/.local/bin"
     $path

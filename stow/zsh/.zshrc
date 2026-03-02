@@ -29,6 +29,7 @@ zstyle ':completion:*' verbose yes
 zstyle ':completion:*:descriptions' format '%F{6}%d%f'
 zstyle ':completion:*:messages' format '%F{3}%d%f'
 zstyle ':completion:*:warnings' format '%F{1}No matches for: %d%f'
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 if [[ -n "${LS_COLORS:-}" ]]; then
   zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 else

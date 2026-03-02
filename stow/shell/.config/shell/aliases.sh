@@ -35,5 +35,10 @@ alias clean-node='find . -name "node_modules" -type d -prune -exec rm -rf {} +'
 alias clean-python='find . -name "__pycache__" -type d -prune -exec rm -rf {} +'
 alias clean-ds='find . -name ".DS_Store" -delete'
 
+# Neovim
+alias vim="nvim"
+alias vi="nvim"
+alias v="nvim"
+
 # Docker cleanup (OrbStack)
 alias dclean='docker system prune -af --volumes'

@@ -23,26 +23,32 @@ fe() {
     file=$(dotfiles_list_files | fzf --preview 'bat --color=always {}') && ${EDITOR} "${file}"
 }
 
-# Quick project launcher (ghq + fzf)
+# Quick project launcher (fd + fzf)
 proj() {
-    local project
-    if ! command -v ghq >/dev/null 2>&1; then
-        echo "ghq is not installed."
+    local project dev_root
+    dev_root="$(dotfiles_developer_root)"
+
+    if ! command -v fd >/dev/null 2>&1; then
+        echo "fd is not installed."
         return 1
     fi
 
-    # shellcheck disable=SC2016
-    project=$(ghq list -p 2>/dev/null | fzf --prompt='project> ' --height=80% --layout=reverse \
-        --preview 'repo={}; echo "repo: $repo"; git -C "$repo" log -1 --oneline 2>/dev/null || echo "last commit: none"; changes=$(git -C "$repo" status --short 2>/dev/null | sed -n "1,20p"); if [[ -n "$changes" ]]; then echo "$changes"; else echo "working tree: clean"; fi')
+    # Find git repos, sort by most recently modified (commit timestamp)
+    project=$(fd --type d --hidden --no-ignore --glob '.git' "$dev_root" --max-depth 4 \
+        | sed 's|/\.git/*$||' \
+        | while read -r dir; do
+            ts=$(git -C "$dir" log -1 --format='%ct' 2>/dev/null || echo 0)
+            printf '%s\t%s\n' "$ts" "$dir"
+        done \
+        | sort -t$'\t' -k1 -nr \
+        | cut -f2 \
+        | fzf --prompt='project> ' --height=80% --layout=reverse \
+            --with-nth=-1 --delimiter='/' \
+            --no-sort)
     [[ -n "$project" && -d "$project" ]] || return
 
     cd "${project}" || return
-
-    if [[ -n "${EDITOR:-}" ]]; then
-        sh -c "${EDITOR} \"$project\"" >/dev/null 2>&1 &
-    elif command -v code >/dev/null 2>&1; then
-        code "$project" >/dev/null 2>&1 &
-    fi
+    ${EDITOR:-nvim} .
 }
 
 project() { proj "$@"; }

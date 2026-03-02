@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=../scripts/lib/env.sh
+source "$DOTFILES_ROOT/scripts/lib/env.sh"
+dotfiles_load_env "$DOTFILES_ROOT"
+
 echo "Applying macOS defaults..."
 
 # Close System Preferences to prevent overrides
@@ -33,24 +38,35 @@ defaults write com.apple.dock mru-spaces -bool false
 
 if command -v dockutil >/dev/null 2>&1; then
     dockutil --no-restart --remove all
-    dock_apps=(
-        "/Applications/Zen.app"
-        "/Applications/Rider.app"
-        "/Applications/Visual Studio Code.app"
-        "/Applications/OrbStack.app"
-        "/Applications/Ghostty.app"
-        "/Applications/DBeaver.app"
-        "/Applications/Linear.app"
-        "/Applications/Obsidian.app"
-        "/Applications/Slack.app"
-        "/Applications/WhatsApp.app"
-        "/Applications/Spotify.app"
-        "/Applications/Figma.app"
-        "/Applications/LM Studio.app"
-        "/Applications/Claude.app"
-        "/Applications/Codex.app"
-        "/System/Applications/System Settings.app"
-    )
+
+    dock_apps=()
+    if [[ -f "$DOTFILES_ROOT/local/dock-apps.txt" ]]; then
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            line="${line%%#*}"   # strip comments
+            line="${line#"${line%%[![:space:]]*}"}"  # trim leading whitespace
+            line="${line%"${line##*[![:space:]]}"}"  # trim trailing whitespace
+            [[ -n "$line" ]] && dock_apps+=("$line")
+        done < "$DOTFILES_ROOT/local/dock-apps.txt"
+    else
+        dock_apps=(
+            "/Applications/Zen.app"
+            "/Applications/Rider.app"
+            "/Applications/Visual Studio Code.app"
+            "/Applications/OrbStack.app"
+            "/Applications/Ghostty.app"
+            "/Applications/DBeaver.app"
+            "/Applications/Linear.app"
+            "/Applications/Obsidian.app"
+            "/Applications/Slack.app"
+            "/Applications/WhatsApp.app"
+            "/Applications/Spotify.app"
+            "/Applications/Figma.app"
+            "/Applications/LM Studio.app"
+            "/Applications/Claude.app"
+            "/Applications/Codex.app"
+            "/System/Applications/System Settings.app"
+        )
+    fi
 
     for app_path in "${dock_apps[@]}"; do
         if [[ -e "$app_path" ]]; then
@@ -87,10 +103,10 @@ defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
 
 # === Screenshots ===
-defaults write com.apple.screencapture location -string "$HOME/Desktop/Screenshots"
+defaults write com.apple.screencapture location -string "$DOTFILES_SCREENSHOTS_PATH"
 defaults write com.apple.screencapture type -string "png"
 defaults write com.apple.screencapture disable-shadow -bool true
-mkdir -p "$HOME/Desktop/Screenshots"
+mkdir -p "$DOTFILES_SCREENSHOTS_PATH"
 
 # === Security & Privacy ===
 defaults write com.apple.screensaver askForPassword -int 1
