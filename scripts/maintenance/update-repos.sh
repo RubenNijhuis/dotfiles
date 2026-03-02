@@ -13,6 +13,7 @@ FAILED=0
 SKIPPED=0
 UP_TO_DATE=0
 DRY_RUN=false
+JOBS=4
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 
 LOG_DIR="$HOME/.local/log"
@@ -21,9 +22,15 @@ mkdir -p "$LOG_DIR"
 
 usage() {
   cat <<EOF2
-Usage: $0 [--help] [--no-color] [--dry-run] [path]
+Usage: $0 [--help] [--no-color] [--dry-run] [--jobs N] [path]
 
 Update all git repositories under the provided path (default: \$DOTFILES_DEVELOPER_ROOT).
+
+Options:
+  --jobs N, -j N  Number of parallel jobs (default: 4, 1 = sequential)
+  --dry-run       Show what would be updated without making changes
+  --no-color      Disable colored output
+  --help          Show this help message
 EOF2
 }
 
@@ -39,6 +46,14 @@ parse_args() {
       --dry-run)
         DRY_RUN=true
         shift
+        ;;
+      --jobs|-j)
+        if [[ -z "${2:-}" || "${2#-}" != "$2" ]]; then
+          print_error "--jobs requires a numeric argument"
+          exit 1
+        fi
+        JOBS="$2"
+        shift 2
         ;;
       *)
         if [[ "${1#-}" != "$1" ]]; then
@@ -59,19 +74,22 @@ log() {
 
 update_repo() {
   local repo_path="$1"
-  local repo_name current_branch upstream behind
+  local repo_name
   repo_name="$(basename "$(dirname "$repo_path")")"
 
-  cd "$(dirname "$repo_path")" || return 1
+  # Exit codes: 0=updated, 1=failed, 2=skipped, 3=up-to-date
+  # parallel runs each invocation in its own process, so exit codes
+  # propagate to the joblog. Sequential fallback wraps calls in a subshell.
+  cd "$(dirname "$repo_path")" || exit 1
 
   if ! git diff-index --quiet HEAD -- 2>/dev/null; then
     printf "  "
     print_warning "$repo_name: Skipped (uncommitted changes)"
     log "⚠ $repo_name: Skipped (uncommitted changes)"
-    SKIPPED=$((SKIPPED + 1))
-    return
+    exit 2
   fi
 
+  local current_branch upstream behind
   current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
 
   if git fetch --all --prune &>/dev/null; then
@@ -85,36 +103,36 @@ update_repo() {
           printf "  "
           print_info "$repo_name: Would update ($behind commits on $current_branch)"
           log "ℹ $repo_name: Would pull $behind commits on $current_branch (dry-run)"
-          UPDATED=$((UPDATED + 1))
+          exit 0
         else
           if git pull --rebase &>/dev/null; then
             printf "  "
             print_success "$repo_name: Updated ($behind commits on $current_branch)"
             log "✓ $repo_name: Updated ($behind commits pulled on $current_branch)"
-            UPDATED=$((UPDATED + 1))
+            exit 0
           else
             printf "  "
             print_error "$repo_name: Failed to pull on $current_branch"
             log "✗ $repo_name: Failed to pull on $current_branch"
-            FAILED=$((FAILED + 1))
             git rebase --abort &>/dev/null || true
+            exit 1
           fi
         fi
       else
         printf "  "
         print_dim "$repo_name: Up to date on $current_branch"
-        UP_TO_DATE=$((UP_TO_DATE + 1))
+        exit 3
       fi
     else
       printf "  "
       print_dim "$repo_name: Fetched (no tracking branch for $current_branch)"
-      UP_TO_DATE=$((UP_TO_DATE + 1))
+      exit 3
     fi
   else
     printf "  "
     print_error "$repo_name: Failed to fetch"
     log "✗ $repo_name: Failed to fetch"
-    FAILED=$((FAILED + 1))
+    exit 1
   fi
 }
 
@@ -152,9 +170,40 @@ main() {
   log "Found $total repositories"
   printf "\n"
 
-  while IFS= read -r repo; do
-    update_repo "$repo"
-  done <<< "$repos"
+  if [[ "$JOBS" -gt 1 ]] && command -v parallel &>/dev/null; then
+    # Parallel execution
+    local result_log
+    result_log=$(mktemp)
+
+    export DRY_RUN LOG_FILE
+    export -f update_repo log
+
+    echo "$repos" | parallel --jobs "$JOBS" --keep-order --joblog "$result_log" \
+      update_repo || true
+
+    # Tally from joblog (column 7 = Exitval, skip header)
+    UPDATED=$(awk 'NR>1 && $7==0' "$result_log" | wc -l | xargs)
+    FAILED=$(awk 'NR>1 && $7==1' "$result_log" | wc -l | xargs)
+    SKIPPED=$(awk 'NR>1 && $7==2' "$result_log" | wc -l | xargs)
+    UP_TO_DATE=$(awk 'NR>1 && $7==3' "$result_log" | wc -l | xargs)
+    rm -f "$result_log"
+  else
+    # Sequential fallback
+    if [[ "$JOBS" -gt 1 ]]; then
+      print_warning "GNU parallel not found, falling back to sequential execution"
+    fi
+
+    while IFS= read -r repo; do
+      local result=0
+      (update_repo "$repo") || result=$?
+      case $result in
+        0) UPDATED=$((UPDATED + 1)) ;;
+        1) FAILED=$((FAILED + 1)) ;;
+        2) SKIPPED=$((SKIPPED + 1)) ;;
+        3) UP_TO_DATE=$((UP_TO_DATE + 1)) ;;
+      esac
+    done <<< "$repos"
+  fi
 
   printf "\n"
   print_header "Update Summary"

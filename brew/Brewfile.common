@@ -33,6 +33,7 @@ brew "grc"           # Colorize command output
 brew "ripgrep"       # Fast grep alternative (rg)
 brew "tree"          # Directory tree visualization
 brew "stow"          # Symlink farm manager (dotfiles)
+brew "parallel"      # GNU parallel for concurrent job execution
 brew "gh"            # GitHub CLI
 brew "git"           # Git version control (prefer Homebrew over Apple Git)
 brew "git-delta"     # Better git diffs
@@ -54,6 +55,7 @@ brew "pnpm"          # Fast npm alternative
 brew "ruff"          # Fast Python linter
 brew "rust"          # Rust programming language
 brew "shellcheck"    # Shell script linter
+brew "shellharden"   # Shell script hardening linter
 
 # Note: tsx not currently installed but available if needed
 # brew "tsx"         # TypeScript execution
