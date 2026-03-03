@@ -1,8 +1,29 @@
 # Atuin — shell history with search UI (local-only mode)
-# Only non-default values are tracked here.
+
+# Search style: prefix, fulltext, fuzzy, skim
+style = "compact"
+inline_height = 20
 
 # Execute immediately on Enter; Tab to edit first
 enter_accept = true
+
+# Don't store failed commands (exit code != 0)
+filter_mode_shell_up_key_binding = "session"
+
+# Fuzzy search by default
+search_mode = "fuzzy"
+
+# Show timestamps in search results
+show_preview = true
+
+# Filter out common noise
+history_filter = [
+  "^ls$",
+  "^cd ",
+  "^clear$",
+  "^exit$",
+  "^pwd$",
+]
 
 [sync]
 # Enable sync v2 protocol

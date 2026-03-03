@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=bash  # closest to zsh; shellcheck has no zsh mode
 # Prefer fd when available, otherwise fall back to find.
 dotfiles_list_files() {
     if command -v fd >/dev/null 2>&1; then

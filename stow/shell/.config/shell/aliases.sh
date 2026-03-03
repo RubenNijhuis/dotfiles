@@ -1,4 +1,4 @@
-# shellcheck shell=bash
+# shellcheck shell=bash  # closest to zsh; shellcheck has no zsh mode
 # Navigation
 alias ..="cd .."
 alias ...="cd ../.."

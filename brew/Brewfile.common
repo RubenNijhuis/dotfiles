@@ -24,6 +24,7 @@ brew "ghq"                       # Git repository manager for local checkouts
 brew "sesh"                      # Terminal session manager (zoxide/fzf driven)
 brew "fd"                        # Fast find alternative
 brew "yazi"                      # Terminal file manager
+brew "tmux"                      # Terminal multiplexer
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools

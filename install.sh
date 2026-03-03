@@ -671,6 +671,17 @@ step_final_setup() {
     bash "$DOTFILES/templates/gpg/generate-keys.sh"
   fi
 
+  if command -v code &>/dev/null; then
+    echo -e "${BLUE}Installing VS Code extensions...${NC}"
+    local ext_file="$DOTFILES/stow/vscode/Library/Application Support/Code/User/extensions.txt"
+    if [[ -f "$ext_file" ]]; then
+      grep -v '^#' "$ext_file" | grep -v '^$' | cut -d' ' -f1 | xargs -L 1 code --install-extension 2>/dev/null || true
+      success "VS Code extensions installed"
+    else
+      warning "VS Code extensions file not found"
+    fi
+  fi
+
   echo -e "${BLUE}Installing git hooks...${NC}"
   if bash "$DOTFILES/git-hooks/install-hooks.sh"; then
     success "Git hooks installed"

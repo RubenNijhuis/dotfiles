@@ -1,4 +1,4 @@
-# shellcheck shell=bash disable=SC2206
+# shellcheck shell=bash disable=SC2206  # zsh-only: uses typeset -U and path=()
 # PATH construction - order matters (first match wins)
 typeset -U PATH  # Remove duplicates
 _brew_prefix="${HOMEBREW_PREFIX:-${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}}"

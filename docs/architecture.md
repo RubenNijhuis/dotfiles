@@ -7,6 +7,10 @@ This repository is a strict, macOS-only operations hub for machine bootstrap, do
 - In scope: macOS bootstrap, stow-managed config, launchd automation, developer environment reliability.
 - Out of scope: Linux portability and cross-platform abstractions.
 
+## Session Management
+
+tmux is the session manager. Ghostty handles terminal windowing; tmux handles session persistence, pane splits, and remote workflows. The tmux config uses Tokyo Night theming consistent with the rest of the stack.
+
 ## Lifecycle
 
 1. Bootstrap with `install.sh`.
