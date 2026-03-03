@@ -1,6 +1,10 @@
 # Font
 font-family = FiraCode Nerd Font
+font-family-bold = FiraCode Nerd Font
+font-family-italic = FiraCode Nerd Font
+font-family-bold-italic = FiraCode Nerd Font
 font-size = 14
+font-codepoint-map = U+E000-U+F8FF,U+F0001-U+F1AF0=Symbols Nerd Font Mono
 font-feature = calt
 font-feature = liga
 

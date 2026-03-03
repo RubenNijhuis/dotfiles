@@ -77,11 +77,6 @@ fi
 # OrbStack
 source ~/.orbstack/shell/init.zsh 2>/dev/null || :
 
-# LM Studio CLI
-if [[ -d "${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin" ]]; then
-  export PATH="$PATH:${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}/bin"
-fi
-
 # ----- Shell config modules -----
 source ~/.config/shell/path.sh
 source ~/.config/shell/exports.sh
@@ -104,5 +99,3 @@ bindkey -M viins '^I' expand-or-complete
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
-
-export PATH=$PATH:/Users/rubennijhuis/.spicetify

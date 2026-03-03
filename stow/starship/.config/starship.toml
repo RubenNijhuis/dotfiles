@@ -16,7 +16,7 @@ read_only = " 󰌾"
 read_only_style = "red"
 
 [git_branch]
-symbol = ""
+symbol = " "
 style = "lavender"
 
 [git_status]
@@ -31,7 +31,7 @@ untracked = "?${count}"
 stashed = "*${count}"
 
 [python]
-symbol = " "
+symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "amber"
 
@@ -41,17 +41,17 @@ format = "via [$symbol($version )]($style)"
 style = "sky"
 
 [bun]
-symbol = " "
+symbol = "🥟 "
 format = "via [$symbol($version )]($style)"
 style = "peach"
 
 [nodejs]
-symbol = " "
+symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "emerald"
 
 [docker_context]
-symbol = " "
+symbol = " "
 format = "via [$symbol$context]($style) "
 style = "teal"
 only_with_files = true

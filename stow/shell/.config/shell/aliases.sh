@@ -21,6 +21,7 @@ alias gd="git diff"
 alias gc="git commit"
 alias gp="git push"
 alias gl="git log --oneline --graph"
+alias lg="lazygit"
 
 # Utility
 alias resource="source ~/.zshrc"
@@ -39,6 +40,9 @@ alias clean-ds='find . -name ".DS_Store" -delete'
 alias vim="nvim"
 alias vi="nvim"
 alias v="nvim"
+
+# System monitor
+alias top="btop"
 
 # Docker cleanup (OrbStack)
 alias dclean='docker system prune -af --volumes'

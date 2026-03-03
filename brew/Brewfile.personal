@@ -8,11 +8,14 @@
 # Taps
 # -----------------------------------------------------------------------------
 tap "krishkrosh/apps"
+tap "spicetify/homebrew-tap"
 
 # -----------------------------------------------------------------------------
 # CLI Tools
 # -----------------------------------------------------------------------------
-brew "mailsy"  # Disposable email CLI
+brew "mailsy"     # Disposable email CLI
+brew "qrencode"   # QR code generator
+brew "signal-cli" # Signal messenger CLI
 
 # -----------------------------------------------------------------------------
 # Browsers
@@ -31,11 +34,12 @@ cask "whatsapp"  # Messaging
 # -----------------------------------------------------------------------------
 # Media & Entertainment
 # -----------------------------------------------------------------------------
-cask "iina"        # Modern media player
-cask "rekordbox"   # DJ software
-cask "sonos"       # Sonos speaker control
-cask "spotify"     # Music streaming
-cask "steam"       # Gaming platform
+brew "spicetify-cli"  # Spotify theming tool
+cask "iina"           # Modern media player
+cask "rekordbox"      # DJ software
+cask "sonos"          # Sonos speaker control
+cask "spotify"        # Music streaming
+cask "steam"          # Gaming platform
 
 # -----------------------------------------------------------------------------
 # Creative Tools
@@ -70,4 +74,4 @@ cask "orbstack"            # Fast Docker Desktop alternative
 cask "rider"               # .NET IDE
 cask "slack"               # Team communication
 cask "yaak"                # API client
-brew "openclaw-cli"
+brew "openclaw-cli"        # OpenClaw CLI

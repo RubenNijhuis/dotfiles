@@ -13,6 +13,7 @@ path=(
     "$_lmstudio_home/bin"
     "$_brew_prefix/opt/dotnet@${DOTFILES_DOTNET_VERSION:-8}/bin"
     "$HOME/.dotnet/tools"
+    "$HOME/.spicetify"
     "$HOME/.local/bin"
     $path
 )

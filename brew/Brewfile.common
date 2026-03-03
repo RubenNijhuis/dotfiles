@@ -23,11 +23,13 @@ brew "atuin"                     # Shell history with search UI (local-only mode
 brew "ghq"                       # Git repository manager for local checkouts
 brew "sesh"                      # Terminal session manager (zoxide/fzf driven)
 brew "fd"                        # Fast find alternative
+brew "yazi"                      # Terminal file manager
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools
 # -----------------------------------------------------------------------------
 brew "bat"           # Better cat with syntax highlighting
+brew "btop"          # Resource monitor with TUI
 brew "eza"           # Modern replacement for ls
 brew "grc"           # Colorize command output
 brew "ripgrep"       # Fast grep alternative (rg)
@@ -37,6 +39,7 @@ brew "parallel"      # GNU parallel for concurrent job execution
 brew "gh"            # GitHub CLI
 brew "git"           # Git version control (prefer Homebrew over Apple Git)
 brew "git-delta"     # Better git diffs
+brew "lazygit"       # Terminal UI for git
 brew "neovim"        # Modern vim
 brew "vim"           # Classic vim (fallback)
 
@@ -54,6 +57,7 @@ brew "node"          # Node.js (installed via fnm or direct)
 brew "pnpm"          # Fast npm alternative
 brew "ruff"          # Fast Python linter
 brew "rust"          # Rust programming language
+brew "prettier"      # Code formatter (multi-language)
 brew "shellcheck"    # Shell script linter
 brew "shellharden"   # Shell script hardening linter
 
@@ -73,14 +77,14 @@ brew "dockutil"             # Manage Dock items declaratively
 brew "mac-cleanup-go"       # System cleanup utility
 brew "obsidian-cli"         # Obsidian CLI tools
 brew "ollama", restart_service: :changed  # Local LLM runtime
-brew "prettier"
 
 # -----------------------------------------------------------------------------
 # Fonts
 # -----------------------------------------------------------------------------
 cask "font-fira-code"            # Monospace font with ligatures
 cask "font-fira-code-nerd-font"  # Nerd Font variant (icons for Neovim)
-cask "font-hack-nerd-font"       # Patched font with icons
+cask "font-hack-nerd-font"            # Patched font with icons
+cask "font-symbols-only-nerd-font"  # Standalone Nerd Font icons (fallback)
 
 # -----------------------------------------------------------------------------
 # Core Applications
@@ -116,7 +120,5 @@ vscode "ms-vscode-remote.remote-containers" # Dev containers
 vscode "svelte.svelte-vscode"           # Svelte support
 vscode "tamasfe.even-better-toml"       # TOML support
 vscode "usernamehw.errorlens"           # Inline error highlighting
-vscode "esbenp.prettier-vscode"
-vscode "foxundermoon.shell-format"
-brew "qrencode"
-brew "signal-cli"
+vscode "esbenp.prettier-vscode"         # Prettier formatter
+vscode "foxundermoon.shell-format"      # Shell script formatter

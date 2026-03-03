@@ -1,0 +1,9 @@
+# Atuin — shell history with search UI (local-only mode)
+# Only non-default values are tracked here.
+
+# Execute immediately on Enter; Tab to edit first
+enter_accept = true
+
+[sync]
+# Enable sync v2 protocol
+records = true

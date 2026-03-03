@@ -1,0 +1,75 @@
+# Theme: tokyo-night-custom
+# Tokyo Night (Night) with distinct accent colors per section
+
+# Main bg — use terminal background
+theme[main_bg]="#1a1b26"
+
+# Main text color
+theme[main_fg]="#a9b1d6"
+
+# Title color for boxes
+theme[title]="#c0caf5"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#2ac3de"
+
+# Background color of selected item in processes box
+theme[selected_bg]="#283457"
+
+# Foreground color of selected item in processes box
+theme[selected_fg]="#c0caf5"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#565f89"
+
+# Misc colors for processes box
+theme[proc_misc]="#7dcfff"
+
+# Box outline colors — subtle borders
+theme[cpu_box]="#414868"
+theme[mem_box]="#414868"
+theme[net_box]="#414868"
+theme[proc_box]="#414868"
+
+# Box divider line
+theme[div_line]="#414868"
+
+# Temperature graph — green to red
+theme[temp_start]="#9ece6a"
+theme[temp_mid]="#e0af68"
+theme[temp_end]="#f7768e"
+
+# CPU graph — cyan to blue
+theme[cpu_start]="#7dcfff"
+theme[cpu_mid]="#7aa2f7"
+theme[cpu_end]="#bb9af7"
+
+# Mem/Disk free meter — green
+theme[free_start]="#73daca"
+theme[free_mid]="#9ece6a"
+theme[free_end]="#9ece6a"
+
+# Mem/Disk cached meter — purple
+theme[cached_start]="#bb9af7"
+theme[cached_mid]="#9d7cd8"
+theme[cached_end]="#9d7cd8"
+
+# Mem/Disk available meter — cyan
+theme[available_start]="#2ac3de"
+theme[available_mid]="#7dcfff"
+theme[available_end]="#7dcfff"
+
+# Mem/Disk used meter — blue to orange
+theme[used_start]="#7aa2f7"
+theme[used_mid]="#e0af68"
+theme[used_end]="#ff9e64"
+
+# Download graph — green to cyan
+theme[download_start]="#9ece6a"
+theme[download_mid]="#73daca"
+theme[download_end]="#2ac3de"
+
+# Upload graph — purple to magenta
+theme[upload_start]="#bb9af7"
+theme[upload_mid]="#ff007c"
+theme[upload_end]="#f7768e"
