@@ -1,11 +1,39 @@
+# Font
 font-family = FiraCode Nerd Font
 font-size = 14
-window-padding-x = 8
-window-padding-y = 8
+font-feature = calt
+font-feature = liga
+
+# Theme
+theme = TokyoNight Night
+
+# Window
+window-padding-x = 14
+window-padding-y = 10
+window-padding-balance = true
 window-width = 120
 window-height = 34
 maximize = false
 fullscreen = false
 window-save-state = never
+window-theme = dark
+macos-titlebar-style = tabs
+
+# Background
+background-opacity = 0.92
+background-blur = 20
+
+# Cursor
 cursor-style = bar
+cursor-color = #7aa2f7
+cursor-opacity = 0.85
+cursor-style-blink = true
+
+# Shell
 shell-integration = zsh
+
+# Splits
+unfocused-split-opacity = 0.8
+
+# Accessibility
+minimum-contrast = 1.1

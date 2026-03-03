@@ -104,3 +104,5 @@ bindkey -M viins '^I' expand-or-complete
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
+
+export PATH=$PATH:/Users/rubennijhuis/.spicetify
