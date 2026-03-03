@@ -1,0 +1,9 @@
+# sesh — tmux session manager (zoxide/fzf driven)
+
+[default_session]
+startup_command = "nvim"
+
+[[session]]
+name = "dotfiles"
+path = "~/Developer/personal/projects/dotfiles"
+startup_command = "nvim ."

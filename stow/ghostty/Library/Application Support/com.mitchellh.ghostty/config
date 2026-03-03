@@ -39,5 +39,8 @@ shell-integration = zsh
 # Splits
 unfocused-split-opacity = 0.8
 
+# tmux compatibility
+shell-integration-features = no-cursor,sudo,title
+
 # Accessibility
 minimum-contrast = 1.1

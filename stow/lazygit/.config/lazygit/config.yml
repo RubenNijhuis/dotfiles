@@ -1,5 +1,8 @@
 gui:
   nerdFontsVersion: "3"
+  showBottomLine: false
+  showPanelJumps: false
+  border: rounded
   theme:
     activeBorderColor:
       - "#ff9e64"
@@ -25,3 +28,19 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
+
+git:
+  paging:
+    colorArg: always
+    pager: delta --paging=never
+  autoFetch: true
+  autoRefresh: true
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --"
+
+os:
+  editPreset: nvim
+
+keybinding:
+  universal:
+    quit: q
+    quit-alt1: <c-c>

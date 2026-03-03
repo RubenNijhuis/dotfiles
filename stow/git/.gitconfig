@@ -17,7 +17,15 @@
 	navigate = true
 	side-by-side = true
 	line-numbers = true
-	syntax-theme = TwoDark
+	syntax-theme = ansi
+	minus-style = "syntax #37222c"
+	minus-emph-style = "syntax #713137"
+	plus-style = "syntax #20303b"
+	plus-emph-style = "syntax #2c5a66"
+	line-numbers-minus-style = "#f7768e"
+	line-numbers-plus-style = "#9ece6a"
+	line-numbers-zero-style = "#414868"
+	hunk-header-decoration-style = "blue box"
 
 [gpg]
 	program = gpg

@@ -20,7 +20,7 @@ check_stow() {
   fi
 
   # Expected packages
-  local packages=(bat ghostty git gpg shell ssh vim vscode zsh)
+  local packages=(atuin bash bat btop ghostty git gpg lazygit sesh shell ssh tmux vim vscode yazi zsh)
   local symlinked=0
   local total=${#packages[@]}
 

@@ -121,6 +121,53 @@ check_vscode_config() {
   fi
 }
 
+check_tmux() {
+  if $QUICK_MODE; then
+    return
+  fi
+
+  printf '%sChecking tmux...%s\n\n' "${BLUE}" "${NC}"
+
+  local issues=0
+  local details=""
+
+  if ! command -v tmux &>/dev/null; then
+    record_result "tmux" 2 "tmux not installed"
+    add_suggestion "Install tmux: brew install tmux"
+    return
+  fi
+
+  local tmux_version
+  tmux_version=$(tmux -V 2>/dev/null)
+  details+="$tmux_version\n  "
+
+  # Check config exists
+  if [[ -f "$HOME/.config/tmux/tmux.conf" ]]; then
+    details+="Config: ~/.config/tmux/tmux.conf\n  "
+  else
+    details+="Config: missing\n  "
+    issues=$((issues + 1))
+    add_suggestion "Re-stow tmux config: cd $DOTFILES && make stow"
+  fi
+
+  # Check tpm installed
+  if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
+    local plugin_count
+    plugin_count=$(find "$HOME/.tmux/plugins" -maxdepth 1 -mindepth 1 -type d | wc -l | xargs)
+    details+="Plugins: $plugin_count installed (tpm)"
+  else
+    details+="Plugins: tpm not installed"
+    issues=$((issues + 1))
+    add_suggestion "Install tpm: git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
+  fi
+
+  if [[ $issues -eq 0 ]]; then
+    record_result "tmux" 0 "$details"
+  else
+    record_result "tmux" 1 "$details"
+  fi
+}
+
 check_backup_system() {
   if $QUICK_MODE; then
     return
