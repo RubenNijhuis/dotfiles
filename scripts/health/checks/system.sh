@@ -88,6 +88,7 @@ check_vscode_config() {
 
   details+="VS Code: installed\n  "
 
+  local INSTALLED_EXTENSIONS REQUIRED_EXTENSIONS missing_extensions
   INSTALLED_EXTENSIONS=$(code --list-extensions 2>/dev/null)
   REQUIRED_EXTENSIONS=(
     "editorconfig.editorconfig"
@@ -130,6 +131,7 @@ check_backup_system() {
   local issues=0
   local details=""
 
+  local BACKUP_DIR LATEST_BACKUP BACKUP_AGE_DAYS
   BACKUP_DIR="$HOME/.dotfiles-backup"
 
   if [[ ! -d "$BACKUP_DIR" ]]; then

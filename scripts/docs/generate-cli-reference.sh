@@ -44,11 +44,11 @@ parse_args() {
 
 append_help_block() {
   local title="$1"
-  local cmd="$2"
+  local script="$2"
 
   printf "## \`%s\`\n\n" "$title" >> "$TMP_FILE"
   printf '```text\n' >> "$TMP_FILE"
-  if ! eval "$cmd" >> "$TMP_FILE" 2>&1; then
+  if ! (cd "$DOTFILES" && bash "$script" --help) >> "$TMP_FILE" 2>&1; then
     printf '[help command failed]\n' >> "$TMP_FILE"
   fi
   printf '```\n\n' >> "$TMP_FILE"
@@ -67,11 +67,11 @@ main() {
     echo ''
   } > "$TMP_FILE"
 
-  append_help_block "install.sh" "cd '$DOTFILES' && bash 'install.sh' --help"
+  append_help_block "install.sh" "install.sh"
 
   while IFS= read -r script; do
     script_name="${script#"$DOTFILES"/}"
-    append_help_block "$script_name" "cd '$DOTFILES' && bash '$script_name' --help"
+    append_help_block "$script_name" "$script_name"
   done < <(
     find "$DOTFILES/scripts" -type f -name '*.sh' \
       -not -path "$DOTFILES/scripts/lib/*" \

@@ -101,7 +101,7 @@ else
 
   # Compress if large
   BACKUP_SIZE=$(du -sm "$BACKUP_DIR" 2>/dev/null | cut -f1)
-  if [[ $BACKUP_SIZE -gt 10 ]]; then
+  if [[ "${BACKUP_SIZE:-0}" -gt 10 ]]; then
     printf '\n'
     print_section "Compressing large backup..."
     tar -czf "$BACKUP_DIR.tar.gz" -C "$(dirname "$BACKUP_DIR")" "$(basename "$BACKUP_DIR")" 2>/dev/null

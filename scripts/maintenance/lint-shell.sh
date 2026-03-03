@@ -95,6 +95,18 @@ main() {
   print_section "shellcheck"
   printf '%s\0' "${files[@]}" | xargs -0 shellcheck
   print_success "Shellcheck passed"
+  printf '\n'
+
+  print_section "shellharden"
+  local harden_failed=0
+  for file in "${files[@]}"; do
+    if ! shellharden --check "$file" 2>/dev/null; then
+      harden_failed=1
+    fi
+  done
+  if [[ "$harden_failed" -eq 0 ]]; then
+    print_success "Shellharden passed"
+  fi
 }
 
 main "$@"

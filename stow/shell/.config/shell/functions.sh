@@ -20,7 +20,7 @@ mkcd() {
 # Find and edit file (combines fd + fzf + editor)
 fe() {
     local file
-    file=$(dotfiles_list_files | fzf --preview 'bat --color=always {}') && ${EDITOR} "${file}"
+    file=$(dotfiles_list_files | fzf --preview 'bat --color=always {}') && ${=EDITOR:-nvim} "${file}"
 }
 
 # Quick project launcher (fd + fzf)
@@ -34,7 +34,7 @@ proj() {
     fi
 
     # Find git repos, sort by most recently modified (commit timestamp)
-    project=$(fd --type d --hidden --no-ignore --glob '.git' "$dev_root" --max-depth 4 \
+    project=$(fd --type d --hidden --no-ignore --glob '.git' "$dev_root" --max-depth 5 \
         | sed 's|/\.git/*$||' \
         | while read -r dir; do
             ts=$(git -C "$dir" log -1 --format='%ct' 2>/dev/null || echo 0)
@@ -48,7 +48,12 @@ proj() {
     [[ -n "$project" && -d "$project" ]] || return
 
     cd "${project}" || return
-    ${EDITOR:-nvim} .
+
+    local editor="${EDITOR:-nvim}"
+    case "$editor" in
+        vim|nvim|nano|vi|emacs) $editor . ;;
+        *) $editor --new-window . ;;
+    esac
 }
 
 project() { proj "$@"; }

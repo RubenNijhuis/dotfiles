@@ -34,5 +34,7 @@
     "https://json-schema.org/": true,
     "https://biomejs.dev": true
   },
-  "terminal.integrated.initialHint": false
+  "terminal.integrated.initialHint": false,
+  "terminal.integrated.tabs.enabled": false,
+  "editor.lineNumbers": "relative"
 }

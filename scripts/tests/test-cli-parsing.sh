@@ -8,35 +8,35 @@ source "$ROOT_DIR/scripts/lib/output.sh" "$@"
 
 assert_exit() {
   local expected="$1"
-  local cmd="$2"
+  shift
   local output
 
   set +e
-  output=$(eval "$cmd" 2>&1)
+  output=$("$@" 2>&1)
   local code=$?
   set -e
 
   if [[ "$code" -ne "$expected" ]]; then
-    print_error "expected exit $expected, got $code for: $cmd"
+    print_error "expected exit $expected, got $code for: $*"
     echo "$output"
     exit 1
   fi
 }
 
-assert_exit 0 "bash '$ROOT_DIR/scripts/health/doctor.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/health/doctor.sh' --section nope"
-assert_exit 0 "bash '$ROOT_DIR/scripts/automation/launchd-manager.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/automation/launchd-manager.sh' nope"
-assert_exit 0 "bash '$ROOT_DIR/scripts/migration/migrate-developer-structure.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/migration/migrate-developer-structure.sh' --dry-run --complete"
-assert_exit 0 "bash '$ROOT_DIR/scripts/backup/restore-backup.sh' --help"
-assert_exit 0 "bash '$ROOT_DIR/scripts/maintenance/sync-brew.sh' --help"
-assert_exit 0 "bash '$ROOT_DIR/scripts/bootstrap/stow-report.sh' --help"
-assert_exit 0 "bash '$ROOT_DIR/scripts/docs/generate-cli-reference.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/docs/generate-cli-reference.sh' --wat"
-assert_exit 0 "bash '$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh' --profile nope --skip-doctor"
-assert_exit 0 "bash '$ROOT_DIR/install.sh' --help"
-assert_exit 1 "bash '$ROOT_DIR/install.sh' --from-step 99"
+assert_exit 0 bash "$ROOT_DIR/scripts/health/doctor.sh" --help
+assert_exit 1 bash "$ROOT_DIR/scripts/health/doctor.sh" --section nope
+assert_exit 0 bash "$ROOT_DIR/scripts/automation/launchd-manager.sh" --help
+assert_exit 1 bash "$ROOT_DIR/scripts/automation/launchd-manager.sh" nope
+assert_exit 0 bash "$ROOT_DIR/scripts/migration/migrate-developer-structure.sh" --help
+assert_exit 1 bash "$ROOT_DIR/scripts/migration/migrate-developer-structure.sh" --dry-run --complete
+assert_exit 0 bash "$ROOT_DIR/scripts/backup/restore-backup.sh" --help
+assert_exit 0 bash "$ROOT_DIR/scripts/maintenance/sync-brew.sh" --help
+assert_exit 0 bash "$ROOT_DIR/scripts/bootstrap/stow-report.sh" --help
+assert_exit 0 bash "$ROOT_DIR/scripts/docs/generate-cli-reference.sh" --help
+assert_exit 1 bash "$ROOT_DIR/scripts/docs/generate-cli-reference.sh" --wat
+assert_exit 0 bash "$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh" --help
+assert_exit 1 bash "$ROOT_DIR/scripts/bootstrap/bootstrap-verify.sh" --profile nope --skip-doctor
+assert_exit 0 bash "$ROOT_DIR/install.sh" --help
+assert_exit 1 bash "$ROOT_DIR/install.sh" --from-step 99
 
 print_success "cli-parsing: all checks passed"

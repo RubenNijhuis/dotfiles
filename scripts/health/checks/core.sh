@@ -183,8 +183,8 @@ check_git() {
 
   # Test in personal repo (if exists)
   if [[ -d "$dev_root/personal/projects/dotfiles/.git" ]]; then
-    cd "$dev_root/personal/projects/dotfiles" || return 1
-    local ssh_cmd=$(git config core.sshCommand || echo "")
+    local ssh_cmd
+    ssh_cmd=$(git -C "$dev_root/personal/projects/dotfiles" config core.sshCommand || echo "")
     if [[ "$ssh_cmd" == *"id_ed25519_personal"* ]]; then
       details+="Personal repos: using id_ed25519_personal\n  "
     else
@@ -196,10 +196,11 @@ check_git() {
 
   # Test in work repo (if exists)
   if [[ -d "$dev_root/work/clients" ]]; then
-    local work_repo=$(find "$dev_root/work/clients" -name ".git" -type d | head -1)
+    local work_repo
+    work_repo=$(find "$dev_root/work/clients" -name ".git" -type d | head -1)
     if [[ -n "$work_repo" ]]; then
-      cd "$(dirname "$work_repo")" || return 1
-      local ssh_cmd=$(git config core.sshCommand || echo "")
+      local ssh_cmd
+      ssh_cmd=$(git -C "$(dirname "$work_repo")" config core.sshCommand || echo "")
       if [[ "$ssh_cmd" == *"id_ed25519_work"* ]]; then
         details+="Work repos: using id_ed25519_work"
       else
