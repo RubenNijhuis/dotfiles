@@ -1,8 +1,4 @@
 # shellcheck shell=bash  # closest to zsh; shellcheck has no zsh mode
-# Navigation
-alias ..="cd .."
-alias ...="cd ../.."
-
 # Modern CLI replacements
 alias cat="bat"
 alias ls="eza --icons"
@@ -10,9 +6,6 @@ alias l="eza -la --icons"
 alias la="eza -la --icons"
 alias ll="eza -la --icons --git"
 alias lt="eza --tree --level=2 --icons"
-
-# Search
-alias lookup="history | grep "
 
 # Git shortcuts
 alias g="git"
@@ -24,7 +17,6 @@ alias gl="git log --oneline --graph"
 alias lg="lazygit"
 
 # Utility
-alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew update && brew upgrade && brew cleanup"
 

@@ -1,16 +1,4 @@
 # shellcheck shell=bash  # closest to zsh; shellcheck has no zsh mode
-# Prefer fd when available, otherwise fall back to find.
-dotfiles_list_files() {
-    if command -v fd >/dev/null 2>&1; then
-        fd --type f
-    else
-        find . -type f 2>/dev/null | sed 's#^\./##'
-    fi
-}
-
-dotfiles_developer_root() {
-    printf '%s\n' "${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
-}
 
 # Create directory and cd into it
 mkcd() {
@@ -20,13 +8,18 @@ mkcd() {
 # Find and edit file (combines fd + fzf + editor)
 fe() {
     local file
-    file=$(dotfiles_list_files | fzf --preview 'bat --color=always {}') && ${=EDITOR:-nvim} "${file}"
+    if command -v fd >/dev/null 2>&1; then
+        file=$(fd --type f | fzf --preview 'bat --color=always {}')
+    else
+        file=$(find . -type f 2>/dev/null | sed 's#^\./##' | fzf --preview 'bat --color=always {}')
+    fi
+    [[ -n "$file" ]] && ${=EDITOR:-nvim} "${file}"
 }
 
 # Quick project launcher (fd + fzf)
 proj() {
     local project dev_root
-    dev_root="$(dotfiles_developer_root)"
+    dev_root="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 
     if ! command -v fd >/dev/null 2>&1; then
         echo "fd is not installed."
@@ -56,29 +49,12 @@ proj() {
     esac
 }
 
-project() { proj "$@"; }
-
-projf() {
-    if command -v zi >/dev/null 2>&1; then
-        zi "$@"
-        return
-    fi
-    echo "zi (zoxide) is not available."
-    return 1
-}
-
-# Category-specific shortcuts
-devp() { cd "$(dotfiles_developer_root)/personal/projects" || return; ls -la; }
-deve() { cd "$(dotfiles_developer_root)/personal/experiments" || return; ls -la; }
-devl() { cd "$(dotfiles_developer_root)/personal/learning" || return; ls -la; }
-devw() { cd "$(dotfiles_developer_root)/work" || return; ls -la; }
-deva() { cd "$(dotfiles_developer_root)/archive" || return; ls -la; }
-
 # Create new project with template
 newproj() {
     local name="$1"
     local type="${2:-experiment}"
     local category="${3:-personal}"
+    local dev_root="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
 
     if [[ -z "$name" ]]; then
         echo "Usage: newproj <name> [type] [category]"
@@ -91,7 +67,7 @@ newproj() {
     name=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr '_' '-' | tr ' ' '-')
 
     # Determine location
-    local basedir="$(dotfiles_developer_root)/$category"
+    local basedir="$dev_root/$category"
     if [[ "$type" == "experiment" ]]; then
         local target="$basedir/experiments/$name"
     else
