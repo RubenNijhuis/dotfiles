@@ -17,6 +17,7 @@ alias gl="git log --oneline --graph"
 alias lg="lazygit"
 
 # Utility
+alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew update && brew upgrade && brew cleanup"
 
