@@ -63,7 +63,7 @@ All settings are in `stow/vscode/Library/Application Support/Code/User/settings.
 
 ## Installed Extensions
 
-All 17 extensions are documented in `extensions.txt` and declared in `brew/Brewfile.common`.
+All 17 extensions are documented in `extensions.txt` and declared in `brew/Brewfile.vscode`.
 
 ### AI Tools (2 extensions)
 
@@ -144,7 +144,7 @@ All 17 extensions are documented in `extensions.txt` and declared in `brew/Brewf
 ### 1. Install VS Code
 
 ```bash
-# Already in Brewfile.common
+# Already in Brewfile.vscode
 brew install --cask visual-studio-code
 ```
 
@@ -309,9 +309,9 @@ make vscode-setup
    echo "publisher.extension-name  # Description" >> \
      "stow/vscode/Library/Application Support/Code/User/extensions.txt"
    ```
-3. Add to `brew/Brewfile.common`:
+3. Add to `brew/Brewfile.vscode`:
    ```bash
-   echo 'vscode "publisher.extension-name"' >> brew/Brewfile.common
+   echo 'vscode "publisher.extension-name"' >> brew/Brewfile.vscode
    ```
 4. Commit changes
 

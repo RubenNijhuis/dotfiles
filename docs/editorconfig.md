@@ -19,7 +19,7 @@ EditorConfig helps maintain consistent coding styles between different editors a
 ## Installation
 
 ### VS Code
-Already configured via `brew/Brewfile.common`:
+Already configured via `brew/Brewfile.vscode`:
 ```ruby
 vscode "editorconfig.editorconfig"
 ```

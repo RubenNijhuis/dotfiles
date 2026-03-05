@@ -2,7 +2,7 @@
 # Work Brewfile - Work machine packages only
 # =============================================================================
 # Packages specific to work projects and clients
-# Common packages shared with personal go in Brewfile.common
+# Common packages shared with personal go in Brewfile.cli, Brewfile.apps, Brewfile.vscode
 
 # -----------------------------------------------------------------------------
 # Development Tools

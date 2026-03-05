@@ -98,15 +98,17 @@ array_contains() {
   return 1
 }
 
-# Parse Brewfile.common
-while IFS= read -r line; do
-  if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
-    COMMON_PACKAGES+=("$line")
-    if key=$(entry_key_from_line "$line"); then
-      DECLARED_KEYS+=("$key")
+# Parse common Brewfiles (cli, apps, vscode)
+for common_file in "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode"; do
+  while IFS= read -r line; do
+    if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
+      COMMON_PACKAGES+=("$line")
+      if key=$(entry_key_from_line "$line"); then
+        DECLARED_KEYS+=("$key")
+      fi
     fi
-  fi
-done < "$DOTFILES/brew/Brewfile.common"
+  done < "$common_file"
+done
 
 # Parse profile-specific Brewfile
 while IFS= read -r line; do
@@ -161,17 +163,27 @@ fi
 for pkg in "${NEW_PACKAGES[@]}"; do
   print_info "Package: $pkg"
   echo "Add to:"
-  echo "  1) Brewfile.common (shared across all profiles)"
-  echo "  2) Brewfile.$PROFILE (current profile only)"
-  echo "  3) Skip (don't add to any Brewfile)"
-  read -rp "Choice [1/2/3]: " choice
+  echo "  1) Brewfile.cli (shared CLI tools)"
+  echo "  2) Brewfile.apps (shared GUI apps)"
+  echo "  3) Brewfile.vscode (VS Code extensions)"
+  echo "  4) Brewfile.$PROFILE (current profile only)"
+  echo "  5) Skip (don't add to any Brewfile)"
+  read -rp "Choice [1/2/3/4/5]: " choice
 
   case "$choice" in
     1)
-      echo "$pkg" >> "$DOTFILES/brew/Brewfile.common"
-      print_success "Added to Brewfile.common"
+      echo "$pkg" >> "$DOTFILES/brew/Brewfile.cli"
+      print_success "Added to Brewfile.cli"
       ;;
     2)
+      echo "$pkg" >> "$DOTFILES/brew/Brewfile.apps"
+      print_success "Added to Brewfile.apps"
+      ;;
+    3)
+      echo "$pkg" >> "$DOTFILES/brew/Brewfile.vscode"
+      print_success "Added to Brewfile.vscode"
+      ;;
+    4)
       echo "$pkg" >> "$DOTFILES/brew/Brewfile.$PROFILE"
       print_success "Added to Brewfile.$PROFILE"
       ;;

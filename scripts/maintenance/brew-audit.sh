@@ -65,13 +65,13 @@ INSTALLED_CASKS=$(brew list --cask | sort)
 INSTALLED_VSCODE=$(code --list-extensions 2>/dev/null | sort || echo "")
 
 # Get declared packages
-DECLARED_FORMULAE=$(cat "$DOTFILES/brew/Brewfile.common" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
+DECLARED_FORMULAE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
   grep '^brew ' | sed 's/brew "\([^"]*\)".*/\1/' | sort)
 
-DECLARED_CASKS=$(cat "$DOTFILES/brew/Brewfile.common" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
+DECLARED_CASKS=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
   grep '^cask ' | sed 's/cask "\([^"]*\)".*/\1/' | sort)
 
-DECLARED_VSCODE=$(cat "$DOTFILES/brew/Brewfile.common" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
+DECLARED_VSCODE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
   grep '^vscode ' | sed 's/vscode "\([^"]*\)".*/\1/' | sort)
 
 # Find packages installed but not in Brewfiles
@@ -195,7 +195,7 @@ fi
 
 if [[ $TOTAL_MISSING -gt 0 ]]; then
   print_error "$TOTAL_MISSING packages declared but not installed"
-  print_dim "  Run 'brew bundle --file=brew/Brewfile.common && brew bundle --file=brew/Brewfile.$PROFILE'"
+  print_dim "  Run 'brew bundle --file=brew/Brewfile.cli && brew bundle --file=brew/Brewfile.apps && brew bundle --file=brew/Brewfile.vscode && brew bundle --file=brew/Brewfile.$PROFILE'"
 fi
 
 if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then

@@ -6,7 +6,9 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 
 ```
 brew/
-├── Brewfile.common    # Packages shared across all profiles (personal + work)
+├── Brewfile.cli       # CLI tools shared across all profiles (brew formulae)
+├── Brewfile.apps      # GUI applications shared across all profiles (casks + fonts)
+├── Brewfile.vscode    # VS Code extensions shared across all profiles
 ├── Brewfile.personal  # Personal-only packages
 ├── Brewfile.work      # Work-only packages
 └── README.md          # This file
@@ -14,14 +16,23 @@ brew/
 
 ## Organization
 
-### Brewfile.common
-**Packages used on both personal and work machines:**
+### Brewfile.cli
+**CLI tools used on both personal and work machines:**
 - Shell & Terminal tools (zsh plugins, Starship, Atuin, fzf, zoxide, ghq, sesh)
 - Core CLI tools (bat, eza, ripgrep, etc.)
 - Development tools (fnm, pnpm, shellcheck, rust)
 - Security (gnupg, pinentry-mac)
-- Core apps (Claude, VS Code, Chrome, Obsidian)
-- VS Code extensions
+- System utilities (dockutil, ollama)
+
+### Brewfile.apps
+**GUI applications used on both personal and work machines:**
+- Core apps (Claude, VS Code, Chrome, Obsidian, Ghostty)
+- Fonts (Fira Code, Nerd Fonts)
+
+### Brewfile.vscode
+**VS Code extensions shared across all profiles:**
+- Language support, formatters, linters
+- Git tools, themes, keybindings
 
 ### Brewfile.personal
 **Personal projects and hobbies:**
@@ -46,7 +57,9 @@ brew/
 make install
 
 # Or manually
-brew bundle --file=brew/Brewfile.common
+brew bundle --file=brew/Brewfile.cli
+brew bundle --file=brew/Brewfile.apps
+brew bundle --file=brew/Brewfile.vscode
 brew bundle --file=brew/Brewfile.personal  # or Brewfile.work
 ```
 
@@ -55,10 +68,10 @@ brew bundle --file=brew/Brewfile.personal  # or Brewfile.work
 **Option 1: Add to Brewfile first, then install**
 ```bash
 # Edit appropriate Brewfile
-echo 'brew "wget"' >> brew/Brewfile.common
+echo 'brew "wget"' >> brew/Brewfile.cli
 
 # Install
-brew bundle --file=brew/Brewfile.common
+brew bundle --file=brew/Brewfile.cli
 ```
 
 **Option 2: Install first, then add to Brewfile**
@@ -121,7 +134,9 @@ cask "app-name"      # Description
    ```
 
 2. **Choose the right file**
-   - Used on all machines? → `Brewfile.common`
+   - CLI tool for all machines? → `Brewfile.cli`
+   - GUI app for all machines? → `Brewfile.apps`
+   - VS Code extension? → `Brewfile.vscode`
    - Personal hobby only? → `Brewfile.personal`
    - Work client requirement? → `Brewfile.work`
 
@@ -217,17 +232,17 @@ Normal! Personal machine may have work tools installed. Options:
 ### Adding a new tool
 ```bash
 # 1. Decide which Brewfile
-# Tool used on all machines → Brewfile.common
+# Tool used on all machines → Brewfile.cli
 # Personal hobby project → Brewfile.personal
 
 # 2. Find the right category
 # It's a CLI tool → "Core CLI Tools"
 
 # 3. Add with comment
-echo 'brew "httpie"  # Better HTTP client' >> brew/Brewfile.common
+echo 'brew "httpie"  # Better HTTP client' >> brew/Brewfile.cli
 
 # 4. Install
-brew bundle --file=brew/Brewfile.common
+brew bundle --file=brew/Brewfile.cli
 ```
 
 ### Cleaning up unused packages
@@ -252,7 +267,9 @@ git push
 
 # Machine B (needs updates)
 git pull
-brew bundle --file=brew/Brewfile.common
+brew bundle --file=brew/Brewfile.cli
+brew bundle --file=brew/Brewfile.apps
+brew bundle --file=brew/Brewfile.vscode
 brew bundle --file=brew/Brewfile.personal
 ```
 

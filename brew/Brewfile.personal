@@ -2,7 +2,7 @@
 # Personal Brewfile - Personal machine packages only
 # =============================================================================
 # Packages specific to personal projects and hobbies
-# Common packages shared with work go in Brewfile.common
+# Common packages shared with work go in Brewfile.cli, Brewfile.apps, Brewfile.vscode
 
 # -----------------------------------------------------------------------------
 # Taps

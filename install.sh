@@ -593,7 +593,9 @@ step_install_homebrew() {
 }
 
 step_install_common_packages() {
-  install_brew_bundle "$DOTFILES/brew/Brewfile.common"
+  install_brew_bundle "$DOTFILES/brew/Brewfile.cli"
+  install_brew_bundle "$DOTFILES/brew/Brewfile.apps"
+  install_brew_bundle "$DOTFILES/brew/Brewfile.vscode"
   success "Common packages installed"
 }
 
