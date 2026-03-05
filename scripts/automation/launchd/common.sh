@@ -32,16 +32,19 @@ render_plist_template() {
   local escaped_dotfiles
   local escaped_home
   local escaped_homebrew_prefix
+  local escaped_obsidian_repo_path
 
   escaped_dotfiles=$(printf '%s\n' "$DOTFILES" | sed 's/[\/&]/\\&/g')
   escaped_home=$(printf '%s\n' "$HOME" | sed 's/[\/&]/\\&/g')
   escaped_homebrew_prefix=$(printf '%s\n' "${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}" | sed 's/[\/&]/\\&/g')
+  escaped_obsidian_repo_path=$(printf '%s\n' "${DOTFILES_OBSIDIAN_REPO_PATH:-$HOME/Developer/personal/projects/obsidian-store}" | sed 's/[\/&]/\\&/g')
 
   # Render placeholder-based templates.
   sed \
     -e "s|__DOTFILES__|$escaped_dotfiles|g" \
     -e "s|__HOME__|$escaped_home|g" \
     -e "s|__HOMEBREW_PREFIX__|$escaped_homebrew_prefix|g" \
+    -e "s|__OBSIDIAN_REPO_PATH__|$escaped_obsidian_repo_path|g" \
     "$source" > "$destination"
 }
 

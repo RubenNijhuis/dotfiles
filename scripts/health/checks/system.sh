@@ -26,9 +26,32 @@ check_launchd() {
   fi
 
   # Check log directory exists
-  if [[ ! -d "$HOME/.local/log" ]]; then
+  local log_dir="$HOME/.local/log"
+  if [[ ! -d "$log_dir" ]]; then
     details+="\n  ⚠ Log directory missing"
     add_suggestion "Create log directory: mkdir -p ~/.local/log"
+  else
+    # Check for recent errors in agent log files
+    local agents_with_errors=()
+    for agent in "${managed_agents[@]}"; do
+      local log_file="$log_dir/${agent}.out.log"
+      [[ "$agent" == "dotfiles-doctor" ]] && log_file="$log_dir/dotfiles-doctor-launchd.out.log"
+      if [[ -f "$log_file" ]]; then
+        local recent_errors
+        recent_errors=$(tail -n 50 "$log_file" 2>/dev/null | grep -c "ERROR" || true)
+        if [[ $recent_errors -gt 0 ]]; then
+          agents_with_errors+=("$agent ($recent_errors errors)")
+        fi
+      fi
+    done
+
+    if [[ ${#agents_with_errors[@]} -gt 0 ]]; then
+      details+="\n  ⚠ Agents with recent log errors:"
+      for entry in "${agents_with_errors[@]}"; do
+        details+="\n    - $entry"
+      done
+      add_suggestion "Check agent logs: ls ~/.local/log/"
+    fi
   fi
 
   record_result "LaunchD Agents" 0 "$details"

@@ -2,6 +2,7 @@
 .idea
 local/*
 !local/.gitkeep
+!local/machine.env.example
 *.local
 *.secret
 .env

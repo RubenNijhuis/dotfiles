@@ -10,7 +10,7 @@ path=(
     "$_brew_prefix/sbin"
     "/usr/local/bin"
     "/usr/local/sbin"
-    "$_lmstudio_home/bin"
+    "$_lmstudio_home/bin"             # LM Studio CLI (lms)
     "$_brew_prefix/opt/dotnet@${DOTFILES_DOTNET_VERSION:-8}/bin"
     "$HOME/.dotnet/tools"
     "$HOME/.spicetify"

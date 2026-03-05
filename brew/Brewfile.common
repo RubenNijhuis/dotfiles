@@ -58,6 +58,7 @@ brew "node"          # Node.js (installed via fnm or direct)
 brew "pnpm"          # Fast npm alternative
 brew "ruff"          # Fast Python linter
 brew "rust"          # Rust programming language
+brew "uv"            # Fast Python package and project manager
 brew "prettier"      # Code formatter (multi-language)
 brew "shellcheck"    # Shell script linter
 brew "shellharden"   # Shell script hardening linter
@@ -92,7 +93,6 @@ cask "font-symbols-only-nerd-font"  # Standalone Nerd Font icons (fallback)
 # -----------------------------------------------------------------------------
 cask "claude"               # Claude AI desktop app
 cask "claude-code"          # Claude Code (coding assistant)
-cask "codex"                # Codex app
 cask "codexbar"             # Menu bar code snippets
 cask "ghostty"              # Fast, feature-rich terminal
 cask "google-chrome"        # Web browser

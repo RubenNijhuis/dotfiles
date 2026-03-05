@@ -621,8 +621,17 @@ step_setup_runtimes() {
   if command -v bun &>/dev/null; then
     success "Bun already installed"
   else
-    curl -fsSL https://bun.sh/install | bash
-    success "Bun installed"
+    if curl -fsSL https://bun.sh/install | bash; then
+      success "Bun installed"
+    else
+      warning "Bun install failed — install manually: curl -fsSL https://bun.sh/install | bash"
+    fi
+  fi
+
+  if command -v uv &>/dev/null; then
+    success "uv already installed"
+  else
+    warning "uv not found — install via Homebrew: brew install uv"
   fi
 }
 

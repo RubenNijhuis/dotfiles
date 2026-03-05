@@ -395,10 +395,26 @@ check_runtime() {
   # Bun
   if command -v bun &>/dev/null; then
     local bun_version=$(bun --version)
-    details+="Bun: $bun_version"
+    details+="Bun: $bun_version\n  "
   else
-    details+="Bun: not installed"
+    details+="Bun: not installed\n  "
     add_suggestion "Install Bun: curl -fsSL https://bun.sh/install | bash"
+  fi
+
+  # Python via uv
+  if command -v uv &>/dev/null; then
+    local uv_version=$(uv --version)
+    details+="uv: $uv_version"
+    if uv python list 2>/dev/null | grep -q "cpython"; then
+      local py_version=$(uv python list 2>/dev/null | grep "cpython" | head -1 | awk '{print $1}')
+      details+="\n  Python: $py_version (via uv)"
+    else
+      details+="\n  ⚠ Python: no versions installed"
+      add_suggestion "Install Python: uv python install"
+    fi
+  else
+    details+="uv: not installed"
+    add_suggestion "Install uv: brew install uv"
   fi
 
   record_result "Runtime Environments" 0 "$details"

@@ -30,7 +30,9 @@
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <string>__HOMEBREW_PREFIX__/bin:__HOMEBREW_PREFIX__/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>DOTFILES_OBSIDIAN_REPO_PATH</key>
+        <string>__OBSIDIAN_REPO_PATH__</string>
     </dict>
 </dict>
 </plist>

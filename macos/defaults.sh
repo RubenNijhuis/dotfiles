@@ -63,7 +63,6 @@ if command -v dockutil >/dev/null 2>&1; then
             "/Applications/Figma.app"
             "/Applications/LM Studio.app"
             "/Applications/Claude.app"
-            "/Applications/Codex.app"
             "/System/Applications/System Settings.app"
         )
     fi
@@ -95,9 +94,15 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadRightC
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain ContextMenuGesture -int 1
 
+# === Appearance (Tokyo Night) ===
+defaults write NSGlobalDomain AppleInterfaceStyle -string "Dark"
+defaults write NSGlobalDomain AppleAccentColor -int -2                # Blue (closest to Tokyo Night)
+defaults write NSGlobalDomain AppleAquaColorVariant -int 1
+defaults write NSGlobalDomain AppleHighlightColor -string "0.478431 0.635294 0.968627 Other"  # #7aa2f7
+
 # === Global UI ===
 defaults write NSGlobalDomain AppleShowScrollBars -string "Automatic"
-defaults write NSGlobalDomain com.apple.swipescrolldirection -bool false
+defaults write NSGlobalDomain com.apple.swipescrolldirection -bool true
 defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode2 -bool true
