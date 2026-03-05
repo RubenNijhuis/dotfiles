@@ -19,17 +19,12 @@ check_stow() {
     return
   fi
 
-  # Expected packages
-  local packages=(atuin bash bat btop ghostty git gpg lazygit sesh shell ssh tmux vim vscode yazi zsh)
-  local symlinked=0
+  # Discover packages dynamically from the stow directory
+  local packages=()
+  while IFS= read -r pkg_dir; do
+    packages+=("$(basename "$pkg_dir")")
+  done < <(find "$stow_dir" -maxdepth 1 -mindepth 1 -type d | sort)
   local total=${#packages[@]}
-
-  for pkg in "${packages[@]}"; do
-    local pkg_dir="$stow_dir/$pkg"
-    if [[ -d "$pkg_dir" ]]; then
-      symlinked=$((symlinked + 1))
-    fi
-  done
 
   # Check for broken symlinks in home directory
   local broken_count=0
@@ -39,14 +34,14 @@ check_stow() {
     fi
   done < <(find "$HOME" -maxdepth 1 -type l 2>/dev/null)
 
-  if [[ $symlinked -eq $total ]] && [[ $broken_count -eq 0 ]]; then
-    record_result "Stow Configuration" 0 "$symlinked/$total packages properly symlinked, no broken symlinks found"
+  if [[ $total -gt 0 ]] && [[ $broken_count -eq 0 ]]; then
+    record_result "Stow Configuration" 0 "$total packages found, no broken symlinks"
   elif [[ $broken_count -gt 0 ]]; then
     record_result "Stow Configuration" 2 "Found $broken_count broken symlinks in home directory"
     add_suggestion "Run: make unstow && make stow to fix symlinks"
   else
-    record_result "Stow Configuration" 2 "Only $symlinked/$total packages found"
-    add_suggestion "Ensure all stow packages exist in $DOTFILES/stow/"
+    record_result "Stow Configuration" 2 "No stow packages found in $stow_dir"
+    add_suggestion "Ensure dotfiles are cloned correctly and stow/ is populated"
   fi
 }
 

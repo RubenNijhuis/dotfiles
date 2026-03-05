@@ -26,5 +26,11 @@
 
     <key>RunAtLoad</key>
     <false/>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__HOMEBREW_PREFIX__/bin:__HOMEBREW_PREFIX__/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
 </dict>
 </plist>
