@@ -44,7 +44,7 @@ zstyle ':completion:*:*:cd:*' list-colors 'di=1;36'
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
-setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 
@@ -74,8 +74,8 @@ fi
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-# OrbStack
-source ~/.orbstack/shell/init.zsh 2>/dev/null || :
+# OrbStack (optional; only present when OrbStack is installed)
+[[ -f ~/.orbstack/shell/init.zsh ]] && source ~/.orbstack/shell/init.zsh
 
 # ----- Shell config modules -----
 source ~/.config/shell/path.sh

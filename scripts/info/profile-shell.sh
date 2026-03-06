@@ -7,13 +7,15 @@ source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 ANALYZE=false
+FULL=false
 
 usage() {
   cat <<EOF2
-Usage: $0 [--help] [--no-color] [--analyze]
+Usage: $0 [--help] [--no-color] [--analyze] [--full]
 
 Without flags, generates shell profile data.
 With --analyze, reads /tmp/zsh-profile.log and prints analysis.
+With --full, generates profile data then immediately prints analysis.
 EOF2
 }
 
@@ -24,6 +26,10 @@ parse_args() {
     case "$1" in
       --analyze)
         ANALYZE=true
+        shift
+        ;;
+      --full)
+        FULL=true
         shift
         ;;
       --no-color)
@@ -141,7 +147,11 @@ main() {
 
   print_header "Shell Startup Performance Analysis"
 
-  if $ANALYZE; then
+  if $FULL; then
+    generate_profile
+    printf '\n'
+    analyze_profile
+  elif $ANALYZE; then
     analyze_profile
   else
     generate_profile

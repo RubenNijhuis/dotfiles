@@ -2,7 +2,7 @@
 	migrate-ssh backup restore brew-sync brew-audit validate-repos migrate-dev-dryrun migrate-dev \
 	complete-migration doctor doctor-quick update-repos \
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
-	lint-shell check-scripts test-scripts maint-check maint-sync maint-automation maint maint-full \
+	lint-shell test-scripts maint-check maint-check-ci maint-sync maint-automation maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
 	keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
 	cleanup-dotfiles-backups
@@ -10,25 +10,9 @@
 DOTFILES := $(shell pwd)
 
 help: ## Show common commands
-	@printf "\033[36m%-15s\033[0m %s\n" "install" "Full install (bootstrap + brew + stow + macos)"
-	@printf "\033[36m%-15s\033[0m %s\n" "update" "Update brew packages and re-stow configs"
-	@printf "\033[36m%-15s\033[0m %s\n" "stow" "Stow all config packages"
-	@printf "\033[36m%-15s\033[0m %s\n" "stow-report" "Preview stow conflicts without changing files"
-	@printf "\033[36m%-15s\033[0m %s\n" "doctor" "Run comprehensive system health check"
-	@printf "\033[36m%-15s\033[0m %s\n" "doctor-quick" "Run quick health check (skip optional checks)"
-	@printf "\033[36m%-15s\033[0m %s\n" "format" "Format all files according to EditorConfig"
-	@printf "\033[36m%-15s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
-	@printf "\033[36m%-15s\033[0m %s\n" "cleanup-dotfiles-backups" "Remove old ~/dotfiles.backup.* directories"
-	@printf "\033[36m%-15s\033[0m %s\n" "backup-status" "Show backup automation status"
-	@printf "\033[36m%-15s\033[0m %s\n" "doctor-status" "Show health monitoring automation status"
-	@printf "\033[36m%-15s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
-	@printf "\033[36m%-15s\033[0m %s\n" "bootstrap-verify" "Run strict bootstrap reliability verification suite"
-	@printf "\033[36m%-15s\033[0m %s\n" "doctor-ci" "Run deterministic CI health checks"
-	@printf "\033[36m%-15s\033[0m %s\n" "docs-sync" "Fail if generated CLI docs are stale"
-	@printf "\033[36m%-15s\033[0m %s\n" "launchd-check" "Validate launchd template contracts"
-	@printf "\033[36m%-15s\033[0m %s\n" "brew-sync-dry" "Preview brew-sync additions without editing Brewfiles"
-	@printf "\033[36m%-15s\033[0m %s\n" "maint" "Run maintenance validation checks"
-	@printf "\033[36m%-15s\033[0m %s\n" "maint-full" "Run checks plus sync/update maintenance workflow"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk -F':.*?## ' '$$1 ~ /^(install|update|stow|stow-report|doctor|doctor-quick|format|backup|cleanup-dotfiles-backups|backup-status|doctor-status|ops-status|bootstrap-verify|doctor-ci|docs-sync|launchd-check|brew-sync-dry|maint-check|maint-full)$$/ \
+		{printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 	@printf "\nRun \033[36mmake help-all\033[0m to see every target.\n"
 
 help-all: ## Show all commands
@@ -111,17 +95,13 @@ hooks: ## Install git hooks for code quality checks
 	@bash $(DOTFILES)/git-hooks/install-hooks.sh
 
 profile-shell: ## Profile shell startup performance
-	@bash $(DOTFILES)/scripts/info/profile-shell.sh && echo "" && bash $(DOTFILES)/scripts/info/profile-shell.sh --analyze
+	@bash $(DOTFILES)/scripts/info/profile-shell.sh --full
 
 format: ## Format all files according to EditorConfig
 	@bash $(DOTFILES)/scripts/maintenance/format-all.sh
 
 vscode-setup: ## Install VS Code extensions from extensions.txt
-	@echo "Installing VS Code extensions..."
-	@cat "$(DOTFILES)/stow/vscode/Library/Application Support/Code/User/extensions.txt" | \
-		grep -v '^#' | grep -v '^$$' | cut -d' ' -f1 | \
-		xargs -L 1 code --install-extension
-	@echo "✓ Extensions installed"
+	@bash $(DOTFILES)/scripts/bootstrap/vscode-setup.sh
 
 backup-setup: ## Setup automated daily backups via LaunchD
 	@bash $(DOTFILES)/scripts/automation/setup-automation.sh backup
@@ -183,8 +163,6 @@ ops-status: ## Show consolidated automation and ops health status
 lint-shell: ## Run syntax and shellcheck on shell scripts
 	@bash $(DOTFILES)/scripts/maintenance/lint-shell.sh
 
-check-scripts: lint-shell ## Run syntax and shellcheck on shell scripts
-
 test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/scripts/tests/test-array-init.sh
 	@bash $(DOTFILES)/scripts/tests/test-idempotency.sh
@@ -208,12 +186,12 @@ docs-sync: ## Verify generated documentation is up to date
 launchd-check: ## Validate launchd template contracts
 	@bash $(DOTFILES)/scripts/health/check-launchd-contracts.sh
 
-maint-check: check-scripts test-scripts docs-sync launchd-check ## Run all maintenance validation checks
+maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks (local-safe)
+
+maint-check-ci: maint-check docs-sync ## Run maintenance checks including docs staleness (CI)
 
 maint-sync: update brew-sync brew-audit update-repos ## Run maintenance sync/update workflow
 
 maint-automation: backup-setup doctor-setup ## Setup all built-in automations
-
-maint: maint-check ## Run maintenance validation checks
 
 maint-full: maint-check maint-sync ## Run checks plus sync/update maintenance workflow

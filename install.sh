@@ -16,7 +16,8 @@ SELF_TEST_CHECKPOINT=false
 # Create directories
 mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
 
-# Colors (disable when output is not a terminal)
+# Colors defined inline (not sourced from scripts/lib/output.sh) to keep install.sh
+# self-contained — lib/output.sh may not be available before stow runs on a fresh machine.
 if [[ -t 1 ]]; then
   RED=$'\033[0;31m'
   GREEN=$'\033[0;32m'
@@ -601,6 +602,11 @@ step_install_common_packages() {
 
 step_install_profile_packages() {
   install_brew_bundle "$DOTFILES/brew/Brewfile.$PROFILE"
+  # Personal machines also install work tools so they get the full development environment.
+  # Work tools are defined once in Brewfile.work and included here rather than duplicated.
+  if [[ "$PROFILE" == "personal" ]]; then
+    install_brew_bundle "$DOTFILES/brew/Brewfile.work"
+  fi
   success "$PROFILE packages installed"
 }
 

@@ -59,19 +59,4 @@ cask "trackweight"  # Weight tracking (from krishkrosh/apps tap)
 cask "arduino-ide"  # Arduino development
 cask "epic-games"   # Epic Games launcher
 
-# -----------------------------------------------------------------------------
-# Work Tools (installed on personal machine)
-# -----------------------------------------------------------------------------
-# These are typically in Brewfile.work but are also installed here
-brew "dive"                # Docker image layer explorer
-brew "dotnet@8"            # .NET 8 SDK
-cask "dbeaver-community"   # Universal database tool
-cask "figma"               # Design tool
-cask "gcloud-cli"          # Google Cloud SDK
-cask "linear-linear"       # Issue tracking
-cask "meetingbar"          # Calendar in menu bar
-cask "orbstack"            # Fast Docker Desktop alternative
-cask "rider"               # .NET IDE
-cask "slack"               # Team communication
-cask "yaak"                # API client
-brew "openclaw-cli"        # OpenClaw CLI
+brew "openclaw-cli"  # OpenClaw CLI

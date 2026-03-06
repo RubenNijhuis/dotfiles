@@ -20,9 +20,6 @@ alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew update && brew upgrade && brew cleanup"
 
-# TypeScript
-alias ts="tsx"
-
 # Development cleanup
 alias clean-node='find . -name "node_modules" -type d -prune -exec rm -rf {} +'
 alias clean-python='find . -name "__pycache__" -type d -prune -exec rm -rf {} +'
