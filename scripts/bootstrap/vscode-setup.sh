@@ -2,17 +2,35 @@
 # Install VS Code extensions from extensions.txt
 set -euo pipefail
 
-if [[ "${1:-}" == "--help" ]]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/common.sh"
+source "$SCRIPT_DIR/../lib/output.sh" "$@"
+
+usage() {
   cat <<EOF
 Usage: $0 [--help]
 
 Install VS Code extensions declared in stow/vscode/.../extensions.txt.
 Skips extensions that are already installed.
 EOF
-  exit 0
-fi
+}
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+parse_args() {
+  show_help_if_requested usage "$@"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      *)
+        print_error "Unknown argument: $1"
+        usage
+        exit 1
+        ;;
+    esac
+  done
+}
+
+parse_args "$@"
+
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EXTENSIONS_FILE="$DOTFILES/stow/vscode/Library/Application Support/Code/User/extensions.txt"
 
