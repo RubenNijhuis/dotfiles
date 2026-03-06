@@ -194,7 +194,7 @@ Validate templates/launchd/*.plist against repository launchd contract.
 Usage: scripts/health/doctor-ci.sh [--help] [--no-color] [--profile <personal|work>]
 
 Run deterministic CI health checks:
-  1. check-scripts
+  1. lint-shell
   2. test-scripts
   3. launchd-check
   4. docs-sync

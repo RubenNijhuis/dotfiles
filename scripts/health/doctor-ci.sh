@@ -14,7 +14,7 @@ usage() {
 Usage: $0 [--help] [--no-color] [--profile <personal|work>]
 
 Run deterministic CI health checks:
-  1. check-scripts
+  1. lint-shell
   2. test-scripts
   3. launchd-check
   4. docs-sync
@@ -71,7 +71,7 @@ main() {
 
   print_header "CI Doctor"
 
-  run_step "Script checks" make -s check-scripts
+  run_step "Script checks" make -s lint-shell
   run_step "Script tests" make -s test-scripts
   run_step "LaunchD contract checks" make -s launchd-check
   run_step "Docs sync" make -s docs-sync
