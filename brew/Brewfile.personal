@@ -13,9 +13,10 @@ tap "spicetify/homebrew-tap"
 # -----------------------------------------------------------------------------
 # CLI Tools
 # -----------------------------------------------------------------------------
-brew "mailsy"     # Disposable email CLI
-brew "qrencode"   # QR code generator
-brew "signal-cli" # Signal messenger CLI
+brew "mailsy"        # Disposable email CLI
+brew "openclaw-cli"  # OpenClaw CLI
+brew "qrencode"      # QR code generator
+brew "signal-cli"    # Signal messenger CLI
 
 # -----------------------------------------------------------------------------
 # Browsers
@@ -58,5 +59,3 @@ cask "trackweight"  # Weight tracking (from krishkrosh/apps tap)
 # -----------------------------------------------------------------------------
 cask "arduino-ide"  # Arduino development
 cask "epic-games"   # Epic Games launcher
-
-brew "openclaw-cli"  # OpenClaw CLI

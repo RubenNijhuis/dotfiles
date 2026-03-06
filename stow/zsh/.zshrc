@@ -60,15 +60,26 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
   source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 } &!
 
-# ----- Tool initialization -----
-eval "$(fnm env --use-on-cd --shell zsh)"
-eval "$(zoxide init zsh)"
+# ----- Tool initialization (eval outputs cached per binary) -----
+# Cache is stored in $XDG_CACHE_HOME/zsh/ and invalidated when the binary changes.
+_zsh_eval_cache() {
+  local cmd="$1"
+  local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${cmd}.zsh"
+  if [[ ! -f "$cache_file" ]] || [[ "$(command -v "$cmd")" -nt "$cache_file" ]]; then
+    mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    "$@" > "$cache_file"
+  fi
+  source "$cache_file"
+}
+
+_zsh_eval_cache fnm env --use-on-cd --shell zsh
+_zsh_eval_cache zoxide init zsh
 # Load fzf key bindings without replacing Tab completion.
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
 fi
 if command -v atuin >/dev/null 2>&1; then
-  eval "$(atuin init zsh --disable-up-arrow)"
+  _zsh_eval_cache atuin init zsh --disable-up-arrow
 fi
 
 # Bun completions
@@ -85,7 +96,7 @@ source ~/.config/shell/functions.sh
 
 # ----- Prompt -----
 if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
+  _zsh_eval_cache starship init zsh
 else
   PROMPT='%n@%m %1~ %# '
 fi

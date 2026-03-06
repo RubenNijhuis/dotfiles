@@ -107,49 +107,25 @@ backup-setup: ## Setup automated daily backups via LaunchD
 	@bash $(DOTFILES)/scripts/automation/setup-automation.sh backup
 
 backup-status: ## Show backup automation status
-	@echo "Backup Automation Status:"
-	@echo ""
-	@echo "LaunchD Agent:"
-	@launchctl print gui/$$(id -u)/com.user.dotfiles-backup >/dev/null 2>&1 && \
-		echo "  com.user.dotfiles-backup (loaded)" || echo "  Not loaded"
-	@echo ""
-	@echo "Recent Backups:"
-	@ls -lth ~/.dotfiles-backup/ 2>/dev/null | head -8 || echo "  No backups found"
-	@echo ""
-	@echo "Log files:"
-	@ls -lh ~/.local/log/dotfiles-backup.* 2>/dev/null || echo "  No logs yet"
+	@bash $(DOTFILES)/scripts/automation/show-agent-status.sh \
+		"Backup Automation" "com.user.dotfiles-backup" \
+		"Recent Backups" "~/.dotfiles-backup/" "dotfiles-backup.*"
 
 doctor-setup: ## Setup automated daily health checks via LaunchD
 	@bash $(DOTFILES)/scripts/automation/setup-automation.sh doctor
 
 doctor-status: ## Show health monitoring automation status
-	@echo "Health Monitoring Status:"
-	@echo ""
-	@echo "LaunchD Agent:"
-	@launchctl print gui/$$(id -u)/com.user.dotfiles-doctor >/dev/null 2>&1 && \
-		echo "  com.user.dotfiles-doctor (loaded)" || echo "  Not loaded"
-	@echo ""
-	@echo "Recent Health Checks:"
-	@tail -10 ~/.local/log/dotfiles-doctor-summary.log 2>/dev/null || echo "  No checks yet"
-	@echo ""
-	@echo "Log files:"
-	@ls -lh ~/.local/log/dotfiles-doctor*.log 2>/dev/null || echo "  No logs yet"
+	@bash $(DOTFILES)/scripts/automation/show-agent-status.sh \
+		"Health Monitoring" "com.user.dotfiles-doctor" \
+		"Recent Health Checks" "~/.local/log/dotfiles-doctor-summary.log" "dotfiles-doctor*.log" 10
 
 repo-update-setup: ## Setup scheduled repository updates via LaunchD
 	@bash $(DOTFILES)/scripts/automation/setup-automation.sh repo-update
 
 repo-update-status: ## Show scheduled repository update automation status
-	@echo "Repository Update Automation Status:"
-	@echo ""
-	@echo "LaunchD Agent:"
-	@launchctl print gui/$$(id -u)/com.user.repo-update >/dev/null 2>&1 && \
-		echo "  com.user.repo-update (loaded)" || echo "  Not loaded"
-	@echo ""
-	@echo "Recent summary:"
-	@tail -12 ~/.local/log/repo-update-summary.log 2>/dev/null || echo "  No runs yet"
-	@echo ""
-	@echo "Log files:"
-	@ls -lh ~/.local/log/repo-update*.log 2>/dev/null || echo "  No logs yet"
+	@bash $(DOTFILES)/scripts/automation/show-agent-status.sh \
+		"Repository Update Automation" "com.user.repo-update" \
+		"Recent summary" "~/.local/log/repo-update-summary.log" "repo-update*.log" 12
 
 keychain-check: ## Validate required keychain entries configured in local/keychain-required.txt
 	@bash $(DOTFILES)/scripts/bootstrap/check-keychain.sh

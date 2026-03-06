@@ -75,6 +75,22 @@ Examples:
   scripts/automation/setup-automation.sh repo-update
 ```
 
+## `scripts/automation/show-agent-status.sh`
+
+```text
+Usage: scripts/automation/show-agent-status.sh <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
+
+Display launchd agent status, recent activity, and log files.
+
+Arguments:
+  title          Display title (e.g., "Backup Automation")
+  agent-id       launchd agent label (e.g., "com.user.dotfiles-backup")
+  recent-label   Label for the recent activity section
+  recent-source  Directory (uses ls) or log file (uses tail) — ~ is expanded
+  log-glob       Glob pattern for log files under ~/.local/log/
+  lines          Lines to tail from log file (default: 10)
+```
+
 ## `scripts/automation/sync-obsidian.sh`
 
 ```text
@@ -144,6 +160,15 @@ Usage: scripts/bootstrap/unstow-all.sh [--help] [--no-color]
 Unstow all packages from stow/ out of $HOME.
 ```
 
+## `scripts/bootstrap/vscode-setup.sh`
+
+```text
+Usage: scripts/bootstrap/vscode-setup.sh [--help]
+
+Install VS Code extensions declared in stow/vscode/.../extensions.txt.
+Skips extensions that are already installed.
+```
+
 ## `scripts/docs/generate-cli-reference.sh`
 
 ```text
@@ -202,10 +227,11 @@ Display GPG key and signing configuration status.
 ## `scripts/info/profile-shell.sh`
 
 ```text
-Usage: scripts/info/profile-shell.sh [--help] [--no-color] [--analyze]
+Usage: scripts/info/profile-shell.sh [--help] [--no-color] [--analyze] [--full]
 
 Without flags, generates shell profile data.
 With --analyze, reads /tmp/zsh-profile.log and prints analysis.
+With --full, generates profile data then immediately prints analysis.
 ```
 
 ## `scripts/info/ssh-info.sh`
