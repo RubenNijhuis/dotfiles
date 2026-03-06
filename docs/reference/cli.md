@@ -18,6 +18,8 @@ Options:
   --without-ssh                 Skip SSH key generation
   --with-gpg                    Generate GPG key
   --without-gpg                 Skip GPG key generation
+  --with-bloatware-removal      Remove common macOS bloatware apps
+  --without-bloatware-removal   Skip bloatware removal
   --self-test-checkpoint        Run checkpoint/resume logic tests and exit
   --help, -h                    Show this help message
 ```
@@ -134,6 +136,21 @@ Usage: scripts/bootstrap/check-keychain.sh [--help] [--no-color] [--config <path
 
 Validate required keychain items listed one service name per line.
 Default config: local/keychain-required.txt
+```
+
+## `scripts/bootstrap/remove-bloatware.sh`
+
+```text
+Usage: scripts/bootstrap/remove-bloatware.sh [options]
+
+Remove common macOS bloatware apps (GUI applications only).
+Apps in /System/Applications require sudo; you will be prompted once.
+
+Options:
+  --yes        Skip confirmation prompts
+  --dry-run    List apps to remove without actually removing them
+  --no-color   Disable colour output
+  --help, -h   Show this help
 ```
 
 ## `scripts/bootstrap/stow-all.sh`
