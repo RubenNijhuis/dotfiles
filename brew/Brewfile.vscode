@@ -24,3 +24,4 @@ vscode "esbenp.prettier-vscode"         # Prettier formatter
 vscode "foxundermoon.shell-format"      # Shell script formatter
 vscode "enkia.tokyo-night"              # Tokyo Night color theme
 vscode "vscodevim.vim"                  # Vim keybindings
+vscode "ms-vscode.makefile-tools"      # Makefile support

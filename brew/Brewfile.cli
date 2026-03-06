@@ -75,6 +75,7 @@ brew "pinentry-mac"  # GPG passphrase entry for macOS
 # -----------------------------------------------------------------------------
 # System Utilities
 # -----------------------------------------------------------------------------
+brew "dive"                  # Docker image layer explorer
 brew "dockutil"             # Manage Dock items declaratively
 brew "mac-cleanup-go"       # System cleanup utility
 brew "obsidian-cli"         # Obsidian CLI tools
