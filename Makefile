@@ -5,13 +5,13 @@
 	lint-shell test-scripts maint-check maint-check-ci maint-sync maint-automation maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
 	keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
-	cleanup-dotfiles-backups
+	cleanup-dotfiles-backups remove-bloatware
 
 DOTFILES := $(shell pwd)
 
 help: ## Show common commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk -F':.*?## ' '$$1 ~ /^(install|update|stow|stow-report|doctor|doctor-quick|format|backup|cleanup-dotfiles-backups|backup-status|doctor-status|ops-status|bootstrap-verify|doctor-ci|docs-sync|launchd-check|brew-sync-dry|maint-check|maint-full)$$/ \
+		awk -F':.*?## ' '$$1 ~ /^(install|update|stow|stow-report|doctor|doctor-quick|format|backup|cleanup-dotfiles-backups|backup-status|doctor-status|ops-status|bootstrap-verify|doctor-ci|docs-sync|launchd-check|brew-sync-dry|maint-check|maint-full|remove-bloatware)$$/ \
 		{printf "\033[36m%-25s\033[0m %s\n", $$1, $$2}'
 	@printf "\nRun \033[36mmake help-all\033[0m to see every target.\n"
 
@@ -57,6 +57,9 @@ backup: ## Backup current dotfiles before modifications
 
 cleanup-dotfiles-backups: ## Remove old ~/dotfiles.backup.* directories
 	@bash $(DOTFILES)/scripts/maintenance/cleanup-dotfiles-backups.sh
+
+remove-bloatware: ## Remove common macOS built-in apps (Tips, Chess, Stocks, etc.)
+	@bash $(DOTFILES)/scripts/bootstrap/remove-bloatware.sh
 
 restore: ## Restore from latest backup
 	@bash $(DOTFILES)/scripts/backup/restore-backup.sh
