@@ -24,4 +24,15 @@ cask "lm-studio"            # Local LLM GUI
 cask "obsidian"             # Note-taking and knowledge base
 cask "raycast"              # Spotlight replacement
 cask "visual-studio-code"   # Code editor
+
+# -----------------------------------------------------------------------------
+# Productivity & Communication
+# -----------------------------------------------------------------------------
+cask "figma"                # Design and prototyping tool
+cask "linear-linear"        # Project management
+cask "meetingbar"           # Meeting bar menu extra
+cask "orbstack"             # Docker and Linux VM manager
+cask "slack"                # Team communication
+cask "yaak"                 # API client
+
 tap "spicetify/tap"

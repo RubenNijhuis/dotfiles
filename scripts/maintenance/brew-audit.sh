@@ -79,7 +79,7 @@ print_section "Installed but not in Brewfiles:"
 printf '\n'
 
 UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") | \
-  grep -v -E '^(ca-certificates|openssl|python|gettext|gmp|libffi|libyaml|mpdecimal|ncurses|readline|sqlite|xz|zlib|libidn|libsodium|pcre2|gnutls|nettle|libtasn1|p11-kit|unbound|libnghttp2|brotli|c-ares|libuv|libssh2|zstd|lz4|icu4c|llvm|llhttp|simdjson|z3|unibilium|libevent|libgit2|libvterm|lpeg|luajit|luv|msgpack|tree-sitter|utf8proc|libunistring|libusb|npth|libassuan|libgcrypt|libgpg-error|libksba|pinentry|ada-url|fmt|hdrhistogram_c|libnghttp3|libngtcp2|oniguruma|pkgconf|ruby|uvwasi|mlx|mlx-c|libiconv)' || true)
+  grep -v -E '^(ca-certificates|openssl|python|gettext|gmp|libffi|libyaml|mpdecimal|ncurses|readline|sqlite|xz|zlib|libidn|libsodium|pcre2|gnutls|nettle|libtasn1|p11-kit|unbound|libnghttp2|brotli|c-ares|libuv|libssh2|zstd|lz4|icu4c|llvm|llhttp|simdjson|z3|unibilium|libevent|libgit2|libvterm|lpeg|luajit|luv|msgpack|tree-sitter|utf8proc|libunistring|libusb|npth|libassuan|libgcrypt|libgpg-error|libksba|pinentry|ada-url|fmt|hdrhistogram_c|libnghttp3|libngtcp2|oniguruma|pkgconf|ruby|uvwasi|mlx|mlx-c|libiconv|cairo|fontconfig|freetype|giflib|glib|graphite2|harfbuzz|jpeg-turbo|libpng|libtiff|libx11|libxau|libxcb|libxdmcp|libxext|libxrender|little-cms2|lzo|openjdk|pixman|xorgproto)' || true)
 
 UNDECLARED_CASKS=$(comm -23 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
 
