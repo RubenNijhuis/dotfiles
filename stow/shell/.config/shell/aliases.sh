@@ -38,3 +38,6 @@ alias top="btop"
 
 # Docker cleanup (OrbStack)
 alias dclean='docker system prune -af --volumes'
+
+# Claude CLI
+alias clauded="claude --dangerously-skip-permissions"
