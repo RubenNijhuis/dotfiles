@@ -32,7 +32,7 @@ else
   NC=''
 fi
 
-TOTAL_STEPS=10
+TOTAL_STEPS=11
 CURRENT_STEP=0
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -46,10 +46,12 @@ FROM_STEP_SET=false
 MACOS_PREF="auto"
 SSH_PREF="auto"
 GPG_PREF="auto"
+BLOATWARE_PREF="auto"
 
 APPLY_MACOS_DEFAULTS="no"
 SETUP_SSH="no"
 SETUP_GPG="no"
+REMOVE_BLOATWARE="no"
 
 STEP_NAMES=(
   "Detecting system"
@@ -61,6 +63,7 @@ STEP_NAMES=(
   "Stowing config packages"
   "Setting up runtime tools"
   "Applying macOS defaults"
+  "Removing macOS bloatware"
   "Final setup"
 )
 
@@ -98,6 +101,8 @@ Options:
   --without-ssh                 Skip SSH key generation
   --with-gpg                    Generate GPG key
   --without-gpg                 Skip GPG key generation
+  --with-bloatware-removal      Remove common macOS bloatware apps
+  --without-bloatware-removal   Skip bloatware removal
   --self-test-checkpoint        Run checkpoint/resume logic tests and exit
   --help, -h                    Show this help message
 EOF2
@@ -174,6 +179,14 @@ parse_args() {
         ;;
       --without-gpg)
         GPG_PREF="no"
+        shift
+        ;;
+      --with-bloatware-removal)
+        BLOATWARE_PREF="yes"
+        shift
+        ;;
+      --without-bloatware-removal)
+        BLOATWARE_PREF="no"
         shift
         ;;
       --self-test-checkpoint)
@@ -418,6 +431,9 @@ load_saved_preferences() {
   if [[ "$GPG_PREF" == "auto" && -n "${PREF_SETUP_GPG:-}" ]]; then
     GPG_PREF="$PREF_SETUP_GPG"
   fi
+  if [[ "$BLOATWARE_PREF" == "auto" && -n "${PREF_REMOVE_BLOATWARE:-}" ]]; then
+    BLOATWARE_PREF="$PREF_REMOVE_BLOATWARE"
+  fi
 }
 
 save_selected_preferences() {
@@ -427,6 +443,7 @@ PREF_PROFILE="$PROFILE"
 PREF_MACOS_DEFAULTS="$APPLY_MACOS_DEFAULTS"
 PREF_SETUP_SSH="$SETUP_SSH"
 PREF_SETUP_GPG="$SETUP_GPG"
+PREF_REMOVE_BLOATWARE="$REMOVE_BLOATWARE"
 EOF
 }
 
@@ -454,6 +471,7 @@ collect_preferences() {
 
   SETUP_SSH=$(resolve_preference "$SSH_PREF" "no" "Generate SSH keys for Git?")
   SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Generate GPG key for commit signing?")
+  REMOVE_BLOATWARE=$(resolve_preference "$BLOATWARE_PREF" "no" "Remove macOS bloatware apps (Tips, Chess, Stocks…)?")
 
   echo ""
   echo "Summary:"
@@ -461,6 +479,7 @@ collect_preferences() {
   echo "  Apply macOS defaults: $APPLY_MACOS_DEFAULTS"
   echo "  Generate SSH keys: $SETUP_SSH"
   echo "  Generate GPG key: $SETUP_GPG"
+  echo "  Remove bloatware: $REMOVE_BLOATWARE"
 
   if ! $NON_INTERACTIVE; then
     if ! prompt_yes_no "Proceed with installation? [Y/n] " "Y"; then
@@ -652,6 +671,15 @@ step_apply_macos_defaults() {
   fi
 }
 
+step_remove_bloatware() {
+  if [[ "$REMOVE_BLOATWARE" == "yes" ]]; then
+    bash "$DOTFILES/scripts/bootstrap/remove-bloatware.sh" --yes
+    success "Bloatware removal complete"
+  else
+    success "Skipped"
+  fi
+}
+
 step_final_setup() {
   mkdir -p "$DEVELOPER_ROOT/personal/projects" \
            "$DEVELOPER_ROOT/personal/experiments" \
@@ -718,6 +746,7 @@ print_next_steps() {
   echo "  Apply macOS defaults: $APPLY_MACOS_DEFAULTS"
   echo "  Generated SSH keys: $SETUP_SSH"
   echo "  Generated GPG key: $SETUP_GPG"
+  echo "  Removed bloatware: $REMOVE_BLOATWARE"
   echo ""
   echo "Next steps:"
   echo "  - Open a new terminal to load the new shell config"
@@ -801,7 +830,8 @@ main() {
   run_step 7 step_stow_configs
   run_step 8 step_setup_runtimes
   run_step 9 step_apply_macos_defaults
-  run_step 10 step_final_setup
+  run_step 10 step_remove_bloatware
+  run_step 11 step_final_setup
 
   if ! $DRY_RUN; then
     rm -f "$CHECKPOINT_FILE"
