@@ -42,10 +42,29 @@
 [push]
 	autoSetupRemote = true
 
+[fetch]
+	prune = true
+	pruneTags = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[rerere]
+	enabled = true
+
+[help]
+	autoCorrect = 20
+
 [alias]
 	lg = log --graph --oneline --all --decorate
 	undo = reset HEAD~1 --soft
 	amend = commit --amend --no-edit
+	st = status -sb
+	co = checkout
+	br = branch
+	ci = commit
+	unstage = reset HEAD --
+	last = log -1 HEAD
 
 # Automatic work/personal detection by directory
 [includeIf "gitdir:**/work/**"]

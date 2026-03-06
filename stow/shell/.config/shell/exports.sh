@@ -15,6 +15,11 @@ export BUN_INSTALL="$HOME/.bun"
 # Homebrew
 export HOMEBREW_NO_ENV_HINTS=1
 
+# eza
+export EZA_ICON_SPACING=2
+export EZA_ICONS_AUTO=1
+export EZA_COLORS="ic=38;5;59"
+
 # fzf — Tokyo Night
 export FZF_DEFAULT_OPTS=" \
   --color=fg:#c0caf5,bg:#1a1b26,hl:#ff9e64 \
