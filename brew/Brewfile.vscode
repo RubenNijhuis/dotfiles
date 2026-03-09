@@ -1,27 +1,45 @@
 # =============================================================================
 # VS Code Extensions Brewfile - Shared across all profiles
 # =============================================================================
-# Managed separately since extensions change independently of CLI/GUI packages
+# Source of truth: stow/vscode/.../extensions.txt
+# This file must stay in sync — run `make brew-audit` to detect drift.
 
-vscode "anthropic.claude-code"          # Claude Code integration
-vscode "bradlc.vscode-tailwindcss"      # Tailwind CSS IntelliSense
-vscode "dbaeumer.vscode-eslint"         # ESLint integration
-vscode "eamodio.gitlens"                # Git supercharged
-vscode "biomejs.biome"                  # Biome formatter/linter
-vscode "editorconfig.editorconfig"      # EditorConfig support
-vscode "github.copilot-chat"            # Copilot Chat
-vscode "kevinrose.vsc-python-indent"    # Python indentation
-vscode "ms-azuretools.vscode-containers" # Docker containers
-vscode "ms-python.debugpy"              # Python debugger
-vscode "ms-python.python"               # Python support
-vscode "ms-python.vscode-pylance"       # Python language server
-vscode "ms-python.vscode-python-envs"   # Python environments
-vscode "ms-vscode-remote.remote-containers" # Dev containers
-vscode "svelte.svelte-vscode"           # Svelte support
-vscode "tamasfe.even-better-toml"       # TOML support
-vscode "usernamehw.errorlens"           # Inline error highlighting
-vscode "esbenp.prettier-vscode"         # Prettier formatter
-vscode "foxundermoon.shell-format"      # Shell script formatter
-vscode "enkia.tokyo-night"              # Tokyo Night color theme
-vscode "vscodevim.vim"                  # Vim keybindings
-vscode "ms-vscode.makefile-tools"      # Makefile support
+# AI Tools
+vscode "anthropic.claude-code"               # Claude Code AI coding assistant
+vscode "github.copilot-chat"                 # GitHub Copilot chat interface
+
+# Code Quality & Formatting
+vscode "biomejs.biome"                       # Fast formatter and linter (JS/TS/JSON)
+vscode "editorconfig.editorconfig"           # EditorConfig support
+vscode "dbaeumer.vscode-eslint"              # JavaScript/TypeScript linter
+vscode "usernamehw.errorlens"                # Inline error highlighting
+vscode "esbenp.prettier-vscode"              # Prettier formatter
+vscode "foxundermoon.shell-format"           # Shell script formatter
+
+# Git
+vscode "eamodio.gitlens"                     # Git supercharged (blame, history)
+
+# Theme
+vscode "enkia.tokyo-night"                   # Tokyo Night color theme
+
+# Editor
+vscode "vscodevim.vim"                       # Vim keybindings
+vscode "ms-vscode.makefile-tools"            # Makefile support
+
+# Language Support - JavaScript/TypeScript
+vscode "bradlc.vscode-tailwindcss"           # Tailwind CSS IntelliSense
+vscode "svelte.svelte-vscode"                # Svelte framework support
+
+# Language Support - Python
+vscode "ms-python.python"                    # Full Python language support
+vscode "ms-python.vscode-pylance"            # Python language server
+vscode "ms-python.debugpy"                   # Python debugger
+vscode "ms-python.vscode-python-envs"        # Python environment management
+vscode "kevinrose.vsc-python-indent"         # Smart Python indentation
+
+# Language Support - Other
+vscode "tamasfe.even-better-toml"            # TOML syntax and formatting
+
+# DevOps & Remote
+vscode "ms-vscode-remote.remote-containers"  # Dev containers support
+vscode "ms-azuretools.vscode-containers"     # Docker/container support

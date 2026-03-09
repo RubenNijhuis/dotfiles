@@ -26,5 +26,6 @@ history_filter = [
 ]
 
 [sync]
-# Enable sync v2 protocol
-records = true
+# Disabled — no Atuin cloud account configured.
+# Set records = true and configure sync_address to enable cross-machine sync.
+records = false

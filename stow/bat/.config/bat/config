@@ -1,3 +1,10 @@
 --theme=tokyonight_night
 --style=numbers,changes
 --italic-text=always
+
+# Map dotfiles-specific file types for better syntax highlighting
+--map-syntax="*.conf:INI"
+--map-syntax=".gitignore_global:Git Ignore"
+--map-syntax="Brewfile*:Ruby"
+--map-syntax="*.plist:XML"
+--map-syntax="Makefile*:Makefile"

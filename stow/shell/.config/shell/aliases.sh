@@ -1,10 +1,12 @@
 # shellcheck shell=bash  # closest to zsh; shellcheck has no zsh mode
-# Modern CLI replacements
-alias cat="bat"
-alias ls="eza --group-directories-first"
-alias la="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all"
-alias ll="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all --git"
-alias lt="eza --tree --level=2"
+# Modern CLI replacements (guarded: fall back gracefully if tool missing)
+if command -v bat >/dev/null 2>&1; then alias cat="bat"; fi
+if command -v eza >/dev/null 2>&1; then
+  alias ls="eza --group-directories-first"
+  alias la="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all"
+  alias ll="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all --git"
+  alias lt="eza --tree --level=2"
+fi
 
 # Git shortcuts
 alias g="git"
@@ -26,15 +28,17 @@ alias clean-python='find . -name "__pycache__" -type d -prune -exec rm -rf {} +'
 alias clean-ds='find . -name ".DS_Store" -delete'
 
 # Search
-alias grep="rg"
+if command -v rg >/dev/null 2>&1; then alias grep="rg"; fi
 
 # Neovim
-alias vim="nvim"
-alias vi="nvim"
-alias v="nvim"
+if command -v nvim >/dev/null 2>&1; then
+  alias vim="nvim"
+  alias vi="nvim"
+  alias v="nvim"
+fi
 
 # System monitor
-alias top="btop"
+if command -v btop >/dev/null 2>&1; then alias top="btop"; fi
 
 # Docker cleanup (OrbStack)
 alias dclean='docker system prune -af --volumes'

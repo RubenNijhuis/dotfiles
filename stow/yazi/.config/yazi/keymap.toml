@@ -1,0 +1,13 @@
+# Yazi keybindings — zoxide integration and editor shortcuts
+
+[manager]
+prepend_keymap = [
+  # Zoxide interactive jump (requires zoxide)
+  { on = ["z"], run = "plugin zoxide", desc = "Jump to directory via zoxide" },
+
+  # Open in editor (respect $EDITOR)
+  { on = ["e"], run = "open", desc = "Open selected file" },
+
+  # Toggle hidden files
+  { on = ["."], run = "hidden toggle", desc = "Toggle hidden files" },
+]

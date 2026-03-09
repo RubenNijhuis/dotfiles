@@ -43,5 +43,19 @@ if command -v atuin >/dev/null 2>&1; then
   eval "$(atuin init bash --disable-up-arrow)"
 fi
 
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --shell bash)"
+fi
+
+# FZF keybindings and completion
+_brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
+if [[ -f "$_brew_prefix/opt/fzf/shell/key-bindings.bash" ]]; then
+  source "$_brew_prefix/opt/fzf/shell/key-bindings.bash"
+fi
+if [[ -f "$_brew_prefix/opt/fzf/shell/completion.bash" ]]; then
+  source "$_brew_prefix/opt/fzf/shell/completion.bash"
+fi
+unset _brew_prefix
+
 # Local overrides (not committed)
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh

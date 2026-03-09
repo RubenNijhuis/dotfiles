@@ -16,6 +16,14 @@ tab_size = 2
 max_width = 600
 max_height = 900
 
+[plugin]
+prepend_previewers = [
+  # Use bat for syntax-highlighted code previews
+  { mime = "text/*", run = "code" },
+  { mime = "application/json", run = "code" },
+  { mime = "*/xml", run = "code" },
+]
+
 [opener]
 edit = [
   { run = '${EDITOR:-nvim} "$@"', block = true, for = "unix" },

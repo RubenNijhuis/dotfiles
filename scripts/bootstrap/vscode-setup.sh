@@ -45,6 +45,18 @@ if ! command -v code &>/dev/null; then
 fi
 
 echo "Installing VS Code extensions..."
-grep -v '^#' "$EXTENSIONS_FILE" | grep -v '^$' | cut -d' ' -f1 | \
-  xargs -L 1 code --install-extension
-echo "✓ Extensions installed"
+failed=0
+total=0
+while IFS= read -r ext; do
+  total=$((total + 1))
+  if ! code --install-extension "$ext" >/dev/null 2>&1; then
+    echo "  ✗ Failed: $ext" >&2
+    failed=$((failed + 1))
+  fi
+done < <(grep -v '^#' "$EXTENSIONS_FILE" | grep -v '^$' | cut -d' ' -f1)
+
+installed=$((total - failed))
+echo "✓ $installed/$total extensions installed"
+if [[ $failed -gt 0 ]]; then
+  echo "⚠ $failed extensions failed to install" >&2
+fi
