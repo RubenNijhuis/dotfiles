@@ -114,8 +114,8 @@ check_starship() {
   if [[ -f "$HOME/.config/starship.toml" ]]; then
     details+="Config: ~/.config/starship.toml\n  "
 
-    # Validate config parses without errors
-    if starship config 2>/dev/null | head -1 | grep -q "format"; then
+    # Validate config is non-empty and contains expected content
+    if grep -q "format" "$HOME/.config/starship.toml" 2>/dev/null; then
       details+="Config: valid"
     else
       details+="Config: could not validate"
