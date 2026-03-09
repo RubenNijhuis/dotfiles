@@ -21,14 +21,20 @@ else
 fi
 unsetopt EXTENDEDGLOB
 
+# fzf-tab: replaces menu-select with FZF fuzzy picker for completions.
+# Must be sourced after compinit and before any zstyle ':fzf-tab:*' rules.
+if [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh" ]]; then
+  source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh"
+fi
+
 # ----- Completion UI -----
 zmodload zsh/complist
 zstyle ':completion:*' menu select
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' verbose yes
-zstyle ':completion:*:descriptions' format '%F{6}%d%f'
-zstyle ':completion:*:messages' format '%F{3}%d%f'
-zstyle ':completion:*:warnings' format '%F{1}No matches for: %d%f'
+zstyle ':completion:*:descriptions' format '[%d]'
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format 'No matches for: %d'
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 if [[ -n "${LS_COLORS:-}" ]]; then
   zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -39,6 +45,14 @@ fi
 # Keep `cd` completion focused on local/named directories, not broad path sources.
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack named-directories
 zstyle ':completion:*:*:cd:*' list-colors 'di=1;36'
+
+# ----- fzf-tab config -----
+# Inherit Tokyo Night colors from FZF_DEFAULT_OPTS; set layout and border.
+zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border --select-1 --exit-0
+# Use < and > to switch between completion groups (e.g. files vs commands).
+zstyle ':fzf-tab:*' switch-group '<' '>'
+# Preview directory contents with eza when completing cd.
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --color=always $realpath 2>/dev/null'
 
 # ----- History -----
 HISTFILE=~/.zsh_history
@@ -51,6 +65,10 @@ setopt SHARE_HISTORY
 # ----- Zsh options -----
 setopt AUTO_CD
 setopt CORRECT
+setopt GLOB_DOTS
+
+# ----- Hooks -----
+chpwd() { ls; }
 
 # ----- Plugins (from Homebrew, cached paths) -----
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -74,7 +92,7 @@ _zsh_eval_cache() {
 
 _zsh_eval_cache fnm env --use-on-cd --shell zsh
 _zsh_eval_cache zoxide init zsh
-# Load fzf key bindings without replacing Tab completion.
+# Load fzf key bindings (Ctrl-R, Ctrl-T, Alt-C); Tab is handled by fzf-tab.
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
 fi
@@ -114,9 +132,11 @@ fi
 # ----- Local overrides (not committed) -----
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
 
-# Final keybinding override: keep Tab on standard completion.
-bindkey -M emacs '^I' expand-or-complete
-bindkey -M viins '^I' expand-or-complete
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
+# End of LM Studio CLI section
+

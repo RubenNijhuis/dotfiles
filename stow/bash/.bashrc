@@ -59,3 +59,8 @@ unset _brew_prefix
 
 # Local overrides (not committed)
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
+# End of LM Studio CLI section
+
