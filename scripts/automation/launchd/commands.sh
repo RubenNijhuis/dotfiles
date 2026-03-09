@@ -197,6 +197,35 @@ install_all_agents() {
   print_success "All agents installed"
 }
 
+uninstall_all_agents() {
+  print_header "Uninstalling All LaunchD Agents"
+  local removed_count=0
+  local failed_count=0
+
+  for agent_info in "${AGENTS[@]}"; do
+    IFS=':' read -r name _desc <<< "$agent_info"
+    local plist_dest="$LAUNCHD_DIR/$(agent_label "$name").plist"
+    if [[ ! -f "$plist_dest" ]]; then
+      print_dim "$name (not installed, skipping)"
+      continue
+    fi
+    if uninstall_agent "$name"; then
+      removed_count=$((removed_count + 1))
+    else
+      failed_count=$((failed_count + 1))
+    fi
+    printf '\n'
+  done
+
+  print_section "Summary:"
+  print_info "Uninstalled: $removed_count"
+  if [[ $failed_count -gt 0 ]]; then
+    print_warning "Failed: $failed_count"
+    return 1
+  fi
+  print_success "All agents uninstalled"
+}
+
 run_command() {
   local command="$1"
   local agent="$2"
@@ -213,6 +242,9 @@ run_command() {
       ;;
     install-all)
       install_all_agents
+      ;;
+    uninstall-all)
+      uninstall_all_agents
       ;;
     uninstall)
       if [[ -z "$agent" ]]; then

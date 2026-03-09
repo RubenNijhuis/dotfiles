@@ -5,9 +5,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROFILE_FILE="$HOME/.config/dotfiles-profile"
-TEMP_BREWFILE="/tmp/brewfile-current.$$"
+TEMP_BREWFILE="$(mktemp "${TMPDIR:-/tmp}/brewfile-current.XXXXXX")"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+trap 'rm -f "$TEMP_BREWFILE"' EXIT
 DRY_RUN=false
 
 usage() {
@@ -138,8 +139,8 @@ while IFS= read -r line; do
   fi
 done < "$TEMP_BREWFILE"
 
-# Clean up temp file
-rm "$TEMP_BREWFILE"
+# Clean up temp file (also handled by EXIT trap)
+rm -f "$TEMP_BREWFILE"
 
 # If no new packages, exit
 if [[ ${#NEW_PACKAGES[@]} -eq 0 ]]; then

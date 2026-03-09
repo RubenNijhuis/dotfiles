@@ -18,12 +18,12 @@ usage() {
 
 validate_section() {
   case "$1" in
-    stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|vscode|backup|biome|tmux|neovim|starship)
+    profile|stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|vscode|backup|biome|tmux|neovim|starship)
       return 0
       ;;
     *)
       echo "Unknown section: $1"
-      echo "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship"
+      echo "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship"
       return 1
       ;;
   esac
@@ -107,6 +107,7 @@ should_run() {
 }
 
 run_checks() {
+  should_run profile && check_profile
   should_run stow && check_stow
   should_run ssh && check_ssh
   should_run gpg && check_gpg

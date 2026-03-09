@@ -8,6 +8,35 @@ developer_root() {
   printf '%s\n' "$DOTFILES_DEVELOPER_ROOT"
 }
 
+check_profile() {
+  printf '%sChecking Profile Configuration...%s\n\n' "${BLUE}" "${NC}"
+
+  local profile_file="$HOME/.config/dotfiles-profile"
+  if [[ ! -f "$profile_file" ]]; then
+    record_result "Profile Configuration" 2 "No profile file found at $profile_file"
+    add_suggestion "Run: make install (or echo personal > $profile_file)"
+    return
+  fi
+
+  local profile
+  profile="$(cat "$profile_file")"
+  if [[ "$profile" != "personal" && "$profile" != "work" ]]; then
+    record_result "Profile Configuration" 2 "Invalid profile value: '$profile' (expected personal or work)"
+    add_suggestion "Fix profile: echo personal > $profile_file"
+    return
+  fi
+
+  local dotfiles_root
+  dotfiles_root="$(cd "$CORE_CHECKS_DIR/../../.." && pwd)"
+  local brewfile="$dotfiles_root/brew/Brewfile.$profile"
+  if [[ ! -f "$brewfile" ]]; then
+    record_result "Profile Configuration" 1 "Profile is '$profile' but $brewfile is missing"
+    return
+  fi
+
+  record_result "Profile Configuration" 0 "Profile: $profile (Brewfile.$profile exists)"
+}
+
 check_stow() {
   printf '%sChecking Stow Configuration...%s\n\n' "${BLUE}" "${NC}"
 

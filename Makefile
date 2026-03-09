@@ -4,7 +4,7 @@
 	hooks profile-shell format vscode-setup backup-setup backup-status doctor-setup doctor-status stow-report \
 	lint-shell test-scripts maint-check maint-check-ci maint-sync maint-automation maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
-	keychain-check backup-verify launchd-check brew-sync-dry doctor-ci \
+	keychain-check backup-verify launchd-install-all launchd-uninstall-all launchd-status launchd-check brew-sync-dry doctor-ci \
 	cleanup-dotfiles-backups remove-bloatware
 
 DOTFILES := $(shell pwd)
@@ -161,6 +161,15 @@ docs-generate: ## Regenerate generated documentation artifacts
 
 docs-sync: ## Verify generated documentation is up to date
 	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh --check
+
+launchd-install-all: ## Install and load all LaunchD agents
+	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh install-all
+
+launchd-uninstall-all: ## Unload and remove all LaunchD agents
+	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh uninstall-all
+
+launchd-status: ## Show status of all LaunchD agents
+	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh status
 
 launchd-check: ## Validate launchd template contracts
 	@bash $(DOTFILES)/scripts/health/check-launchd-contracts.sh

@@ -97,6 +97,9 @@ stow_packages() {
     if stow_output=$(stow -d "$STOW_DIR" -t "$HOME" "$pkg" 2>&1); then
       print_success "$pkg"
       stowed_count=$((stowed_count + 1))
+      # GNU Stow emits a spurious "BUG in find_stowed_path" warning when
+      # target directories already exist (known upstream issue). Filter it
+      # to avoid confusing output.
       filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
       if [[ -n "$filtered_output" ]]; then
         print_dim "    $filtered_output"
@@ -131,12 +134,29 @@ stow_packages() {
   return 1
 }
 
+check_stow_version() {
+  local version
+  version="$(stow --version 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
+  if [[ -z "$version" ]]; then
+    print_warning "Could not detect stow version"
+    return
+  fi
+  local major minor
+  major="${version%%.*}"
+  minor="${version#*.}"
+  minor="${minor%%.*}"
+  if [[ "$major" -lt 2 || ( "$major" -eq 2 && "$minor" -lt 3 ) ]]; then
+    print_warning "GNU Stow $version detected; version 2.3+ recommended (brew upgrade stow)"
+  fi
+}
+
 main() {
   parse_args "$@"
   require_cmd "stow" "Install stow: brew install stow" >/dev/null || {
     print_error "GNU Stow is required"
     exit 1
   }
+  check_stow_version
   print_header "Stowing Configuration Packages"
 
   backup_before_stow

@@ -587,8 +587,15 @@ step_setup_profile() {
 step_install_xcode_clt() {
   if ! xcode-select -p &>/dev/null; then
     xcode-select --install
-    echo "Press enter after Xcode CLT finishes installing."
-    read -r
+    if [[ -t 0 ]]; then
+      echo "Press enter after Xcode CLT finishes installing."
+      read -r
+    else
+      echo "Waiting for Xcode CLT installation to complete..."
+      until xcode-select -p &>/dev/null; do
+        sleep 5
+      done
+    fi
   else
     success "Xcode CLT already installed"
   fi
@@ -800,8 +807,8 @@ main() {
     exit 0
   fi
 
-  trap cleanup_on_error ERR
   exec > >(tee -a "$INSTALL_LOG") 2>&1
+  trap cleanup_on_error ERR
 
   show_header
   load_saved_preferences

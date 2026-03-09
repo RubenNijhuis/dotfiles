@@ -45,6 +45,7 @@ unstow_packages() {
     if stow_output=$(stow -d "$STOW_DIR" -t "$HOME" -D "$pkg" 2>&1); then
       print_success "$pkg"
       unstowed_count=$((unstowed_count + 1))
+      # Filter spurious GNU Stow warning (known upstream issue with existing directories)
       filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
       if [[ -n "$filtered_output" ]]; then
         print_dim "    $filtered_output"

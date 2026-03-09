@@ -22,6 +22,9 @@ dotfiles_load_env() {
   fi
 
   export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+  if [[ ! -d "$DOTFILES_DEVELOPER_ROOT" && -z "${DOTFILES_SKIP_DIR_CHECK:-}" ]]; then
+    mkdir -p "$DOTFILES_DEVELOPER_ROOT"
+  fi
   export DOTFILES_LMSTUDIO_HOME="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
   export DOTFILES_EDITOR="${DOTFILES_EDITOR:-nvim}"
   export DOTFILES_HOMEBREW_PREFIX
