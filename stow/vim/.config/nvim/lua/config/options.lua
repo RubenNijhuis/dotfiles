@@ -8,14 +8,6 @@ opt.cursorline = true
 opt.termguicolors = true
 opt.signcolumn = "yes"
 opt.scrolloff = 8
-
--- Indentation (2-space default, matches VS Code / .editorconfig)
-opt.tabstop = 2
-opt.shiftwidth = 2
-opt.expandtab = true
-opt.autoindent = true
-opt.smartindent = true
-
 -- Search
 opt.ignorecase = true
 opt.smartcase = true

@@ -53,8 +53,8 @@ brew "vim"           # Classic vim (fallback)
 brew "bash"          # Modern bash (macOS ships with old version)
 brew "biome"         # Fast formatter and linter (JS/TS/JSON)
 brew "fnm"           # Fast Node version manager
+brew "node"          # Fallback Node.js (fnm takes priority via PATH)
 brew "lua"           # Lua programming language
-brew "node"          # Node.js (installed via fnm or direct)
 brew "pnpm"          # Fast npm alternative
 brew "ruff"          # Fast Python linter
 brew "rust"          # Rust programming language

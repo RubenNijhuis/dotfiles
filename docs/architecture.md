@@ -11,6 +11,10 @@ This repository is a strict, macOS-only operations hub for machine bootstrap, do
 
 tmux is the session manager. Ghostty handles terminal windowing; tmux handles session persistence, pane splits, and remote workflows. The tmux config uses Tokyo Night theming consistent with the rest of the stack.
 
+## Python
+
+uv is the Python package and project manager. It also manages Python versions (`uv python install 3.x`). No separate version manager (pyenv, asdf) is needed. Pyright provides type checking in Neovim with `basic` mode.
+
 ## Lifecycle
 
 1. Bootstrap with `install.sh`.

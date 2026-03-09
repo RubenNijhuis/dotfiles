@@ -83,6 +83,17 @@ newproj() {
     echo "✓ Created $name in $target"
 }
 
+# Yazi file manager wrapper — cd into directory on exit
+y() {
+    local tmp
+    tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        builtin cd -- "$cwd" || return
+    fi
+    rm -f -- "$tmp"
+}
+
 # Git branch checkout with fzf
 fco() {
     local branch
