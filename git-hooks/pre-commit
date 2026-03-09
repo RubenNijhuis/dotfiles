@@ -17,11 +17,14 @@ STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(s
 # Get staged JS/TS/JSON files supported by Biome
 STAGED_BIOME_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
 
-if [[ -z "$STAGED_SCRIPTS" ]] && [[ -z "$STAGED_BIOME_FILES" ]]; then
+# Get all staged files (for secret detection)
+STAGED_ALL_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+if [[ -z "$STAGED_SCRIPTS" ]] && [[ -z "$STAGED_BIOME_FILES" ]] && [[ -z "$STAGED_ALL_FILES" ]]; then
   exit 0
 fi
 
-print_header "Pre-commit: Validating Shell Scripts"
+print_header "Pre-commit: Validating Staged Files"
 
 # Check 1: Shell lint validation (shared with Make/CI)
 if [[ -n "$STAGED_SCRIPTS" ]]; then
@@ -122,7 +125,42 @@ fi
 
 printf '\n'
 
-# Check 5: TODO/FIXME markers (warning only)
+# Check 5: Basic secret detection (scans staged content)
+if [[ -n "$STAGED_ALL_FILES" ]]; then
+  print_section "Scanning for secrets..."
+
+  SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|PRIVATE KEY|api_key=|apikey=|api_secret='
+  SECRET_FOUND=0
+
+  # Exclude the pre-commit hook itself (contains the pattern as a literal string)
+  if git diff --cached -U0 -- ':!git-hooks/pre-commit' | grep -E "$SECRET_PATTERN" &>/dev/null; then
+    while IFS= read -r file; do
+      [[ -n "$file" ]] || continue
+      [[ "$file" == "git-hooks/pre-commit" ]] && continue
+      matches=$(git diff --cached -U0 -- "$file" | grep -E "$SECRET_PATTERN" || true)
+      if [[ -n "$matches" ]]; then
+        if [[ $SECRET_FOUND -eq 0 ]]; then
+          print_error "Possible secrets detected in staged changes:"
+        fi
+        SECRET_FOUND=$((SECRET_FOUND + 1))
+        echo "$matches" | while IFS= read -r line; do
+          printf "    "
+          print_dim "$file: $line"
+        done
+      fi
+    done <<< "$STAGED_ALL_FILES"
+  fi
+
+  if [[ $SECRET_FOUND -gt 0 ]]; then
+    FAILED=1
+  else
+    print_success "No secrets detected"
+  fi
+
+  printf '\n'
+fi
+
+# Check 6: TODO/FIXME markers (warning only)
 if [[ -n "$STAGED_SCRIPTS" ]]; then
   print_section "Checking for TODO/FIXME markers..."
 

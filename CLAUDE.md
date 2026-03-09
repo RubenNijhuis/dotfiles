@@ -24,6 +24,16 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 - `make docs-sync` — Verify generated docs are current
 - `make update` — Update packages and re-stow configs
 
+## Lifecycle
+
+```
+Fresh machine → install.sh → make stow → make doctor → make ops-status
+                                ↓
+                         make brew-sync (ongoing)
+                                ↓
+                         make maint-check (pre-push)
+```
+
 ## Script Contract
 
 All scripts in `scripts/**` (except `lib/` and `tests/`) must:

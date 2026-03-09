@@ -2,7 +2,7 @@ add_newline = false
 command_timeout = 1000
 scan_timeout = 30
 palette = "tokyonight_storm"
-format = "$directory$git_branch$git_status$python$dotnet$bun$nodejs$docker_context$kubernetes$fill$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$python$dotnet$bun$nodejs$rust$docker_context$kubernetes$fill$cmd_duration$line_break$character"
 right_format = "$time"
 
 [fill]
@@ -49,6 +49,13 @@ style = "peach"
 symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "emerald"
+detect_files = ["package.json", ".node-version", ".nvmrc"]
+
+[rust]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "bold red"
+detect_files = ["Cargo.toml", "Cargo.lock"]
 
 [docker_context]
 symbol = " "

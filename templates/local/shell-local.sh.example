@@ -1,0 +1,11 @@
+# Machine-specific shell configuration.
+# Copy to ~/.config/shell/local.sh — this file is sourced last and not committed.
+
+# Example: Work-specific aliases
+# alias vpn="sudo openvpn ~/vpn/work.conf"
+
+# Example: Machine-specific environment variables
+# export WORK_API_URL="https://api.internal.company.local"
+
+# Example: Additional PATH entries
+# export PATH="$HOME/.local/custom/bin:$PATH"

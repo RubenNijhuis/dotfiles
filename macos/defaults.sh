@@ -119,6 +119,10 @@ defaults write com.apple.screensaver askForPasswordDelay -int 0
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
+# === Apps ===
+# VS Code: enable key repeat (required for Vim extension)
+defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+
 # === Filesystem visibility ===
 chflags nohidden "$HOME/Library" 2>/dev/null || true
 

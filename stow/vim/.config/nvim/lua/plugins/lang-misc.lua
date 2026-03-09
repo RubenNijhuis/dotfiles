@@ -10,4 +10,15 @@ return {
       },
     },
   },
+
+  -- Lint shell scripts with shellcheck
+  {
+    "mfussenegger/nvim-lint",
+    opts = {
+      linters_by_ft = {
+        sh = { "shellcheck" },
+        bash = { "shellcheck" },
+      },
+    },
+  },
 }

@@ -78,12 +78,22 @@ _zsh_eval_cache zoxide init zsh
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
 fi
+if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh" ]]; then
+  source "$HOMEBREW_PREFIX/opt/fzf/shell/completion.zsh"
+fi
 if command -v atuin >/dev/null 2>&1; then
   _zsh_eval_cache atuin init zsh --disable-up-arrow
+fi
+if command -v gh >/dev/null 2>&1; then
+  _zsh_eval_cache gh completion -s zsh
 fi
 
 # Bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+
+if command -v docker >/dev/null 2>&1; then
+  _zsh_eval_cache docker completion zsh
+fi
 
 # OrbStack (optional; only present when OrbStack is installed)
 [[ -f ~/.orbstack/shell/init.zsh ]] && source ~/.orbstack/shell/init.zsh

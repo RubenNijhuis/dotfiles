@@ -65,6 +65,13 @@
 	ci = commit
 	unstage = reset HEAD --
 	last = log -1 HEAD
+	push-force = push --force-with-lease
+	stash-all = stash push -u
+	wt = worktree
+
+[maintenance]
+	auto = true
+	strategy = incremental
 
 # Automatic work/personal detection by directory
 [includeIf "gitdir:**/work/**"]
