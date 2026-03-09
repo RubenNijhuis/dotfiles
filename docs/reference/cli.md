@@ -33,6 +33,7 @@ Commands:
   install <agent>   Install and load a LaunchD agent
   install-all       Install and load all available LaunchD agents
   uninstall <agent> Unload and remove a LaunchD agent
+  uninstall-all     Unload and remove all installed LaunchD agents
   list              List all available agents
   status            Show status of installed agents
   restart <agent>   Restart a running agent
