@@ -271,6 +271,23 @@ Options:
   --check   Exit non-zero when drift is found.
 ```
 
+## `scripts/maintenance/clean-all.sh`
+
+```text
+Usage: scripts/maintenance/clean-all.sh [--help] [--no-color] [--dry-run]
+
+Remove dotfiles backup directories and Homebrew download cache.
+Run after clean.sh (via 'make clean-all').
+```
+
+## `scripts/maintenance/clean.sh`
+
+```text
+Usage: scripts/maintenance/clean.sh [--help] [--no-color] [--dry-run]
+
+Remove zsh caches, automation log files, and .DS_Store files from the repo.
+```
+
 ## `scripts/maintenance/cleanup-dotfiles-backups.sh`
 
 ```text
