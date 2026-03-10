@@ -12,6 +12,11 @@ unknown_fail=0
 while IFS= read -r script; do
   name="${script##*/}"
 
+  # Skip scripts marked as launchd-internal (no CLI contract required)
+  if grep -q '^# SCRIPT_VISIBILITY: launchd-internal' "$script"; then
+    continue
+  fi
+
   if ! bash "$script" --help >/dev/null 2>&1; then
     print_error "FAIL(help): $name"
     help_fail=$((help_fail + 1))
