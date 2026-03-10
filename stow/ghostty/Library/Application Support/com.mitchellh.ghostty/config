@@ -8,21 +8,23 @@ font-codepoint-map = U+E000-U+F8FF,U+F0001-U+F1AF0=Symbols Nerd Font Mono
 adjust-cell-height = 8%
 font-feature = calt
 font-feature = liga
+font-thicken = true
 
 # Theme
 theme = TokyoNight Night
 
 # Window
-window-padding-x = 14
-window-padding-y = 10
+window-padding-x = 4
+window-padding-y = 4
 window-padding-balance = true
+window-padding-color = extend
 window-width = 120
 window-height = 34
-maximize = false
-fullscreen = false
 window-save-state = never
 window-theme = dark
+window-colorspace = display-p3
 macos-titlebar-style = tabs
+window-inherit-working-directory = true
 
 # Background
 background-opacity = 0.92
@@ -33,6 +35,10 @@ cursor-style = bar
 cursor-color = #7aa2f7
 cursor-opacity = 0.85
 cursor-style-blink = true
+
+# Mouse
+mouse-hide-while-typing = true
+cursor-click-to-move = true
 
 # Shell
 shell-integration = zsh
@@ -45,6 +51,12 @@ shell-integration-features = no-cursor,sudo,title
 
 # Accessibility
 minimum-contrast = 1.1
+
+# Resize
+resize-overlay = after-first
+
+# Clipboard
+clipboard-trim-trailing-spaces = true
 
 # Keybindings
 keybind = super+d=new_split:right
