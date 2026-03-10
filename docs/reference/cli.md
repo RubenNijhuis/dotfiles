@@ -51,6 +51,11 @@ Examples:
   scripts/automation/launchd-manager.sh restart dotfiles-doctor
 ```
 
+## `scripts/automation/lmstudio-start.sh`
+
+```text
+```
+
 ## `scripts/automation/ops-status.sh`
 
 ```text

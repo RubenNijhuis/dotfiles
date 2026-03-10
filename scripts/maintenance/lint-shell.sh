@@ -32,10 +32,11 @@ collect_files() {
     return 0
   fi
 
-  find "$DOTFILES" -type f \( -name "*.sh" -o -name "*.bash" -o -name "*.zsh" \) \
-    -not -path "*/.git/*" \
-    -not -path "*/node_modules/*" \
-    -not -path "*/.cache/*" | sort
+  {
+    git -C "$DOTFILES" ls-files --cached --others --exclude-standard \
+      '*.sh' '*.bash' '*.zsh' 2>/dev/null \
+      | sed "s|^|${DOTFILES}/|" || true
+  } | sort
 }
 
 parse_args() {
