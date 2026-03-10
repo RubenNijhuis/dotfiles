@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.user.lmstudio-server</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>__DOTFILES__/scripts/automation/lmstudio-start.sh</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>7</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+	<key>StandardOutPath</key>
+	<string>__HOME__/.local/log/lmstudio-server.out.log</string>
+	<key>StandardErrorPath</key>
+	<string>__HOME__/.local/log/lmstudio-server.err.log</string>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>__HOMEBREW_PREFIX__/bin:__HOMEBREW_PREFIX__/sbin:__HOME__/.lmstudio/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+</dict>
+</plist>

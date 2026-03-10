@@ -17,6 +17,9 @@ stow/ssh/.ssh/*.pub
 stow/ssh/.ssh/known_hosts*
 stow/ssh/.ssh/config.d/local.conf
 
+# Shell - machine-specific local overrides (may contain secrets)
+stow/shell/.config/shell/local.sh
+
 # GPG - keep config, ignore keys and trust database
 stow/gpg/.gnupg/*.gpg
 stow/gpg/.gnupg/*.kbx

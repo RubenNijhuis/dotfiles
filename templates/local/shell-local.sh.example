@@ -9,3 +9,13 @@
 
 # Example: Additional PATH entries
 # export PATH="$HOME/.local/custom/bin:$PATH"
+
+# ── MCP / AI Tool Secrets ──────────────────────────────────────────────
+# Used by Claude Code MCP servers and OpenClaw.
+# export OBSIDIAN_VAULT_PATH="$HOME/Developer/personal/projects/obsidian-store"
+# export GOOGLE_OAUTH_CREDENTIALS="$HOME/.config/google/gcp-oauth.keys.json"
+# export LINEAR_API_KEY="lin_api_..."
+
+# ── LM Studio ─────────────────────────────────────────────────────────
+# export LMSTUDIO_DEFAULT_MODEL="qwen3.5-2b"
+# export LMSTUDIO_PORT="1234"
