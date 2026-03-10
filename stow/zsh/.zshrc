@@ -68,7 +68,7 @@ setopt CORRECT
 setopt GLOB_DOTS
 
 # ----- Hooks -----
-chpwd() { ls; }
+chpwd() { emulate -L zsh -o aliases; ls; }
 
 # ----- Plugins (from Homebrew, cached paths) -----
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
