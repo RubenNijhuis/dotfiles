@@ -21,7 +21,7 @@ shopt -s cdspell
 shopt -s dirspell 2>/dev/null
 
 # PATH (manual, since path.sh uses zsh-specific syntax)
-export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/go/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/sbin:/usr/local/bin:/usr/local/sbin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/go/bin:$HOME/.dotnet/tools:${HOMEBREW_PREFIX:-/opt/homebrew}/opt/dotnet@${DOTFILES_DOTNET_VERSION:-8}/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/sbin:/usr/local/bin:/usr/local/sbin:$HOME/.local/bin:$PATH"
 
 # Shared shell modules (bash-compatible)
 source ~/.config/shell/exports.sh

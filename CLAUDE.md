@@ -74,6 +74,7 @@ Each stow package maps to a tool config. Cross-tool dependencies are noted with 
 | `sesh` | `.config/sesh/sesh.toml` | Tmux session manager | → tmux, fzf, zoxide |
 | `spicetify` | `.config/spicetify/` | Spotify theming (Tokyo Night) | |
 | `vscode` | `Library/.../Code/User/{settings.json,extensions.txt}` | VS Code (Biome, ESLint, Tokyo Night) | |
+| `dotnet` | `path.sh`, `exports.sh` | .NET SDK (version-pinned, Rider as IDE) | → omnisharp (Neovim LSP) |
 | `claude` | `.claude/skills/` | Claude CLI skills (commit, review-pr, fix-issue) | |
 
 ### Shell Module Loading Order

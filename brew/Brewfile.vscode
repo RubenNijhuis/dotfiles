@@ -37,6 +37,24 @@ vscode "ms-python.debugpy"                   # Python debugger
 vscode "ms-python.vscode-python-envs"        # Python environment management
 vscode "kevinrose.vsc-python-indent"         # Smart Python indentation
 
+# Language Support - C#
+vscode "ms-dotnettools.csdevkit"             # C# Dev Kit (LSP, debugging, project management)
+
+# Language Support - Go
+vscode "golang.go"                           # Go language support (gopls, debugging, testing)
+
+# Language Support - Rust
+vscode "rust-lang.rust-analyzer"             # Rust language server
+
+# Language Support - Ruby
+vscode "shopify.ruby-lsp"                    # Ruby language server
+
+# Language Support - Zig
+vscode "ziglang.vscode-zig"                  # Zig language support (ZLS)
+
+# Language Support - Lua
+vscode "sumneko.lua"                         # Lua language server
+
 # Language Support - Other
 vscode "tamasfe.even-better-toml"            # TOML syntax and formatting
 
