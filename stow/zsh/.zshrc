@@ -98,6 +98,7 @@ fi
 if command -v rustup >/dev/null 2>&1; then
   _zsh_eval_cache rustup completions zsh
 fi
+# Go, Zig, Cargo completions: auto-loaded by compinit via Homebrew site-functions
 # Load fzf key bindings (Ctrl-R, Ctrl-T, Alt-C); Tab is handled by fzf-tab.
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"

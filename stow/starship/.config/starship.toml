@@ -73,7 +73,8 @@ detect_files = ["Gemfile", ".ruby-version"]
 symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "sky"
-detect_files = [".lua-version", "lua", "*.rockspec"]
+detect_files = [".lua-version", "*.rockspec"]
+detect_extensions = ["lua"]
 
 [zig]
 symbol = " "
