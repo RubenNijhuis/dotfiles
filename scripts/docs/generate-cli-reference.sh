@@ -70,6 +70,10 @@ main() {
   append_help_block "install.sh" "install.sh"
 
   while IFS= read -r script; do
+    # Skip launchd-internal scripts (no CLI contract)
+    if grep -q '^# SCRIPT_VISIBILITY: launchd-internal' "$script"; then
+      continue
+    fi
     script_name="${script#"$DOTFILES"/}"
     append_help_block "$script_name" "$script_name"
   done < <(
