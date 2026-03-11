@@ -83,7 +83,7 @@ zsh/bash startup
   → HOMEBREW_PREFIX (cached)
   → completions (zsh: cached 20h, bash: none)
   → plugins (zsh-autosuggestions, syntax-highlighting deferred)
-  → tool inits (fnm, zoxide, fzf, atuin, gh, docker — all cached in ~/.cache/zsh/)
+  → tool inits (fnm, zoxide, fzf, atuin, rbenv, gh, docker — all cached in ~/.cache/zsh/)
   → shell/path.sh (zsh-only: typeset -U, path=())
   → shell/exports.sh (env vars, FZF colors, eza icons)
   → shell/aliases.sh (cat→bat, ls→eza, grep→rg, vim→nvim, top→btop)

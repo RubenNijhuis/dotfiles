@@ -2,7 +2,7 @@ add_newline = false
 command_timeout = 1000
 scan_timeout = 30
 palette = "tokyonight_storm"
-format = "$directory$git_branch$git_status$python$dotnet$bun$nodejs$rust$docker_context$kubernetes$fill$cmd_duration$line_break$character"
+format = "$directory$git_branch$git_status$python$dotnet$bun$nodejs$rust$golang$ruby$lua$zig$docker_context$kubernetes$fill$cmd_duration$line_break$character"
 right_format = "$time"
 
 [fill]
@@ -56,6 +56,30 @@ symbol = " "
 format = "via [$symbol($version )]($style)"
 style = "bold red"
 detect_files = ["Cargo.toml", "Cargo.lock"]
+
+[golang]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "teal"
+detect_files = ["go.mod", "go.sum"]
+
+[ruby]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "red"
+detect_files = ["Gemfile", ".ruby-version"]
+
+[lua]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "sky"
+detect_files = [".lua-version", "lua", "*.rockspec"]
+
+[zig]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+style = "peach"
+detect_files = ["build.zig", "build.zig.zon"]
 
 [docker_context]
 symbol = " "

@@ -6,6 +6,9 @@ _lmstudio_home="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
 
 path=(
     "$HOME/.bun/bin"
+    "$HOME/.cargo/bin"
+    "$HOME/go/bin"
+    "$_brew_prefix/opt/rustup/bin"
     "$_brew_prefix/bin"
     "$_brew_prefix/sbin"
     "/usr/local/bin"

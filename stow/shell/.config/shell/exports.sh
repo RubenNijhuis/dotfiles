@@ -12,6 +12,14 @@ export VISUAL="$DOTFILES_EDITOR"
 export LANG="en_US.UTF-8"
 export BUN_INSTALL="$HOME/.bun"
 
+# Rust
+export RUSTUP_HOME="$HOME/.rustup"
+export CARGO_HOME="$HOME/.cargo"
+
+# Go
+export GOPATH="$HOME/go"
+export GOBIN="$GOPATH/bin"
+
 # Homebrew
 export HOMEBREW_NO_ENV_HINTS=1
 

@@ -92,6 +92,12 @@ _zsh_eval_cache() {
 
 _zsh_eval_cache fnm env --use-on-cd --shell zsh
 _zsh_eval_cache zoxide init zsh
+if command -v rbenv >/dev/null 2>&1; then
+  _zsh_eval_cache rbenv init - --no-rehash zsh
+fi
+if command -v rustup >/dev/null 2>&1; then
+  _zsh_eval_cache rustup completions zsh
+fi
 # Load fzf key bindings (Ctrl-R, Ctrl-T, Alt-C); Tab is handled by fzf-tab.
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then
   source "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh"
@@ -135,8 +141,4 @@ fi
 
 # Ensure clean exit code
 return 0 2>/dev/null || true
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
-# End of LM Studio CLI section
 

@@ -21,7 +21,7 @@ shopt -s cdspell
 shopt -s dirspell 2>/dev/null
 
 # PATH (manual, since path.sh uses zsh-specific syntax)
-export PATH="$HOME/.bun/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/sbin:/usr/local/bin:/usr/local/sbin:$HOME/.local/bin:$PATH"
+export PATH="$HOME/.bun/bin:$HOME/.cargo/bin:$HOME/go/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/opt/rustup/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/bin:${HOMEBREW_PREFIX:-/opt/homebrew}/sbin:/usr/local/bin:/usr/local/sbin:$HOME/.local/bin:$PATH"
 
 # Shared shell modules (bash-compatible)
 source ~/.config/shell/exports.sh
@@ -47,6 +47,10 @@ if command -v fnm >/dev/null 2>&1; then
   eval "$(fnm env --use-on-cd --shell bash)"
 fi
 
+if command -v rbenv >/dev/null 2>&1; then
+  eval "$(rbenv init - --no-rehash bash)"
+fi
+
 # FZF keybindings and completion
 _brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"
 if [[ -f "$_brew_prefix/opt/fzf/shell/key-bindings.bash" ]]; then
@@ -59,8 +63,4 @@ unset _brew_prefix
 
 # Local overrides (not committed)
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/rubennijhuis/.lmstudio/bin"
-# End of LM Studio CLI section
 

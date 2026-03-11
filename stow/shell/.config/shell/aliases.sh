@@ -25,6 +25,8 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 # Development cleanup
 alias clean-node='find . -name "node_modules" -type d -prune -exec rm -rf {} +'
 alias clean-python='find . -name "__pycache__" -type d -prune -exec rm -rf {} +'
+alias clean-rust='cargo clean 2>/dev/null; find . -name "target" -type d -prune -exec rm -rf {} +'
+alias clean-go='go clean -cache'
 alias clean-ds='find . -name ".DS_Store" -delete'
 
 # Search
