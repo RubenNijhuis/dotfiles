@@ -9,6 +9,8 @@ github.copilot-chat            # GitHub Copilot chat interface
 biomejs.biome                  # Fast formatter and linter (JS/TS/JSON)
 editorconfig.editorconfig      # EditorConfig support
 dbaeumer.vscode-eslint         # JavaScript/TypeScript linter
+esbenp.prettier-vscode         # Prettier formatter
+foxundermoon.shell-format      # Shell script formatter
 usernamehw.errorlens           # Inline error highlighting
 
 # Git
@@ -16,6 +18,10 @@ eamodio.gitlens                # Git supercharged (blame, history, authorship)
 
 # Theme
 enkia.tokyo-night               # Tokyo Night color theme
+
+# Editor
+vscodevim.vim                  # Vim keybindings
+ms-vscode.makefile-tools       # Makefile support
 
 # Language Support - JavaScript/TypeScript
 bradlc.vscode-tailwindcss      # Tailwind CSS IntelliSense

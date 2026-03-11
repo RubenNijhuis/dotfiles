@@ -44,8 +44,7 @@ brew "lazygit"       # Terminal UI for git
 brew "neovim"        # Modern vim
 brew "vim"           # Classic vim (fallback)
 
-# Note: dust not currently installed but available if needed
-# brew "dust"        # Better du (disk usage)
+brew "dust"          # Better du (disk usage)
 
 # -----------------------------------------------------------------------------
 # Development Tools
@@ -59,9 +58,12 @@ brew "pnpm"          # Fast npm alternative
 brew "ruff"          # Fast Python linter
 brew "rust"          # Rust programming language
 brew "uv"            # Fast Python package and project manager
+brew "jq"            # JSON processor
+brew "yq"            # YAML processor
 brew "prettier"      # Code formatter (multi-language)
 brew "shellcheck"    # Shell script linter
 brew "shellharden"   # Shell script hardening linter
+brew "tealdeer"      # Fast tldr client for quick command examples
 
 # Note: tsx not currently installed but available if needed
 # brew "tsx"         # TypeScript execution

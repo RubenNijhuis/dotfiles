@@ -86,22 +86,8 @@ print_key_value() {
   printf '  %s%s:%s %s\n' "${BOLD}" "$key" "${NC}" "$value"
 }
 
-# Status indicators
-status_ok() {
-  printf '%s✓%s' "${GREEN}" "${NC}"
-}
-
-status_fail() {
-  printf '%s✗%s' "${RED}" "${NC}"
-}
-
-status_warn() {
-  printf '%s⚠%s' "${YELLOW}" "${NC}"
-}
-
 # Export functions and variables
 export RED GREEN YELLOW BLUE CYAN MAGENTA BOLD DIM NC
 export -f print_header print_section print_subsection
 export -f print_success print_error print_warning print_info print_dim
 export -f print_bullet print_indent print_key_value
-export -f status_ok status_fail status_warn

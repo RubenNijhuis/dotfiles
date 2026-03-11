@@ -35,17 +35,6 @@ require_cmd() {
   fi
 }
 
-require_file() {
-  local file="$1"
-  local hint="${2:-Required file is missing.}"
-
-  if [[ ! -f "$file" ]]; then
-    echo "Missing required file: $file"
-    echo "$hint"
-    return 1
-  fi
-}
-
 confirm() {
   local prompt="$1"
   local default="${2:-N}"
