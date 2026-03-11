@@ -139,7 +139,6 @@ fi
 # ----- Local overrides (not committed) -----
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
 
-
 # Ensure clean exit code
 return 0 2>/dev/null || true
 
