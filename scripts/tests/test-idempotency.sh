@@ -129,7 +129,46 @@ EOS
   print_success "idempotency(launchd-manager): passed"
 }
 
+test_stow_symlinks_resolve_to_stow_dir() {
+  if ! command -v stow >/dev/null 2>&1; then
+    print_warning "idempotency(symlink-targets): skipped (stow not installed)"
+    return 0
+  fi
+
+  local temp_home real_root_dir
+  temp_home="$(mktemp -d)"
+  # Resolve symlinks in ROOT_DIR so comparison works when repo is accessed via a symlink
+  real_root_dir="$(cd "$ROOT_DIR" && pwd -P)"
+  trap 'rm -rf "$temp_home"' RETURN
+
+  HOME="$temp_home" bash "$ROOT_DIR/scripts/bootstrap/stow-all.sh" --no-color >/dev/null
+
+  local bad=0
+  while IFS= read -r link; do
+    local target
+    target="$(readlink "$link")"
+    # Resolve relative targets to absolute
+    if [[ "$target" != /* ]]; then
+      target="$(cd "$(dirname "$link")" && cd "$(dirname "$target")" && pwd -P)/$(basename "$target")"
+    fi
+    if [[ "$target" != "$real_root_dir/stow/"* ]]; then
+      print_error "Symlink $link points outside stow dir: $target"
+      bad=$((bad + 1))
+    fi
+  done < <(find "$temp_home" -type l)
+
+  if [[ "$bad" -gt 0 ]]; then
+    fail "Found $bad symlink(s) pointing outside $real_root_dir/stow/"
+  fi
+
+  trap - RETURN
+  rm -rf "$temp_home"
+
+  print_success "idempotency(symlink-targets): passed"
+}
+
 test_stow_all_idempotent
 test_launchd_manager_idempotent
+test_stow_symlinks_resolve_to_stow_dir
 
 print_success "idempotency: all checks passed"

@@ -99,14 +99,19 @@ main() {
   printf '\n'
 
   print_section "shellharden"
-  local harden_failed=0
-  for file in "${files[@]}"; do
-    if ! shellharden --check "$file" 2>/dev/null; then
-      harden_failed=1
+  if ! command -v shellharden &>/dev/null; then
+    print_warning "shellharden not installed — skipping quoting checks"
+    print_dim "Install with: brew install shellharden"
+  else
+    local harden_failed=0
+    for file in "${files[@]}"; do
+      if ! shellharden --check "$file" 2>/dev/null; then
+        harden_failed=1
+      fi
+    done
+    if [[ "$harden_failed" -eq 0 ]]; then
+      print_success "Shellharden passed"
     fi
-  done
-  if [[ "$harden_failed" -eq 0 ]]; then
-    print_success "Shellharden passed"
   fi
 }
 

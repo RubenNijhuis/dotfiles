@@ -35,6 +35,17 @@ require_cmd() {
   fi
 }
 
+validate_profile() {
+  local profile="$1"
+  case "$profile" in
+    personal|work) return 0 ;;
+    *)
+      echo "Invalid profile: '$profile' (expected 'personal' or 'work')" >&2
+      return 1
+      ;;
+  esac
+}
+
 confirm() {
   local prompt="$1"
   local default="${2:-N}"

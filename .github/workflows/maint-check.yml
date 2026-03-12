@@ -16,9 +16,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          brew install shellcheck
+          brew install shellcheck biome
+
+      - name: Run maintenance checks
+        run: |
+          make maint-check-ci
 
       - name: Run CI doctor checks
         run: |
-          make lint-shell
           make doctor-ci
+
+      - name: Biome check
+        run: |
+          biome check --no-errors-on-unmatched .

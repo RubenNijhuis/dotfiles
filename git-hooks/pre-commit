@@ -28,20 +28,25 @@ print_header "Pre-commit: Validating Staged Files"
 
 # Check 1: Shell lint validation (shared with Make/CI)
 if [[ -n "$STAGED_SCRIPTS" ]]; then
-  print_section "Running shell lint..."
-  STAGED_SHELL_ARRAY=()
-  while IFS= read -r script; do
-    [[ -n "$script" ]] || continue
-    STAGED_SHELL_ARRAY+=("$script")
-  done <<< "$STAGED_SCRIPTS"
+  if ! command -v shellcheck &>/dev/null; then
+    print_warning "shellcheck not installed — skipping shell lint"
+    print_dim "Install with: brew install shellcheck"
+  else
+    print_section "Running shell lint..."
+    STAGED_SHELL_ARRAY=()
+    while IFS= read -r script; do
+      [[ -n "$script" ]] || continue
+      STAGED_SHELL_ARRAY+=("$script")
+    done <<< "$STAGED_SCRIPTS"
 
-  if [[ -x "$LINT_SHELL" ]]; then
-    if ! "$LINT_SHELL" --no-color "${STAGED_SHELL_ARRAY[@]}"; then
+    if [[ -x "$LINT_SHELL" ]]; then
+      if ! "$LINT_SHELL" --no-color "${STAGED_SHELL_ARRAY[@]}"; then
+        FAILED=1
+      fi
+    else
+      print_error "Missing lint script: $LINT_SHELL"
       FAILED=1
     fi
-  else
-    print_error "Missing lint script: $LINT_SHELL"
-    FAILED=1
   fi
   printf '\n'
 fi

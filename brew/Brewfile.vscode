@@ -12,9 +12,9 @@ vscode "github.copilot-chat"                 # GitHub Copilot chat interface
 vscode "biomejs.biome"                       # Fast formatter and linter (JS/TS/JSON)
 vscode "editorconfig.editorconfig"           # EditorConfig support
 vscode "dbaeumer.vscode-eslint"              # JavaScript/TypeScript linter
-vscode "usernamehw.errorlens"                # Inline error highlighting
 vscode "esbenp.prettier-vscode"              # Prettier formatter
 vscode "foxundermoon.shell-format"           # Shell script formatter
+vscode "usernamehw.errorlens"                # Inline error highlighting
 
 # Git
 vscode "eamodio.gitlens"                     # Git supercharged (blame, history)

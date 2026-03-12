@@ -5,7 +5,7 @@
 	lint-shell test-scripts maint-check maint-check-ci maint-sync maint-automation maint-full \
 	bootstrap-verify docs-generate docs-sync ops-status repo-update-setup repo-update-status \
 	keychain-check backup-verify launchd-install-all launchd-uninstall-all launchd-status launchd-check brew-sync-dry doctor-ci \
-	cleanup-dotfiles-backups remove-bloatware clean clean-all
+	cleanup-dotfiles-backups remove-bloatware clean clean-all vscode-parity
 
 DOTFILES := $(shell pwd)
 
@@ -180,9 +180,12 @@ launchd-status: ## Show status of all LaunchD agents
 launchd-check: ## Validate launchd template contracts
 	@bash $(DOTFILES)/scripts/health/check-launchd-contracts.sh
 
+vscode-parity: ## Check VS Code extension parity between extensions.txt and Brewfile.vscode
+	@bash $(DOTFILES)/scripts/health/check-vscode-parity.sh --check
+
 maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks (local-safe)
 
-maint-check-ci: maint-check docs-sync ## Run maintenance checks including docs staleness (CI)
+maint-check-ci: maint-check docs-sync vscode-parity ## Run maintenance checks including docs staleness (CI)
 
 maint-sync: update brew-sync brew-audit update-repos ## Run maintenance sync/update workflow
 

@@ -31,6 +31,7 @@ RECENT_LABEL="$3"
 RECENT_SOURCE="$4"  # directory path or log file path (~ is expanded)
 LOG_GLOB="$5"
 LINES="${6:-10}"
+LOG_DIR="${HOME}/.local/log/"
 
 # Expand leading ~ to $HOME
 expanded="${RECENT_SOURCE/#\~/$HOME}"
@@ -53,4 +54,4 @@ fi
 echo ""
 echo "Log files:"
 # shellcheck disable=SC2086
-ls -lh "${HOME}/.local/log/"${LOG_GLOB} 2>/dev/null || echo "  No logs yet"
+ls -lh "${LOG_DIR}"${LOG_GLOB} 2>/dev/null || echo "  No logs yet"

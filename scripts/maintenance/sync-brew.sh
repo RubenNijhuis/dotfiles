@@ -48,6 +48,7 @@ if [[ ! -f "$PROFILE_FILE" ]]; then
   exit 1
 fi
 PROFILE="$(cat "$PROFILE_FILE")"
+validate_profile "$PROFILE" || exit 1
 
 require_cmd "brew" "Install Homebrew first: https://brew.sh" >/dev/null || {
   print_error "Homebrew is required"
