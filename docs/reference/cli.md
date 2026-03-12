@@ -206,6 +206,19 @@ Usage: scripts/health/check-launchd-contracts.sh [--help] [--no-color]
 Validate templates/launchd/*.plist against repository launchd contract.
 ```
 
+## `scripts/health/check-vscode-parity.sh`
+
+```text
+Usage: scripts/health/check-vscode-parity.sh [--help] [--no-color] [--check]
+
+Verify VS Code extension parity between extensions.txt and Brewfile.vscode.
+
+Options:
+  --check     Exit non-zero if drift is detected (for CI/Makefile use)
+  --no-color  Disable colored output
+  --help      Show this help message
+```
+
 ## `scripts/health/doctor-ci.sh`
 
 ```text
