@@ -59,3 +59,20 @@ confirm() {
 
   [[ "$answer" =~ ^[Yy]$ ]]
 }
+
+# Read a saved preference value from dotfiles-install-preferences.
+# Returns the stored value, or the default if the file/key is absent.
+get_preference() {
+  local key="$1"
+  local default="${2:-}"
+  local prefs_file="$HOME/.config/dotfiles-install-preferences"
+  if [[ -f "$prefs_file" ]]; then
+    local value
+    value=$(grep "^${key}=" "$prefs_file" 2>/dev/null | tail -1 | cut -d'"' -f2)
+    if [[ -n "$value" ]]; then
+      printf '%s' "$value"
+      return
+    fi
+  fi
+  printf '%s' "$default"
+}

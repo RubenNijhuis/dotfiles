@@ -62,7 +62,23 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 **Impact:** Removes ~20ms from critical path
 
-### 4. Starship Prompt
+### 4. Lazy-Load fnm and zoxide
+**Problem:** `fnm env` and `zoxide init` run eagerly on every startup even when not needed in that session.
+
+**Solution:** Stub the commands and defer real init until first use
+```zsh
+_zsh_lazy_load_fnm() {
+  unfunction fnm node npm npx corepack 2>/dev/null
+  _zsh_eval_cache fnm env --use-on-cd --shell zsh
+}
+for cmd in fnm node npm npx corepack; do
+  eval "${cmd}() { _zsh_lazy_load_fnm; ${cmd} \"\$@\" }"
+done
+```
+
+**Impact:** Removes ~30-50ms from startup when node/zoxide not used in that session. First-use delay is negligible (cache hit via `_zsh_eval_cache`).
+
+### 5. Starship Prompt
 **Goal:** Keep prompt rendering fast and stable with a single backend.
 
 ```zsh
@@ -97,33 +113,6 @@ zprof
 ```
 
 ## Future Optimizations
-
-### Lazy Loading (Not Yet Implemented)
-Could reduce startup time further by lazy-loading tools:
-
-**fnm (Node version manager):**
-```zsh
-# Instead of: eval "$(fnm env)"
-# Lazy load on first node/npm/npx use
-fnm() {
-  unfunction fnm
-  eval "$(command fnm env --use-on-cd --shell zsh)"
-  fnm "$@"
-}
-```
-
-**zoxide:**
-```zsh
-# Instead of: eval "$(zoxide init zsh)"
-# Lazy load on first z/zi use
-z() {
-  unfunction z zi
-  eval "$(zoxide init zsh)"
-  z "$@"
-}
-```
-
-**Trade-off:** Adds delay on first use, but removes ~30-50ms from startup.
 
 ### Parallel Loading
 Could load multiple slow operations in parallel:

@@ -2,6 +2,7 @@
 # Doctor checks: core environment and configuration checks.
 CORE_CHECKS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CORE_CHECKS_DIR/../../lib/env.sh"
+source "$CORE_CHECKS_DIR/../../lib/common.sh"
 dotfiles_load_env "$(cd "$CORE_CHECKS_DIR/../../.." && pwd)"
 
 developer_root() {
@@ -97,6 +98,8 @@ check_ssh() {
   fi
 
   # Check work key (optional - warning only)
+  local ssh_pref
+  ssh_pref="$(get_preference "PREF_SETUP_SSH")"
   if [[ -f "$HOME/.ssh/id_ed25519_work" ]]; then
     local perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_work" 2>/dev/null || echo "")
     if [[ "$perms" == "600" ]]; then
@@ -106,6 +109,8 @@ check_ssh() {
       issues=$((issues + 1))
       add_suggestion "Fix permissions: chmod 600 ~/.ssh/id_ed25519_work"
     fi
+  elif [[ "$ssh_pref" == "no" ]]; then
+    details+="${DIM}Work SSH: skipped (preference)${NC}\n  "
   else
     details+="⚠ Work key: not configured (optional)\n  "
   fi
@@ -131,7 +136,11 @@ check_ssh() {
     details+="\n  SSH agent: $loaded_keys keys loaded"
   else
     details+="\n  ⚠ SSH agent: no keys loaded"
-    add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal ~/.ssh/id_ed25519_work"
+    if [[ "$ssh_pref" == "no" ]]; then
+      add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal"
+    else
+      add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal ~/.ssh/id_ed25519_work"
+    fi
   fi
 
   if [[ $issues -eq 0 ]]; then
@@ -144,6 +153,13 @@ check_ssh() {
 check_gpg() {
   printf '%sChecking GPG Configuration...%s\n' "${BLUE}" "${NC}"
   echo ""
+
+  local gpg_pref
+  gpg_pref="$(get_preference "PREF_SETUP_GPG")"
+  if [[ "$gpg_pref" == "no" ]]; then
+    record_result "GPG Configuration" 0 "${DIM}GPG: skipped (preference)${NC}"
+    return
+  fi
 
   local issues=0
   local details=""

@@ -90,8 +90,25 @@ _zsh_eval_cache() {
   source "$cache_file"
 }
 
-_zsh_eval_cache fnm env --use-on-cd --shell zsh
-_zsh_eval_cache zoxide init zsh
+# ----- Lazy-loaded tools (deferred until first use) -----
+_zsh_lazy_load_fnm() {
+  unfunction fnm node npm npx corepack 2>/dev/null
+  _zsh_eval_cache fnm env --use-on-cd --shell zsh
+}
+for cmd in fnm node npm npx corepack; do
+  eval "${cmd}() { _zsh_lazy_load_fnm; ${cmd} \"\$@\" }"
+done
+unset cmd
+
+_zsh_lazy_load_zoxide() {
+  unfunction z zi __zoxide_z __zoxide_zi 2>/dev/null
+  _zsh_eval_cache zoxide init zsh
+}
+for cmd in z zi; do
+  eval "${cmd}() { _zsh_lazy_load_zoxide; ${cmd} \"\$@\" }"
+done
+unset cmd
+
 if command -v rbenv >/dev/null 2>&1; then
   _zsh_eval_cache rbenv init - --no-rehash zsh
 fi
