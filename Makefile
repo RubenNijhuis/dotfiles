@@ -1,10 +1,10 @@
 .PHONY: help install update update-brew update-stow stow unstow macos ssh-setup gpg-setup \
 	backup brew-sync brew-sync-dry brew-audit \
 	doctor ops-status stow-report \
-	hooks format vscode-setup keychain-check automation-setup remove-bloatware \
+	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync \
 	launchd-install-all launchd-uninstall-all launchd-status \
-	clean
+	clean status
 
 DOTFILES := $(shell pwd)
 
@@ -20,6 +20,7 @@ help: ## Show all commands
 	@printf "  \033[36m%-25s\033[0m %s\n" "unstow" "Unstow all config packages"
 	@printf "  \033[36m%-25s\033[0m %s\n" "macos" "Apply macOS defaults"
 	@printf "\n\033[1m── Health & Status ──────────\033[0m\n"
+	@printf "  \033[36m%-25s\033[0m %s\n" "status" "Quick system status (shows only actionable items)"
 	@printf "  \033[36m%-25s\033[0m %s\n" "doctor" "Run comprehensive system health check"
 	@printf "  \033[36m%-25s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
 	@printf "  \033[36m%-25s\033[0m %s\n" "stow-report" "Preview stow conflicts without changing files"
@@ -40,6 +41,7 @@ help: ## Show all commands
 	@printf "  \033[36m%-25s\033[0m %s\n" "keychain-check" "Validate required keychain entries"
 	@printf "  \033[36m%-25s\033[0m %s\n" "automation-setup" "Setup all LaunchD automations"
 	@printf "  \033[36m%-25s\033[0m %s\n" "remove-bloatware" "Remove common macOS built-in apps"
+	@printf "  \033[36m%-25s\033[0m %s\n" "new-tool NAME=<name>" "Scaffold a new stow package"
 	@printf "\n\033[1m── Backup ───────────────────\033[0m\n"
 	@printf "  \033[36m%-25s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
 	@printf "\n\033[1m── LaunchD ──────────────────\033[0m\n"
@@ -78,6 +80,9 @@ macos: ## Apply macOS defaults
 
 # ── Health & Status ───────────────────────────────────────────────────
 
+status: ## Quick system status — shows only actionable items
+	@bash $(DOTFILES)/scripts/health/status.sh
+
 doctor: ## Run comprehensive system health check
 	@bash $(DOTFILES)/scripts/health/doctor.sh
 
@@ -108,6 +113,9 @@ automation-setup: ## Setup all LaunchD automations (backup, doctor, repo-update)
 
 remove-bloatware: ## Remove common macOS built-in apps (Tips, Chess, Stocks, etc.)
 	@bash $(DOTFILES)/scripts/bootstrap/remove-bloatware.sh
+
+new-tool: ## Scaffold a new stow package (usage: make new-tool NAME=<name>)
+	@bash $(DOTFILES)/scripts/bootstrap/new-tool.sh $(NAME)
 
 # ── Backup ────────────────────────────────────────────────────────────
 

@@ -140,6 +140,29 @@ Validate required keychain items listed one service name per line.
 Default config: local/keychain-required.txt
 ```
 
+## `scripts/bootstrap/new-tool.sh`
+
+```text
+Usage: scripts/bootstrap/new-tool.sh <name> [--brew <formula>] [--cask <cask>] [--config-dir] [--help] [--no-color]
+
+Scaffold a new stow package.
+
+Arguments:
+  name              Package name (e.g., ripgrep, lazydocker)
+
+Options:
+  --brew <formula>  Add a brew formula to Brewfile.cli
+  --cask <cask>     Add a cask to Brewfile.apps
+  --config-dir      Create .config/<name>/ structure (default: config in home root)
+  --no-color        Disable colored output
+  --help, -h        Show this help message
+
+Examples:
+  scripts/bootstrap/new-tool.sh ripgrep --brew ripgrep
+  scripts/bootstrap/new-tool.sh lazydocker --brew lazydocker --config-dir
+  scripts/bootstrap/new-tool.sh wezterm --cask wezterm --config-dir
+```
+
 ## `scripts/bootstrap/remove-bloatware.sh`
 
 ```text
@@ -245,6 +268,18 @@ Options:
 Sections:
   profile, stow, ssh, gpg, git, shell, developer, runtime,
   launchd, homebrew, vscode, backup, biome, tmux, neovim, starship
+```
+
+## `scripts/health/status.sh`
+
+```text
+Usage: scripts/health/status.sh [--help] [--no-color]
+
+Unified system status check. Shows only actionable items.
+
+Options:
+  --no-color    Disable colored output
+  --help, -h    Show this help message
 ```
 
 ## `scripts/info/gpg-info.sh`
