@@ -30,9 +30,9 @@ jobs:
         run: |
           bash scripts/health/check-vscode-parity.sh --check
 
-      - name: Run CI doctor checks
+      - name: Install dry-run
         run: |
-          bash scripts/health/doctor-ci.sh
+          bash install.sh --dry-run --yes --profile personal --without-macos-defaults --without-ssh --without-gpg
 
       - name: Biome check
         run: |

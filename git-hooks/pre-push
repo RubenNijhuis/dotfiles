@@ -7,27 +7,15 @@ set -euo pipefail
 # Get dotfiles root
 DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/scripts/lib/output.sh"
-LINT_SHELL="$DOTFILES/scripts/maintenance/lint-shell.sh"
 HOOK_CHECKS="$DOTFILES/scripts/maintenance/hook-checks.sh"
 
 # Track if any checks failed
 FAILED=0
+BREW_DRIFT_MSG=""
 
 print_header "Pre-push: Validating Repository"
 
-# Check 1: Lint shell scripts (shared with Make/CI)
-print_section "Running shell lint..."
-if [[ -x "$LINT_SHELL" ]]; then
-  if ! "$LINT_SHELL" --no-color; then
-    FAILED=1
-  fi
-else
-  print_error "Missing lint script: $LINT_SHELL"
-  FAILED=1
-fi
-printf '\n'
-
-# Check 2: Verify Brewfiles are in sync
+# Check 1: Verify Brewfiles are in sync
 print_section "Checking Brewfile sync..."
 
 if command -v brew &>/dev/null; then
@@ -38,6 +26,7 @@ if command -v brew &>/dev/null; then
     if "$BREW_AUDIT" --check >/dev/null 2>&1; then
       print_success "Brewfiles are in sync"
     else
+      BREW_DRIFT_MSG="Brewfiles are out of sync — run: make brew-audit"
       print_warning "Brewfiles are out of sync"
       print_dim "Run: make brew-audit"
       # Don't fail, just warn (Brewfiles may be intentionally different)
@@ -51,7 +40,7 @@ fi
 
 printf '\n'
 
-# Check 3: Ensure generated docs are in sync
+# Check 2: Ensure generated docs are in sync
 if [[ -x "$HOOK_CHECKS" ]]; then
   if ! "$HOOK_CHECKS" --no-color docs-sync; then
     FAILED=1
@@ -63,7 +52,7 @@ fi
 
 printf '\n'
 
-# Check 4: Check for untracked scripts that should be committed
+# Check 3: Check for untracked scripts that should be committed
 if [[ -x "$HOOK_CHECKS" ]]; then
   "$HOOK_CHECKS" --no-color untracked-shell || true
 else
@@ -73,7 +62,7 @@ fi
 
 printf '\n'
 
-# Check 5: Verify no large files are being pushed
+# Check 4: Verify no large files are being pushed
 STAGED_FILES=()
 while IFS= read -r file; do
   [[ -n "$file" ]] || continue
@@ -90,7 +79,7 @@ fi
 
 printf '\n'
 
-# Check 6: Ensure commit messages are meaningful (check last commit)
+# Check 5: Ensure commit messages are meaningful (check last commit)
 if [[ -x "$HOOK_CHECKS" ]]; then
   "$HOOK_CHECKS" --no-color commit-message || true
 else
@@ -100,7 +89,7 @@ fi
 
 printf '\n'
 
-# Check 7: Verify we're not pushing to protected branches with issues
+# Check 6: Verify we're not pushing to protected branches with issues
 if [[ -x "$HOOK_CHECKS" ]]; then
   branch_failed=false
   if [[ $FAILED -eq 1 ]]; then
@@ -124,6 +113,10 @@ if [[ $FAILED -eq 1 ]]; then
   exit 1
 else
   print_success "All pre-push checks passed - ready to push!"
+  if [[ -n "$BREW_DRIFT_MSG" ]]; then
+    printf '\n'
+    print_warning "$BREW_DRIFT_MSG"
+  fi
   printf '\n'
   exit 0
 fi

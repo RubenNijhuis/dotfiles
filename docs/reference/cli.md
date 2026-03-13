@@ -220,19 +220,6 @@ Options:
   --help      Show this help message
 ```
 
-## `scripts/health/doctor-ci.sh`
-
-```text
-Usage: scripts/health/doctor-ci.sh [--help] [--no-color] [--profile <personal|work>]
-
-Run deterministic CI health checks:
-  1. lint-shell
-  2. test-scripts
-  3. launchd-check
-  4. docs-sync
-  5. install.sh dry-run
-```
-
 ## `scripts/health/doctor-notify.sh`
 
 ```text

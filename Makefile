@@ -1,4 +1,4 @@
-.PHONY: help install update stow unstow macos ssh-setup gpg-setup \
+.PHONY: help install update update-brew update-stow stow unstow macos ssh-setup gpg-setup \
 	backup brew-sync brew-sync-dry brew-audit \
 	doctor ops-status stow-report \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware \
@@ -13,7 +13,9 @@ DOTFILES := $(shell pwd)
 help: ## Show all commands
 	@printf "\n\033[1m── Core ──────────────────────\033[0m\n"
 	@printf "  \033[36m%-25s\033[0m %s\n" "install" "Full install (bootstrap + brew + stow + macos)"
-	@printf "  \033[36m%-25s\033[0m %s\n" "update" "Update brew packages and re-stow configs"
+	@printf "  \033[36m%-25s\033[0m %s\n" "update" "Update brew packages, runtimes, and re-stow configs"
+	@printf "  \033[36m%-25s\033[0m %s\n" "update-brew" "Update only Homebrew packages"
+	@printf "  \033[36m%-25s\033[0m %s\n" "update-stow" "Re-stow config packages only"
 	@printf "  \033[36m%-25s\033[0m %s\n" "stow" "Stow all config packages"
 	@printf "  \033[36m%-25s\033[0m %s\n" "unstow" "Unstow all config packages"
 	@printf "  \033[36m%-25s\033[0m %s\n" "macos" "Apply macOS defaults"
@@ -53,8 +55,14 @@ help: ## Show all commands
 install: ## Full install (bootstrap + brew + stow + macos)
 	@bash $(DOTFILES)/install.sh
 
-update: ## Update brew packages and re-stow configs
+update: ## Update brew packages, runtimes, and re-stow configs
 	@bash $(DOTFILES)/scripts/maintenance/update.sh
+
+update-brew: ## Update only Homebrew packages
+	@brew update && brew upgrade && brew cleanup
+
+update-stow: ## Re-stow config packages only
+	@bash $(DOTFILES)/scripts/bootstrap/stow-all.sh
 
 stow: ## Stow all config packages
 	@bash $(DOTFILES)/scripts/bootstrap/stow-all.sh

@@ -49,18 +49,23 @@ show_recent_log() {
 main() {
   parse_args "$@"
 
+  # Source agent registry for log file paths
+  source "$DOTFILES/scripts/automation/launchd/common.sh"
+
   print_header "Ops Status"
 
   print_section "Launchd agents"
   bash "$DOTFILES/scripts/automation/launchd-manager.sh" --no-color status
 
   print_section "Recent task logs"
-  show_recent_log "backup out" "$HOME/.local/log/dotfiles-backup.out.log"
-  show_recent_log "backup err" "$HOME/.local/log/dotfiles-backup.err.log"
-  show_recent_log "doctor out" "$HOME/.local/log/dotfiles-doctor-launchd.out.log"
-  show_recent_log "doctor err" "$HOME/.local/log/dotfiles-doctor-launchd.err.log"
-  show_recent_log "repo update out" "$HOME/.local/log/repo-update.out.log"
-  show_recent_log "repo update err" "$HOME/.local/log/repo-update.err.log"
+  for agent_info in "${AGENTS[@]}"; do
+    IFS=':' read -r name _desc <<< "$agent_info"
+    local out_log err_log
+    out_log="$(agent_log_file "$name")"
+    err_log="${out_log%.out.log}.err.log"
+    show_recent_log "$name out" "$out_log"
+    show_recent_log "$name err" "$err_log"
+  done
 
   print_section "Backup recency"
   latest_backup=$(find "$HOME/.dotfiles-backup" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1 || true)

@@ -1,5 +1,8 @@
 # Developer Repository Migration
 
+> **One-time operation.** These scripts are for migrating an existing machine's
+> repo layout into the structured Developer tree. Not part of the regular workflow.
+
 This repo supports two migration scenarios:
 
 - Fresh machine: no legacy source exists, migration exits cleanly.

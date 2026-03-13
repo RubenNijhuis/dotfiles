@@ -11,7 +11,14 @@ check_launchd() {
 
   local details=""
   local loaded_agents=0
-  local managed_agents=(dotfiles-backup dotfiles-doctor obsidian-sync repo-update)
+
+  # Source agent registry from launchd common module
+  source "$DOTFILES/scripts/automation/launchd/common.sh"
+  local managed_agents=()
+  for agent_info in "${AGENTS[@]}"; do
+    IFS=':' read -r name _desc <<< "$agent_info"
+    managed_agents+=("$name")
+  done
 
   for agent in "${managed_agents[@]}"; do
     if launchctl print "gui/$(id -u)/com.user.$agent" >/dev/null 2>&1; then
