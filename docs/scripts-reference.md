@@ -9,6 +9,6 @@ Authoritative CLI docs are generated in:
 Commands:
 
 ```bash
-make docs-generate
+bash scripts/docs/generate-cli-reference.sh
 make docs-sync
 ```

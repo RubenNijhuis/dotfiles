@@ -35,28 +35,28 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 EXTENSIONS_FILE="$DOTFILES/stow/vscode/Library/Application Support/Code/User/extensions.txt"
 
 if [[ ! -f "$EXTENSIONS_FILE" ]]; then
-  echo "Error: extensions.txt not found at $EXTENSIONS_FILE" >&2
+  print_error "extensions.txt not found at $EXTENSIONS_FILE"
   exit 1
 fi
 
 if ! command -v code &>/dev/null; then
-  echo "Error: 'code' command not found. Is VS Code installed?" >&2
+  print_error "'code' command not found. Is VS Code installed?"
   exit 1
 fi
 
-echo "Installing VS Code extensions..."
+print_section "Installing VS Code extensions..."
 failed=0
 total=0
 while IFS= read -r ext; do
   total=$((total + 1))
   if ! code --install-extension "$ext" >/dev/null 2>&1; then
-    echo "  ✗ Failed: $ext" >&2
+    print_error "Failed: $ext"
     failed=$((failed + 1))
   fi
 done < <(grep -v '^#' "$EXTENSIONS_FILE" | grep -v '^$' | cut -d' ' -f1)
 
 installed=$((total - failed))
-echo "✓ $installed/$total extensions installed"
+print_success "$installed/$total extensions installed"
 if [[ $failed -gt 0 ]]; then
-  echo "⚠ $failed extensions failed to install" >&2
+  print_warning "$failed extensions failed to install"
 fi

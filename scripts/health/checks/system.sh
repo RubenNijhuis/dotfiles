@@ -237,7 +237,7 @@ check_backup_system() {
     details+="Automation: LaunchD agent running"
   else
     details+="Automation: not configured"
-    add_suggestion "Setup automation: make backup-setup"
+    add_suggestion "Setup automation: make automation-setup"
   fi
 
   if [[ $issues -eq 0 ]]; then

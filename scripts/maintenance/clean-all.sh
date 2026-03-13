@@ -13,7 +13,7 @@ usage() {
 Usage: $0 [--help] [--no-color] [--dry-run]
 
 Remove dotfiles backup directories and Homebrew download cache.
-Run after clean.sh (via 'make clean-all').
+Run after clean.sh for a full cleanup.
 EOF
 }
 

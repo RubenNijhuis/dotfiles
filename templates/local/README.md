@@ -28,6 +28,6 @@ make keychain-check
 Migration rules are optional. If present at `local/migration-rules.txt`, they are used by:
 
 ```bash
-make migrate-dev
-make complete-migration
+bash scripts/migration/migrate-developer-structure.sh
+bash scripts/migration/migrate-developer-structure.sh --complete
 ```

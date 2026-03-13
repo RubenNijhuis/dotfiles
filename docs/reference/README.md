@@ -5,6 +5,6 @@
 Generation:
 
 ```bash
-make docs-generate
+bash scripts/docs/generate-cli-reference.sh
 make docs-sync
 ```

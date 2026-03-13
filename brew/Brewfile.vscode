@@ -61,3 +61,5 @@ vscode "tamasfe.even-better-toml"            # TOML syntax and formatting
 # DevOps & Remote
 vscode "ms-vscode-remote.remote-containers"  # Dev containers support
 vscode "ms-azuretools.vscode-containers"     # Docker/container support
+vscode "ms-dotnettools.csharp"
+vscode "ms-dotnettools.vscode-dotnet-runtime"

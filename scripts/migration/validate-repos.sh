@@ -143,7 +143,7 @@ fi
 print_error "ACTION REQUIRED:"
 echo "1. Commit or stash uncommitted changes"
 echo "2. Push unpushed commits"
-echo "3. Run validation again: make validate-repos"
+echo "3. Run validation again: bash scripts/migration/validate-repos.sh"
 echo ""
 
 exit 1

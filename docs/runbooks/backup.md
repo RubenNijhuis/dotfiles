@@ -4,9 +4,8 @@
 
 ```bash
 make backup
-make backup-setup
-make backup-status
-make backup-verify
+make automation-setup   # sets up backup + doctor + repo-update automations
+make ops-status         # check all automation statuses
 ```
 
 ## Validation
@@ -18,7 +17,7 @@ make backup-verify
 ## Recovery
 
 ```bash
-make restore
+bash scripts/backup/restore-backup.sh
 ```
 
 Use latest successful backup directory shown in status output.

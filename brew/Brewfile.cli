@@ -87,3 +87,5 @@ brew "dockutil"             # Manage Dock items declaratively
 brew "mac-cleanup-go"       # System cleanup utility
 brew "obsidian-cli"         # Obsidian CLI tools
 brew "ollama", restart_service: :changed  # Local LLM runtime
+tap "manaflow-ai/cmux"
+cask "cmux"

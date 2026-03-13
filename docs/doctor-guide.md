@@ -1,15 +1,12 @@
 # Doctor Guide
 
-Operational guide for `make doctor` and `make doctor-quick`.
+Operational guide for `make doctor`.
 
 ## Commands
 
 ```bash
 make doctor
-make doctor-quick
-
-# direct script usage
-bash scripts/health/doctor.sh --no-color
+bash scripts/health/doctor.sh --quick
 bash scripts/health/doctor.sh --section backup --no-color
 ```
 
@@ -30,7 +27,7 @@ bash scripts/health/doctor.sh --section backup --no-color
 - Backup recency + automation
 - Biome presence/config
 
-`make doctor-quick` skips optional slower checks.
+`bash scripts/health/doctor.sh --quick` skips optional slower checks.
 
 ## Exit Codes
 
@@ -41,7 +38,7 @@ bash scripts/health/doctor.sh --section backup --no-color
 Example in scripts:
 
 ```bash
-if make doctor-quick; then
+if bash scripts/health/doctor.sh --quick; then
   echo "healthy"
 else
   echo "issues found"
@@ -75,15 +72,8 @@ make stow
 
 ```bash
 make backup
-make backup-setup
-make backup-status
-```
-
-### Doctor automation
-
-```bash
-make doctor-setup
-make doctor-status
+make automation-setup
+make ops-status
 ```
 
 ### VS Code baseline extensions

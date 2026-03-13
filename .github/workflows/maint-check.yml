@@ -20,11 +20,19 @@ jobs:
 
       - name: Run maintenance checks
         run: |
-          make maint-check-ci
+          make maint-check
+
+      - name: Check docs freshness
+        run: |
+          bash scripts/docs/generate-cli-reference.sh --check
+
+      - name: Check VS Code extension parity
+        run: |
+          bash scripts/health/check-vscode-parity.sh --check
 
       - name: Run CI doctor checks
         run: |
-          make doctor-ci
+          bash scripts/health/doctor-ci.sh
 
       - name: Biome check
         run: |

@@ -54,7 +54,7 @@ check_docs_sync() {
   fi
 
   print_error "Generated docs are stale"
-  print_info "Run: make docs-generate"
+  print_info "Run: bash scripts/docs/generate-cli-reference.sh"
   return 1
 }
 

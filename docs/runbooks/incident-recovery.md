@@ -30,5 +30,5 @@ make doctor
 ## Last-Resort Restore
 
 ```bash
-make restore
+bash scripts/backup/restore-backup.sh
 ```

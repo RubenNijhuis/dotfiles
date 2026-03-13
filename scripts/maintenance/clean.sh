@@ -14,6 +14,11 @@ usage() {
 Usage: $0 [--help] [--no-color] [--dry-run]
 
 Remove zsh caches, automation log files, and .DS_Store files from the repo.
+
+Options:
+  --dry-run     Preview what would be removed without deleting anything
+  --no-color    Disable colored output
+  --help        Show this help message
 EOF
 }
 

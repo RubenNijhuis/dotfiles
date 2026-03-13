@@ -16,13 +16,13 @@ This repo supports two migration scenarios:
 
 ```bash
 # Preview (no file changes)
-make migrate-dev-dryrun
+bash scripts/migration/migrate-developer-structure.sh --dry-run
 
 # Auto mode (rules + heuristics)
-make migrate-dev
+bash scripts/migration/migrate-developer-structure.sh
 
 # Interactive mode (choose destination per repo)
-make complete-migration
+bash scripts/migration/migrate-developer-structure.sh --complete
 ```
 
 ## Direct Script Usage
@@ -71,6 +71,6 @@ Legacy/*|archive
 ## Validation
 
 ```bash
-make validate-repos
+bash scripts/migration/validate-repos.sh
 make doctor
 ```

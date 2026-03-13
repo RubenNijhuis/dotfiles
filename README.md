@@ -13,11 +13,10 @@ cd ~/dotfiles
 ## Common Commands
 
 ```bash
-make help             # common command list
+make help             # show all commands
 make install          # full machine bootstrap
 make bootstrap-verify # strict bootstrap reliability checks
 make doctor           # full health checks
-make doctor-quick     # fast health checks
 make ops-status       # consolidated automation + ops status
 make update           # package/runtime update + restow
 make maint-check      # lint + script tests

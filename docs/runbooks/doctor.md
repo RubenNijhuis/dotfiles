@@ -4,7 +4,7 @@
 
 ```bash
 make doctor
-make doctor-quick
+bash scripts/health/doctor.sh --quick
 bash scripts/health/doctor.sh --section backup --no-color
 ```
 
@@ -16,7 +16,7 @@ bash scripts/health/doctor.sh --section backup --no-color
 
 ## Triage Flow
 
-1. Run `make doctor-quick` for fast signal.
+1. Run `bash scripts/health/doctor.sh --quick` for fast signal.
 2. Run failing section directly with `--section`.
 3. Apply fixes from `docs/doctor-guide.md`.
 4. Re-run `make doctor`.

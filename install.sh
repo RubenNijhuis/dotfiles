@@ -16,21 +16,14 @@ SELF_TEST_CHECKPOINT=false
 # Create directories
 mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
 
-# Colors defined inline (not sourced from scripts/lib/output.sh) to keep install.sh
-# self-contained — lib/output.sh may not be available before stow runs on a fresh machine.
-if [[ -t 1 ]]; then
-  RED=$'\033[0;31m'
-  GREEN=$'\033[0;32m'
-  YELLOW=$'\033[1;33m'
-  BLUE=$'\033[0;34m'
-  NC=$'\033[0m'
-else
-  RED=''
-  GREEN=''
-  YELLOW=''
-  BLUE=''
-  NC=''
-fi
+# Source shared output helpers (lives in the git clone, always available)
+source "$DOTFILES/scripts/lib/output.sh" "$@"
+
+# Thin wrappers mapping install.sh's naming convention to output.sh functions
+success() { print_success "$1"; }
+warning() { print_warning "$1"; }
+error()   { print_error "$1"; }
+info()    { print_info "$1"; }
 
 TOTAL_STEPS=11
 CURRENT_STEP=0
@@ -103,15 +96,12 @@ Options:
   --without-gpg                 Skip GPG key generation
   --with-bloatware-removal      Remove common macOS bloatware apps
   --without-bloatware-removal   Skip bloatware removal
+  --no-color                    Disable colored output
   --self-test-checkpoint        Run checkpoint/resume logic tests and exit
   --help, -h                    Show this help message
 EOF2
 }
 
-success() { echo -e "${GREEN}✓${NC} $1"; }
-warning() { echo -e "${YELLOW}⚠${NC} $1"; }
-error() { echo -e "${RED}✗${NC} $1"; }
-info() { echo -e "${BLUE}i${NC} $1"; }
 
 has_gum() {
   command -v gum &>/dev/null && [[ -t 0 ]] && [[ -t 1 ]] && ! $NON_INTERACTIVE
@@ -120,7 +110,7 @@ has_gum() {
 step_begin() {
   local label="$1"
   CURRENT_STEP=$((CURRENT_STEP + 1))
-  echo -e "\n${BLUE}[$CURRENT_STEP/$TOTAL_STEPS]${NC} $label..."
+  printf '\n%s[%s/%s]%s %s...\n' "${BLUE}" "$CURRENT_STEP" "$TOTAL_STEPS" "${NC}" "$label"
 }
 
 step_done() {
@@ -189,6 +179,9 @@ parse_args() {
         BLOATWARE_PREF="no"
         shift
         ;;
+      --no-color)
+        shift
+        ;;
       --self-test-checkpoint)
         SELF_TEST_CHECKPOINT=true
         shift
@@ -230,9 +223,9 @@ load_checkpoint() {
 
 cleanup_on_error() {
   local exit_code=$?
-  echo -e "\n${RED}Installation failed at step $CURRENT_STEP${NC}"
-  echo "Check log: $INSTALL_LOG"
-  echo "To resume, re-run: ./install.sh"
+  printf '\n%sInstallation failed at step %s%s\n' "${RED}" "$CURRENT_STEP" "${NC}"
+  printf 'Check log: %s\n' "$INSTALL_LOG"
+  printf 'To resume, re-run: ./install.sh\n'
   exit $exit_code
 }
 
@@ -341,11 +334,11 @@ resolve_preference() {
 }
 
 show_header() {
-  echo -e "${BLUE}========================================${NC}"
-  echo -e "${BLUE} Dotfiles Installation${NC}"
-  echo -e "${BLUE}========================================${NC}"
-  echo ""
-  echo "Log: $INSTALL_LOG"
+  printf '%s========================================%s\n' "${BLUE}" "${NC}"
+  printf '%s Dotfiles Installation%s\n' "${BLUE}" "${NC}"
+  printf '%s========================================%s\n' "${BLUE}" "${NC}"
+  printf '\n'
+  printf 'Log: %s\n' "$INSTALL_LOG"
 }
 
 handle_resume() {
@@ -356,8 +349,8 @@ handle_resume() {
     return
   fi
 
-  echo ""
-  echo -e "${YELLOW}Previous installation stopped at step $last_completed${NC}"
+  printf '\n'
+  printf '%sPrevious installation stopped at step %s%s\n' "${YELLOW}" "$last_completed" "${NC}"
   if [[ $last_completed -ge 1 && $last_completed -le $TOTAL_STEPS ]]; then
     echo "Last completed: ${STEP_NAMES[$((last_completed - 1))]}"
   fi
@@ -455,9 +448,9 @@ collect_preferences() {
 
   local default_profile="${PROFILE_OVERRIDE:-${existing_profile:-personal}}"
 
-  echo ""
-  echo -e "${BLUE}Installer Preferences${NC}"
-  echo "----------------------------------------"
+  printf '\n'
+  printf '%sInstaller Preferences%s\n' "${BLUE}" "${NC}"
+  printf '----------------------------------------\n'
 
   if [[ -n "$PROFILE_OVERRIDE" ]]; then
     PROFILE="$PROFILE_OVERRIDE"
@@ -702,9 +695,9 @@ step_final_setup() {
     if [[ "$legacy_repo_count" -gt 0 ]]; then
       warning "Detected legacy $DEVELOPER_ROOT/repositories with $legacy_repo_count repo(s)"
       echo "  Run migration after install:"
-      echo "    make migrate-dev-dryrun"
-      echo "    make migrate-dev"
-      echo "    make complete-migration"
+      echo "    bash scripts/migration/migrate-developer-structure.sh --dry-run"
+      echo "    bash scripts/migration/migrate-developer-structure.sh"
+      echo "    bash scripts/migration/migrate-developer-structure.sh --complete"
     fi
   fi
 
@@ -724,7 +717,7 @@ step_final_setup() {
   fi
 
   if command -v code &>/dev/null; then
-    echo -e "${BLUE}Installing VS Code extensions...${NC}"
+    printf '%sInstalling VS Code extensions...%s\n' "${BLUE}" "${NC}"
     local ext_file="$DOTFILES/stow/vscode/Library/Application Support/Code/User/extensions.txt"
     if [[ -f "$ext_file" ]]; then
       grep -v '^#' "$ext_file" | grep -v '^$' | cut -d' ' -f1 | xargs -L 1 code --install-extension 2>/dev/null || true
@@ -734,7 +727,7 @@ step_final_setup() {
     fi
   fi
 
-  echo -e "${BLUE}Installing git hooks...${NC}"
+  printf '%sInstalling git hooks...%s\n' "${BLUE}" "${NC}"
   if bash "$DOTFILES/git-hooks/install-hooks.sh"; then
     success "Git hooks installed"
   else
@@ -743,10 +736,10 @@ step_final_setup() {
 }
 
 print_next_steps() {
-  echo ""
-  echo -e "${GREEN}========================================${NC}"
-  echo -e "${GREEN} Setup complete! Profile: $PROFILE${NC}"
-  echo -e "${GREEN}========================================${NC}"
+  printf '\n'
+  printf '%s========================================%s\n' "${GREEN}" "${NC}"
+  printf '%s Setup complete! Profile: %s%s\n' "${GREEN}" "$PROFILE" "${NC}"
+  printf '%s========================================%s\n' "${GREEN}" "${NC}"
   echo ""
   echo "Configuration recap:"
   echo "  Profile: $PROFILE"
@@ -769,7 +762,7 @@ print_next_steps() {
 
   if [[ "$SETUP_GPG" == "yes" ]]; then
     echo "  - Add GPG public key to GitHub/GitLab (see templates/gpg/README.md)"
-    echo "  - Update signingkey in git configs: make gpg-info"
+    echo "  - Update signingkey in git configs: bash scripts/info/gpg-info.sh"
   fi
 
   echo ""
@@ -784,8 +777,8 @@ run_post_install_health_check() {
     return
   fi
 
-  echo ""
-  echo -e "${BLUE}Post-install quick health check${NC}"
+  printf '\n'
+  printf '%sPost-install quick health check%s\n' "${BLUE}" "${NC}"
   set +e
   bash "$DOTFILES/scripts/health/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
   local doctor_code=$?

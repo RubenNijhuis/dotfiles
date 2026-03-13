@@ -82,7 +82,7 @@ setup_backup() {
   printf '\n'
   print_info "Automated backups will run daily at 2:00 AM"
   print_info "Logs: $log_dir/dotfiles-backup.out.log"
-  print_info "Check status: make backup-status"
+  print_info "Check status: make ops-status"
   printf '\n'
 }
 
@@ -132,7 +132,7 @@ setup_doctor() {
   print_info "Health checks will run daily at 9:00 AM"
   print_info "Notifications sent on failures only"
   print_info "Logs: $log_dir/dotfiles-doctor.out.log"
-  print_info "Check status: make doctor-status"
+  print_info "Check status: make ops-status"
   printf '\n'
 }
 
@@ -172,7 +172,7 @@ setup_repo_update() {
   printf '\n'
   print_info "Repository updates will run daily at 9:30 AM"
   print_info "Summary log: $log_dir/repo-update-summary.log"
-  print_info "Check status: make repo-update-status"
+  print_info "Check status: make ops-status"
   printf '\n'
 }
 

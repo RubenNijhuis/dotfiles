@@ -13,7 +13,21 @@ SECTION=""
 export DOTFILES QUICK_MODE
 
 usage() {
-  echo "Usage: $0 [--help] [--quick] [--section <name>] [--no-color]"
+  cat <<EOF
+Usage: $0 [--help] [--quick] [--section <name>] [--no-color]
+
+Comprehensive system health check for dotfiles setup.
+
+Options:
+  --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --section <name>    Run only the specified check section
+  --no-color          Disable colored output
+  --help, -h          Show this help message
+
+Sections:
+  profile, stow, ssh, gpg, git, shell, developer, runtime,
+  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship
+EOF
 }
 
 validate_section() {

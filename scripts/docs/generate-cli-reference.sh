@@ -63,7 +63,7 @@ main() {
   {
     echo '# CLI Reference'
     echo ''
-    echo "Generated from live \`--help\` output. Do not edit manually; run \`make docs-generate\`."
+    echo "Generated from live \`--help\` output. Do not edit manually; run \`bash scripts/docs/generate-cli-reference.sh\`."
     echo ''
   } > "$TMP_FILE"
 
@@ -91,7 +91,7 @@ main() {
       exit 0
     fi
 
-    print_error "CLI reference is stale: run make docs-generate"
+    print_error "CLI reference is stale: run bash scripts/docs/generate-cli-reference.sh"
     diff -u "$OUTPUT_FILE" "$TMP_FILE" || true
     rm -f "$TMP_FILE"
     exit 1

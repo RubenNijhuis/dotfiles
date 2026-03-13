@@ -389,7 +389,7 @@ check_developer() {
   # Check old structure removed
   if [[ -d "$dev_root/repositories" ]]; then
     details+="\n  ⚠ Old repositories/ folder still exists"
-    add_suggestion "Complete migration: make complete-migration"
+    add_suggestion "Complete migration: bash scripts/migration/migrate-developer-structure.sh --complete"
   fi
 
   if [[ $issues -eq 0 ]] && [[ $warnings -gt 0 ]]; then

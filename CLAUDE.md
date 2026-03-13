@@ -16,13 +16,16 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 ## Key Commands
 
 - `make install` — Full bootstrap (brew + stow + macos defaults)
+- `make update` — Update packages and re-stow configs
 - `make stow` / `make unstow` — Manage symlinks
 - `make doctor` — Comprehensive health check
+- `make ops-status` — Consolidated automation and ops health status
 - `make maint-check` — Lint + test + launchd validation
 - `make bootstrap-verify` — Strict reliability checks
 - `make format` — Format all files (EditorConfig)
 - `make docs-sync` — Verify generated docs are current
-- `make update` — Update packages and re-stow configs
+- `make automation-setup` — Setup all LaunchD automations
+- `make help` — Show all available targets
 
 ## Lifecycle
 
@@ -119,7 +122,7 @@ When adding packages to Brewfiles, also run `brew install <package>` to install 
 
 ## Testing / Validation
 
-Run `make maint-check` before committing. CI runs `make lint-shell` and `make doctor-ci`.
+Run `make maint-check` before committing. CI runs `make maint-check` plus docs-sync, vscode-parity, and doctor-ci checks directly.
 Pre-push hook runs shellcheck, docs-sync check, and Brewfile drift warning.
 
 ## Theme

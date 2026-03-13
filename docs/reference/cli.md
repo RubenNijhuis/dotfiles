@@ -1,6 +1,6 @@
 # CLI Reference
 
-Generated from live `--help` output. Do not edit manually; run `make docs-generate`.
+Generated from live `--help` output. Do not edit manually; run `bash scripts/docs/generate-cli-reference.sh`.
 
 ## `install.sh`
 
@@ -20,6 +20,7 @@ Options:
   --without-gpg                 Skip GPG key generation
   --with-bloatware-removal      Remove common macOS bloatware apps
   --without-bloatware-removal   Skip bloatware removal
+  --no-color                    Disable colored output
   --self-test-checkpoint        Run checkpoint/resume logic tests and exit
   --help, -h                    Show this help message
 ```
@@ -245,6 +246,18 @@ Defaults to quick mode; use --full for full checks.
 
 ```text
 Usage: scripts/health/doctor.sh [--help] [--quick] [--section <name>] [--no-color]
+
+Comprehensive system health check for dotfiles setup.
+
+Options:
+  --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --section <name>    Run only the specified check section
+  --no-color          Disable colored output
+  --help, -h          Show this help message
+
+Sections:
+  profile, stow, ssh, gpg, git, shell, developer, runtime,
+  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship
 ```
 
 ## `scripts/info/gpg-info.sh`
@@ -290,7 +303,7 @@ Options:
 Usage: scripts/maintenance/clean-all.sh [--help] [--no-color] [--dry-run]
 
 Remove dotfiles backup directories and Homebrew download cache.
-Run after clean.sh (via 'make clean-all').
+Run after clean.sh for a full cleanup.
 ```
 
 ## `scripts/maintenance/clean.sh`
@@ -299,6 +312,11 @@ Run after clean.sh (via 'make clean-all').
 Usage: scripts/maintenance/clean.sh [--help] [--no-color] [--dry-run]
 
 Remove zsh caches, automation log files, and .DS_Store files from the repo.
+
+Options:
+  --dry-run     Preview what would be removed without deleting anything
+  --no-color    Disable colored output
+  --help        Show this help message
 ```
 
 ## `scripts/maintenance/cleanup-dotfiles-backups.sh`

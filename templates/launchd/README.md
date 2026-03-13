@@ -116,9 +116,7 @@ If install fails with permissions, run the command outside sandboxed tooling.
 ## Operations Commands
 
 ```bash
-make backup-setup
-make doctor-setup
-make repo-update-setup
+make automation-setup
 make ops-status
 ```
 
