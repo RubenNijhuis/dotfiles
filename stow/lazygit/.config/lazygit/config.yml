@@ -28,20 +28,17 @@ gui:
       - "#db4b4b"
     defaultFgColor:
       - "#c0caf5"
-
 git:
-  paging:
-    colorArg: always
-    pager: delta --paging=never
+  pagers:
+    - colorArg: always
+      pager: delta --paging=never
   autoFetch: true
   autoRefresh: true
   branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative --pretty=medium {{branchName}} --"
-
 os:
   editPreset: ""
   edit: "{{editor}} {{filename}}"
   editAtLine: "{{editor}} +{{line}} {{filename}}"
-
 keybinding:
   universal:
     quit: q

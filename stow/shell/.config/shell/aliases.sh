@@ -17,6 +17,11 @@ alias gp="git push"
 alias gl="git log --oneline --graph"
 alias lg="lazygit"
 
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+
 # Utility
 alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'

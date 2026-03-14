@@ -72,6 +72,8 @@ chpwd() { emulate -L zsh -o aliases; ls; }
 
 # ----- Plugins (from Homebrew, cached paths) -----
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
+export YSU_MESSAGE_POSITION="after"
 
 # Defer syntax highlighting to background (it's slow and non-critical)
 {
