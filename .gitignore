@@ -8,6 +8,7 @@ local/*
 .env
 .claude
 !stow/claude/.claude/
+stow/claude/.claude/skills/
 !stow/claude/.claude/settings.json
 !stow/claude/.claude/statusline-command.sh
 
