@@ -88,6 +88,11 @@ _zsh_eval_cache() {
   if [[ ! -f "$cache_file" ]] || [[ "$(command -v "$cmd")" -nt "$cache_file" ]]; then
     mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     "$@" > "$cache_file"
+    if [[ ! -s "$cache_file" ]]; then
+      rm -f "$cache_file"
+      echo "[eval-cache] warning: ${cmd} produced empty output" >&2
+      return 1
+    fi
   fi
   source "$cache_file"
 }

@@ -20,6 +20,11 @@ parse_args() {
       --no-color)
         shift
         ;;
+      --*)
+        print_error "Unknown argument: $1"
+        show_usage
+        exit 1
+        ;;
       *)
         break
         ;;

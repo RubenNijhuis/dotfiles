@@ -9,6 +9,11 @@ DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/scripts/lib/output.sh"
 HOOK_CHECKS="$DOTFILES/scripts/maintenance/hook-checks.sh"
 
+if [[ ! -x "$HOOK_CHECKS" ]]; then
+  print_error "Missing hook checks script: $HOOK_CHECKS"
+  exit 1
+fi
+
 # Track if any checks failed
 FAILED=0
 BREW_DRIFT_MSG=""
@@ -41,24 +46,14 @@ fi
 printf '\n'
 
 # Check 2: Ensure generated docs are in sync
-if [[ -x "$HOOK_CHECKS" ]]; then
-  if ! "$HOOK_CHECKS" --no-color docs-sync; then
-    FAILED=1
-  fi
-else
-  print_error "Missing hook checks script: $HOOK_CHECKS"
+if ! "$HOOK_CHECKS" --no-color docs-sync; then
   FAILED=1
 fi
 
 printf '\n'
 
 # Check 3: Check for untracked scripts that should be committed
-if [[ -x "$HOOK_CHECKS" ]]; then
-  "$HOOK_CHECKS" --no-color untracked-shell || true
-else
-  print_error "Missing hook checks script: $HOOK_CHECKS"
-  FAILED=1
-fi
+"$HOOK_CHECKS" --no-color untracked-shell || true
 
 printf '\n'
 
@@ -68,38 +63,23 @@ while IFS= read -r file; do
   [[ -n "$file" ]] || continue
   STAGED_FILES+=("$file")
 done < <(git diff --cached --name-only --diff-filter=ACM)
-if [[ -x "$HOOK_CHECKS" ]]; then
-  if ! "$HOOK_CHECKS" --no-color large-files "${STAGED_FILES[@]}"; then
-    FAILED=1
-  fi
-else
-  print_error "Missing hook checks script: $HOOK_CHECKS"
+if ! "$HOOK_CHECKS" --no-color large-files "${STAGED_FILES[@]}"; then
   FAILED=1
 fi
 
 printf '\n'
 
 # Check 5: Ensure commit messages are meaningful (check last commit)
-if [[ -x "$HOOK_CHECKS" ]]; then
-  "$HOOK_CHECKS" --no-color commit-message || true
-else
-  print_error "Missing hook checks script: $HOOK_CHECKS"
-  FAILED=1
-fi
+"$HOOK_CHECKS" --no-color commit-message || true
 
 printf '\n'
 
 # Check 6: Verify we're not pushing to protected branches with issues
-if [[ -x "$HOOK_CHECKS" ]]; then
-  branch_failed=false
-  if [[ $FAILED -eq 1 ]]; then
-    branch_failed=true
-  fi
-  if ! "$HOOK_CHECKS" --no-color branch-status "$branch_failed"; then
-    FAILED=1
-  fi
-else
-  print_error "Missing hook checks script: $HOOK_CHECKS"
+branch_failed=false
+if [[ $FAILED -eq 1 ]]; then
+  branch_failed=true
+fi
+if ! "$HOOK_CHECKS" --no-color branch-status "$branch_failed"; then
   FAILED=1
 fi
 

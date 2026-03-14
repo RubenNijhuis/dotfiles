@@ -3,7 +3,7 @@
 # Usage: show-agent-status.sh <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
 set -euo pipefail
 
-if [[ "${1:-}" == "--help" ]]; then
+if [[ " $* " == *" --help "* ]]; then
   cat <<EOF
 Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
 
@@ -19,6 +19,22 @@ Arguments:
 EOF
   exit 0
 fi
+
+# Filter out --no-color (accepted for CLI contract compliance)
+# Reject unknown flags
+args=()
+for arg in "$@"; do
+  if [[ "$arg" == "--no-color" ]]; then
+    continue
+  elif [[ "$arg" == --* ]]; then
+    echo "Error: Unknown argument: $arg" >&2
+    echo "Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]" >&2
+    exit 1
+  else
+    args+=("$arg")
+  fi
+done
+set -- "${args[@]}"
 
 if [[ $# -lt 5 ]]; then
   echo "Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]" >&2
