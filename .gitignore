@@ -7,6 +7,9 @@ local/*
 *.secret
 .env
 .claude
+!stow/claude/.claude/
+!stow/claude/.claude/settings.json
+!stow/claude/.claude/statusline-command.sh
 
 # Backups
 .dotfiles-backup/
