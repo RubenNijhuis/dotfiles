@@ -60,7 +60,9 @@ print_info "Current profile: $PROFILE"
 printf '\n'
 
 # Get lists
-INSTALLED_FORMULAE=$(brew list --formula | sort)
+# Use brew leaves to get only explicitly installed formulae (not transitive deps)
+# Strip tap prefixes (e.g. "user/tap/pkg" → "pkg") to match Brewfile short names
+INSTALLED_FORMULAE=$(brew leaves --installed-on-request 2>/dev/null | sed 's|.*/||' | sort)
 INSTALLED_CASKS=$(brew list --cask | sort)
 INSTALLED_VSCODE=$(code --list-extensions 2>/dev/null | sort || echo "")
 
@@ -74,15 +76,11 @@ DECLARED_CASKS=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps
 DECLARED_VSCODE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" "$DOTFILES/brew/Brewfile.$PROFILE" 2>/dev/null | \
   grep '^vscode ' | sed 's/vscode "\([^"]*\)".*/\1/' | sort)
 
-# Build list of auto-installed dependencies (pulled in by other formulae)
-AUTO_DEPS=$(brew deps --installed --formula 2>/dev/null | sed 's/.*: //' | tr ' ' '\n' | sort -u || true)
-
 # Find packages installed but not in Brewfiles
 print_section "Installed but not in Brewfiles:"
 printf '\n'
 
-UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") | \
-  comm -23 - <(echo "$AUTO_DEPS") || true)
+UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 
 UNDECLARED_CASKS=$(comm -23 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
 
@@ -128,7 +126,9 @@ fi
 print_section "Declared but not installed:"
 printf '\n'
 
-MISSING_FORMULAE=$(comm -13 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
+# For missing check, use full install list (a declared package might be present as a dep)
+ALL_INSTALLED_FORMULAE=$(brew list --formula | sort)
+MISSING_FORMULAE=$(comm -13 <(echo "$ALL_INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 MISSING_CASKS=$(comm -13 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
 MISSING_VSCODE=$(comm -13 <(echo "$INSTALLED_VSCODE") <(echo "$DECLARED_VSCODE") || true)
 
