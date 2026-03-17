@@ -166,7 +166,7 @@ check_gpg() {
 
   # Check if GPG key exists
   if gpg --list-secret-keys &>/dev/null; then
-    local key_id=$(gpg --list-secret-keys --keyid-format=long | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+    local key_id=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
     details+="Secret key: $key_id\n  "
   else
     details+="No GPG secret key found\n  "
