@@ -385,15 +385,16 @@ Sync manually installed Homebrew packages into tracked Brewfiles.
 ## `scripts/maintenance/update-repos.sh`
 
 ```text
-Usage: scripts/maintenance/update-repos.sh [--help] [--no-color] [--dry-run] [--jobs N] [path]
+Usage: scripts/maintenance/update-repos.sh [--help] [--no-color] [--dry-run] [--jobs N] [--timeout N] [path]
 
 Update all git repositories under the provided path (default: $DOTFILES_DEVELOPER_ROOT).
 
 Options:
-  --jobs N, -j N  Number of parallel jobs (default: 4, 1 = sequential)
-  --dry-run       Show what would be updated without making changes
-  --no-color      Disable colored output
-  --help          Show this help message
+  --jobs N, -j N     Number of parallel jobs (default: 15, 1 = sequential)
+  --timeout N, -t N  Fetch timeout in seconds per repo (default: 30)
+  --dry-run          Show what would be updated without making changes
+  --no-color         Disable colored output
+  --help             Show this help message
 ```
 
 ## `scripts/maintenance/update.sh`
