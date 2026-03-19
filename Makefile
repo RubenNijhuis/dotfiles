@@ -21,7 +21,7 @@ help: ## Show all commands
 	@printf "  \033[36m%-25s\033[0m %s\n" "macos" "Apply macOS defaults"
 	@printf "\n\033[1m── Health & Status ──────────\033[0m\n"
 	@printf "  \033[36m%-25s\033[0m %s\n" "status" "Quick system status (shows only actionable items)"
-	@printf "  \033[36m%-25s\033[0m %s\n" "doctor" "Run comprehensive system health check"
+	@printf "  \033[36m%-25s\033[0m %s\n" "doctor" "System health check (--quick, --section <name>)"
 	@printf "  \033[36m%-25s\033[0m %s\n" "ops-status" "Show consolidated automation and ops health status"
 	@printf "  \033[36m%-25s\033[0m %s\n" "stow-report" "Preview stow conflicts without changing files"
 	@printf "\n\033[1m── Brew ─────────────────────\033[0m\n"
@@ -171,7 +171,7 @@ test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/scripts/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/scripts/tests/test-cli-parsing.sh
 	@bash $(DOTFILES)/scripts/tests/test-install-checkpoint.sh
-	@echo "✓ Script tests passed"
+	@printf "  \033[32m✓\033[0m Script tests passed\n"
 
 bootstrap-verify: ## Run strict bootstrap reliability verification suite
 	@bash $(DOTFILES)/scripts/bootstrap/bootstrap-verify.sh

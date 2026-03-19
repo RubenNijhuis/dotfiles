@@ -43,7 +43,26 @@ show_recent_log() {
 
   local last_modified
   last_modified=$(stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$log_file" 2>/dev/null || echo "unknown")
-  print_dim "    $label: $last_modified"
+
+  if [[ "$log_file" == *.err.log ]]; then
+    if [[ -s "$log_file" ]]; then
+      print_warning "  $label: $last_modified (has errors)"
+    else
+      print_dim "    $label: $last_modified (clean)"
+    fi
+  elif [[ "$log_file" == *.out.log ]]; then
+    local last_line
+    last_line=$(tail -1 "$log_file" 2>/dev/null || true)
+    if [[ "$last_line" =~ (✓|passed|success|complete) ]]; then
+      print_success "  $label: $last_modified"
+    elif [[ "$last_line" =~ (✗|error|fail) ]]; then
+      print_error "  $label: $last_modified"
+    else
+      print_dim "    $label: $last_modified"
+    fi
+  else
+    print_dim "    $label: $last_modified"
+  fi
 }
 
 main() {

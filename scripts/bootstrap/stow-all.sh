@@ -110,7 +110,7 @@ stow_packages() {
       if [[ -n "$filtered_output" ]]; then
         print_dim "    $filtered_output"
       fi
-      print_dim "    Run 'make unstow' and try again, or check for conflicts"
+      print_dim "    Run 'make stow-report' to see conflicts, or 'make unstow' first"
       failed_count=$((failed_count + 1))
     fi
   done
@@ -127,6 +127,7 @@ stow_packages() {
     else
       print_success "Successfully stowed $stowed_count packages"
     fi
+    print_dim "  Next: run 'make doctor' to verify system health"
     return 0
   fi
 

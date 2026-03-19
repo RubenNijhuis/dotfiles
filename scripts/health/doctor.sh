@@ -99,12 +99,12 @@ record_result() {
       ;;
     1)
       print_warning "$name"
-      printf '  ⚠ %b\n' "$message"
+      printf '  %b\n' "$message"
       WARNINGS=$((WARNINGS + 1))
       ;;
     2)
       print_error "$name"
-      printf '  ✗ %b\n' "$message"
+      printf '  %b\n' "$message"
       ERRORS=$((ERRORS + 1))
       ;;
   esac
