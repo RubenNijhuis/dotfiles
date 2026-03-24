@@ -25,7 +25,7 @@ alias ....="cd ../../.."
 # Utility
 alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
-alias brewup="brew update && brew upgrade && brew cleanup"
+alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew cleanup"
 
 # Development cleanup
 alias clean-node='find . -name "node_modules" -type d -prune -exec rm -rf {} +'
