@@ -79,14 +79,7 @@ parse_args() {
 }
 
 log() {
-  # Use a lock file to prevent interleaved writes from parallel jobs
-  local lock_file="${LOG_FILE}.lock"
-  (
-    flock -w 5 200 2>/dev/null || true
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
-  ) 200>"$lock_file"
-  # Also print to stdout (outside lock to avoid blocking)
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+  log_msg "$LOG_FILE" "$1"
 }
 
 # Check if a .git path belongs to a submodule (file-based .git reference)
@@ -283,6 +276,7 @@ filter_repos() {
 
 main() {
   parse_args "$@"
+  acquire_lock "update-repos" || exit 0
 
   require_cmd "git" "Install Git first: brew install git" || exit 1
 

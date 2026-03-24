@@ -41,6 +41,7 @@ parse_args() {
 
 main() {
   parse_args "$@"
+  acquire_lock "doctor-notify" || exit 0
 
   local log_dir="$HOME/.local/log"
   mkdir -p "$log_dir"
@@ -51,8 +52,8 @@ main() {
   local exit_code=$?
   set -e
 
-  echo "$(date '+%Y-%m-%d %H:%M:%S'): Health check completed (exit code: $exit_code)" >> "$log_dir/dotfiles-doctor-summary.log"
-  echo "$output" >> "$log_dir/dotfiles-doctor.out.log"
+  log_msg "$log_dir/dotfiles-doctor-summary.log" "Health check completed (exit code: $exit_code)" --quiet
+  printf '%s\n' "$output" >> "$log_dir/dotfiles-doctor.out.log"
 
   if [[ $exit_code -ne 0 ]]; then
     osascript -e 'display notification "Run make doctor for details" with title "Dotfiles Health Check Failed"' 2>/dev/null || true

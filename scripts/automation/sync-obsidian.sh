@@ -42,11 +42,12 @@ parse_args() {
 }
 
 log() {
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG_FILE"
+  log_msg "$LOG_FILE" "$*"
 }
 
 main() {
   parse_args "$@"
+  acquire_lock "sync-obsidian" || exit 0
   require_cmd "git" "Install Git first: brew install git" || exit 1
 
   mkdir -p "$(dirname "$LOG_FILE")"

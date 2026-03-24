@@ -7,6 +7,7 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+require_bash_version 4 "doctor.sh"
 
 QUICK_MODE=false
 SECTION=""

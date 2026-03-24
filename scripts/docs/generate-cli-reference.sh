@@ -59,6 +59,7 @@ main() {
 
   mkdir -p "$(dirname "$OUTPUT_FILE")"
   TMP_FILE="$(mktemp)"
+  trap 'rm -f "$TMP_FILE"' EXIT
 
   {
     echo '# CLI Reference'
@@ -87,13 +88,11 @@ main() {
   if $CHECK_MODE; then
     if cmp -s "$TMP_FILE" "$OUTPUT_FILE"; then
       print_success "CLI reference is up to date"
-      rm -f "$TMP_FILE"
       exit 0
     fi
 
     print_error "CLI reference is stale: run bash scripts/docs/generate-cli-reference.sh"
     diff -u "$OUTPUT_FILE" "$TMP_FILE" || true
-    rm -f "$TMP_FILE"
     exit 1
   fi
 

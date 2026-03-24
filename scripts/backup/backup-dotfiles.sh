@@ -32,6 +32,7 @@ parse_args() {
 }
 
 parse_args "$@"
+acquire_lock "backup-dotfiles" || exit 0
 
 BACKUP_ROOT="$HOME/.dotfiles-backup"
 BACKUP_DIR="$BACKUP_ROOT/$(date +%Y%m%d-%H%M%S)"

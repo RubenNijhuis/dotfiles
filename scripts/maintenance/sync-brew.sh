@@ -159,6 +159,18 @@ if $DRY_RUN; then
   exit 0
 fi
 
+# Append a package line to a Brewfile if not already present.
+append_if_missing() {
+  local line="$1"
+  local file="$2"
+  if grep -qF "$line" "$file" 2>/dev/null; then
+    print_warning "Already in $(basename "$file"), skipping"
+  else
+    printf '%s\n' "$line" >> "$file"
+    print_success "Added to $(basename "$file")"
+  fi
+}
+
 for pkg in "${NEW_PACKAGES[@]}"; do
   print_info "Package: $pkg"
   print_subsection "Add to:"
@@ -170,25 +182,11 @@ for pkg in "${NEW_PACKAGES[@]}"; do
   read -rp "Choice [1/2/3/4/5]: " choice
 
   case "$choice" in
-    1)
-      echo "$pkg" >> "$DOTFILES/brew/Brewfile.cli"
-      print_success "Added to Brewfile.cli"
-      ;;
-    2)
-      echo "$pkg" >> "$DOTFILES/brew/Brewfile.apps"
-      print_success "Added to Brewfile.apps"
-      ;;
-    3)
-      echo "$pkg" >> "$DOTFILES/brew/Brewfile.vscode"
-      print_success "Added to Brewfile.vscode"
-      ;;
-    4)
-      echo "$pkg" >> "$DOTFILES/brew/Brewfile.$PROFILE"
-      print_success "Added to Brewfile.$PROFILE"
-      ;;
-    *)
-      print_dim "Skipped"
-      ;;
+    1) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.cli" ;;
+    2) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.apps" ;;
+    3) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.vscode" ;;
+    4) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.$PROFILE" ;;
+    *) print_dim "Skipped" ;;
   esac
   printf '\n'
 done

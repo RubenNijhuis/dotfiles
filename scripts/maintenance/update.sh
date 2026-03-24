@@ -112,13 +112,20 @@ main() {
   parse_args "$@"
   print_header "System Update"
 
-  update_homebrew
-  update_node_lts
-  update_global_packages
-  restow_configs
+  local failures=0
+
+  update_homebrew  || failures=$((failures + 1))
+  update_node_lts  || failures=$((failures + 1))
+  update_global_packages || failures=$((failures + 1))
+  restow_configs   || failures=$((failures + 1))
 
   printf '\n'
-  print_header "Update Complete"
+  if [[ $failures -gt 0 ]]; then
+    print_warning "Update finished with $failures failed step(s)"
+    print_info "Run 'make doctor' to diagnose issues"
+    exit 1
+  fi
+
   print_success "All updates finished successfully"
   print_info "Run 'make doctor' to verify system health"
 }
