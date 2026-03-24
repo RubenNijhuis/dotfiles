@@ -100,6 +100,15 @@ fco() {
     branch=$(git branch -a | fzf | tr -d '[:space:]') && git checkout "${branch}"
 }
 
+# Force-refresh shell caches (completions + eval caches)
+# Useful after brew install/upgrade to pick up new completions immediately.
+flush-cache() {
+    rm -f "${ZDOTDIR:-$HOME}/.zcompdump"*
+    rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+    rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+    echo "Shell caches cleared. Restart your shell to rebuild."
+}
+
 # Colored man pages — Tokyo Night palette
 export LESS_TERMCAP_mb=$'\e[1;38;2;122;162;247m'
 export LESS_TERMCAP_md=$'\e[1;38;2;122;162;247m'

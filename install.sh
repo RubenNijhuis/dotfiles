@@ -584,9 +584,15 @@ step_install_xcode_clt() {
       echo "Press enter after Xcode CLT finishes installing."
       read -r
     else
-      echo "Waiting for Xcode CLT installation to complete..."
+      echo "Waiting for Xcode CLT installation to complete (up to 10 minutes)..."
+      local wait_count=0
       until xcode-select -p &>/dev/null; do
         sleep 5
+        wait_count=$((wait_count + 1))
+        if [[ $wait_count -ge 120 ]]; then
+          error "Xcode CLT installation timed out after 10 minutes"
+          exit 1
+        fi
       done
     fi
   else
@@ -599,7 +605,7 @@ step_install_homebrew() {
   brew_bin="$(detect_brew_binary || true)"
 
   if [[ -z "$brew_bin" ]]; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl --max-time 120 -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew_bin="$(detect_brew_binary || true)"
   fi
 

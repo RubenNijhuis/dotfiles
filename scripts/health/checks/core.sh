@@ -184,6 +184,16 @@ check_gpg() {
     add_suggestion "Configure GPG signing: make gpg-setup"
   fi
 
+  # Validate pinentry-mac path matches actual Homebrew prefix
+  if [[ -f "$HOME/.gnupg/gpg-agent.conf" ]]; then
+    local pinentry_path
+    pinentry_path=$(grep "^pinentry-program" "$HOME/.gnupg/gpg-agent.conf" 2>/dev/null | awk '{print $2}')
+    if [[ -n "$pinentry_path" ]] && [[ ! -f "$pinentry_path" ]]; then
+      details+="⚠ pinentry-mac not found at $pinentry_path\n  "
+      add_suggestion "Fix pinentry path in ~/.gnupg/gpg-agent.conf (check brew --prefix)"
+    fi
+  fi
+
   # Test GPG sign (warning only)
   if ! echo "test" | gpg --clear-sign &>/dev/null; then
     details+="⚠ GPG test sign failed"

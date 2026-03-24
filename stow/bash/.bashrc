@@ -28,28 +28,41 @@ source ~/.config/shell/exports.sh
 source ~/.config/shell/aliases.sh
 source ~/.config/shell/functions.sh
 
-# Tool initialization
+# ----- Eval caching (mirrors zsh _zsh_eval_cache pattern) -----
+# Caches eval output in ~/.cache/bash/ and invalidates when the binary changes.
+_bash_eval_cache() {
+  local cmd="$1"
+  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
+  local cache_file="$cache_dir/${cmd}.bash"
+  local bin_path
+  bin_path="$(command -v "$cmd" 2>/dev/null || true)"
+
+  if [[ -z "$bin_path" ]]; then
+    return 1
+  fi
+
+  if [[ ! -f "$cache_file" ]] || [[ "$bin_path" -nt "$cache_file" ]]; then
+    mkdir -p "$cache_dir"
+    "$@" > "$cache_file" 2>/dev/null
+    if [[ ! -s "$cache_file" ]]; then
+      rm -f "$cache_file"
+      return 1
+    fi
+  fi
+  source "$cache_file"
+}
+
+# Tool initialization (cached)
 if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init bash)"
+  _bash_eval_cache starship init bash
 else
   PS1='\u@\h \W \$ '
 fi
 
-if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init bash)"
-fi
-
-if command -v atuin >/dev/null 2>&1; then
-  eval "$(atuin init bash --disable-up-arrow)"
-fi
-
-if command -v fnm >/dev/null 2>&1; then
-  eval "$(fnm env --use-on-cd --shell bash)"
-fi
-
-if command -v rbenv >/dev/null 2>&1; then
-  eval "$(rbenv init - --no-rehash bash)"
-fi
+_bash_eval_cache zoxide init bash 2>/dev/null || true
+_bash_eval_cache atuin init bash --disable-up-arrow 2>/dev/null || true
+_bash_eval_cache fnm env --use-on-cd --shell bash 2>/dev/null || true
+_bash_eval_cache rbenv init - --no-rehash bash 2>/dev/null || true
 
 # FZF keybindings and completion
 _brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"

@@ -137,15 +137,16 @@ check_biome() {
         BIOME_FIXED=0
         while IFS= read -r file; do
           if [[ -f "$file" ]]; then
-            output="$(biome check --write "$file" 2>&1 || true)"
-            if echo "$output" | grep -q "Fixed"; then
+            # Check first without writing; only fix+restage if needed
+            if biome check "$file" &>/dev/null; then
+              printf "  "
+              print_success "$file"
+            else
+              biome check --write "$file" &>/dev/null || true
               BIOME_FIXED=$((BIOME_FIXED + 1))
               printf "  "
               print_warning "$file (fixed)"
               git add "$file"
-            else
-              printf "  "
-              print_success "$file"
             fi
           fi
         done <<< "$STAGED_BIOME_FILES"

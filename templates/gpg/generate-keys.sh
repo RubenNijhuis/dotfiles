@@ -27,7 +27,8 @@ if ! command -v gpg &>/dev/null; then
 fi
 
 # Check if pinentry-mac is installed
-if [[ ! -f /opt/homebrew/bin/pinentry-mac ]]; then
+BREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null || echo /opt/homebrew)}"
+if [[ ! -f "$BREW_PREFIX/bin/pinentry-mac" ]]; then
     echo "Warning: pinentry-mac not found. Installing..."
     brew install pinentry-mac
 fi
@@ -56,7 +57,9 @@ else
     read -rp "Email [$PERSONAL_EMAIL]: " email
     email="${email:-$PERSONAL_EMAIL}"
 
-    # Generate key with batch mode
+    # Generate key with batch mode.
+    # %no-protection: batch mode requires this; add a passphrase after with:
+    #   gpg --edit-key <KEY_ID>  →  passwd
     gpg --batch --generate-key <<EOF
 Key-Type: RSA
 Key-Length: 4096

@@ -90,6 +90,8 @@ stow_packages() {
   local failed_count=0
   local skipped_count=0
   local pkg_dir pkg stow_output filtered_output
+  local -a succeeded_pkgs=()
+  local -a failed_pkgs=()
 
   for pkg_dir in "$STOW_DIR"/*/; do
     pkg="$(basename "$pkg_dir")"
@@ -97,6 +99,7 @@ stow_packages() {
     if stow_output=$(stow -d "$STOW_DIR" -t "$HOME" "$pkg" 2>&1); then
       print_success "$pkg"
       stowed_count=$((stowed_count + 1))
+      succeeded_pkgs+=("$pkg")
       # GNU Stow emits a spurious "BUG in find_stowed_path" warning when
       # target directories already exist (known upstream issue). Filter it
       # to avoid confusing output.
@@ -112,6 +115,7 @@ stow_packages() {
       fi
       print_dim "    Run 'make stow-report' to see conflicts, or 'make unstow' first"
       failed_count=$((failed_count + 1))
+      failed_pkgs+=("$pkg")
     fi
   done
 
@@ -131,7 +135,10 @@ stow_packages() {
     return 0
   fi
 
-  print_error "Failed to stow $failed_count packages"
+  print_error "Failed to stow $failed_count package(s): ${failed_pkgs[*]}"
+  if [[ $stowed_count -gt 0 ]]; then
+    print_info "Successfully stowed: ${succeeded_pkgs[*]}"
+  fi
   return 1
 }
 
