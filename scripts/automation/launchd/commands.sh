@@ -65,8 +65,8 @@ install_agent() {
 
   if [[ ! -f "$plist_source" ]]; then
     print_error "Agent '$agent_name' not found"
-    echo ""
-    echo "Available agents:"
+    printf '\n'
+    print_info "Available agents:"
     list_agents
     exit 1
   fi
@@ -235,7 +235,7 @@ run_command() {
       if [[ -z "$agent" ]]; then
         print_error "Agent name required"
         printf '\n'
-        show_usage
+        usage
         exit 1
       fi
       install_agent "$agent"
@@ -250,7 +250,7 @@ run_command() {
       if [[ -z "$agent" ]]; then
         print_error "Agent name required"
         printf '\n'
-        show_usage
+        usage
         exit 1
       fi
       uninstall_agent "$agent"
@@ -265,7 +265,7 @@ run_command() {
       if [[ -z "$agent" ]]; then
         print_error "Agent name required"
         printf '\n'
-        show_usage
+        usage
         exit 1
       fi
       restart_agent "$agent"
@@ -273,7 +273,7 @@ run_command() {
     *)
       print_error "Unknown command '$command'"
       printf '\n'
-      show_usage
+      usage
       exit 1
       ;;
   esac

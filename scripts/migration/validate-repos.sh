@@ -47,10 +47,7 @@ if [[ ! -d "$REPOS_DIR" ]]; then
   exit 1
 fi
 
-require_cmd "git" "Install Git first: brew install git" >/dev/null || {
-  print_error "Git is required"
-  exit 1
-}
+require_cmd "git" "Install Git first: brew install git" || exit 1
 
 print_header "Repository Safety Report"
 
@@ -106,44 +103,44 @@ total_count=$((safe_count + uncommitted_count + unpushed_count + stashed_count))
 # Summary
 if [[ $uncommitted_count -eq 0 && $unpushed_count -eq 0 && $stashed_count -eq 0 ]]; then
   print_success "All $safe_count repos are safe to migrate"
-  echo
+  printf '\n'
   exit 0
 else
   print_success "Safe: $safe_count repos"
   print_warning "Needs attention: $((uncommitted_count + unpushed_count + stashed_count)) repos"
-  echo
+  printf '\n'
 fi
 
 # Details
 if [[ $uncommitted_count -gt 0 ]]; then
   print_section "UNCOMMITTED CHANGES:"
   for repo in "${uncommitted_repos[@]}"; do
-    echo "  - $repo"
+    print_bullet "$repo"
   done
-  echo ""
+  printf '\n'
 fi
 
 if [[ $unpushed_count -gt 0 ]]; then
   print_section "UNPUSHED COMMITS:"
   for repo in "${unpushed_repos[@]}"; do
-    echo "  - $repo"
+    print_bullet "$repo"
   done
-  echo ""
+  printf '\n'
 fi
 
 if [[ $stashed_count -gt 0 ]]; then
   print_section "STASHED CHANGES:"
   for repo in "${stashed_repos[@]}"; do
-    echo "  - $repo"
+    print_bullet "$repo"
   done
-  echo ""
+  printf '\n'
 fi
 
 # Action required
 print_error "ACTION REQUIRED:"
-echo "1. Commit or stash uncommitted changes"
-echo "2. Push unpushed commits"
-echo "3. Run validation again: bash scripts/migration/validate-repos.sh"
-echo ""
+print_indent "1. Commit or stash uncommitted changes"
+print_indent "2. Push unpushed commits"
+print_indent "3. Run validation again: bash scripts/migration/validate-repos.sh"
+printf '\n'
 
 exit 1

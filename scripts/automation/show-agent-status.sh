@@ -3,6 +3,9 @@
 # Usage: show-agent-status.sh <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/output.sh" "$@"
+
 if [[ " $* " == *" --help "* ]]; then
   cat <<EOF
 Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
@@ -27,8 +30,8 @@ for arg in "$@"; do
   if [[ "$arg" == "--no-color" ]]; then
     continue
   elif [[ "$arg" == --* ]]; then
-    echo "Error: Unknown argument: $arg" >&2
-    echo "Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]" >&2
+    print_error "Unknown argument: $arg"
+    printf 'Usage: %s <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]\n' "$0"
     exit 1
   else
     args+=("$arg")
@@ -37,7 +40,7 @@ done
 set -- "${args[@]}"
 
 if [[ $# -lt 5 ]]; then
-  echo "Usage: $0 <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]" >&2
+  printf 'Usage: %s <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]\n' "$0"
   exit 1
 fi
 
@@ -52,22 +55,25 @@ LOG_DIR="${HOME}/.local/log/"
 # Expand leading ~ to $HOME
 expanded="${RECENT_SOURCE/#\~/$HOME}"
 
-echo "${TITLE} Status:"
-echo ""
-echo "LaunchD Agent:"
-launchctl print "gui/$(id -u)/${AGENT_ID}" >/dev/null 2>&1 && \
-  echo "  ${AGENT_ID} (loaded)" || echo "  Not loaded"
+print_section "${TITLE} Status:"
 
-echo ""
-echo "${RECENT_LABEL}:"
-if [[ -d "$expanded" ]]; then
-  # shellcheck disable=SC2012  # ls used intentionally for human-readable timestamp display
-  ls -lth "$expanded" 2>/dev/null | head -8 || echo "  No entries found"
+print_subsection "LaunchD Agent:"
+if launchctl print "gui/$(id -u)/${AGENT_ID}" >/dev/null 2>&1; then
+  print_success "${AGENT_ID} (loaded)"
 else
-  tail -"${LINES}" "$expanded" 2>/dev/null || echo "  No entries yet"
+  print_warning "Not loaded"
 fi
 
-echo ""
-echo "Log files:"
+printf '\n'
+print_subsection "${RECENT_LABEL}:"
+if [[ -d "$expanded" ]]; then
+  # shellcheck disable=SC2012  # ls used intentionally for human-readable timestamp display
+  ls -lth "$expanded" 2>/dev/null | head -8 || print_dim "  No entries found"
+else
+  tail -"${LINES}" "$expanded" 2>/dev/null || print_dim "  No entries yet"
+fi
+
+printf '\n'
+print_subsection "Log files:"
 # shellcheck disable=SC2086
-ls -lh "${LOG_DIR}"${LOG_GLOB} 2>/dev/null || echo "  No logs yet"
+ls -lh "${LOG_DIR}"${LOG_GLOB} 2>/dev/null || print_dim "  No logs yet"

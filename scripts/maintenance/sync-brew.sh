@@ -50,14 +50,11 @@ fi
 PROFILE="$(cat "$PROFILE_FILE")"
 validate_profile "$PROFILE" || exit 1
 
-require_cmd "brew" "Install Homebrew first: https://brew.sh" >/dev/null || {
-  print_error "Homebrew is required"
-  exit 1
-}
+require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Syncing Homebrew packages to Brewfiles"
 print_key_value "Profile" "$PROFILE"
-echo
+printf '\n'
 
 # Dump current system state
 brew bundle dump --file="$TEMP_BREWFILE" --force
@@ -151,7 +148,7 @@ fi
 
 # Display new packages and prompt for categorization
 print_warning "Found ${#NEW_PACKAGES[@]} new package(s)"
-echo
+printf '\n'
 
 if $DRY_RUN; then
   print_warning "DRY RUN: no Brewfiles will be modified"
@@ -164,12 +161,12 @@ fi
 
 for pkg in "${NEW_PACKAGES[@]}"; do
   print_info "Package: $pkg"
-  echo "Add to:"
-  echo "  1) Brewfile.cli (shared CLI tools)"
-  echo "  2) Brewfile.apps (shared GUI apps)"
-  echo "  3) Brewfile.vscode (VS Code extensions)"
-  echo "  4) Brewfile.$PROFILE (current profile only)"
-  echo "  5) Skip (don't add to any Brewfile)"
+  print_subsection "Add to:"
+  print_indent "1) Brewfile.cli (shared CLI tools)"
+  print_indent "2) Brewfile.apps (shared GUI apps)"
+  print_indent "3) Brewfile.vscode (VS Code extensions)"
+  print_indent "4) Brewfile.$PROFILE (current profile only)"
+  print_indent "5) Skip (don't add to any Brewfile)"
   read -rp "Choice [1/2/3/4/5]: " choice
 
   case "$choice" in
@@ -193,11 +190,11 @@ for pkg in "${NEW_PACKAGES[@]}"; do
       print_dim "Skipped"
       ;;
   esac
-  echo ""
+  printf '\n'
 done
 
 print_success "Brew sync complete"
-echo ""
-echo "Remember to:"
-echo "  1. Review changes: git diff brew/"
-echo "  2. Commit changes: git add brew/ && git commit -m 'chore: sync brew packages'"
+printf '\n'
+print_section "Remember to:"
+print_indent "1. Review changes: git diff brew/"
+print_indent "2. Commit changes: git add brew/ && git commit -m 'chore: sync brew packages'"

@@ -57,17 +57,13 @@ check_doctor() {
 
 check_stow() {
   local stow_dir="$DOTFILES/stow"
-  local total=0 broken=0
+  local total=0 broken
 
   # Count packages
   total=$(find "$stow_dir" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | xargs)
 
   # Check for broken symlinks in home directory
-  while IFS= read -r link; do
-    if [[ -L "$link" ]] && [[ ! -e "$link" ]]; then
-      broken=$((broken + 1))
-    fi
-  done < <(find "$HOME" -maxdepth 1 -type l 2>/dev/null)
+  broken=$(count_broken_symlinks "$HOME")
 
   if [[ $broken -eq 0 ]]; then
     print_success "Stow: $total packages, no broken symlinks"
@@ -137,7 +133,7 @@ check_docs() {
     print_success "Docs: up to date"
   else
     print_warning "Docs: generated reference is stale"
-    print_dim "  → Run: make docs-sync"
+    print_dim "  → Run: make docs-regen"
     ISSUES=$((ISSUES + 1))
   fi
 }
@@ -153,7 +149,7 @@ main() {
   check_backup
   check_docs
 
-  echo ""
+  printf '\n'
   if [[ $ISSUES -eq 0 ]]; then
     print_success "All clear"
   else

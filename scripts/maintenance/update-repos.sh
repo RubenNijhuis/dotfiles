@@ -22,7 +22,7 @@ LOG_FILE="$LOG_DIR/repo-updates-$(date +%Y-%m-%d).log"
 mkdir -p "$LOG_DIR"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--dry-run] [--jobs N] [--timeout N] [path]
 
 Update all git repositories under the provided path (default: \$DOTFILES_DEVELOPER_ROOT).
@@ -33,7 +33,7 @@ Options:
   --dry-run          Show what would be updated without making changes
   --no-color         Disable colored output
   --help             Show this help message
-EOF2
+EOF
 }
 
 parse_args() {
@@ -284,10 +284,7 @@ filter_repos() {
 main() {
   parse_args "$@"
 
-  require_cmd "git" "Install Git first: brew install git" >/dev/null || {
-    print_error "Git is required"
-    exit 1
-  }
+  require_cmd "git" "Install Git first: brew install git" || exit 1
 
   if [[ ! -d "$REPOS_DIR" ]]; then
     print_error "Directory not found: $REPOS_DIR"

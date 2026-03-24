@@ -2,8 +2,8 @@
 	backup brew-sync brew-sync-dry brew-audit \
 	doctor ops-status stow-report \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
-	lint-shell test-scripts maint-check bootstrap-verify docs-sync \
-	launchd-install-all launchd-uninstall-all launchd-status \
+	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
+	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean status
 
 DOTFILES := $(shell pwd)
@@ -33,6 +33,7 @@ help: ## Show all commands
 	@printf "  \033[36m%-25s\033[0m %s\n" "clean" "Remove zsh caches, log files, and .DS_Stores"
 	@printf "  \033[36m%-25s\033[0m %s\n" "maint-check" "Run maintenance validation checks (lint + test + launchd)"
 	@printf "  \033[36m%-25s\033[0m %s\n" "docs-sync" "Verify generated documentation is up to date"
+	@printf "  \033[36m%-25s\033[0m %s\n" "docs-regen" "Regenerate CLI reference documentation"
 	@printf "\n\033[1m── Setup (one-time) ─────────\033[0m\n"
 	@printf "  \033[36m%-25s\033[0m %s\n" "ssh-setup" "Generate SSH keys for current profile"
 	@printf "  \033[36m%-25s\033[0m %s\n" "gpg-setup" "Generate GPG key and configure Git signing"
@@ -45,6 +46,7 @@ help: ## Show all commands
 	@printf "\n\033[1m── Backup ───────────────────\033[0m\n"
 	@printf "  \033[36m%-25s\033[0m %s\n" "backup" "Backup current dotfiles before modifications"
 	@printf "\n\033[1m── LaunchD ──────────────────\033[0m\n"
+	@printf "  \033[36m%-25s\033[0m %s\n" "automation-list" "List all managed LaunchD agents"
 	@printf "  \033[36m%-25s\033[0m %s\n" "launchd-install-all" "Install and load all LaunchD agents"
 	@printf "  \033[36m%-25s\033[0m %s\n" "launchd-uninstall-all" "Unload and remove all LaunchD agents"
 	@printf "  \033[36m%-25s\033[0m %s\n" "launchd-status" "Show status of all LaunchD agents"
@@ -61,6 +63,7 @@ update: ## Update brew packages, runtimes, and re-stow configs
 	@bash $(DOTFILES)/scripts/maintenance/update.sh
 
 update-brew: ## Update only Homebrew packages
+	@brew autoremove 2>/dev/null || true
 	@brew update && brew upgrade && brew cleanup
 
 update-stow: ## Re-stow config packages only
@@ -146,7 +149,13 @@ maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation
 docs-sync: ## Verify generated documentation is up to date
 	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh --check
 
+docs-regen: ## Regenerate CLI reference documentation
+	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh
+
 # ── LaunchD ───────────────────────────────────────────────────────────
+
+automation-list: ## List all managed LaunchD agents with descriptions
+	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh list
 
 launchd-install-all: ## Install and load all LaunchD agents
 	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh install-all

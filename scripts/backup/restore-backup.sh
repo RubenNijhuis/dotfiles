@@ -8,11 +8,11 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 DRY_RUN=false
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--dry-run]
 
 Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
-EOF2
+EOF
 }
 
 parse_args() {
@@ -54,10 +54,10 @@ main() {
 
   print_header "Restore Backup"
   print_info "Restoring from: $backup_dir"
-  echo
+  printf '\n'
   print_section "Files to restore:"
   ls -1 "$backup_dir"
-  echo
+  printf '\n'
 
   if $DRY_RUN; then
     print_warning "DRY RUN: no files will be copied"

@@ -6,7 +6,8 @@ check_biome() {
     return
   fi
 
-  printf '%sChecking Biome...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Biome..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -41,7 +42,8 @@ check_neovim() {
     return
   fi
 
-  printf '%sChecking Neovim...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Neovim..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -97,7 +99,8 @@ check_starship() {
     return
   fi
 
-  printf '%sChecking Starship...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Starship..."
+  printf '\n'
 
   local details=""
 

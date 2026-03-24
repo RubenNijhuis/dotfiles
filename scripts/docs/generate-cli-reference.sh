@@ -11,14 +11,14 @@ OUTPUT_FILE="$DOTFILES/docs/reference/cli.md"
 CHECK_MODE=false
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--check]
 
 Generate docs/reference/cli.md from --help output.
 
 Options:
   --check    Exit non-zero if generated output differs from committed file.
-EOF2
+EOF
 }
 
 parse_args() {

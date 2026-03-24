@@ -13,11 +13,11 @@ VAULT_PATH="$DOTFILES_OBSIDIAN_REPO_PATH"
 LOG_FILE="$HOME/.local/log/obsidian-sync.log"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [path]
 
 Sync an Obsidian git repository (default: \$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store).
-EOF2
+EOF
 }
 
 parse_args() {
@@ -47,10 +47,7 @@ log() {
 
 main() {
   parse_args "$@"
-  require_cmd "git" "Install Git first: brew install git" >/dev/null || {
-    log "ERROR: Git is required"
-    exit 1
-  }
+  require_cmd "git" "Install Git first: brew install git" || exit 1
 
   mkdir -p "$(dirname "$LOG_FILE")"
 

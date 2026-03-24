@@ -132,30 +132,30 @@ main() {
   fi
 
   # Print next steps
-  echo ""
+  printf '\n'
   print_section "Next steps"
   local step=1
 
   if $CONFIG_DIR; then
-    printf '  %d. Add config files to stow/%s/.config/%s/\n' "$step" "$TOOL_NAME" "$TOOL_NAME"
+    print_indent "$step. Add config files to stow/$TOOL_NAME/.config/$TOOL_NAME/"
   else
-    printf '  %d. Add config files to stow/%s/\n' "$step" "$TOOL_NAME"
+    print_indent "$step. Add config files to stow/$TOOL_NAME/"
   fi
   step=$((step + 1))
 
   if [[ -n "$BREW_FORMULA" ]]; then
-    printf '  %d. Install: brew install %s\n' "$step" "$BREW_FORMULA"
+    print_indent "$step. Install: brew install $BREW_FORMULA"
     step=$((step + 1))
   fi
 
   if [[ -n "$BREW_CASK" ]]; then
-    printf '  %d. Install: brew install --cask %s\n' "$step" "$BREW_CASK"
+    print_indent "$step. Install: brew install --cask $BREW_CASK"
     step=$((step + 1))
   fi
 
-  printf '  %d. Stow: make stow\n' "$step"
+  print_indent "$step. Stow: make stow"
   step=$((step + 1))
-  printf '  %d. Verify: make doctor\n' "$step"
+  print_indent "$step. Verify: make doctor"
 }
 
 main "$@"

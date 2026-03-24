@@ -11,7 +11,7 @@ PROFILE="personal"
 RUN_DOCTOR=true
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--profile <personal|work>] [--skip-doctor]
 
 Runs bootstrap verification:
@@ -19,7 +19,7 @@ Runs bootstrap verification:
   2. script CLI tests
   3. docs sync check
   4. quick doctor check
-EOF2
+EOF
 }
 
 parse_args() {

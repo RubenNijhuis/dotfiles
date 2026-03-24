@@ -10,12 +10,12 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 CONFIG_FILE="$DOTFILES/local/keychain-required.txt"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--config <path>]
 
 Validate required keychain items listed one service name per line.
 Default config: local/keychain-required.txt
-EOF2
+EOF
 }
 
 parse_args() {

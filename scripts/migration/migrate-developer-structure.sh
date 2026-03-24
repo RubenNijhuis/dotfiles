@@ -177,13 +177,13 @@ prompt_destination() {
 
   print_warning "Unmapped repo: ${rel%/}/$repo_name"
   printf '  Suggested: %s\n' "$suggested"
-  echo "  1) personal/projects"
-  echo "  2) personal/experiments"
-  echo "  3) personal/learning"
-  echo "  4) work/projects"
-  echo "  5) work/clients"
-  echo "  6) archive"
-  echo "  7) custom subpath"
+  print_indent "1) personal/projects"
+  print_indent "2) personal/experiments"
+  print_indent "3) personal/learning"
+  print_indent "4) work/projects"
+  print_indent "5) work/clients"
+  print_indent "6) archive"
+  print_indent "7) custom subpath"
 
   read -rp "Choice [1-7, Enter=suggested]: " choice
   case "${choice:-}" in
@@ -359,7 +359,7 @@ run_migration() {
   print_key_value "Mode" "$([ "$COMPLETE_MODE" == "true" ] && echo "interactive" || echo "auto")"
   print_key_value "Dry run" "$DRY_RUN"
   print_key_value "Repositories found" "$repo_count"
-  echo ""
+  printf '\n'
 
   load_rules "$RULES_FILE"
   create_backup
@@ -397,7 +397,7 @@ run_migration() {
 
   cleanup_source_if_empty
 
-  echo ""
+  printf '\n'
   print_section "Migration Summary"
   print_key_value "Moved" "$moved"
   print_key_value "Skipped" "$skipped"

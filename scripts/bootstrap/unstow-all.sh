@@ -73,10 +73,7 @@ unstow_packages() {
 
 main() {
   parse_args "$@"
-  require_cmd "stow" "Install stow: brew install stow" >/dev/null || {
-    print_error "GNU Stow is required"
-    exit 1
-  }
+  require_cmd "stow" "Install stow: brew install stow" || exit 1
   print_header "Unstowing Configuration Packages"
   unstow_packages
 }

@@ -40,6 +40,9 @@ update_homebrew() {
     return 1
   fi
 
+  # Remove orphaned dependencies first to avoid noisy "Skipping/Autoremoving" warnings
+  brew autoremove &>/dev/null || true
+
   if brew update && brew upgrade && brew cleanup; then
     print_success "Homebrew packages updated"
     return 0

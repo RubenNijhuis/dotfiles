@@ -6,8 +6,8 @@ check_launchd() {
     return
   fi
 
-  printf '%sChecking LaunchD Agents...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking LaunchD Agents..."
+  printf '\n'
 
   local details=""
   local loaded_agents=0
@@ -69,8 +69,8 @@ check_homebrew() {
     return
   fi
 
-  printf '%sChecking Homebrew...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking Homebrew..."
+  printf '\n'
 
   local details=""
 
@@ -105,7 +105,8 @@ check_vscode_config() {
     return
   fi
 
-  printf '%sChecking VS Code Configuration...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking VS Code Configuration..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -156,7 +157,8 @@ check_tmux() {
     return
   fi
 
-  printf '%sChecking tmux...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking tmux..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -203,7 +205,8 @@ check_backup_system() {
     return
   fi
 
-  printf '%sChecking Backup System...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Backup System..."
+  printf '\n'
 
   local issues=0
   local details=""

@@ -89,8 +89,8 @@ unload_plist() {
   launchctl unload "$plist_path" 2>/dev/null
 }
 
-show_usage() {
-  cat << EOF2
+usage() {
+  cat << EOF
 Usage: $0 [--help] [--no-color] <command> [agent-name]
 
 Commands:
@@ -103,15 +103,15 @@ Commands:
   restart <agent>   Restart a running agent
 
 Available agents:
-EOF2
+EOF
   for agent_info in "${AGENTS[@]}"; do
     IFS=':' read -r name desc <<< "$agent_info"
     printf "  %-20s %s\n" "$name" "$desc"
   done
-  echo ""
-  echo "Examples:"
-  echo "  $0 install dotfiles-backup"
-  echo "  $0 install-all"
-  echo "  $0 status"
-  echo "  $0 restart dotfiles-doctor"
+  printf '\n'
+  printf 'Examples:\n'
+  printf '  %s install dotfiles-backup\n' "$0"
+  printf '  %s install-all\n' "$0"
+  printf '  %s status\n' "$0"
+  printf '  %s restart dotfiles-doctor\n' "$0"
 }

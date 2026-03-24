@@ -10,13 +10,13 @@ ANALYZE=false
 FULL=false
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--analyze] [--full]
 
 Without flags, generates shell profile data.
 With --analyze, reads /tmp/zsh-profile.log and prints analysis.
 With --full, generates profile data then immediately prints analysis.
-EOF2
+EOF
 }
 
 parse_args() {
@@ -116,7 +116,7 @@ generate_profile() {
   print_key_value "Actual startup time" "${elapsed_ms}ms"
   printf '\n'
 
-  cat > /tmp/.zshrc-profile << 'EOF2'
+  cat > /tmp/.zshrc-profile << 'EOF'
 # Profiling wrapper
 zmodload zsh/zprof
 
@@ -125,7 +125,7 @@ source ~/.zshrc
 
 # Print profiling results
 zprof
-EOF2
+EOF
 
   zsh -c "source /tmp/.zshrc-profile" > /tmp/zsh-profile.log 2>&1
 

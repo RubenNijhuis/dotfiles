@@ -10,12 +10,12 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 DOCTOR_ARGS=(--quick --no-color)
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--full]
 
 Run doctor checks and show a macOS notification when issues are found.
 Defaults to quick mode; use --full for full checks.
-EOF2
+EOF
 }
 
 parse_args() {

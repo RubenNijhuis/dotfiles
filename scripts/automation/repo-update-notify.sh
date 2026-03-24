@@ -11,11 +11,11 @@ LOG_DIR="$HOME/.local/log"
 SUMMARY_LOG="$LOG_DIR/repo-update-summary.log"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] [--dry-run] [path]
 
 Wrapper around scripts/maintenance/update-repos.sh with notification and summary log.
-EOF2
+EOF
 }
 
 ARGS=()

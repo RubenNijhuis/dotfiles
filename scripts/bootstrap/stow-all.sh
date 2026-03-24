@@ -153,10 +153,7 @@ check_stow_version() {
 
 main() {
   parse_args "$@"
-  require_cmd "stow" "Install stow: brew install stow" >/dev/null || {
-    print_error "GNU Stow is required"
-    exit 1
-  }
+  require_cmd "stow" "Install stow: brew install stow" || exit 1
   check_stow_version
   print_header "Stowing Configuration Packages"
 

@@ -42,10 +42,7 @@ parse_args() {
 }
 
 parse_args "$@"
-require_cmd "brew" "Install Homebrew first: https://brew.sh" >/dev/null || {
-  print_error "Homebrew is required"
-  exit 1
-}
+require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Brewfile Audit"
 

@@ -10,7 +10,8 @@ developer_root() {
 }
 
 check_profile() {
-  printf '%sChecking Profile Configuration...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Profile Configuration..."
+  printf '\n'
 
   local profile_file="$HOME/.config/dotfiles-profile"
   if [[ ! -f "$profile_file" ]]; then
@@ -21,8 +22,10 @@ check_profile() {
 
   local profile
   profile="$(cat "$profile_file")"
-  if [[ "$profile" != "personal" && "$profile" != "work" ]]; then
-    record_result "Profile Configuration" 2 "Invalid profile value: '$profile' (expected personal or work)"
+  if ! validate_profile "$profile" 2>/dev/null; then
+    local valid_list
+    valid_list="$(IFS='|'; printf '%s' "${VALID_PROFILES[*]}")"
+    record_result "Profile Configuration" 2 "Invalid profile value: '$profile' (expected $valid_list)"
     add_suggestion "Fix profile: echo personal > $profile_file"
     return
   fi
@@ -39,7 +42,8 @@ check_profile() {
 }
 
 check_stow() {
-  printf '%sChecking Stow Configuration...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking Stow Configuration..."
+  printf '\n'
 
   local stow_dir="$DOTFILES/stow"
 
@@ -57,12 +61,8 @@ check_stow() {
   local total=${#packages[@]}
 
   # Check for broken symlinks in home directory
-  local broken_count=0
-  while IFS= read -r link; do
-    if [[ -L "$link" ]] && [[ ! -e "$link" ]]; then
-      broken_count=$((broken_count + 1))
-    fi
-  done < <(find "$HOME" -maxdepth 1 -type l 2>/dev/null)
+  local broken_count
+  broken_count=$(count_broken_symlinks "$HOME")
 
   if [[ $total -gt 0 ]] && [[ $broken_count -eq 0 ]]; then
     record_result "Stow Configuration" 0 "$total packages found, no broken symlinks"
@@ -76,7 +76,8 @@ check_stow() {
 }
 
 check_ssh() {
-  printf '%sChecking SSH Configuration...%s\n\n' "${BLUE}" "${NC}"
+  print_subsection "Checking SSH Configuration..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -151,8 +152,8 @@ check_ssh() {
 }
 
 check_gpg() {
-  printf '%sChecking GPG Configuration...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking GPG Configuration..."
+  printf '\n'
 
   local gpg_pref
   gpg_pref="$(get_preference "PREF_SETUP_GPG")"
@@ -197,8 +198,8 @@ check_gpg() {
 }
 
 check_git() {
-  printf '%sChecking Git Configuration...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking Git Configuration..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -259,8 +260,8 @@ check_git() {
 }
 
 check_shell() {
-  printf '%sChecking Shell Configuration...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking Shell Configuration..."
+  printf '\n'
 
   local issues=0
   local details=""
@@ -329,8 +330,8 @@ check_shell() {
 }
 
 check_developer() {
-  printf '%sChecking Developer Directory...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking Developer Directory..."
+  printf '\n'
 
   local issues=0
   local warnings=0
@@ -418,8 +419,8 @@ check_developer() {
 }
 
 check_runtime() {
-  printf '%sChecking Runtime Environments...%s\n' "${BLUE}" "${NC}"
-  echo ""
+  print_subsection "Checking Runtime Environments..."
+  printf '\n'
 
   local details=""
 

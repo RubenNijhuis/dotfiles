@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Shared utility helpers for dotfiles scripts.
 
+# Valid dotfiles profiles — single source of truth.
+VALID_PROFILES=(personal work)
+
 has_flag() {
   local needle="$1"
   shift || true
@@ -29,21 +32,43 @@ require_cmd() {
   local hint="${2:-Install $cmd and retry.}"
 
   if ! command -v "$cmd" &>/dev/null; then
-    echo "Missing required command: $cmd"
-    echo "$hint"
+    if declare -f print_error &>/dev/null; then
+      print_error "Missing required command: $cmd" >&2
+      printf '  %s\n' "$hint" >&2
+    else
+      echo "Missing required command: $cmd" >&2
+      echo "$hint" >&2
+    fi
     return 1
   fi
 }
 
 validate_profile() {
   local profile="$1"
-  case "$profile" in
-    personal|work) return 0 ;;
-    *)
-      echo "Invalid profile: '$profile' (expected 'personal' or 'work')" >&2
-      return 1
-      ;;
-  esac
+  local valid
+  for valid in "${VALID_PROFILES[@]}"; do
+    if [[ "$profile" == "$valid" ]]; then
+      return 0
+    fi
+  done
+  local joined
+  joined="$(IFS='|'; printf '%s' "${VALID_PROFILES[*]}")"
+  echo "Invalid profile: '$profile' (expected $joined)" >&2
+  return 1
+}
+
+# Count broken symlinks in a directory (default: $HOME, depth 1).
+# Usage: count_broken_symlinks [dir] [maxdepth]
+count_broken_symlinks() {
+  local dir="${1:-$HOME}"
+  local maxdepth="${2:-1}"
+  local count=0
+  while IFS= read -r link; do
+    if [[ -L "$link" ]] && [[ ! -e "$link" ]]; then
+      count=$((count + 1))
+    fi
+  done < <(find "$dir" -maxdepth "$maxdepth" -type l 2>/dev/null)
+  printf '%d' "$count"
 }
 
 confirm() {

@@ -10,11 +10,11 @@ source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color]
 
 Preview stow operations and report package conflicts.
-EOF2
+EOF
 }
 
 parse_args() {
@@ -36,10 +36,7 @@ parse_args() {
 
 main() {
   parse_args "$@"
-  require_cmd "stow" "Install stow: brew install stow" >/dev/null || {
-    print_error "GNU Stow is required"
-    exit 1
-  }
+  require_cmd "stow" "Install stow: brew install stow" || exit 1
 
   print_header "Stow Conflict Report"
 

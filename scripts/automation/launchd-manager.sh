@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/launchd/common.sh"
 source "$SCRIPT_DIR/launchd/commands.sh"
 
 parse_args() {
-  show_help_if_requested show_usage "$@"
+  show_help_if_requested usage "$@"
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -22,7 +22,7 @@ parse_args() {
         ;;
       --*)
         print_error "Unknown argument: $1"
-        show_usage
+        usage
         exit 1
         ;;
       *)
@@ -32,7 +32,7 @@ parse_args() {
   done
 
   if [[ $# -eq 0 ]]; then
-    show_usage
+    usage
     exit 1
   fi
 

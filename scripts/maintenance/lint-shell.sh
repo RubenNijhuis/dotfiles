@@ -63,10 +63,7 @@ parse_args() {
 
 main() {
   parse_args "$@"
-  require_cmd "shellcheck" "Install shellcheck with: brew install shellcheck" >/dev/null || {
-    print_error "shellcheck is required"
-    exit 1
-  }
+  require_cmd "shellcheck" "Install shellcheck with: brew install shellcheck" || exit 1
 
   files=()
   if [[ ${#LINT_TARGETS[@]} -gt 0 ]]; then

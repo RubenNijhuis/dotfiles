@@ -11,14 +11,14 @@ LAUNCHD_MANAGER="$DOTFILES/scripts/automation/launchd-manager.sh"
 TARGET=""
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color] <backup|doctor|repo-update>
 
 Examples:
   $0 backup
   $0 doctor
   $0 repo-update
-EOF2
+EOF
 }
 
 parse_args() {

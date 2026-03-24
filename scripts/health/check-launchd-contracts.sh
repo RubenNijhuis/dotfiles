@@ -8,11 +8,11 @@ source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 usage() {
-  cat <<EOF2
+  cat <<EOF
 Usage: $0 [--help] [--no-color]
 
 Validate templates/launchd/*.plist against repository launchd contract.
-EOF2
+EOF
 }
 
 parse_args() {

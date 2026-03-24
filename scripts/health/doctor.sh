@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Source shared output helpers; respects --no-color when present in argv.
+source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
 QUICK_MODE=false
@@ -36,14 +36,16 @@ validate_section() {
       return 0
       ;;
     *)
-      echo "Unknown section: $1"
-      echo "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship"
+      print_error "Unknown section: $1"
+      print_info "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship"
       return 1
       ;;
   esac
 }
 
 parse_args() {
+  show_help_if_requested usage "$@"
+
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --quick)
@@ -58,14 +60,11 @@ parse_args() {
         SECTION="$2"
         shift 2
         ;;
-      --help|-h)
-        usage
-        exit 0
-        ;;
       --no-color)
         shift
         ;;
       *)
+        print_error "Unknown argument: $1"
         usage
         exit 1
         ;;
@@ -148,14 +147,19 @@ print_summary() {
   if [[ $ERRORS -gt 0 ]]; then
     print_key_value "Errors" "$ERRORS"
   fi
-  echo ""
+  printf '\n'
 
   if [[ ${#SUGGESTIONS[@]} -gt 0 ]]; then
     print_section "Suggested fixes"
+    # Deduplicate suggestions while preserving order
+    declare -A _seen_suggestions=()
     for suggestion in "${SUGGESTIONS[@]}"; do
-      printf -- '- %s\n' "$suggestion"
+      if [[ -z "${_seen_suggestions[$suggestion]:-}" ]]; then
+        printf -- '- %s\n' "$suggestion"
+        _seen_suggestions[$suggestion]=1
+      fi
     done
-    echo ""
+    printf '\n'
   fi
 }
 
