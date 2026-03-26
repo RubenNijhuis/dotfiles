@@ -44,6 +44,9 @@ Available agents:
   dotfiles-doctor      Daily health monitoring
   obsidian-sync        Obsidian vault synchronization
   repo-update          Repository updates
+  log-cleanup          Weekly log rotation
+  brew-audit           Weekly Brewfile drift detection
+  weekly-digest        Weekly automation health digest
 
 Examples:
   scripts/automation/launchd-manager.sh install dotfiles-backup
@@ -71,12 +74,22 @@ Wrapper around scripts/maintenance/update-repos.sh with notification and summary
 ## `scripts/automation/setup-automation.sh`
 
 ```text
-Usage: scripts/automation/setup-automation.sh [--help] [--no-color] <backup|doctor|repo-update>
+Usage: scripts/automation/setup-automation.sh [--help] [--no-color] <target>
+
+Targets:
+  backup         Setup backup automation only
+  doctor         Setup health monitoring only
+  repo-update    Setup repository update automation only
+  obsidian-sync  Setup Obsidian vault sync only
+  lmstudio       Setup LM Studio server only
+  log-cleanup    Setup log rotation only
+  brew-audit     Setup Brewfile drift detection only
+  weekly-digest  Setup weekly automation digest only
+  setup-all      Setup all applicable automations (auto-detects optional agents)
 
 Examples:
   scripts/automation/setup-automation.sh backup
-  scripts/automation/setup-automation.sh doctor
-  scripts/automation/setup-automation.sh repo-update
+  scripts/automation/setup-automation.sh setup-all
 ```
 
 ## `scripts/automation/show-agent-status.sh`
@@ -101,6 +114,14 @@ Arguments:
 Usage: scripts/automation/sync-obsidian.sh [--help] [--no-color] [path]
 
 Sync an Obsidian git repository (default: $DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store).
+```
+
+## `scripts/automation/weekly-digest.sh`
+
+```text
+Usage: scripts/automation/weekly-digest.sh [--help] [--no-color]
+
+Summarize automation health over the past 7 days and send a notification.
 ```
 
 ## `scripts/backup/backup-dotfiles.sh`
@@ -267,7 +288,7 @@ Options:
 
 Sections:
   profile, stow, ssh, gpg, git, shell, developer, runtime,
-  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship
+  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
 ```
 
 ## `scripts/health/status.sh`
@@ -347,6 +368,14 @@ Options:
 Usage: scripts/maintenance/cleanup-dotfiles-backups.sh [--help] [--no-color] [--dry-run]
 
 Remove directories matching $HOME/dotfiles.backup.*.
+```
+
+## `scripts/maintenance/cleanup-logs.sh`
+
+```text
+Usage: scripts/maintenance/cleanup-logs.sh [--help] [--no-color] [--days N]
+
+Delete automation log files older than N days (default: 30).
 ```
 
 ## `scripts/maintenance/format-all.sh`
