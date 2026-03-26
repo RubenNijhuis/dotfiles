@@ -362,7 +362,8 @@ Delete automation log files older than N days (default: 30).
 ```text
 Usage: scripts/maintenance/format-all.sh [--help] [--no-color]
 
-Apply EditorConfig-style cleanup and Biome formatting across the repository.
+Run Biome formatting on JS/TS/JSON files and ensure shell scripts are executable.
+EditorConfig handles whitespace, line endings, and indentation via your editor.
 ```
 
 ## `scripts/maintenance/generate-cli-reference.sh`
@@ -374,14 +375,6 @@ Generate docs/reference/cli.md from --help output.
 
 Options:
   --check    Exit non-zero if generated output differs from committed file.
-```
-
-## `scripts/maintenance/hook-checks.sh`
-
-```text
-Usage: scripts/maintenance/hook-checks.sh [--help] [--no-color] <docs-sync|untracked-shell|large-files|commit-message|branch-status> [path ...]
-
-Run shared git-hook checks.
 ```
 
 ## `scripts/maintenance/lint-shell.sh`
