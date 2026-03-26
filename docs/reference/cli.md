@@ -81,16 +81,6 @@ Usage: health/gpg-info.sh [--help] [--no-color]
 Display GPG key and signing configuration status.
 ```
 
-## `health/profile-shell.sh`
-
-```text
-Usage: health/profile-shell.sh [--help] [--no-color] [--analyze] [--full]
-
-Without flags, generates shell profile data.
-With --analyze, reads /tmp/zsh-profile.log and prints analysis.
-With --full, generates profile data then immediately prints analysis.
-```
-
 ## `health/ssh-info.sh`
 
 ```text
@@ -106,27 +96,12 @@ Usage: ops/automation/launchd-manager.sh [--help] [--no-color] <command> [agent-
 
 Commands:
   install <agent>   Install and load a LaunchD agent
-  install-all       Install and load all available LaunchD agents
+  install-all       Install and load all agents
   uninstall <agent> Unload and remove a LaunchD agent
-  uninstall-all     Unload and remove all installed LaunchD agents
-  list              List all available agents
+  uninstall-all     Unload and remove all agents
+  list              List available agents
   status            Show status of installed agents
   restart <agent>   Restart a running agent
-
-Available agents:
-  dotfiles-backup      Automated daily backups
-  dotfiles-doctor      Daily health monitoring
-  obsidian-sync        Obsidian vault synchronization
-  repo-update          Repository updates
-  log-cleanup          Weekly log rotation
-  brew-audit           Weekly Brewfile drift detection
-  weekly-digest        Weekly automation health digest
-
-Examples:
-  ops/automation/launchd-manager.sh install dotfiles-backup
-  ops/automation/launchd-manager.sh install-all
-  ops/automation/launchd-manager.sh status
-  ops/automation/launchd-manager.sh restart dotfiles-doctor
 ```
 
 ## `ops/automation/ops-status.sh`
@@ -151,35 +126,15 @@ Wrapper around ops/update-repos.sh with notification and summary log.
 Usage: ops/automation/setup-automation.sh [--help] [--no-color] <target>
 
 Targets:
-  backup         Setup backup automation only
-  doctor         Setup health monitoring only
-  repo-update    Setup repository update automation only
-  obsidian-sync  Setup Obsidian vault sync only
-  lmstudio       Setup LM Studio server only
-  log-cleanup    Setup log rotation only
-  brew-audit     Setup Brewfile drift detection only
-  weekly-digest  Setup weekly automation digest only
-  setup-all      Setup all applicable automations (auto-detects optional agents)
-
-Examples:
-  ops/automation/setup-automation.sh backup
-  ops/automation/setup-automation.sh setup-all
-```
-
-## `ops/automation/show-agent-status.sh`
-
-```text
-Usage: ops/automation/show-agent-status.sh <title> <agent-id> <recent-label> <recent-source> <log-glob> [lines]
-
-Display launchd agent status, recent activity, and log files.
-
-Arguments:
-  title          Display title (e.g., "Backup Automation")
-  agent-id       launchd agent label (e.g., "com.user.dotfiles-backup")
-  recent-label   Label for the recent activity section
-  recent-source  Directory (uses ls) or log file (uses tail) — ~ is expanded
-  log-glob       Glob pattern for log files under ~/.local/log/
-  lines          Lines to tail from log file (default: 10)
+  backup         Setup backup automation
+  doctor         Setup health monitoring
+  repo-update    Setup repository updates
+  obsidian-sync  Setup Obsidian vault sync
+  lmstudio       Setup LM Studio server
+  log-cleanup    Setup log rotation
+  brew-audit     Setup Brewfile drift detection
+  weekly-digest  Setup weekly digest
+  setup-all      Setup all applicable automations
 ```
 
 ## `ops/automation/sync-obsidian.sh`
@@ -232,11 +187,6 @@ Run after clean.sh for a full cleanup.
 Usage: ops/clean.sh [--help] [--no-color] [--dry-run]
 
 Remove zsh caches, automation log files, and .DS_Store files from the repo.
-
-Options:
-  --dry-run     Preview what would be removed without deleting anything
-  --no-color    Disable colored output
-  --help        Show this help message
 ```
 
 ## `ops/cleanup-logs.sh`
@@ -300,11 +250,10 @@ Usage: ops/update-repos.sh [--help] [--no-color] [--dry-run] [--jobs N] [--timeo
 Update all git repositories under the provided path (default: $DOTFILES_DEVELOPER_ROOT).
 
 Options:
-  --jobs N, -j N     Number of parallel jobs (default: 15, 1 = sequential)
-  --timeout N, -t N  Fetch timeout in seconds per repo (default: 30)
-  --dry-run          Show what would be updated without making changes
+  --jobs N, -j N     Parallel jobs (default: 15)
+  --timeout N, -t N  Fetch timeout in seconds (default: 30)
+  --dry-run          Preview without making changes
   --no-color         Disable colored output
-  --help             Show this help message
 ```
 
 ## `ops/update.sh`
@@ -376,35 +325,20 @@ Usage: setup/new-tool.sh <name> [--brew <formula>] [--cask <cask>] [--config-dir
 
 Scaffold a new config package.
 
-Arguments:
-  name              Package name (e.g., ripgrep, lazydocker)
-
 Options:
   --brew <formula>  Add a brew formula to Brewfile.cli
   --cask <cask>     Add a cask to Brewfile.apps
-  --config-dir      Create .config/<name>/ structure (default: config in home root)
+  --config-dir      Create .config/<name>/ structure
   --no-color        Disable colored output
   --help, -h        Show this help message
-
-Examples:
-  setup/new-tool.sh ripgrep --brew ripgrep
-  setup/new-tool.sh lazydocker --brew lazydocker --config-dir
-  setup/new-tool.sh wezterm --cask wezterm --config-dir
 ```
 
 ## `setup/remove-bloatware.sh`
 
 ```text
-Usage: setup/remove-bloatware.sh [options]
+Usage: setup/remove-bloatware.sh [--help] [--no-color] [--dry-run] [--yes]
 
-Remove common macOS bloatware apps (GUI applications only).
-Apps in /System/Applications require sudo; you will be prompted once.
-
-Options:
-  --yes        Skip confirmation prompts
-  --dry-run    List apps to remove without actually removing them
-  --no-color   Disable colour output
-  --help, -h   Show this help
+Remove common macOS bloatware apps (Tips, Chess, Stocks, etc.).
 ```
 
 ## `setup/stow-all.sh`

@@ -15,108 +15,39 @@ usage() {
 Usage: $0 [--help] [--no-color] [--dry-run]
 
 Remove zsh caches, automation log files, and .DS_Store files from the repo.
-
-Options:
-  --dry-run     Preview what would be removed without deleting anything
-  --no-color    Disable colored output
-  --help        Show this help message
 EOF
 }
 
-clean_zsh_cache() {
-  print_section "Zsh cache..."
-  local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+parse_standard_args usage --accept-dry-run "$@"
 
-  if [[ ! -d "$cache_dir" ]]; then
-    print_dim "    No zsh cache found"
-    return 0
-  fi
+print_header "Clean"
+$DRY_RUN && print_warning "DRY RUN"
 
-  if $DRY_RUN; then
-    print_info "Would remove: $cache_dir"
-  else
-    rm -rf "$cache_dir"
-    print_success "Removed $cache_dir (regenerates on next shell start)"
-  fi
-}
+# Zsh cache
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+if [[ -d "$cache_dir" ]]; then
+  if $DRY_RUN; then print_info "Would remove: $cache_dir"
+  else rm -rf "$cache_dir"; print_success "Removed zsh cache"; fi
+fi
 
-clean_logs() {
-  print_section "Automation logs..."
-  local log_dir="$HOME/.local/log"
-
-  if [[ ! -d "$log_dir" ]]; then
-    print_dim "    No log directory found"
-    return 0
-  fi
-
-  local count=0
+# Automation logs
+log_dir="$HOME/.local/log"
+if [[ -d "$log_dir" ]]; then
   shopt -s nullglob
-  local files=("$log_dir"/dotfiles-*.log "$log_dir"/repo-update*.log)
+  log_files=("$log_dir"/dotfiles-*.log "$log_dir"/repo-update*.log)
   shopt -u nullglob
-
-  if [[ ${#files[@]} -eq 0 ]]; then
-    print_dim "    No log files found"
-    return 0
+  if [[ ${#log_files[@]} -gt 0 ]]; then
+    if $DRY_RUN; then print_info "Would remove ${#log_files[@]} log file(s)"
+    else rm -f "${log_files[@]}"; print_success "Removed ${#log_files[@]} log file(s)"; fi
   fi
+fi
 
-  for f in "${files[@]}"; do
-    [[ -f "$f" ]] || continue
-    if $DRY_RUN; then
-      print_info "Would remove: $f"
-    else
-      rm "$f"
-      count=$((count + 1))
-    fi
-  done
+# .DS_Store in repo
+ds_count=$(find "$DOTFILES" -name ".DS_Store" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$ds_count" -gt 0 ]]; then
+  if $DRY_RUN; then print_info "Would remove $ds_count .DS_Store file(s)"
+  else find "$DOTFILES" -name ".DS_Store" -delete; print_success "Removed $ds_count .DS_Store file(s)"; fi
+fi
 
-  if ! $DRY_RUN; then
-    print_success "Removed $count log file(s)"
-  fi
-}
-
-clean_ds_store() {
-  print_section ".DS_Store files in repo..."
-
-  local files
-  files=$(find "$DOTFILES" -name ".DS_Store" 2>/dev/null) || true
-
-  if [[ -z "$files" ]]; then
-    print_dim "    None found"
-    return 0
-  fi
-
-  local count
-  count=$(echo "$files" | wc -l | tr -d ' ')
-
-  if $DRY_RUN; then
-    echo "$files" | while IFS= read -r f; do
-      print_info "Would remove: $f"
-    done
-  else
-    find "$DOTFILES" -name ".DS_Store" -delete
-    print_success "Removed $count .DS_Store file(s)"
-  fi
-}
-
-main() {
-  parse_standard_args usage --accept-dry-run "$@"
-
-  if $DRY_RUN; then
-    print_header "Clean (dry run)"
-  else
-    print_header "Clean"
-  fi
-
-  clean_zsh_cache
-  clean_logs
-  clean_ds_store
-
-  printf '\n'
-  if $DRY_RUN; then
-    print_info "Dry run complete — no files were removed"
-  else
-    print_success "Clean complete"
-  fi
-}
-
-main "$@"
+printf '\n'
+if $DRY_RUN; then print_info "Dry run complete"; else print_success "Clean complete"; fi

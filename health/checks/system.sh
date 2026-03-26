@@ -13,7 +13,7 @@ check_launchd() {
   local loaded_agents=0
 
   # Source agent registry from launchd common module
-  source "$DOTFILES/ops/automation/launchd/common.sh"
+  LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
   local managed_agents=()
   for agent_info in "${AGENTS[@]}"; do
     IFS=':' read -r name _desc <<< "$agent_info"
@@ -92,58 +92,6 @@ check_homebrew() {
   fi
 
   record_result "Homebrew" 0 "$details"
-}
-
-check_vscode_config() {
-  if $QUICK_MODE; then
-    return
-  fi
-
-  print_subsection "Checking VS Code Configuration..."
-  printf '\n'
-
-  local issues=0
-  local details=""
-
-  if ! command -v code &>/dev/null; then
-    record_result "VS Code" 1 "VS Code not installed"
-    add_suggestion "Install VS Code: brew install --cask visual-studio-code"
-    return
-  fi
-
-  details+="VS Code: installed\n  "
-
-  local INSTALLED_EXTENSIONS REQUIRED_EXTENSIONS missing_extensions
-  INSTALLED_EXTENSIONS=$(code --list-extensions 2>/dev/null)
-  REQUIRED_EXTENSIONS=(
-    "editorconfig.editorconfig"
-    "biomejs.biome"
-    "foxundermoon.shell-format"
-  )
-
-  missing_extensions=()
-  for ext in "${REQUIRED_EXTENSIONS[@]}"; do
-    if ! echo "$INSTALLED_EXTENSIONS" | grep -q "$ext"; then
-      missing_extensions+=("$ext")
-    fi
-  done
-
-  if [[ ${#missing_extensions[@]} -gt 0 ]]; then
-    details+="Extensions: missing ${#missing_extensions[@]}\n  "
-    for ext in "${missing_extensions[@]}"; do
-      details+="  • $ext\n  "
-    done
-    issues=$((issues + 1))
-    add_suggestion "Install extensions: make vscode-setup"
-  else
-    details+="Extensions: all required installed"
-  fi
-
-  if [[ $issues -eq 0 ]]; then
-    record_result "VS Code Configuration" 0 "$details"
-  else
-    record_result "VS Code Configuration" 1 "$details"
-  fi
 }
 
 check_tmux() {

@@ -143,11 +143,6 @@ require_network() {
   /sbin/ping -c1 -W3 "$host" >/dev/null 2>&1
 }
 
-# Return 0 if running on battery power.
-is_on_battery() {
-  pmset -g batt 2>/dev/null | grep -q "Battery Power"
-}
-
 # Retry a command up to N times with exponential backoff.
 # Usage: retry <max_attempts> <command...>
 retry() {
@@ -239,5 +234,5 @@ get_preference() {
 # Export functions so they're available in subshells (e.g. GNU parallel).
 export -f require_bash_version has_flag show_help_if_requested
 export -f require_cmd count_broken_symlinks
-export -f log_msg acquire_lock notify require_network is_on_battery
+export -f log_msg acquire_lock notify require_network
 export -f retry rotate_logs run_automation confirm get_preference

@@ -7,7 +7,7 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/cli.sh"
-source "$DOTFILES/ops/automation/launchd/common.sh"
+LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
 usage() {
   cat <<EOF

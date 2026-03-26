@@ -53,8 +53,8 @@ show_recent_log() {
 main() {
   parse_standard_args usage "$@"
 
-  # Source agent registry for log file paths
-  source "$DOTFILES/ops/automation/launchd/common.sh"
+  # Source agent registry for AGENTS array and agent_log_file()
+  LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
   print_header "Ops Status"
 

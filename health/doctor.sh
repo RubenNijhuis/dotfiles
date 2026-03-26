@@ -149,7 +149,6 @@ run_checks() {
   should_run runtime && check_runtime
   should_run launchd && check_launchd
   should_run homebrew && check_homebrew
-  should_run vscode && check_vscode_config
   should_run backup && check_backup_system
   should_run biome && check_biome
   should_run tmux && check_tmux
@@ -224,7 +223,7 @@ status_check_stow() {
 }
 
 status_check_launchd() {
-  source "$DOTFILES/ops/automation/launchd/common.sh"
+  LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
   local managed=0 loaded=0
   for agent_info in "${AGENTS[@]}"; do
     IFS=':' read -r name _desc <<< "$agent_info"

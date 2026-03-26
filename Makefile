@@ -177,7 +177,6 @@ lint-shell: ## Run syntax and shellcheck on shell scripts
 	@bash $(DOTFILES)/ops/lint-shell.sh
 
 test-scripts: ## Run lightweight script behavior tests
-	@bash $(DOTFILES)/tests/test-array-init.sh
 	@bash $(DOTFILES)/tests/test-idempotency.sh
 	@bash $(DOTFILES)/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/tests/test-cli-parsing.sh
