@@ -4,27 +4,13 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT_DIR/lib/output.sh" "$@"
-
-failures=0
-
-assert_exit() {
-  local label="$1" expected="$2"
-  shift 2
-  set +e
-  "$@" >/dev/null 2>&1
-  local actual=$?
-  set -e
-  if [[ "$actual" -ne "$expected" ]]; then
-    print_error "FAIL($label): expected exit $expected, got $actual"
-    failures=$((failures + 1))
-  fi
-}
+source "$ROOT_DIR/lib/test-helpers.sh"
 
 # ── clean.sh --dry-run is non-destructive ───────────────────────────
 
 test_clean_dry_run_safe() {
   local temp_home cache_dir log_dir
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   # Create fake cache and log files
@@ -42,11 +28,11 @@ test_clean_dry_run_safe() {
   # Verify files still exist
   if [[ ! -f "$cache_dir/compdump" ]]; then
     print_error "FAIL(clean-dry-run): cache file was deleted"
-    failures=$((failures + 1))
+    TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
   if [[ ! -f "$log_dir/dotfiles-test.log" ]]; then
     print_error "FAIL(clean-dry-run): log file was deleted"
-    failures=$((failures + 1))
+    TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
   trap - RETURN
@@ -57,7 +43,7 @@ test_clean_dry_run_safe() {
 
 test_clean_all_dry_run_safe() {
   local temp_home
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   # Create fake backup directories
@@ -68,7 +54,7 @@ test_clean_all_dry_run_safe() {
 
   if [[ ! -d "$temp_home/dotfiles.backup.test" ]]; then
     print_error "FAIL(clean-all-dry-run): backup dir was deleted"
-    failures=$((failures + 1))
+    TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
   trap - RETURN
@@ -79,7 +65,7 @@ test_clean_all_dry_run_safe() {
 
 test_restore_dry_run_safe() {
   local temp_home backup_dir
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   # Create a fake backup
@@ -98,7 +84,7 @@ test_restore_dry_run_safe() {
   content="$(cat "$temp_home/.zshrc")"
   if [[ "$content" != "current-content" ]]; then
     print_error "FAIL(restore-dry-run): file was overwritten during dry-run"
-    failures=$((failures + 1))
+    TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
   trap - RETURN
@@ -114,7 +100,7 @@ test_stow_then_doctor() {
   fi
 
   local temp_home
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null 2>&1
@@ -129,7 +115,7 @@ test_stow_then_doctor() {
 
   if ! printf '%s' "$output" | /usr/bin/grep -q "✓ Stow Configuration"; then
     print_error "FAIL(stow-then-doctor): stow check did not pass"
-    failures=$((failures + 1))
+    TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
   trap - RETURN
@@ -143,9 +129,4 @@ test_clean_all_dry_run_safe
 test_restore_dry_run_safe
 test_stow_then_doctor
 
-if [[ $failures -gt 0 ]]; then
-  print_error "integration: $failures test(s) failed"
-  exit 1
-fi
-
-print_success "integration: all checks passed"
+test_summary "integration"

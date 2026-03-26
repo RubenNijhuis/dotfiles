@@ -4,40 +4,13 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$ROOT_DIR/lib/output.sh" "$@"
-
-failures=0
-
-assert_exit() {
-  local label="$1" expected="$2"
-  shift 2
-  set +e
-  "$@" >/dev/null 2>&1
-  local actual=$?
-  set -e
-  if [[ "$actual" -ne "$expected" ]]; then
-    print_error "FAIL($label): expected exit $expected, got $actual"
-    failures=$((failures + 1))
-  fi
-}
-
-assert_output_contains() {
-  local label="$1" pattern="$2"
-  shift 2
-  set +e
-  local output
-  output=$("$@" 2>&1)
-  set -e
-  if ! printf '%s' "$output" | /usr/bin/grep -q "$pattern"; then
-    print_error "FAIL($label): output missing '$pattern'"
-    failures=$((failures + 1))
-  fi
-}
+source "$ROOT_DIR/lib/test-helpers.sh"
 
 # ── restore-backup.sh with no backup ────────────────────────────────
 
 test_restore_no_backup() {
   local temp_home
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   assert_exit "restore-no-backup" 1 \
@@ -54,7 +27,7 @@ test_restore_no_backup() {
 
 test_restore_stale_pointer() {
   local temp_home
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   mkdir -p "$temp_home/.dotfiles-backup"
@@ -74,7 +47,7 @@ test_restore_stale_pointer() {
 
 test_clean_empty_home() {
   local temp_home
-  temp_home="$(mktemp -d)"
+  temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
   assert_exit "clean-empty-home" 0 \
@@ -88,7 +61,7 @@ test_clean_empty_home() {
 
 test_validate_launchd_empty_dir() {
   local temp_dir
-  temp_dir="$(mktemp -d)"
+  temp_dir="$(make_temp_home)"
   trap 'rm -rf "$temp_dir"' RETURN
 
   assert_exit "validate-launchd-empty" 1 \
@@ -102,7 +75,7 @@ test_validate_launchd_empty_dir() {
 
 test_validate_launchd_malformed() {
   local temp_dir
-  temp_dir="$(mktemp -d)"
+  temp_dir="$(make_temp_home)"
   trap 'rm -rf "$temp_dir"' RETURN
 
   echo "this is not valid xml" > "$temp_dir/com.user.test.plist"
@@ -122,9 +95,4 @@ test_clean_empty_home
 test_validate_launchd_empty_dir
 test_validate_launchd_malformed
 
-if [[ $failures -gt 0 ]]; then
-  print_error "error-handling: $failures test(s) failed"
-  exit 1
-fi
-
-print_success "error-handling: all checks passed"
+test_summary "error-handling"
