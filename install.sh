@@ -450,7 +450,7 @@ collect_preferences() {
 
   printf '\n'
   printf '%sInstaller Preferences%s\n' "${BLUE}" "${NC}"
-  printf '----------------------------------------\n'
+  printf '%s\n' "----------------------------------------"
 
   if [[ -n "$PROFILE_OVERRIDE" ]]; then
     PROFILE="$PROFILE_OVERRIDE"
