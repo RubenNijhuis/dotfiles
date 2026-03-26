@@ -35,7 +35,9 @@ ms-python.vscode-python-envs   # Python environment management
 kevinrose.vsc-python-indent    # Smart Python indentation
 
 # Language Support - C#
-ms-dotnettools.csdevkit        # C# Dev Kit (LSP, debugging, project management)
+ms-dotnettools.csdevkit                # C# Dev Kit (LSP, debugging, project management)
+ms-dotnettools.csharp                  # C# language support (OmniSharp)
+ms-dotnettools.vscode-dotnet-runtime   # .NET runtime for VS Code extensions
 
 # Language Support - Go
 golang.go                      # Go language support (gopls, debugging, testing)
