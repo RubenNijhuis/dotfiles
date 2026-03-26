@@ -15,25 +15,41 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install dependencies
+        timeout-minutes: 10
         run: |
-          brew install shellcheck biome
+          brew install shellcheck biome shellharden
 
       - name: Run maintenance checks
+        timeout-minutes: 5
         run: |
           make maint-check
 
       - name: Check docs freshness
+        timeout-minutes: 2
         run: |
           bash ops/generate-cli-reference.sh --check
 
       - name: Check VS Code extension parity
+        timeout-minutes: 2
         run: |
           bash health/check-vscode-parity.sh --check
 
-      - name: Install dry-run
+      - name: Install dry-run (personal)
+        timeout-minutes: 5
         run: |
           bash install.sh --dry-run --yes --profile personal --without-macos-defaults --without-ssh --without-gpg
 
+      - name: Install dry-run (work)
+        timeout-minutes: 5
+        run: |
+          bash install.sh --dry-run --yes --profile work --without-macos-defaults --without-ssh --without-gpg
+
+      - name: Lint Python
+        timeout-minutes: 2
+        run: |
+          python3 -m py_compile lib/validate_launchd.py
+
       - name: Biome check
+        timeout-minutes: 3
         run: |
           biome check --no-errors-on-unmatched .

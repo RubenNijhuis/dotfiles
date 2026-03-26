@@ -182,6 +182,9 @@ test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/tests/test-cli-contract.sh
 	@bash $(DOTFILES)/tests/test-cli-parsing.sh
 	@bash $(DOTFILES)/tests/test-install-checkpoint.sh
+	@bash $(DOTFILES)/tests/test-error-handling.sh
+	@bash $(DOTFILES)/tests/test-backup-restore.sh
+	@bash $(DOTFILES)/tests/test-integration.sh
 	@printf "  \033[32m✓\033[0m Script tests passed\n"
 
 bootstrap-verify: ## Run strict bootstrap reliability verification suite

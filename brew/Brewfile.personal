@@ -13,7 +13,6 @@ tap "spicetify/homebrew-tap"
 # -----------------------------------------------------------------------------
 # CLI Tools
 # -----------------------------------------------------------------------------
-brew "dotnet@8"      # .NET 8 SDK
 brew "mailsy"        # Disposable email CLI
 brew "openclaw-cli"  # OpenClaw CLI
 brew "qrencode"      # QR code generator
@@ -60,10 +59,3 @@ cask "trackweight"  # Weight tracking (from krishkrosh/apps tap)
 # -----------------------------------------------------------------------------
 cask "arduino-ide"  # Arduino development
 cask "epic-games"   # Epic Games launcher
-
-# -----------------------------------------------------------------------------
-# Development
-# -----------------------------------------------------------------------------
-cask "dbeaver-community"  # Database GUI client
-cask "gcloud-cli"         # Google Cloud CLI
-cask "rider"              # JetBrains Rider (.NET / C# IDE)

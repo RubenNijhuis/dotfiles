@@ -7,6 +7,7 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 usage() {
   cat <<EOF
@@ -14,23 +15,6 @@ Usage: $0 [--help] [--no-color]
 
 Update Homebrew packages, runtime tools, and restow configs.
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 update_homebrew() {
@@ -109,7 +93,7 @@ restow_configs() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage "$@"
   print_header "System Update"
 
   local failures=0

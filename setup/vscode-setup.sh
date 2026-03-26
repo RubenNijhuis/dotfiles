@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 usage() {
   cat <<EOF
@@ -15,21 +16,7 @@ Skips extensions that are already installed.
 EOF
 }
 
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
-}
-
-parse_args "$@"
+parse_standard_args usage "$@"
 
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 EXTENSIONS_FILE="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"

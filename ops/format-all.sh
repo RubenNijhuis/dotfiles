@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 usage() {
   cat <<EOF
@@ -17,18 +18,7 @@ EditorConfig handles whitespace, line endings, and indentation via your editor.
 EOF
 }
 
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color) shift ;;
-      *) print_error "Unknown argument: $1"; usage; exit 1 ;;
-    esac
-  done
-}
-
-parse_args "$@"
+parse_standard_args usage "$@"
 print_header "Format All"
 
 # Biome formatting

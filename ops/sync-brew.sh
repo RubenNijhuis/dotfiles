@@ -8,6 +8,7 @@ PROFILE_FILE="$HOME/.config/dotfiles-profile"
 TEMP_BREWFILE="$(mktemp "${TMPDIR:-/tmp}/brewfile-current.XXXXXX")"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 trap 'rm -f "$TEMP_BREWFILE"' EXIT
 DRY_RUN=false
 
@@ -19,28 +20,7 @@ Sync manually installed Homebrew packages into tracked Brewfiles.
 EOF
 }
 
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
-}
-
-parse_args "$@"
+parse_standard_args usage --accept-dry-run "$@"
 
 # Read current profile
 if [[ ! -f "$PROFILE_FILE" ]]; then

@@ -64,6 +64,7 @@ brew "go"            # Go programming language
 brew "rbenv"         # Ruby version manager
 brew "ruby-build"    # rbenv plugin: install Ruby versions
 brew "zig"           # Zig programming language
+brew "dotnet@8"      # .NET 8 SDK
 brew "jq"            # JSON processor
 brew "yq"            # YAML processor
 brew "prettier"      # Code formatter (multi-language)

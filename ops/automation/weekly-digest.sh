@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../../lib/cli.sh"
 source "$DOTFILES/ops/automation/launchd/common.sh"
 
 usage() {
@@ -14,23 +15,6 @@ Usage: $0 [--help] [--no-color]
 
 Summarize automation health over the past 7 days and send a notification.
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 # Count log entries from the past N days matching a pattern.
@@ -62,7 +46,7 @@ count_log_entries() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage "$@"
 
   print_header "Weekly Automation Digest"
   printf '\n'

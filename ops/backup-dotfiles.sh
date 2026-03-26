@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 usage() {
   cat <<EOF
@@ -14,24 +15,7 @@ Create a timestamped backup of local dotfile files before stow operations.
 EOF
 }
 
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
-}
-
-parse_args "$@"
+parse_standard_args usage "$@"
 acquire_lock "backup-dotfiles" || exit 0
 
 BACKUP_ROOT="$HOME/.dotfiles-backup"

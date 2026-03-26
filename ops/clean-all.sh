@@ -5,6 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 DRY_RUN=false
 
@@ -15,27 +16,6 @@ Usage: $0 [--help] [--no-color] [--dry-run]
 Remove dotfiles backup directories and Homebrew download cache.
 Run after clean.sh for a full cleanup.
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 clean_dotfiles_backups() {
@@ -82,7 +62,7 @@ clean_brew_cache() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage --accept-dry-run "$@"
 
   if $DRY_RUN; then
     print_header "Clean All (dry run)"

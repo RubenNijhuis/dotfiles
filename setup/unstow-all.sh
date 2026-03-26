@@ -8,6 +8,7 @@ STOW_DIR="$DOTFILES/config"
 
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 usage() {
   cat <<EOF
@@ -15,23 +16,6 @@ Usage: $0 [--help] [--no-color]
 
 Unstow all packages from config/ out of \$HOME.
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 unstow_packages() {
@@ -72,7 +56,7 @@ unstow_packages() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage "$@"
   require_cmd "stow" "Install stow: brew install stow" || exit 1
   print_header "Unstowing Configuration Packages"
   unstow_packages

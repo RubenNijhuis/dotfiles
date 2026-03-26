@@ -6,30 +6,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../../lib/cli.sh"
 
+# shellcheck disable=SC2329
 usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
 Show launchd automation health, recent logs, and recent backup activity.
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 show_recent_log() {
@@ -66,7 +51,7 @@ show_recent_log() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage "$@"
 
   # Source agent registry for log file paths
   source "$DOTFILES/ops/automation/launchd/common.sh"

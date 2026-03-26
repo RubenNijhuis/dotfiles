@@ -35,4 +35,9 @@ cask "orbstack"             # Docker and Linux VM manager
 cask "slack"                # Team communication
 cask "yaak"                 # API client
 
-tap "spicetify/tap"
+# -----------------------------------------------------------------------------
+# Development
+# -----------------------------------------------------------------------------
+cask "dbeaver-community"    # Universal database tool
+cask "gcloud-cli"           # Google Cloud SDK
+cask "rider"                # .NET IDE

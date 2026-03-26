@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
 
 DRY_RUN=false
 
@@ -20,27 +21,6 @@ Options:
   --no-color    Disable colored output
   --help        Show this help message
 EOF
-}
-
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
 }
 
 clean_zsh_cache() {
@@ -119,7 +99,7 @@ clean_ds_store() {
 }
 
 main() {
-  parse_args "$@"
+  parse_standard_args usage --accept-dry-run "$@"
 
   if $DRY_RUN; then
     print_header "Clean (dry run)"
