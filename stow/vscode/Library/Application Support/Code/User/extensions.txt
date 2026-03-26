@@ -11,6 +11,7 @@ editorconfig.editorconfig      # EditorConfig support
 dbaeumer.vscode-eslint         # JavaScript/TypeScript linter
 esbenp.prettier-vscode         # Prettier formatter
 foxundermoon.shell-format      # Shell script formatter
+timonwong.shellcheck           # Shell script linting (shellcheck integration)
 usernamehw.errorlens           # Inline error highlighting
 
 # Git
@@ -31,8 +32,7 @@ svelte.svelte-vscode           # Svelte framework support
 ms-python.python               # Full Python language support
 ms-python.vscode-pylance       # Python language server (fast static analysis)
 ms-python.debugpy              # Python debugger
-ms-python.vscode-python-envs   # Python environment management
-kevinrose.vsc-python-indent    # Smart Python indentation
+charliermarsh.ruff             # Python linter and formatter (fast, Rust-based)
 
 # Language Support - C#
 ms-dotnettools.csdevkit                # C# Dev Kit (LSP, debugging, project management)
@@ -59,4 +59,5 @@ tamasfe.even-better-toml       # TOML syntax and formatting
 
 # DevOps & Remote
 ms-vscode-remote.remote-containers  # Dev containers support
-ms-azuretools.vscode-containers     # Docker/container support
+ms-azuretools.vscode-docker         # Docker/container management and Dockerfile support
+ms-azuretools.vscode-containers     # Dev container CLI support
