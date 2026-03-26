@@ -39,7 +39,6 @@ dotfiles/
 ├── templates/       # launchd, ssh, gpg, local templates
 ├── brew/            # profile-separated Brewfiles
 ├── docs/            # architecture, runbooks, reference
-├── macos/           # macOS defaults
 ├── install.sh       # bootstrap installer
 └── Makefile         # operator entrypoint
 ```

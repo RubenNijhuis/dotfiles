@@ -670,7 +670,7 @@ step_setup_runtimes() {
 
 step_apply_macos_defaults() {
   if [[ "$APPLY_MACOS_DEFAULTS" == "yes" ]]; then
-    bash "$DOTFILES/macos/defaults.sh"
+    bash "$DOTFILES/scripts/bootstrap/macos-defaults.sh"
     success "macOS defaults applied"
   else
     success "Skipped"
@@ -768,7 +768,7 @@ print_next_steps() {
 
   if [[ "$SETUP_GPG" == "yes" ]]; then
     echo "  - Add GPG public key to GitHub/GitLab (see templates/gpg/README.md)"
-    echo "  - Update signingkey in git configs: bash scripts/info/gpg-info.sh"
+    echo "  - Update signingkey in git configs: bash scripts/health/gpg-info.sh"
   fi
 
   echo ""

@@ -82,7 +82,7 @@ main() {
   run_step "CLI contract checks" bash "$DOTFILES/scripts/tests/test-cli-contract.sh"
   run_step "Install checkpoint checks" bash "$DOTFILES/scripts/tests/test-install-checkpoint.sh"
   run_step "Keychain requirement checks" bash "$DOTFILES/scripts/bootstrap/check-keychain.sh" --no-color
-  run_step "Docs sync check" bash "$DOTFILES/scripts/docs/generate-cli-reference.sh" --check
+  run_step "Docs sync check" bash "$DOTFILES/scripts/maintenance/generate-cli-reference.sh" --check
 
   if $RUN_DOCTOR; then
     run_step "Doctor quick check" bash "$DOTFILES/scripts/health/doctor.sh" --quick --no-color

@@ -1,6 +1,6 @@
 # CLI Reference
 
-Generated from live `--help` output. Do not edit manually; run `bash scripts/docs/generate-cli-reference.sh`.
+Generated from live `--help` output. Do not edit manually; run `bash scripts/maintenance/generate-cli-reference.sh`.
 
 ## `install.sh`
 
@@ -161,6 +161,15 @@ Validate required keychain items listed one service name per line.
 Default config: local/keychain-required.txt
 ```
 
+## `scripts/bootstrap/macos-defaults.sh`
+
+```text
+Usage: scripts/bootstrap/macos-defaults.sh [--help] [--no-color]
+
+Apply macOS system defaults (Finder, Dock, keyboard, trackpad, etc.).
+Run once after fresh install, then selectively as needed.
+```
+
 ## `scripts/bootstrap/new-tool.sh`
 
 ```text
@@ -232,17 +241,6 @@ Install VS Code extensions declared in stow/vscode/.../extensions.txt.
 Skips extensions that are already installed.
 ```
 
-## `scripts/docs/generate-cli-reference.sh`
-
-```text
-Usage: scripts/docs/generate-cli-reference.sh [--help] [--no-color] [--check]
-
-Generate docs/reference/cli.md from --help output.
-
-Options:
-  --check    Exit non-zero if generated output differs from committed file.
-```
-
 ## `scripts/health/check-launchd-contracts.sh`
 
 ```text
@@ -291,6 +289,32 @@ Sections:
   launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
 ```
 
+## `scripts/health/gpg-info.sh`
+
+```text
+Usage: scripts/health/gpg-info.sh [--help] [--no-color]
+
+Display GPG key and signing configuration status.
+```
+
+## `scripts/health/profile-shell.sh`
+
+```text
+Usage: scripts/health/profile-shell.sh [--help] [--no-color] [--analyze] [--full]
+
+Without flags, generates shell profile data.
+With --analyze, reads /tmp/zsh-profile.log and prints analysis.
+With --full, generates profile data then immediately prints analysis.
+```
+
+## `scripts/health/ssh-info.sh`
+
+```text
+Usage: scripts/health/ssh-info.sh [--help] [--no-color]
+
+Display SSH key, agent, and config status.
+```
+
 ## `scripts/health/status.sh`
 
 ```text
@@ -301,32 +325,6 @@ Unified system status check. Shows only actionable items.
 Options:
   --no-color    Disable colored output
   --help, -h    Show this help message
-```
-
-## `scripts/info/gpg-info.sh`
-
-```text
-Usage: scripts/info/gpg-info.sh [--help] [--no-color]
-
-Display GPG key and signing configuration status.
-```
-
-## `scripts/info/profile-shell.sh`
-
-```text
-Usage: scripts/info/profile-shell.sh [--help] [--no-color] [--analyze] [--full]
-
-Without flags, generates shell profile data.
-With --analyze, reads /tmp/zsh-profile.log and prints analysis.
-With --full, generates profile data then immediately prints analysis.
-```
-
-## `scripts/info/ssh-info.sh`
-
-```text
-Usage: scripts/info/ssh-info.sh [--help] [--no-color]
-
-Display SSH key, agent, and config status.
 ```
 
 ## `scripts/maintenance/brew-audit.sh`
@@ -384,6 +382,17 @@ Delete automation log files older than N days (default: 30).
 Usage: scripts/maintenance/format-all.sh [--help] [--no-color]
 
 Apply EditorConfig-style cleanup and Biome formatting across the repository.
+```
+
+## `scripts/maintenance/generate-cli-reference.sh`
+
+```text
+Usage: scripts/maintenance/generate-cli-reference.sh [--help] [--no-color] [--check]
+
+Generate docs/reference/cli.md from --help output.
+
+Options:
+  --check    Exit non-zero if generated output differs from committed file.
 ```
 
 ## `scripts/maintenance/hook-checks.sh`

@@ -69,6 +69,6 @@ Install/uninstall/status is handled only via `scripts/automation/launchd-manager
 1. Define scope and owner in docs.
 2. Add/extend script with contract-compliant CLI flags.
 3. Add tests under `scripts/tests/` for parsing and behavior.
-4. Update or generate docs (`bash scripts/docs/generate-cli-reference.sh` + `make docs-sync`).
+4. Update or generate docs (`bash scripts/maintenance/generate-cli-reference.sh` + `make docs-sync`).
 5. For automation: add launchd template + manager compatibility + `ops-status` visibility.
 6. Validate with `make maint-check` and `make bootstrap-verify`.

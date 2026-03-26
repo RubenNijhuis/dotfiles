@@ -64,7 +64,7 @@ main() {
   {
     echo '# CLI Reference'
     echo ''
-    echo "Generated from live \`--help\` output. Do not edit manually; run \`bash scripts/docs/generate-cli-reference.sh\`."
+    echo "Generated from live \`--help\` output. Do not edit manually; run \`bash scripts/maintenance/generate-cli-reference.sh\`."
     echo ''
   } > "$TMP_FILE"
 
@@ -91,7 +91,7 @@ main() {
       exit 0
     fi
 
-    print_error "CLI reference is stale: run bash scripts/docs/generate-cli-reference.sh"
+    print_error "CLI reference is stale: run bash scripts/maintenance/generate-cli-reference.sh"
     diff -u "$OUTPUT_FILE" "$TMP_FILE" || true
     exit 1
   fi

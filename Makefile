@@ -79,7 +79,7 @@ unstow: ## Unstow all config packages
 	@bash $(DOTFILES)/scripts/bootstrap/unstow-all.sh
 
 macos: ## Apply macOS defaults
-	@bash $(DOTFILES)/macos/defaults.sh
+	@bash $(DOTFILES)/scripts/bootstrap/macos-defaults.sh
 
 # ── Health & Status ───────────────────────────────────────────────────
 
@@ -145,10 +145,10 @@ clean: ## Remove zsh caches, log files, and .DS_Stores in repo
 maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks (lint + test + launchd)
 
 docs-sync: ## Verify generated documentation is up to date
-	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh --check
+	@bash $(DOTFILES)/scripts/maintenance/generate-cli-reference.sh --check
 
 docs-regen: ## Regenerate CLI reference documentation
-	@bash $(DOTFILES)/scripts/docs/generate-cli-reference.sh
+	@bash $(DOTFILES)/scripts/maintenance/generate-cli-reference.sh
 
 # ── LaunchD ───────────────────────────────────────────────────────────
 

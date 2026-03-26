@@ -129,7 +129,7 @@ check_backup() {
 }
 
 check_docs() {
-  if bash "$DOTFILES/scripts/docs/generate-cli-reference.sh" --check --no-color >/dev/null 2>&1; then
+  if bash "$DOTFILES/scripts/maintenance/generate-cli-reference.sh" --check --no-color >/dev/null 2>&1; then
     print_success "Docs: up to date"
   else
     print_warning "Docs: generated reference is stale"

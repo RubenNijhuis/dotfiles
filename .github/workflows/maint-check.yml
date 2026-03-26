@@ -24,7 +24,7 @@ jobs:
 
       - name: Check docs freshness
         run: |
-          bash scripts/docs/generate-cli-reference.sh --check
+          bash scripts/maintenance/generate-cli-reference.sh --check
 
       - name: Check VS Code extension parity
         run: |

@@ -4,10 +4,37 @@
 
 set -euo pipefail
 
-DOTFILES_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# shellcheck source=../scripts/lib/env.sh
-source "$DOTFILES_ROOT/scripts/lib/env.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+# shellcheck source=../lib/common.sh
+source "$SCRIPT_DIR/../lib/common.sh"
+# shellcheck source=../lib/output.sh
+source "$SCRIPT_DIR/../lib/output.sh" "$@"
+# shellcheck source=../lib/env.sh
+source "$SCRIPT_DIR/../lib/env.sh"
 dotfiles_load_env "$DOTFILES_ROOT"
+
+usage() {
+  cat <<EOF
+Usage: $0 [--help] [--no-color]
+
+Apply macOS system defaults (Finder, Dock, keyboard, trackpad, etc.).
+Run once after fresh install, then selectively as needed.
+EOF
+}
+
+parse_args() {
+  show_help_if_requested usage "$@"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --no-color) shift ;;
+      *) print_error "Unknown option: $1"; usage; exit 1 ;;
+    esac
+  done
+}
+parse_args "$@"
 
 echo "Applying macOS defaults..."
 
