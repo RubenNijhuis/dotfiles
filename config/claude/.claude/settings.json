@@ -7,16 +7,6 @@
     "command": "bash ~/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true,
-    "clbtx@celebratix-marketplace": true
-  },
-  "extraKnownMarketplaces": {
-    "celebratix-marketplace": {
-      "source": {
-        "source": "directory",
-        "path": "/Users/rubennijhuis/Developer/work/clients/celebratix/sdd"
-      }
-    }
-  },
-  "skipDangerousModePermissionPrompt": true
+    "typescript-lsp@claude-plugins-official": true
+  }
 }

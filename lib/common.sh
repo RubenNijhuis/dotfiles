@@ -99,7 +99,7 @@ log_msg() {
 # Returns 1 if another instance is already running.
 acquire_lock() {
   local lock_name="$1"
-  local lock_dir="/tmp/dotfiles-${lock_name}.lock"
+  local lock_dir="${TMPDIR:-/tmp}/dotfiles-${lock_name}.lock"
   local stale_seconds=3600
 
   # Remove stale locks (older than 1 hour)

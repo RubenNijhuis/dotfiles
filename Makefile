@@ -4,7 +4,7 @@
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
-	clean clean-all restore status launchd-check \
+	clean clean-all restore status launchd-check vscode-parity \
 	help-setup help-brew help-launchd help-test
 
 DOTFILES := $(shell pwd)
@@ -152,6 +152,9 @@ clean: ## Remove zsh caches, log files, and .DS_Stores in repo
 
 clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
 	@bash $(DOTFILES)/ops/clean-all.sh
+
+vscode-parity: ## Check VS Code extension parity with extensions.txt
+	@bash $(DOTFILES)/health/check-vscode-parity.sh --check
 
 maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks
 

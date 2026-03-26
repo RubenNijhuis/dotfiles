@@ -11,7 +11,7 @@ fi
 # Only regenerate completions once per day
 autoload -Uz compinit
 setopt EXTENDEDGLOB
-local zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
+zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
 if [[ -n ${zcompdump}(#qNmh-20) ]]; then
   # Cached: use existing dump from last 20 hours
   compinit -C -d "$zcompdump"
@@ -77,12 +77,9 @@ chpwd() { emulate -L zsh -o aliases; ls; }
   source "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
 export YSU_MESSAGE_POSITION="after"
 
-# Defer syntax highlighting to background (it's slow and non-critical)
-{
-  if [[ -f "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
-    source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-  fi
-} &!
+# Syntax highlighting (must be sourced synchronously — subshells can't modify parent)
+[[ -f "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
+  source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # ----- Tool initialization (eval outputs cached per binary) -----
 # Cache is stored in $XDG_CACHE_HOME/zsh/ and invalidated when the binary changes.
