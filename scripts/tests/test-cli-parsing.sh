@@ -27,8 +27,6 @@ assert_exit 0 bash "$ROOT_DIR/scripts/health/doctor.sh" --help
 assert_exit 1 bash "$ROOT_DIR/scripts/health/doctor.sh" --section nope
 assert_exit 0 bash "$ROOT_DIR/scripts/automation/launchd-manager.sh" --help
 assert_exit 1 bash "$ROOT_DIR/scripts/automation/launchd-manager.sh" nope
-assert_exit 0 bash "$ROOT_DIR/scripts/migration/migrate-developer-structure.sh" --help
-assert_exit 1 bash "$ROOT_DIR/scripts/migration/migrate-developer-structure.sh" --dry-run --complete
 assert_exit 0 bash "$ROOT_DIR/scripts/backup/restore-backup.sh" --help
 assert_exit 0 bash "$ROOT_DIR/scripts/maintenance/sync-brew.sh" --help
 assert_exit 0 bash "$ROOT_DIR/scripts/bootstrap/stow-report.sh" --help

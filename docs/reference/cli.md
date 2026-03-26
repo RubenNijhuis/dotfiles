@@ -274,12 +274,13 @@ Defaults to quick mode; use --full for full checks.
 ## `scripts/health/doctor.sh`
 
 ```text
-Usage: scripts/health/doctor.sh [--help] [--quick] [--section <name>] [--no-color]
+Usage: scripts/health/doctor.sh [--help] [--quick] [--status] [--section <name>] [--no-color]
 
 Comprehensive system health check for dotfiles setup.
 
 Options:
   --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --status            Show quick actionable system status summary
   --section <name>    Run only the specified check section
   --no-color          Disable colored output
   --help, -h          Show this help message
@@ -315,18 +316,6 @@ Usage: scripts/health/ssh-info.sh [--help] [--no-color]
 Display SSH key, agent, and config status.
 ```
 
-## `scripts/health/status.sh`
-
-```text
-Usage: scripts/health/status.sh [--help] [--no-color]
-
-Unified system status check. Shows only actionable items.
-
-Options:
-  --no-color    Disable colored output
-  --help, -h    Show this help message
-```
-
 ## `scripts/maintenance/brew-audit.sh`
 
 ```text
@@ -358,14 +347,6 @@ Options:
   --dry-run     Preview what would be removed without deleting anything
   --no-color    Disable colored output
   --help        Show this help message
-```
-
-## `scripts/maintenance/cleanup-dotfiles-backups.sh`
-
-```text
-Usage: scripts/maintenance/cleanup-dotfiles-backups.sh [--help] [--no-color] [--dry-run]
-
-Remove directories matching $HOME/dotfiles.backup.*.
 ```
 
 ## `scripts/maintenance/cleanup-logs.sh`
@@ -441,50 +422,5 @@ Options:
 Usage: scripts/maintenance/update.sh [--help] [--no-color]
 
 Update Homebrew packages, runtime tools, and restow configs.
-```
-
-## `scripts/migration/migrate-developer-structure.sh`
-
-```text
-Usage: scripts/migration/migrate-developer-structure.sh [options]
-
-Options:
-  --dry-run                          Preview planned moves without changing files
-  --complete                         Interactive categorization mode for existing setups
-  --source <path>                    Source root containing repositories
-                                     (default: $DOTFILES_DEVELOPER_ROOT/repositories)
-  --target <path>                    Target developer root
-                                     (default: $DOTFILES_DEVELOPER_ROOT)
-  --rules <path>                     Optional pattern rules file
-                                     (default: local/migration-rules.txt if present)
-  --default-destination <subpath>    Fallback target subpath for unmapped repos
-                                     (default: personal/projects)
-  --non-interactive                  Disable prompts (auto/rules only)
-  --help                             Show this help message
-  --no-color                         Disable color output
-
-Rules file format:
-  pattern|destination-subpath
-
-Example:
-  # Move all repos in a legacy Work folder under work/projects
-  Work/*|work/projects
-```
-
-## `scripts/migration/migrate-ssh-keys.sh`
-
-```text
-Usage: scripts/migration/migrate-ssh-keys.sh [--help] [--no-color]
-
-Rename ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal.
-```
-
-## `scripts/migration/validate-repos.sh`
-
-```text
-Usage: scripts/migration/validate-repos.sh [--help] [--no-color] [path]
-
-Validate git repositories for uncommitted, unpushed, or stashed work.
-Defaults to: $DOTFILES_DEVELOPER_ROOT
 ```
 

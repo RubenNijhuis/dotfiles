@@ -84,7 +84,7 @@ macos: ## Apply macOS defaults
 # ── Health & Status ───────────────────────────────────────────────────
 
 status: ## Quick system status — shows only actionable items
-	@bash $(DOTFILES)/scripts/health/status.sh
+	@bash $(DOTFILES)/scripts/health/doctor.sh --status
 
 doctor: ## Run comprehensive system health check
 	@bash $(DOTFILES)/scripts/health/doctor.sh

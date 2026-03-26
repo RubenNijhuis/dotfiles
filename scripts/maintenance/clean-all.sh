@@ -41,10 +41,28 @@ parse_args() {
 clean_dotfiles_backups() {
   print_section "Dotfiles backups..."
 
-  local args=()
-  $DRY_RUN && args+=(--dry-run)
+  local found=0 removed=0
+  shopt -s nullglob
+  for path in "$HOME"/dotfiles.backup.*; do
+    [[ -d "$path" ]] || continue
+    found=$((found + 1))
+    if $DRY_RUN; then
+      print_info "Would remove: $path"
+      continue
+    fi
+    rm -r "$path"
+    print_success "Removed: $path"
+    removed=$((removed + 1))
+  done
+  shopt -u nullglob
 
-  bash "$SCRIPT_DIR/cleanup-dotfiles-backups.sh" "${args[@]}"
+  if [[ $found -eq 0 ]]; then
+    print_success "No backup clones found"
+  elif $DRY_RUN; then
+    print_info "Found $found backup clone(s)"
+  else
+    print_success "Removed $removed backup clone(s)"
+  fi
 }
 
 clean_brew_cache() {

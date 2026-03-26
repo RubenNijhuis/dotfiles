@@ -413,12 +413,6 @@ check_developer() {
     add_suggestion "Keep one clone only to avoid stow ownership conflicts"
   fi
 
-  # Check old structure removed
-  if [[ -d "$dev_root/repositories" ]]; then
-    details+="\n  ⚠ Old repositories/ folder still exists"
-    add_suggestion "Complete migration: bash scripts/migration/migrate-developer-structure.sh --complete"
-  fi
-
   if [[ $issues -eq 0 ]] && [[ $warnings -gt 0 ]]; then
     record_result "Developer Directory" 1 "$details"
   elif [[ $issues -eq 0 ]]; then

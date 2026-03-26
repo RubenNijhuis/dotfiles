@@ -25,7 +25,7 @@ uv is the Python package and project manager. It also manages Python versions (`
 ## Directory Responsibilities
 
 - `stow/`: source-of-truth user config packages symlinked into `$HOME`.
-- `scripts/`: operational interfaces grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `migration/`, `backup/`, `info/`, `docs/`), plus `lib/` and `tests/`.
+- `scripts/`: operational interfaces grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `backup/`), plus `lib/` and `tests/`.
 - `templates/launchd/`: managed launch agents and launchd contracts.
 - `templates/local/`: machine-local, untracked override templates.
 - `brew/`: package declarations split by profile (`common`, `personal`, `work`).

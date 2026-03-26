@@ -5,7 +5,7 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 ## Structure
 
 - `stow/` — Config packages symlinked into `$HOME`. Each subdirectory mirrors home directory structure.
-- `scripts/` — Operational scripts grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `migration/`, `backup/`), plus `lib/` and `tests/`.
+- `scripts/` — Operational scripts grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `backup/`), plus `lib/` and `tests/`.
 - `brew/` — Brewfiles split by profile (see below).
 - `templates/` — Launchd plist templates and local override templates.
 - `docs/` — Runbooks and generated references.

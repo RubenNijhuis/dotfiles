@@ -695,25 +695,6 @@ step_final_setup() {
            "$DEVELOPER_ROOT/archive"
   success "Created developer structure at $DEVELOPER_ROOT"
 
-  if [[ -d "$DEVELOPER_ROOT/repositories" ]]; then
-    local legacy_repo_count
-    legacy_repo_count=$(find "$DEVELOPER_ROOT/repositories" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-    if [[ "$legacy_repo_count" -gt 0 ]]; then
-      warning "Detected legacy $DEVELOPER_ROOT/repositories with $legacy_repo_count repo(s)"
-      echo "  Run migration after install:"
-      echo "    bash scripts/migration/migrate-developer-structure.sh --dry-run"
-      echo "    bash scripts/migration/migrate-developer-structure.sh"
-      echo "    bash scripts/migration/migrate-developer-structure.sh --complete"
-    fi
-  fi
-
-  if [[ -f ~/.ssh/id_ed25519 && ! -f ~/.ssh/id_ed25519_personal ]]; then
-    warning "Found existing SSH key that needs migration"
-    if $NON_INTERACTIVE || prompt_yes_no "Migrate ~/.ssh/id_ed25519 to ~/.ssh/id_ed25519_personal? [y/N] " "N"; then
-      bash "$DOTFILES/scripts/migration/migrate-ssh-keys.sh" --no-color
-    fi
-  fi
-
   if [[ "$SETUP_SSH" == "yes" ]]; then
     bash "$DOTFILES/templates/ssh/generate-keys.sh"
   fi

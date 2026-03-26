@@ -6,8 +6,6 @@ Index for the dotfiles documentation.
 
 - [Architecture](architecture.md) — repo structure, scope, and design decisions
 - [Shell Performance](shell-performance.md) — startup time optimisation
-- [Developer Migration](developer-migration.md) — migrating repos to a new machine
-
 ## Tool Configuration
 
 - [EditorConfig](editorconfig.md) — consistent coding styles across editors
@@ -21,8 +19,6 @@ Index for the dotfiles documentation.
 - [Runbook: Backups](runbooks/backup.md)
 - [Runbook: Doctor](runbooks/doctor.md)
 - [Runbook: Incident Recovery](runbooks/incident-recovery.md)
-- [Runbook: Migration](runbooks/migration.md)
-
 ## Reference
 
 - [CLI Reference](reference/cli.md) — generated command docs (`bash scripts/maintenance/generate-cli-reference.sh`)
