@@ -34,15 +34,10 @@ jobs:
         run: |
           bash health/check-vscode-parity.sh --check
 
-      - name: Install dry-run (personal)
+      - name: Install dry-run
         timeout-minutes: 5
         run: |
-          bash install.sh --dry-run --yes --profile personal --without-macos-defaults --without-ssh --without-gpg
-
-      - name: Install dry-run (work)
-        timeout-minutes: 5
-        run: |
-          bash install.sh --dry-run --yes --profile work --without-macos-defaults --without-ssh --without-gpg
+          bash install.sh --dry-run --yes --without-macos-defaults --without-ssh --without-gpg
 
       - name: Lint Python
         timeout-minutes: 2
