@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.4.9/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,7 +7,16 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["brew/", "scripts/lib/", ".git/", "node_modules/", ".cache/"]
+    "includes": [
+      "**",
+      "!**/brew/",
+      "!**/scripts/lib/",
+      "!**/.git/",
+      "!**/node_modules/",
+      "!**/.cache/",
+      "!**/stow/vim/.config/nvim/lazy-lock.json",
+      "!**/stow/vim/.config/nvim/lazyvim.json"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -17,9 +26,7 @@
     "lineEnding": "lf",
     "lineWidth": 80
   },
-  "organizeImports": {
-    "enabled": true
-  },
+  "assist": { "actions": { "source": { "organizeImports": "on" } } },
   "linter": {
     "enabled": true,
     "rules": {
@@ -42,5 +49,12 @@
     "formatter": {
       "trailingCommas": "none"
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["stow/spicetify/**"],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false }
+    }
+  ]
 }
