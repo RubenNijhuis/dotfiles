@@ -52,7 +52,8 @@ check_ssh() {
 
   # Check personal key
   if [[ -f "$HOME/.ssh/id_ed25519_personal" ]]; then
-    local perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_personal" 2>/dev/null || echo "")
+    local perms
+    perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_personal" 2>/dev/null || echo "")
     if [[ "$perms" == "600" ]]; then
       details+="Personal key: ~/.ssh/id_ed25519_personal (600)\n  "
     else
@@ -68,7 +69,8 @@ check_ssh() {
 
   # Check work key (optional)
   if [[ -f "$HOME/.ssh/id_ed25519_work" ]]; then
-    local perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_work" 2>/dev/null || echo "")
+    local perms
+    perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_work" 2>/dev/null || echo "")
     if [[ "$perms" == "600" ]]; then
       details+="Work key: ~/.ssh/id_ed25519_work (600)\n  "
     else
@@ -83,7 +85,8 @@ check_ssh() {
   # Check SSH config includes
   if [[ -f "$HOME/.ssh/config" ]]; then
     if grep -q "Include" "$HOME/.ssh/config" 2>/dev/null; then
-      local includes_count=$(find "$HOME/.ssh/config.d" -name "*.conf" 2>/dev/null | wc -l | xargs)
+      local includes_count
+      includes_count=$(find "$HOME/.ssh/config.d" -name "*.conf" 2>/dev/null | wc -l | xargs)
       details+="SSH config includes: $includes_count loaded"
     else
       details+="SSH config: Include directive missing"
@@ -97,7 +100,8 @@ check_ssh() {
 
   # Check SSH agent (warning only)
   if ssh-add -l &>/dev/null; then
-    local loaded_keys=$(ssh-add -l | wc -l | xargs)
+    local loaded_keys
+    loaded_keys=$(ssh-add -l | wc -l | xargs)
     details+="\n  SSH agent: $loaded_keys keys loaded"
   else
     details+="\n  ⚠ SSH agent: no keys loaded"
@@ -127,7 +131,8 @@ check_gpg() {
 
   # Check if GPG key exists
   if gpg --list-secret-keys &>/dev/null; then
-    local key_id=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
+    local key_id
+    key_id=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
     details+="Secret key: $key_id\n  "
   else
     details+="No GPG secret key found\n  "
@@ -255,7 +260,8 @@ check_shell() {
     details+="Shell config files: all present\n  "
 
     # Count functions defined in functions.sh
-    local func_count=$(grep -c "^[a-z_]*() {" "$HOME/.config/shell/functions.sh" 2>/dev/null || echo "0")
+    local func_count
+    func_count=$(grep -c "^[a-z_]*() {" "$HOME/.config/shell/functions.sh" 2>/dev/null || echo "0")
     if [[ $func_count -gt 0 ]]; then
       details+="Functions: $func_count defined\n  "
     else
@@ -264,7 +270,8 @@ check_shell() {
     fi
 
     # Count aliases defined in aliases.sh
-    local alias_count=$(grep -c "^alias " "$HOME/.config/shell/aliases.sh" 2>/dev/null || echo "0")
+    local alias_count
+    alias_count=$(grep -c "^alias " "$HOME/.config/shell/aliases.sh" 2>/dev/null || echo "0")
     if [[ $alias_count -gt 0 ]]; then
       details+="Aliases: $alias_count defined\n  "
     else
@@ -335,12 +342,13 @@ check_developer() {
   fi
 
   # Count repos per category
-  local total=$(find "$dev_root" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_projects=$(find "$dev_root/personal/projects" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_experiments=$(find "$dev_root/personal/experiments" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local personal_learning=$(find "$dev_root/personal/learning" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local work=$(find "$dev_root/work" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  local archive=$(find "$dev_root/archive" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  local total personal_projects personal_experiments personal_learning work archive
+  total=$(find "$dev_root" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  personal_projects=$(find "$dev_root/personal/projects" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  personal_experiments=$(find "$dev_root/personal/experiments" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  personal_learning=$(find "$dev_root/personal/learning" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  work=$(find "$dev_root/work" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  archive=$(find "$dev_root/archive" -name ".git" -type d 2>/dev/null | wc -l | xargs)
 
   details+="Repositories: $total total\n  "
   details+="  - personal/projects: $personal_projects\n  "
@@ -390,7 +398,8 @@ check_runtime() {
 
   # Node.js via fnm
   if command -v node &>/dev/null; then
-    local node_version=$(node --version)
+    local node_version
+    node_version=$(node --version)
     details+="Node.js: $node_version (via fnm)\n  "
   else
     details+="Node.js: not installed\n  "
@@ -399,7 +408,8 @@ check_runtime() {
 
   # Bun
   if command -v bun &>/dev/null; then
-    local bun_version=$(bun --version)
+    local bun_version
+    bun_version=$(bun --version)
     details+="Bun: $bun_version\n  "
   else
     details+="Bun: not installed\n  "
@@ -408,10 +418,12 @@ check_runtime() {
 
   # Python via uv
   if command -v uv &>/dev/null; then
-    local uv_version=$(uv --version)
+    local uv_version
+    uv_version=$(uv --version)
     details+="uv: $uv_version"
     if uv python list 2>/dev/null | grep -q "cpython"; then
-      local py_version=$(uv python list 2>/dev/null | grep "cpython" | head -1 | awk '{print $1}')
+      local py_version
+      py_version=$(uv python list 2>/dev/null | grep "cpython" | head -1 | awk '{print $1}')
       details+="\n  Python: $py_version (via uv)"
     else
       details+="\n  ⚠ Python: no versions installed"

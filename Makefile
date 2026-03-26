@@ -4,7 +4,7 @@
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
-	clean status \
+	clean clean-all status \
 	help-setup help-brew help-launchd help-test
 
 DOTFILES := $(shell pwd)
@@ -19,6 +19,7 @@ help: ## Show commands
 	@printf "  \033[36m%-20s\033[0m %s\n" "status" "Quick system status"
 	@printf "  \033[36m%-20s\033[0m %s\n" "doctor" "Full health check"
 	@printf "  \033[36m%-20s\033[0m %s\n" "clean" "Remove caches, logs, .DS_Stores"
+	@printf "  \033[36m%-20s\033[0m %s\n" "clean-all" "Full clean incl. backups + brew cache"
 	@printf "  \033[36m%-20s\033[0m %s\n" "backup" "Backup dotfiles"
 	@printf "\n\033[1m── Occasional ────────────────\033[0m\n"
 	@printf "  \033[36m%-20s\033[0m %s\n" "install" "Full bootstrap (new machine)"
@@ -145,6 +146,9 @@ format: ## Format all files
 
 clean: ## Remove zsh caches, log files, and .DS_Stores in repo
 	@bash $(DOTFILES)/ops/clean.sh
+
+clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
+	@bash $(DOTFILES)/ops/clean-all.sh
 
 maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks
 

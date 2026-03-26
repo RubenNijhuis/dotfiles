@@ -25,6 +25,7 @@ AGENTS=(
   "log-cleanup:Weekly log rotation"
   "brew-audit:Weekly Brewfile drift detection"
   "weekly-digest:Weekly automation health digest"
+  "lmstudio-server:LM Studio local server"
 )
 
 # --- Helpers -----------------------------------------------------------------

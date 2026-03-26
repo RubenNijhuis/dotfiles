@@ -7,12 +7,11 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
-PROFILE="personal"
 RUN_DOCTOR=true
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] [--profile <personal|work>] [--skip-doctor]
+Usage: $0 [--help] [--no-color] [--skip-doctor]
 
 Runs bootstrap verification:
   1. install.sh dry-run
@@ -30,15 +29,6 @@ parse_args() {
       --no-color)
         shift
         ;;
-      --profile)
-        if [[ $# -lt 2 ]]; then
-          print_error "Missing value for --profile"
-          usage
-          exit 1
-        fi
-        PROFILE="$2"
-        shift 2
-        ;;
       --skip-doctor)
         RUN_DOCTOR=false
         shift
@@ -50,11 +40,6 @@ parse_args() {
         ;;
     esac
   done
-
-  if [[ "$PROFILE" != "personal" && "$PROFILE" != "work" ]]; then
-    print_error "--profile must be personal or work"
-    exit 1
-  fi
 }
 
 run_step() {
@@ -76,7 +61,7 @@ main() {
   print_header "Bootstrap Verification"
 
   run_step "Installer dry-run" \
-    bash "$DOTFILES/install.sh" --dry-run --yes --profile "$PROFILE" --without-macos-defaults --without-ssh --without-gpg
+    bash "$DOTFILES/install.sh" --dry-run --yes --without-macos-defaults --without-ssh --without-gpg
 
   run_step "CLI parsing checks" bash "$DOTFILES/tests/test-cli-parsing.sh"
   run_step "CLI contract checks" bash "$DOTFILES/tests/test-cli-contract.sh"

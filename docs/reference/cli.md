@@ -69,8 +69,8 @@ Options:
   --help, -h          Show this help message
 
 Sections:
-  profile, stow, ssh, gpg, git, shell, developer, runtime,
-  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
+  stow, ssh, gpg, git, shell, developer, runtime,
+  launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf
 ```
 
 ## `health/gpg-info.sh`
@@ -267,7 +267,7 @@ Update Homebrew packages, runtime tools, and restow configs.
 ## `setup/bootstrap-verify.sh`
 
 ```text
-Usage: setup/bootstrap-verify.sh [--help] [--no-color] [--profile <personal|work>] [--skip-doctor]
+Usage: setup/bootstrap-verify.sh [--help] [--no-color] [--skip-doctor]
 
 Runs bootstrap verification:
   1. install.sh dry-run

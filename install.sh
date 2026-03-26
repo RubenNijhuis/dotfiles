@@ -682,7 +682,7 @@ run_post_install_health_check() {
   printf '\n'
   printf '%sPost-install quick health check%s\n' "${BLUE}" "${NC}"
   set +e
-  bash "$DOTFILES/health/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
+  bash "$DOTFILES/health/doctor.sh" --quick --no-color >"${TMPDIR:-/tmp}/dotfiles-install-doctor-quick.out" 2>&1
   local doctor_code=$?
   set -e
 

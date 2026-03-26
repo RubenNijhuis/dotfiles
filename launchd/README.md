@@ -28,6 +28,10 @@ Canonical launchd automation contract for this repository.
 - `dotfiles-doctor`: daily health check + notifications at 09:00.
 - `obsidian-sync`: daily vault sync.
 - `repo-update`: scheduled repository updates with notification wrapper.
+- `log-cleanup`: weekly log rotation.
+- `brew-audit`: weekly Brewfile drift detection.
+- `weekly-digest`: weekly automation health digest.
+- `lmstudio-server`: LM Studio local server.
 
 Templates live in `launchd/com.user.*.plist`.
 Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).

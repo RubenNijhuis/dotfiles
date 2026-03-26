@@ -77,7 +77,9 @@ export YSU_MESSAGE_POSITION="after"
 
 # Defer syntax highlighting to background (it's slow and non-critical)
 {
-  source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  if [[ -f "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]]; then
+    source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+  fi
 } &!
 
 # ----- Tool initialization (eval outputs cached per binary) -----

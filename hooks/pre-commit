@@ -52,7 +52,7 @@ if [[ -n "$STAGED_SCRIPTS" ]]; then
   while IFS= read -r script; do
     [[ -f "$script" ]] || continue
     first=$(head -n 1 "$script")
-    if [[ ! "$first" =~ ^#!/usr/bin/env\ bash$ && ! "$first" =~ ^#!/bin/bash$ ]]; then
+    if [[ ! "$first" =~ ^#!/usr/bin/env\ bash$ ]]; then
       print_error "$script — invalid shebang: $first"
       FAILED=1
     fi
@@ -81,7 +81,7 @@ fi
 # ── Secret detection ────────────────────────────────────────────────
 
 if [[ -n "$STAGED_ALL" ]]; then
-  SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|PRIVATE KEY|api_key=|apikey=|api_secret='
+  SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|lin_api_[0-9a-zA-Z]+|slk_[0-9a-zA-Z]+|xoxb-[0-9a-zA-Z-]+|xoxp-[0-9a-zA-Z-]+|PRIVATE KEY|api_key=|apikey=|api_secret='
   if git diff --cached -U0 -- ':!hooks/pre-commit' | grep -qE "$SECRET_PATTERN" 2>/dev/null; then
     print_error "Possible secrets detected in staged changes"
     while IFS= read -r file; do

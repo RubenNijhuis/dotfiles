@@ -16,7 +16,7 @@ assert_exit "stow-report-help" 0 bash "$ROOT_DIR/setup/stow-report.sh" --help
 assert_exit "cli-ref-help" 0 bash "$ROOT_DIR/ops/generate-cli-reference.sh" --help
 assert_exit "cli-ref-bad-flag" 1 bash "$ROOT_DIR/ops/generate-cli-reference.sh" --wat
 assert_exit "bootstrap-help" 0 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --help
-assert_exit "bootstrap-bad-profile" 1 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --profile nope --skip-doctor
+assert_exit "bootstrap-bad-flag" 1 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --bogus
 assert_exit "install-help" 0 bash "$ROOT_DIR/install.sh" --help
 assert_exit "install-bad-step" 1 bash "$ROOT_DIR/install.sh" --from-step 99
 

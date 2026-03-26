@@ -24,8 +24,8 @@ Options:
   --help, -h          Show this help message
 
 Sections:
-  profile, stow, ssh, gpg, git, shell, developer, runtime,
-  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
+  stow, ssh, gpg, git, shell, developer, runtime,
+  launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
 
@@ -49,12 +49,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    profile|stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|vscode|backup|biome|tmux|neovim|starship|shell-perf)
+    stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -208,7 +208,7 @@ status_check_doctor() {
 }
 
 status_check_stow() {
-  local stow_dir="$DOTFILES/stow"
+  local stow_dir="$DOTFILES/config"
   local total broken
   total=$(find "$stow_dir" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | xargs)
   broken=$(count_broken_symlinks "$HOME")
