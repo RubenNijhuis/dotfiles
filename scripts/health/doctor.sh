@@ -7,6 +7,27 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+
+# Handle --help before the version gate so CLI contract tests pass on bash 3.x
+if has_flag "--help" "$@" || has_flag "-h" "$@"; then
+  cat <<HELP
+Usage: $0 [--help] [--quick] [--section <name>] [--no-color]
+
+Comprehensive system health check for dotfiles setup.
+
+Options:
+  --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --section <name>    Run only the specified check section
+  --no-color          Disable colored output
+  --help, -h          Show this help message
+
+Sections:
+  profile, stow, ssh, gpg, git, shell, developer, runtime,
+  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
+HELP
+  exit 0
+fi
+
 require_bash_version 4 "doctor.sh"
 
 QUICK_MODE=false
@@ -45,8 +66,7 @@ validate_section() {
 }
 
 parse_args() {
-  show_help_if_requested usage "$@"
-
+  # --help is handled before require_bash_version for CI compatibility
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --quick)
