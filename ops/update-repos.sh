@@ -334,8 +334,8 @@ main() {
     local result_log
     result_log=$(mktemp)
 
-    export DRY_RUN LOG_FILE FETCH_TIMEOUT
-    export -f update_repo log restore_stash
+    export DRY_RUN LOG_FILE FETCH_TIMEOUT REPOS_DIR
+    export -f update_repo log restore_stash is_submodule
 
     echo "$repos" | parallel --jobs "$JOBS" --keep-order --joblog "$result_log" \
       update_repo || true

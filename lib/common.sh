@@ -252,3 +252,9 @@ get_preference() {
   fi
   printf '%s' "$default"
 }
+
+# Export functions so they're available in subshells (e.g. GNU parallel).
+export -f require_bash_version has_flag show_help_if_requested
+export -f require_cmd validate_profile count_broken_symlinks
+export -f log_msg acquire_lock notify require_network is_on_battery
+export -f retry rotate_logs run_automation confirm get_preference
