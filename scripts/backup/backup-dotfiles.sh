@@ -112,4 +112,5 @@ else
   fi
 fi
 
+notify "Dotfiles Backup" "Backup completed successfully"
 printf '\n'

@@ -27,18 +27,18 @@ Options:
 
 Sections:
   profile, stow, ssh, gpg, git, shell, developer, runtime,
-  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship
+  launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
 EOF
 }
 
 validate_section() {
   case "$1" in
-    profile|stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|vscode|backup|biome|tmux|neovim|starship)
+    profile|stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|vscode|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship"
+      print_info "Valid sections: profile, stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -137,6 +137,7 @@ run_checks() {
   should_run tmux && check_tmux
   should_run neovim && check_neovim
   should_run starship && check_starship
+  should_run shell-perf && check_shell_perf
 }
 
 print_summary() {

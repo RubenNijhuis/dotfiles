@@ -145,6 +145,83 @@ acquire_lock() {
   trap "rm -rf '${lock_dir}'" EXIT
 }
 
+# Send a macOS notification. No-op on non-macOS or missing osascript.
+# Usage: notify <title> <message>
+notify() {
+  local title="$1" message="$2"
+  command -v osascript >/dev/null 2>&1 || return 0
+  osascript -e "display notification \"$message\" with title \"$title\"" >/dev/null 2>&1 || true
+}
+
+# Return 0 if network is reachable, 1 otherwise. Timeout: 3s.
+# Usage: require_network [host]
+require_network() {
+  local host="${1:-github.com}"
+  /sbin/ping -c1 -W3 "$host" >/dev/null 2>&1
+}
+
+# Return 0 if running on battery power.
+is_on_battery() {
+  pmset -g batt 2>/dev/null | grep -q "Battery Power"
+}
+
+# Retry a command up to N times with exponential backoff.
+# Usage: retry <max_attempts> <command...>
+retry() {
+  local max="$1"; shift
+  local attempt=1 delay=5
+  while [[ $attempt -le $max ]]; do
+    if "$@"; then return 0; fi
+    [[ $attempt -eq $max ]] && return 1
+    sleep $delay
+    delay=$((delay * 2))
+    attempt=$((attempt + 1))
+  done
+}
+
+# Delete log files older than N days. Default: 30 days.
+# Usage: rotate_logs [log_dir] [max_days]
+rotate_logs() {
+  local log_dir="${1:-$HOME/.local/log}"
+  local max_days="${2:-30}"
+  find "$log_dir" -name "*.log" -mtime +"$max_days" -delete 2>/dev/null || true
+}
+
+# Run a script with locking, logging, and notification.
+# Usage: run_automation <lock_name> <script_path> <log_file> <task_label> [--notify-on-success] [-- script_args...]
+run_automation() {
+  local lock_name="$1" script_path="$2" log_file="$3" task_label="$4"
+  shift 4
+  local notify_on_success=false
+  local script_args=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --notify-on-success) notify_on_success=true; shift ;;
+      --) shift; script_args=("$@"); break ;;
+      *) script_args+=("$1"); shift ;;
+    esac
+  done
+
+  acquire_lock "$lock_name" || exit 0
+  mkdir -p "$(dirname "$log_file")"
+
+  local output code
+  set +e
+  output=$(bash "$script_path" "${script_args[@]}" 2>&1)
+  code=$?
+  set -e
+
+  log_msg "$log_file" "$task_label completed (exit=$code)" --quiet
+  printf '%s\n' "$output" >> "$log_file"
+
+  if [[ $code -ne 0 ]]; then
+    notify "$task_label Failed" "Check logs: $log_file"
+    exit "$code"
+  elif [[ "$notify_on_success" == true ]]; then
+    notify "$task_label" "Completed successfully"
+  fi
+}
+
 confirm() {
   local prompt="$1"
   local default="${2:-N}"

@@ -41,24 +41,13 @@ parse_args() {
 
 main() {
   parse_args "$@"
-  acquire_lock "doctor-notify" || exit 0
 
-  local log_dir="$HOME/.local/log"
-  mkdir -p "$log_dir"
-
-  set +e
-  local output
-  output=$(bash "$DOTFILES/scripts/health/doctor.sh" "${DOCTOR_ARGS[@]}" 2>&1)
-  local exit_code=$?
-  set -e
-
-  log_msg "$log_dir/dotfiles-doctor-summary.log" "Health check completed (exit code: $exit_code)" --quiet
-  printf '%s\n' "$output" >> "$log_dir/dotfiles-doctor.out.log"
-
-  if [[ $exit_code -ne 0 ]]; then
-    osascript -e 'display notification "Run make doctor for details" with title "Dotfiles Health Check Failed"' 2>/dev/null || true
-    exit "$exit_code"
-  fi
+  run_automation \
+    "doctor-notify" \
+    "$DOTFILES/scripts/health/doctor.sh" \
+    "$HOME/.local/log/dotfiles-doctor.out.log" \
+    "Health Check" \
+    -- "${DOCTOR_ARGS[@]}"
 }
 
 main "$@"

@@ -207,5 +207,6 @@ if [[ -n "$MISSING_VSCODE" || -n "$UNDECLARED_VSCODE" ]]; then
 fi
 
 if $CHECK_MODE && { [[ $TOTAL_UNDECLARED_STRICT -gt 0 ]] || [[ $TOTAL_MISSING_STRICT -gt 0 ]]; }; then
+  notify "Brew Audit" "Brewfile drift detected — run make brew-sync"
   exit 1
 fi

@@ -200,6 +200,46 @@ check_tmux() {
   fi
 }
 
+check_shell_perf() {
+  if $QUICK_MODE; then
+    return
+  fi
+
+  print_subsection "Checking Shell Startup Time..."
+  printf '\n'
+
+  if ! command -v zsh &>/dev/null; then
+    record_result "Shell Performance" 1 "zsh not found"
+    return
+  fi
+
+  # Measure zsh startup time (average of 3 runs for stability)
+  # Use python3 for portable millisecond timestamps (macOS date lacks %N)
+  local total_ms=0
+  local runs=3
+  for _ in $(seq 1 $runs); do
+    local start_ms end_ms elapsed_ms
+    start_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
+    zsh -i -c exit 2>/dev/null
+    end_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
+    elapsed_ms=$((end_ms - start_ms))
+    total_ms=$((total_ms + elapsed_ms))
+  done
+  local avg_ms=$((total_ms / runs))
+
+  local details="Average startup: ${avg_ms}ms (${runs} runs)"
+
+  if [[ $avg_ms -gt 300 ]]; then
+    record_result "Shell Performance" 2 "$details — exceeds 300ms threshold"
+    add_suggestion "Profile shell startup: scripts/info/profile-shell.sh --full"
+  elif [[ $avg_ms -gt 200 ]]; then
+    record_result "Shell Performance" 1 "$details — exceeds 200ms threshold"
+    add_suggestion "Profile shell startup: scripts/info/profile-shell.sh --full"
+  else
+    record_result "Shell Performance" 0 "$details"
+  fi
+}
+
 check_backup_system() {
   if $QUICK_MODE; then
     return

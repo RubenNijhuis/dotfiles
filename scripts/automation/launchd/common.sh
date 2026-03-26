@@ -12,6 +12,9 @@ AGENTS=(
   "dotfiles-doctor:Daily health monitoring"
   "obsidian-sync:Obsidian vault synchronization"
   "repo-update:Repository updates"
+  "log-cleanup:Weekly log rotation"
+  "brew-audit:Weekly Brewfile drift detection"
+  "weekly-digest:Weekly automation health digest"
 )
 
 agent_log_file() {

@@ -109,10 +109,8 @@ hooks: ## Install git hooks for code quality checks
 keychain-check: ## Validate required keychain entries configured in local/keychain-required.txt
 	@bash $(DOTFILES)/scripts/bootstrap/check-keychain.sh
 
-automation-setup: ## Setup all LaunchD automations (backup, doctor, repo-update)
-	@bash $(DOTFILES)/scripts/automation/setup-automation.sh backup
-	@bash $(DOTFILES)/scripts/automation/setup-automation.sh doctor
-	@bash $(DOTFILES)/scripts/automation/setup-automation.sh repo-update
+automation-setup: ## Setup all LaunchD automations (auto-detects optional agents)
+	@bash $(DOTFILES)/scripts/automation/setup-automation.sh setup-all
 
 remove-bloatware: ## Remove common macOS built-in apps (Tips, Chess, Stocks, etc.)
 	@bash $(DOTFILES)/scripts/bootstrap/remove-bloatware.sh

@@ -7,8 +7,7 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
-LOG_DIR="$HOME/.local/log"
-SUMMARY_LOG="$LOG_DIR/repo-update-summary.log"
+LOG_FILE="$HOME/.local/log/repo-update-summary.log"
 
 usage() {
   cat <<EOF
@@ -44,43 +43,21 @@ parse_args() {
   done
 }
 
-send_notification() {
-  local title="$1"
-  local message="$2"
-
-  if command -v osascript >/dev/null 2>&1; then
-    osascript -e "display notification \"$message\" with title \"$title\"" >/dev/null 2>&1 || true
-  fi
-}
-
 main() {
   parse_args "$@"
 
-  mkdir -p "$LOG_DIR"
-  local now
-  now="$(date '+%Y-%m-%d %H:%M:%S')"
-
-  set +e
-  output=$(bash "$DOTFILES/scripts/maintenance/update-repos.sh" --no-color "${ARGS[@]}" 2>&1)
-  code=$?
-  set -e
-
-  {
-    echo "[$now] exit=$code"
-    echo "$output"
-    echo ""
-  } >> "$SUMMARY_LOG"
-
-  if [[ $code -eq 0 ]]; then
-    print_success "Repository update succeeded"
-    send_notification "Repo Update" "Repository update completed successfully"
+  if ! require_network; then
+    print_info "Offline — skipping repository update"
     exit 0
   fi
 
-  print_error "Repository update failed"
-  print_info "See $SUMMARY_LOG"
-  send_notification "Repo Update" "Repository update failed - check summary log"
-  exit $code
+  run_automation \
+    "repo-update-notify" \
+    "$DOTFILES/scripts/maintenance/update-repos.sh" \
+    "$LOG_FILE" \
+    "Repo Update" \
+    --notify-on-success \
+    -- --no-color "${ARGS[@]}"
 }
 
 main "$@"

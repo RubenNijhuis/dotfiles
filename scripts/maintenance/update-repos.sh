@@ -184,15 +184,19 @@ update_repo() {
     fi
   fi
 
-  # Fetch with timeout to avoid hanging on unresponsive remotes
+  # Fetch with timeout and retry to handle transient network issues
+  # shellcheck disable=SC2329  # Invoked indirectly via retry.
+  fetch_once() {
+    if command -v gtimeout &>/dev/null; then
+      gtimeout "$FETCH_TIMEOUT" git fetch --all --prune &>/dev/null
+    elif command -v timeout &>/dev/null; then
+      timeout "$FETCH_TIMEOUT" git fetch --all --prune &>/dev/null
+    else
+      git fetch --all --prune &>/dev/null
+    fi
+  }
   local fetch_ok=false
-  if command -v gtimeout &>/dev/null; then
-    gtimeout "$FETCH_TIMEOUT" git fetch --all --prune &>/dev/null && fetch_ok=true
-  elif command -v timeout &>/dev/null; then
-    timeout "$FETCH_TIMEOUT" git fetch --all --prune &>/dev/null && fetch_ok=true
-  else
-    git fetch --all --prune &>/dev/null && fetch_ok=true
-  fi
+  retry 2 fetch_once && fetch_ok=true
 
   if ! $fetch_ok; then
     restore_stash "$stashed" "$repo_name"

@@ -50,6 +50,11 @@ main() {
   acquire_lock "sync-obsidian" || exit 0
   require_cmd "git" "Install Git first: brew install git" || exit 1
 
+  if ! require_network; then
+    log "Offline — skipping sync"
+    exit 0
+  fi
+
   mkdir -p "$(dirname "$LOG_FILE")"
 
   if [[ ! -d "$VAULT_PATH" ]]; then
@@ -77,10 +82,12 @@ main() {
   commit_msg="Automated vault backup: $(date '+%Y-%m-%d %H:%M:%S')"
   git commit -m "$commit_msg"
 
-  if git push; then
+  if retry 3 git push; then
     log "Successfully synced Obsidian vault"
+    notify "Obsidian Sync" "Vault synced successfully"
   else
-    log "ERROR: Failed to push changes"
+    log "ERROR: Failed to push changes after retries"
+    notify "Obsidian Sync Failed" "Could not push vault changes"
     exit 1
   fi
 }
