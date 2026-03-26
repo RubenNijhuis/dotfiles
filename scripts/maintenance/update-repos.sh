@@ -11,14 +11,13 @@ dotfiles_load_env "$(cd "$SCRIPT_DIR/../.." && pwd)"
 UPDATED=0
 FAILED=0
 SKIPPED=0
-UP_TO_DATE=0
 DRY_RUN=false
 JOBS=15
 FETCH_TIMEOUT=30
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 
 LOG_DIR="$HOME/.local/log"
-LOG_FILE="$LOG_DIR/repo-updates-$(date +%Y-%m-%d).log"
+LOG_FILE="$LOG_DIR/repo-updates.log"
 mkdir -p "$LOG_DIR"
 
 usage() {
@@ -119,23 +118,21 @@ update_repo() {
   local repo_name
   repo_name="$(basename "$(dirname "$repo_path")")"
 
-  # Exit codes: 0=updated, 1=failed, 2=skipped, 3=up-to-date
-  # parallel runs each invocation in its own process, so exit codes
-  # propagate to the joblog. Sequential fallback wraps calls in a subshell.
+  # Exit codes: 0=updated, 1=failed, 2=skipped/up-to-date
   cd "$(dirname "$repo_path")" || exit 1
 
   # Skip bare repositories — they have no worktree to update
   if [[ "$(git rev-parse --is-bare-repository 2>/dev/null)" == "true" ]]; then
     printf "  "
     print_dim "$repo_name: Skipped (bare repository)"
-    exit 3
+    exit 2
   fi
 
   # Skip repos with no commits yet
   if ! git rev-parse HEAD &>/dev/null; then
     printf "  "
     print_dim "$repo_name: Skipped (no commits)"
-    exit 3
+    exit 2
   fi
 
   # Skip repos in detached HEAD state — no branch to pull into
@@ -144,7 +141,7 @@ update_repo() {
   if [[ "$current_branch" == "HEAD" || "$current_branch" == "unknown" ]]; then
     printf "  "
     print_dim "$repo_name: Skipped (detached HEAD)"
-    exit 3
+    exit 2
   fi
 
   # Skip repos in the middle of a rebase, merge, or cherry-pick
@@ -213,7 +210,7 @@ update_repo() {
     restore_stash "$stashed" "$repo_name"
     printf "  "
     print_dim "$repo_name: Fetched (no tracking branch for $current_branch)"
-    exit 3
+    exit 2
   fi
 
   behind=$(git rev-list HEAD..@{upstream} --count 2>/dev/null || echo "0")
@@ -222,7 +219,7 @@ update_repo() {
     restore_stash "$stashed" "$repo_name"
     printf "  "
     print_dim "$repo_name: Up to date on $current_branch"
-    exit 3
+    exit 2
   fi
 
   if $DRY_RUN; then
@@ -347,7 +344,6 @@ main() {
     UPDATED=$(awk 'NR>1 && $7==0' "$result_log" | wc -l | xargs)
     FAILED=$(awk 'NR>1 && $7==1' "$result_log" | wc -l | xargs)
     SKIPPED=$(awk 'NR>1 && $7==2' "$result_log" | wc -l | xargs)
-    UP_TO_DATE=$(awk 'NR>1 && $7==3' "$result_log" | wc -l | xargs)
     rm -f "$result_log"
   else
     # Sequential fallback
@@ -362,7 +358,6 @@ main() {
         0) UPDATED=$((UPDATED + 1)) ;;
         1) FAILED=$((FAILED + 1)) ;;
         2) SKIPPED=$((SKIPPED + 1)) ;;
-        3) UP_TO_DATE=$((UP_TO_DATE + 1)) ;;
       esac
     done <<< "$repos"
   fi
@@ -372,24 +367,19 @@ main() {
 
   printf "\n"
   print_header "Update Summary"
-  print_key_value "Updated" "$UPDATED repositories"
-  print_key_value "Up to date" "$UP_TO_DATE repositories"
-
-  if [[ $SKIPPED -gt 0 ]]; then
-    print_key_value "Skipped" "$SKIPPED repositories"
-  fi
+  print_key_value "Updated" "$UPDATED"
+  print_key_value "Skipped" "$SKIPPED"
 
   if [[ $FAILED -gt 0 ]]; then
-    print_key_value "Failed" "$FAILED repositories"
+    print_key_value "Failed" "$FAILED"
     printf "\n"
     print_error "Some repositories failed to update"
-    print_info "Check log file: $LOG_FILE"
+    print_info "Check log: $LOG_FILE"
     exit 1
   fi
 
   printf "\n"
-  print_success "All repositories updated successfully"
-  print_info "Log saved to: $LOG_FILE"
+  print_success "All repositories processed"
 }
 
 main "$@"

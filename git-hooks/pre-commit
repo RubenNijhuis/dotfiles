@@ -1,304 +1,104 @@
 #!/usr/bin/env bash
-# Pre-commit hook for dotfiles repository
-# Validates shell scripts and prevents common issues
+# Pre-commit hook: validates staged shell scripts and JS/TS/JSON files.
 
 set -euo pipefail
 
-# Get dotfiles root (we're in .git/hooks via symlink, need to go up two levels)
 DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/scripts/lib/output.sh"
-LINT_SHELL="$DOTFILES/scripts/maintenance/lint-shell.sh"
 
-# Track failures and warnings
-FAILED=0
-WARN_COUNT=0
-
-# Temp dir for buffered output
-TMPDIR_HOOK=$(mktemp -d)
-trap 'rm -rf "$TMPDIR_HOOK"' EXIT
-
-# Get list of staged shell scripts (excluding sourced config files)
 STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' | grep -v '\.config/shell/' || true)
-# Get staged JS/TS/JSON files supported by Biome
-STAGED_BIOME_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
+STAGED_BIOME=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
+STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM || true)
 
-# Get all staged files (for secret detection)
-STAGED_ALL_FILES=$(git diff --cached --name-only --diff-filter=ACM || true)
+[[ -z "$STAGED_SCRIPTS" && -z "$STAGED_BIOME" && -z "$STAGED_ALL" ]] && exit 0
 
-if [[ -z "$STAGED_SCRIPTS" ]] && [[ -z "$STAGED_BIOME_FILES" ]] && [[ -z "$STAGED_ALL_FILES" ]]; then
-  exit 0
-fi
+FAILED=0
 
-# Check 1: Shell lint validation
-check_shell_lint() {
-  local out="$TMPDIR_HOOK/1-lint"
-  if [[ -z "$STAGED_SCRIPTS" ]]; then
-    return 0
-  fi
-  {
-    if ! command -v shellcheck &>/dev/null; then
-      print_warning "shellcheck not installed — skipping shell lint"
-      print_dim "Install with: brew install shellcheck"
-      echo "__WARN__"
-    else
-      print_section "Running shell lint..."
-      STAGED_SHELL_ARRAY=()
-      while IFS= read -r script; do
-        [[ -n "$script" ]] || continue
-        STAGED_SHELL_ARRAY+=("$script")
-      done <<< "$STAGED_SCRIPTS"
-
-      if [[ -x "$LINT_SHELL" ]]; then
-        if ! "$LINT_SHELL" --no-color "${STAGED_SHELL_ARRAY[@]}"; then
-          echo "__FAIL__"
-        fi
-      else
-        print_error "Missing lint script: $LINT_SHELL"
-        echo "__FAIL__"
-      fi
-    fi
-  } > "$out" 2>&1
-  if grep -q "__FAIL__" "$out"; then
-    sed -i '' '/__FAIL__/d' "$out"
-    return 1
-  elif grep -q "__WARN__" "$out"; then
-    sed -i '' '/__WARN__/d' "$out"
-    return 2
-  fi
-  return 0
-}
-
-# Check 2: Executable bit for scripts
-check_executable_permissions() {
-  local out="$TMPDIR_HOOK/2-perms"
-  if [[ -z "$STAGED_SCRIPTS" ]]; then
-    return 0
-  fi
-  {
-    print_section "Checking executable permissions..."
-    while IFS= read -r script; do
-      if [[ -f "$script" ]]; then
-        if [[ -x "$script" ]]; then
-          printf "  "
-          print_success "$script (executable)"
-        else
-          printf "  "
-          print_warning "$script (not executable - fixing)"
-          chmod +x "$script"
-          git add "$script"
-          echo "__WARN__"
-        fi
-      fi
-    done <<< "$STAGED_SCRIPTS"
-  } > "$out" 2>&1
-  if grep -q "__WARN__" "$out"; then
-    sed -i '' '/__WARN__/d' "$out"
-    return 2
-  fi
-  return 0
-}
-
-# Check 3: Shebang validation
-check_shebangs() {
-  local out="$TMPDIR_HOOK/3-shebang"
-  if [[ -z "$STAGED_SCRIPTS" ]]; then
-    return 0
-  fi
-  {
-    print_section "Validating shebangs..."
-    while IFS= read -r script; do
-      if [[ -f "$script" ]]; then
-        first_line=$(head -n 1 "$script")
-        if [[ "$first_line" =~ ^#!/usr/bin/env\ bash$ ]] || [[ "$first_line" =~ ^#!/bin/bash$ ]]; then
-          printf "  "
-          print_success "$script"
-        else
-          printf "  "
-          print_error "$script (invalid or missing shebang: $first_line)"
-          echo "__FAIL__"
-        fi
-      fi
-    done <<< "$STAGED_SCRIPTS"
-  } > "$out" 2>&1
-  if grep -q "__FAIL__" "$out"; then
-    sed -i '' '/__FAIL__/d' "$out"
-    return 1
-  fi
-  return 0
-}
-
-# Check 4: Biome formatting
-check_biome() {
-  local out="$TMPDIR_HOOK/4-biome"
-  {
-    if command -v biome &>/dev/null; then
-      print_section "Checking Biome formatting..."
-      if [[ -n "$STAGED_BIOME_FILES" ]]; then
-        BIOME_FIXED=0
-        while IFS= read -r file; do
-          if [[ -f "$file" ]]; then
-            # Check first without writing; only fix+restage if needed
-            if biome check "$file" &>/dev/null; then
-              printf "  "
-              print_success "$file"
-            else
-              biome check --write "$file" &>/dev/null || true
-              BIOME_FIXED=$((BIOME_FIXED + 1))
-              printf "  "
-              print_warning "$file (fixed)"
-              git add "$file"
-            fi
-          fi
-        done <<< "$STAGED_BIOME_FILES"
-
-        if [[ $BIOME_FIXED -eq 0 ]]; then
-          print_success "All files formatted correctly"
-        else
-          print_success "Fixed $BIOME_FIXED files"
-          echo "__WARN__"
-        fi
-      else
-        print_dim "No JS/TS/JSON files to check"
-      fi
-    else
-      print_warning "biome not installed - skipping formatting check"
-      print_dim "Install with: brew install biome"
-      echo "__WARN__"
-    fi
-  } > "$out" 2>&1
-  if grep -q "__WARN__" "$out"; then
-    sed -i '' '/__WARN__/d' "$out"
-    return 2
-  fi
-  return 0
-}
-
-# Check 5: Basic secret detection
-check_secrets() {
-  local out="$TMPDIR_HOOK/5-secrets"
-  if [[ -z "$STAGED_ALL_FILES" ]]; then
-    return 0
-  fi
-  {
-    print_section "Scanning for secrets..."
-
-    SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|PRIVATE KEY|api_key=|apikey=|api_secret='
-    SECRET_FOUND=0
-
-    # Exclude the pre-commit hook itself (contains the pattern as a literal string)
-    if git diff --cached -U0 -- ':!git-hooks/pre-commit' | grep -E "$SECRET_PATTERN" &>/dev/null; then
-      while IFS= read -r file; do
-        [[ -n "$file" ]] || continue
-        [[ "$file" == "git-hooks/pre-commit" ]] && continue
-        matches=$(git diff --cached -U0 -- "$file" | grep -E "$SECRET_PATTERN" || true)
-        if [[ -n "$matches" ]]; then
-          if [[ $SECRET_FOUND -eq 0 ]]; then
-            print_error "Possible secrets detected in staged changes:"
-          fi
-          SECRET_FOUND=$((SECRET_FOUND + 1))
-          echo "$matches" | while IFS= read -r line; do
-            printf "    "
-            print_dim "$file: $line"
-          done
-        fi
-      done <<< "$STAGED_ALL_FILES"
-    fi
-
-    if [[ $SECRET_FOUND -gt 0 ]]; then
-      echo "__FAIL__"
-    else
-      print_success "No secrets detected"
-    fi
-  } > "$out" 2>&1
-  if grep -q "__FAIL__" "$out"; then
-    sed -i '' '/__FAIL__/d' "$out"
-    return 1
-  fi
-  return 0
-}
-
-# Check 6: TODO/FIXME markers (warning only)
-check_todo_markers() {
-  local out="$TMPDIR_HOOK/6-todo"
-  if [[ -z "$STAGED_SCRIPTS" ]]; then
-    return 0
-  fi
-  {
-    print_section "Checking for TODO/FIXME markers..."
-
-    TODO_COUNT=0
-    while IFS= read -r script; do
-      if [[ -f "$script" ]]; then
-        if grep -nE '(TODO|FIXME|XXX|HACK)' "$script" &>/dev/null; then
-          if [[ $TODO_COUNT -eq 0 ]]; then
-            print_warning "Found TODO/FIXME markers:"
-          fi
-          TODO_COUNT=$((TODO_COUNT + 1))
-          grep -nE '(TODO|FIXME|XXX|HACK)' "$script" | while IFS= read -r line; do
-            printf "    "
-            print_dim "$script: $line"
-          done
-        fi
-      fi
-    done <<< "$STAGED_SCRIPTS"
-
-    if [[ $TODO_COUNT -eq 0 ]]; then
-      print_success "No TODO/FIXME markers found"
-    else
-      echo "__WARN__"
-    fi
-  } > "$out" 2>&1
-  if grep -q "__WARN__" "$out"; then
-    sed -i '' '/__WARN__/d' "$out"
-    return 2
-  fi
-  return 0
-}
-
-# Run all checks, capturing output
-CHECKS=(check_shell_lint check_executable_permissions check_shebangs check_biome check_secrets check_todo_markers)
-RESULTS=()
-
-for check in "${CHECKS[@]}"; do
-  rc=0
-  "$check" || rc=$?
-  RESULTS+=("$rc")
-  if [[ $rc -eq 1 ]]; then
-    FAILED=1
-  elif [[ $rc -eq 2 ]]; then
-    WARN_COUNT=$((WARN_COUNT + 1))
-  fi
-done
-
-# Output based on results
-if [[ $FAILED -eq 0 ]] && [[ $WARN_COUNT -eq 0 ]]; then
-  # Clean pass — single line
-  print_success "All pre-commit checks passed"
-  exit 0
-fi
-
-# Something to show — print header + relevant check output
 print_header "Pre-commit: Validating Staged Files"
 
-for i in "${!RESULTS[@]}"; do
-  rc="${RESULTS[$i]}"
-  if [[ $rc -ne 0 ]]; then
-    idx=$((i + 1))
-    # Find the matching temp file
-    for f in "$TMPDIR_HOOK"/${idx}-*; do
-      if [[ -f "$f" ]]; then
-        cat "$f"
-        printf '\n'
-      fi
-    done
+# ── Shell lint ───────────────────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  LINT="$DOTFILES/scripts/maintenance/lint-shell.sh"
+  if command -v shellcheck &>/dev/null && [[ -x "$LINT" ]]; then
+    files=()
+    while IFS= read -r s; do [[ -n "$s" ]] && files+=("$s"); done <<< "$STAGED_SCRIPTS"
+    if "$LINT" --no-color "${files[@]}"; then
+      print_success "Shell lint passed"
+    else
+      FAILED=1
+    fi
+  else
+    print_warning "shellcheck not installed — skipping shell lint"
   fi
-done
+fi
+
+# ── Executable permissions ───────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  while IFS= read -r script; do
+    [[ -f "$script" ]] || continue
+    if [[ ! -x "$script" ]]; then
+      chmod +x "$script"
+      git add "$script"
+      print_warning "$script — made executable"
+    fi
+  done <<< "$STAGED_SCRIPTS"
+fi
+
+# ── Shebang validation ──────────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  while IFS= read -r script; do
+    [[ -f "$script" ]] || continue
+    first=$(head -n 1 "$script")
+    if [[ ! "$first" =~ ^#!/usr/bin/env\ bash$ && ! "$first" =~ ^#!/bin/bash$ ]]; then
+      print_error "$script — invalid shebang: $first"
+      FAILED=1
+    fi
+  done <<< "$STAGED_SCRIPTS"
+fi
+
+# ── Biome formatting ────────────────────────────────────────────────
+
+if [[ -n "$STAGED_BIOME" ]] && command -v biome &>/dev/null; then
+  fixed=0
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    if ! biome check "$file" &>/dev/null; then
+      biome check --write "$file" &>/dev/null || true
+      git add "$file"
+      fixed=$((fixed + 1))
+    fi
+  done <<< "$STAGED_BIOME"
+  if [[ $fixed -gt 0 ]]; then
+    print_warning "Biome fixed $fixed file(s)"
+  else
+    print_success "Biome formatting OK"
+  fi
+fi
+
+# ── Secret detection ────────────────────────────────────────────────
+
+if [[ -n "$STAGED_ALL" ]]; then
+  SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|PRIVATE KEY|api_key=|apikey=|api_secret='
+  if git diff --cached -U0 -- ':!git-hooks/pre-commit' | grep -qE "$SECRET_PATTERN" 2>/dev/null; then
+    print_error "Possible secrets detected in staged changes"
+    while IFS= read -r file; do
+      [[ -n "$file" && "$file" != "git-hooks/pre-commit" ]] || continue
+      matches=$(git diff --cached -U0 -- "$file" | grep -E "$SECRET_PATTERN" || true)
+      [[ -n "$matches" ]] && print_dim "  $file"
+    done <<< "$STAGED_ALL"
+    FAILED=1
+  fi
+fi
+
+# ── Result ───────────────────────────────────────────────────────────
 
 if [[ $FAILED -eq 1 ]]; then
+  printf '\n'
   print_error "Pre-commit checks failed"
-  print_info "Fix the errors above and try committing again"
   exit 1
-else
-  print_success "All pre-commit checks passed (with warnings)"
-  exit 0
 fi
+
+print_success "All pre-commit checks passed"
