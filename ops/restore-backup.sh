@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/cli.sh"
+
 DRY_RUN=false
 
 usage() {
@@ -15,29 +17,8 @@ Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
 EOF
 }
 
-parse_args() {
-  show_help_if_requested usage "$@"
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --no-color)
-        shift
-        ;;
-      --dry-run)
-        DRY_RUN=true
-        shift
-        ;;
-      *)
-        print_error "Unknown argument: $1"
-        usage
-        exit 1
-        ;;
-    esac
-  done
-}
-
 main() {
-  parse_args "$@"
+  parse_standard_args usage --accept-dry-run "$@"
 
   local latest_backup="$HOME/.dotfiles-backup/latest"
   if [[ ! -f "$latest_backup" ]]; then
@@ -45,8 +26,19 @@ main() {
     exit 1
   fi
 
-  local backup_dir
-  backup_dir="$(cat "$latest_backup")"
+  local backup_path
+  backup_path="$(cat "$latest_backup")"
+
+  # Handle compressed backups
+  local backup_dir="$backup_path"
+  if [[ "$backup_path" == *.tar.gz && -f "$backup_path" ]]; then
+    backup_dir="${backup_path%.tar.gz}"
+    if [[ ! -d "$backup_dir" ]]; then
+      tar -xzf "$backup_path" -C "$(dirname "$backup_path")"
+      print_info "Extracted compressed backup"
+    fi
+  fi
+
   if [[ ! -d "$backup_dir" ]]; then
     print_error "Backup directory not found: $backup_dir"
     exit 1

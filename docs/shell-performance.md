@@ -89,14 +89,10 @@ eval "$(starship init zsh)"
 
 ### Profile Current Shell
 ```bash
-bash health/profile-shell.sh --full
-```
-
-This generates timing data and measures actual startup time.
-
-### Analyze Profile Data
-```bash
-bash health/profile-shell.sh --full
+# Trace shell startup with timing
+zsh -xvlic exit 2>&1 | ts -i '%.s' | head -200
+# Or without moreutils:
+time zsh -ilc exit
 ```
 
 Shows breakdown of where time is spent during startup.

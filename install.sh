@@ -609,7 +609,6 @@ step_final_setup() {
   mkdir -p "$DEVELOPER_ROOT/personal/projects" \
            "$DEVELOPER_ROOT/personal/experiments" \
            "$DEVELOPER_ROOT/personal/learning" \
-           "$DEVELOPER_ROOT/work/projects" \
            "$DEVELOPER_ROOT/work/clients" \
            "$DEVELOPER_ROOT/archive"
   success "Created developer structure at $DEVELOPER_ROOT"

@@ -22,26 +22,27 @@ clean_dotfiles_backups() {
   print_section "Dotfiles backups..."
 
   local found=0 removed=0
+  local backup_root="$HOME/.dotfiles-backup"
   shopt -s nullglob
-  for path in "$HOME"/dotfiles.backup.*; do
-    [[ -d "$path" ]] || continue
+  for path in "$backup_root"/202*; do
+    [[ -d "$path" || -f "$path" ]] || continue
     found=$((found + 1))
     if $DRY_RUN; then
       print_info "Would remove: $path"
       continue
     fi
-    rm -r "$path"
+    rm -rf "$path"
     print_success "Removed: $path"
     removed=$((removed + 1))
   done
   shopt -u nullglob
 
   if [[ $found -eq 0 ]]; then
-    print_success "No backup clones found"
+    print_success "No old backups found"
   elif $DRY_RUN; then
-    print_info "Found $found backup clone(s)"
+    print_info "Found $found backup(s)"
   else
-    print_success "Removed $removed backup clone(s)"
+    print_success "Removed $removed backup(s)"
   fi
 }
 

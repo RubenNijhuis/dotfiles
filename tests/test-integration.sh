@@ -46,13 +46,13 @@ test_clean_all_dry_run_safe() {
   temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
-  # Create fake backup directories
-  mkdir -p "$temp_home/dotfiles.backup.test"
-  echo "data" > "$temp_home/dotfiles.backup.test/file.txt"
+  # Create fake backup directories matching real backup path pattern
+  mkdir -p "$temp_home/.dotfiles-backup/20240101-120000"
+  echo "data" > "$temp_home/.dotfiles-backup/20240101-120000/file.txt"
 
   HOME="$temp_home" bash "$ROOT_DIR/ops/clean-all.sh" --no-color --dry-run >/dev/null 2>&1
 
-  if [[ ! -d "$temp_home/dotfiles.backup.test" ]]; then
+  if [[ ! -d "$temp_home/.dotfiles-backup/20240101-120000" ]]; then
     print_error "FAIL(clean-all-dry-run): backup dir was deleted"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi

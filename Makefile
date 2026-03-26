@@ -4,7 +4,7 @@
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
-	clean clean-all status \
+	clean clean-all restore status launchd-check \
 	help-setup help-brew help-launchd help-test
 
 DOTFILES := $(shell pwd)
@@ -130,6 +130,9 @@ new-tool: ## Scaffold a new config package (usage: make new-tool NAME=<name>)
 
 backup: ## Backup current dotfiles before modifications
 	@bash $(DOTFILES)/ops/backup-dotfiles.sh
+
+restore: ## Restore from latest backup
+	@bash $(DOTFILES)/ops/restore-backup.sh
 
 # ── Brew ─────────────────────────────────────────────────────────────
 

@@ -39,7 +39,6 @@ while IFS= read -r script; do
 
 done < <(
   find "$ROOT_DIR/setup" "$ROOT_DIR/ops" "$ROOT_DIR/health" -type f -name '*.sh' \
-    -not -path "$ROOT_DIR/ops/automation/launchd/*" \
     -not -path "$ROOT_DIR/health/checks/*" | sort
 )
 

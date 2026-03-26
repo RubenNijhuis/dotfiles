@@ -7,7 +7,7 @@
 3. If needed, force restart from a known step:
 
 ```bash
-./install.sh --from-step <1-10>
+./install.sh --from-step <1-9>
 ```
 
 ## Launchd Automation Failure

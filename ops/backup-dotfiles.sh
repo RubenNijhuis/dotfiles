@@ -55,6 +55,7 @@ size=$(du -sm "$BACKUP_DIR" 2>/dev/null | cut -f1)
 if [[ "${size:-0}" -gt 10 ]]; then
   tar -czf "$BACKUP_DIR.tar.gz" -C "$(dirname "$BACKUP_DIR")" "$(basename "$BACKUP_DIR")"
   rm -rf "$BACKUP_DIR"
+  echo "$BACKUP_DIR.tar.gz" > "$BACKUP_ROOT/latest"
   print_info "Compressed to $(basename "$BACKUP_DIR").tar.gz"
 fi
 

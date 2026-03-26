@@ -173,10 +173,10 @@ check_shell_perf() {
 
   if [[ $avg_ms -gt 300 ]]; then
     record_result "Shell Performance" 2 "$details — exceeds 300ms threshold"
-    add_suggestion "Profile shell startup: health/profile-shell.sh --full"
+    add_suggestion "Profile shell startup: zsh -xvlic exit 2>&1 | head -100"
   elif [[ $avg_ms -gt 200 ]]; then
     record_result "Shell Performance" 1 "$details — exceeds 200ms threshold"
-    add_suggestion "Profile shell startup: health/profile-shell.sh --full"
+    add_suggestion "Profile shell startup: zsh -xvlic exit 2>&1 | head -100"
   else
     record_result "Shell Performance" 0 "$details"
   fi

@@ -79,7 +79,6 @@ main() {
     append_help_block "$script_name" "$script_name"
   done < <(
     find "$DOTFILES/setup" "$DOTFILES/ops" "$DOTFILES/health" -type f -name '*.sh' \
-      -not -path "$DOTFILES/ops/automation/launchd/*" \
       -not -path "$DOTFILES/health/checks/*" | sort
   )
 

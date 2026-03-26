@@ -40,7 +40,7 @@ Fresh machine → install.sh → make stow → make doctor → make ops-status
 
 ## Script Contract
 
-All scripts in `setup/`, `ops/`, and `health/` (except `health/checks/` and `ops/automation/launchd/`) must:
+All scripts in `setup/`, `ops/`, and `health/` (except `health/checks/` and scripts marked `SCRIPT_VISIBILITY: launchd-internal`) must:
 - Support `--help` (exit 0)
 - Reject unknown flags (non-zero exit)
 - Accept `--no-color` for output formatting
