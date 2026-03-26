@@ -10,8 +10,7 @@ Usage: install.sh [options]
 Options:
   --yes                         Non-interactive mode with defaults
   --dry-run                     Preview all steps without making changes
-  --from-step <1-10>            Start execution from a specific step
-  --profile <personal|work>     Set profile without prompting
+  --from-step <1-9>             Start execution from a specific step
   --with-macos-defaults         Apply macOS defaults
   --without-macos-defaults      Skip macOS defaults
   --with-ssh                    Generate SSH keys
@@ -350,7 +349,7 @@ Generate a GPG key for commit signing and configure Git to use it.
 ```text
 Usage: setup/generate-ssh-keys.sh [--help] [--no-color]
 
-Generate SSH keys for the current profile (personal/work).
+Generate SSH keys for personal and (optionally) work identities.
 ```
 
 ## `setup/install-hooks.sh`

@@ -1,12 +1,13 @@
 # =============================================================================
-# CLI Brewfile - Command-line tools shared across all profiles
+# CLI Brewfile - Command-line tools
 # =============================================================================
-# Formulae installed on both personal and work machines
 # GUI apps go in Brewfile.apps, VS Code extensions in Brewfile.vscode
 
 # -----------------------------------------------------------------------------
 # Taps
 # -----------------------------------------------------------------------------
+tap "krishkrosh/apps"
+tap "spicetify/homebrew-tap"
 tap "steipete/tap"
 tap "yakitrak/yakitrak"
 
@@ -79,7 +80,12 @@ brew "tealdeer"      # Fast tldr client for quick command examples
 # Security & Privacy
 # -----------------------------------------------------------------------------
 brew "gnupg"         # GPG encryption
+brew "mailsy"        # Disposable email CLI
+brew "openclaw-cli"  # OpenClaw CLI
 brew "pinentry-mac"  # GPG passphrase entry for macOS
+brew "qrencode"      # QR code generator
+brew "signal-cli"    # Signal messenger CLI
+brew "spicetify-cli" # Spotify theming tool
 
 # -----------------------------------------------------------------------------
 # System Utilities

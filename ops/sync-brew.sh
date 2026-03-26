@@ -4,7 +4,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
-PROFILE_FILE="$HOME/.config/dotfiles-profile"
 TEMP_BREWFILE="$(mktemp "${TMPDIR:-/tmp}/brewfile-current.XXXXXX")"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
@@ -22,26 +21,16 @@ EOF
 
 parse_standard_args usage --accept-dry-run "$@"
 
-# Read current profile
-if [[ ! -f "$PROFILE_FILE" ]]; then
-  print_error "No profile found. Run install.sh first."
-  exit 1
-fi
-PROFILE="$(cat "$PROFILE_FILE")"
-validate_profile "$PROFILE" || exit 1
-
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Syncing Homebrew packages to Brewfiles"
-print_key_value "Profile" "$PROFILE"
 printf '\n'
 
 # Dump current system state
 brew bundle dump --file="$TEMP_BREWFILE" --force
 
 # Read existing Brewfiles into arrays
-declare -a COMMON_PACKAGES=()
-declare -a PROFILE_PACKAGES=()
+declare -a DECLARED_PACKAGES=()
 declare -a DECLARED_KEYS=()
 
 entry_key_from_line() {
@@ -77,27 +66,17 @@ array_contains() {
   return 1
 }
 
-# Parse common Brewfiles (cli, apps, vscode)
-for common_file in "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode"; do
+# Parse all Brewfiles (cli, apps, vscode)
+for brewfile in "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode"; do
   while IFS= read -r line; do
     if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
-      COMMON_PACKAGES+=("$line")
+      DECLARED_PACKAGES+=("$line")
       if key=$(entry_key_from_line "$line"); then
         DECLARED_KEYS+=("$key")
       fi
     fi
-  done < "$common_file"
+  done < "$brewfile"
 done
-
-# Parse profile-specific Brewfile
-while IFS= read -r line; do
-  if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
-    PROFILE_PACKAGES+=("$line")
-    if key=$(entry_key_from_line "$line"); then
-      DECLARED_KEYS+=("$key")
-    fi
-  fi
-done < "$DOTFILES/brew/Brewfile.$PROFILE"
 
 # Find new packages (in current dump but not in any Brewfile)
 declare -a NEW_PACKAGES=()
@@ -154,18 +133,16 @@ append_if_missing() {
 for pkg in "${NEW_PACKAGES[@]}"; do
   print_info "Package: $pkg"
   print_subsection "Add to:"
-  print_indent "1) Brewfile.cli (shared CLI tools)"
-  print_indent "2) Brewfile.apps (shared GUI apps)"
+  print_indent "1) Brewfile.cli (CLI tools)"
+  print_indent "2) Brewfile.apps (GUI apps)"
   print_indent "3) Brewfile.vscode (VS Code extensions)"
-  print_indent "4) Brewfile.$PROFILE (current profile only)"
-  print_indent "5) Skip (don't add to any Brewfile)"
-  read -rp "Choice [1/2/3/4/5]: " choice
+  print_indent "4) Skip (don't add to any Brewfile)"
+  read -rp "Choice [1/2/3/4]: " choice
 
   case "$choice" in
     1) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.cli" ;;
     2) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.apps" ;;
     3) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.vscode" ;;
-    4) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.$PROFILE" ;;
     *) print_dim "Skipped" ;;
   esac
   printf '\n'

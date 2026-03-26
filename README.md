@@ -1,6 +1,6 @@
 # Dotfiles
 
-macOS-first personal/work laptop bootstrap and operations repo.
+macOS laptop bootstrap and operations repo.
 
 ## Quick Start
 
@@ -42,7 +42,7 @@ dotfiles/
 ├── lib/             # Shared shell libraries
 ├── hooks/           # Git hooks (pre-commit, commit-msg, pre-push)
 ├── launchd/         # Launchd plist templates
-├── brew/            # Profile-separated Brewfiles
+├── brew/            # Brewfiles (cli, apps, vscode)
 ├── local/           # Machine-specific config (gitignored)
 ├── docs/            # Architecture, runbooks, reference
 ├── install.sh       # Bootstrap installer

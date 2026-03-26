@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 # Shared utility helpers for dotfiles scripts.
 
-# Valid dotfiles profiles — single source of truth.
-VALID_PROFILES=(personal work)
-
 # Require a minimum bash version. macOS ships bash 3.2; Homebrew provides 5+.
 # Usage: require_bash_version <major> [context]
 require_bash_version() {
@@ -53,20 +50,6 @@ require_cmd() {
     fi
     return 1
   fi
-}
-
-validate_profile() {
-  local profile="$1"
-  local valid
-  for valid in "${VALID_PROFILES[@]}"; do
-    if [[ "$profile" == "$valid" ]]; then
-      return 0
-    fi
-  done
-  local joined
-  joined="$(IFS='|'; printf '%s' "${VALID_PROFILES[*]}")"
-  echo "Invalid profile: '$profile' (expected $joined)" >&2
-  return 1
 }
 
 # Count broken symlinks in a directory (default: $HOME, depth 1).
@@ -255,6 +238,6 @@ get_preference() {
 
 # Export functions so they're available in subshells (e.g. GNU parallel).
 export -f require_bash_version has_flag show_help_if_requested
-export -f require_cmd validate_profile count_broken_symlinks
+export -f require_cmd count_broken_symlinks
 export -f log_msg acquire_lock notify require_network is_on_battery
 export -f retry rotate_logs run_automation confirm get_preference

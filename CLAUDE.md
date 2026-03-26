@@ -12,7 +12,7 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 - `lib/` — Shared shell libraries sourced by all scripts.
 - `hooks/` — Git hooks (pre-commit, commit-msg, pre-push).
 - `launchd/` — Launchd plist templates with `__DOTFILES__`/`__HOME__` placeholders.
-- `brew/` — Brewfiles split by profile (see below).
+- `brew/` — Brewfiles (cli, apps, vscode).
 - `docs/` — Runbooks and generated references.
 - `local/` — Machine-specific config (gitignored), with `.example` templates.
 
@@ -112,12 +112,10 @@ Packages live in `config/`. Each subdirectory is a stow package symlinked into `
 
 ## Brewfiles
 
-Split by profile in `brew/`:
-- `Brewfile.cli` — Shared CLI tools
-- `Brewfile.apps` — Shared GUI apps
+Three Brewfiles in `brew/`:
+- `Brewfile.cli` — CLI tools
+- `Brewfile.apps` — GUI apps
 - `Brewfile.vscode` — VS Code extensions (must stay in sync with `config/vscode/.../extensions.txt`)
-- `Brewfile.personal` — Personal-only packages
-- `Brewfile.work` — Work-only packages
 
 When adding packages to Brewfiles, also run `brew install <package>` to install immediately.
 

@@ -32,7 +32,7 @@ uv is the Python package and project manager. It also manages Python versions (`
 - `tests/`: script tests.
 - `launchd/`: managed launch agents and launchd contracts.
 - `local/`: machine-local, untracked override templates.
-- `brew/`: package declarations split by profile (`common`, `personal`, `work`).
+- `brew/`: package declarations (`cli`, `apps`, `vscode`).
 - `docs/runbooks/`: operational procedures.
 - `docs/reference/`: generated or canonical references.
 

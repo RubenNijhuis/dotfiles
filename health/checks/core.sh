@@ -9,38 +9,6 @@ developer_root() {
   printf '%s\n' "$DOTFILES_DEVELOPER_ROOT"
 }
 
-check_profile() {
-  print_subsection "Checking Profile Configuration..."
-  printf '\n'
-
-  local profile_file="$HOME/.config/dotfiles-profile"
-  if [[ ! -f "$profile_file" ]]; then
-    record_result "Profile Configuration" 2 "No profile file found at $profile_file"
-    add_suggestion "Run: make install (or echo personal > $profile_file)"
-    return
-  fi
-
-  local profile
-  profile="$(cat "$profile_file")"
-  if ! validate_profile "$profile" 2>/dev/null; then
-    local valid_list
-    valid_list="$(IFS='|'; printf '%s' "${VALID_PROFILES[*]}")"
-    record_result "Profile Configuration" 2 "Invalid profile value: '$profile' (expected $valid_list)"
-    add_suggestion "Fix profile: echo personal > $profile_file"
-    return
-  fi
-
-  local dotfiles_root
-  dotfiles_root="$(cd "$CORE_CHECKS_DIR/../.." && pwd)"
-  local brewfile="$dotfiles_root/brew/Brewfile.$profile"
-  if [[ ! -f "$brewfile" ]]; then
-    record_result "Profile Configuration" 1 "Profile is '$profile' but $brewfile is missing"
-    return
-  fi
-
-  record_result "Profile Configuration" 0 "Profile: $profile (Brewfile.$profile exists)"
-}
-
 check_stow() {
   print_subsection "Checking Stow Configuration..."
   printf '\n'
@@ -98,9 +66,7 @@ check_ssh() {
     add_suggestion "Generate personal SSH key: make ssh-setup"
   fi
 
-  # Check work key (optional - warning only)
-  local ssh_pref
-  ssh_pref="$(get_preference "PREF_SETUP_SSH")"
+  # Check work key (optional)
   if [[ -f "$HOME/.ssh/id_ed25519_work" ]]; then
     local perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_work" 2>/dev/null || echo "")
     if [[ "$perms" == "600" ]]; then
@@ -110,10 +76,8 @@ check_ssh() {
       issues=$((issues + 1))
       add_suggestion "Fix permissions: chmod 600 ~/.ssh/id_ed25519_work"
     fi
-  elif [[ "$ssh_pref" == "no" ]]; then
-    details+="${DIM}Work SSH: skipped (preference)${NC}\n  "
   else
-    details+="⚠ Work key: not configured (optional)\n  "
+    details+="${DIM}Work key: not configured (optional)${NC}\n  "
   fi
 
   # Check SSH config includes
@@ -137,11 +101,7 @@ check_ssh() {
     details+="\n  SSH agent: $loaded_keys keys loaded"
   else
     details+="\n  ⚠ SSH agent: no keys loaded"
-    if [[ "$ssh_pref" == "no" ]]; then
-      add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal"
-    else
-      add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal ~/.ssh/id_ed25519_work"
-    fi
+    add_suggestion "Load SSH keys: ssh-add ~/.ssh/id_ed25519_personal"
   fi
 
   if [[ $issues -eq 0 ]]; then

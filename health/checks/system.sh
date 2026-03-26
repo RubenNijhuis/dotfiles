@@ -91,12 +91,6 @@ check_homebrew() {
     add_suggestion "Install Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   fi
 
-  # Check profile
-  if [[ -f "$HOME/.config/dotfiles-profile" ]]; then
-    local profile=$(cat "$HOME/.config/dotfiles-profile")
-    details+="\n  Profile: $profile"
-  fi
-
   record_result "Homebrew" 0 "$details"
 }
 

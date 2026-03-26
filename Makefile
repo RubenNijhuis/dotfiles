@@ -33,7 +33,7 @@ help: ## Show commands
 
 help-setup: ## Setup commands
 	@printf "\n\033[1m── Setup ─────────────────────\033[0m\n"
-	@printf "  \033[36m%-20s\033[0m %s\n" "ssh-setup" "Generate SSH keys for current profile"
+	@printf "  \033[36m%-20s\033[0m %s\n" "ssh-setup" "Generate SSH keys"
 	@printf "  \033[36m%-20s\033[0m %s\n" "gpg-setup" "Generate GPG key and configure Git signing"
 	@printf "  \033[36m%-20s\033[0m %s\n" "vscode-setup" "Install VS Code extensions"
 	@printf "  \033[36m%-20s\033[0m %s\n" "hooks" "Install git hooks"
@@ -101,7 +101,7 @@ ops-status: ## Show consolidated automation and ops health status
 
 # ── Setup (one-time) ────────────────────────────────────────────────
 
-ssh-setup: ## Generate SSH keys for current profile
+ssh-setup: ## Generate SSH keys
 	@bash $(DOTFILES)/setup/generate-ssh-keys.sh
 
 gpg-setup: ## Generate GPG key and configure Git signing

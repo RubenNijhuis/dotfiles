@@ -24,21 +24,11 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-PROFILE_FILE="$HOME/.config/dotfiles-profile"
-
-if [[ ! -f "$PROFILE_FILE" ]]; then
-    echo "Error: Profile not set. Run install.sh first."
-    exit 1
-fi
-
-PROFILE="$(cat "$PROFILE_FILE")"
 PERSONAL_EMAIL=$(git config --file ~/.gitconfig-personal user.email 2>/dev/null || echo "")
 GIT_USER=$(git config user.name 2>/dev/null || echo "")
 
 echo "GPG Key Generation for Commit Signing"
 echo "======================================"
-echo ""
-echo "Current profile: $PROFILE"
 echo ""
 
 # Check if GPG is installed

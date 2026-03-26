@@ -6,7 +6,6 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 source "$DOTFILES/lib/env.sh"
 dotfiles_load_env "$DOTFILES"
-PROFILE_FILE="$HOME/.config/dotfiles-profile"
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 PREFERENCES_FILE="$HOME/.config/dotfiles-install-preferences"
 INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
@@ -25,15 +24,13 @@ warning() { print_warning "$1"; }
 error()   { print_error "$1"; }
 info()    { print_info "$1"; }
 
-TOTAL_STEPS=11
+TOTAL_STEPS=9
 CURRENT_STEP=0
 OS="$(uname -s)"
 ARCH="$(uname -m)"
-PROFILE="${PROFILE:-}"
 
 NON_INTERACTIVE=false
 DRY_RUN=false
-PROFILE_OVERRIDE=""
 FROM_STEP=1
 FROM_STEP_SET=false
 MACOS_PREF="auto"
@@ -48,11 +45,9 @@ REMOVE_BLOATWARE="no"
 
 STEP_NAMES=(
   "Detecting system"
-  "Setting up profile"
   "Xcode Command Line Tools"
   "Installing Homebrew"
-  "Installing common packages"
-  "Installing profile packages"
+  "Installing packages"
   "Stowing config packages"
   "Setting up runtime tools"
   "Applying macOS defaults"
@@ -86,8 +81,7 @@ Usage: $0 [options]
 Options:
   --yes                         Non-interactive mode with defaults
   --dry-run                     Preview all steps without making changes
-  --from-step <1-10>            Start execution from a specific step
-  --profile <personal|work>     Set profile without prompting
+  --from-step <1-9>             Start execution from a specific step
   --with-macos-defaults         Apply macOS defaults
   --without-macos-defaults      Skip macOS defaults
   --with-ssh                    Generate SSH keys
@@ -136,15 +130,6 @@ parse_args() {
         fi
         FROM_STEP="$2"
         FROM_STEP_SET=true
-        shift 2
-        ;;
-      --profile)
-        if [[ $# -lt 2 ]]; then
-          error "Missing value for --profile"
-          usage
-          exit 1
-        fi
-        PROFILE_OVERRIDE="$2"
         shift 2
         ;;
       --with-macos-defaults)
@@ -197,11 +182,6 @@ parse_args() {
         ;;
     esac
   done
-
-  if [[ -n "$PROFILE_OVERRIDE" && "$PROFILE_OVERRIDE" != "personal" && "$PROFILE_OVERRIDE" != "work" ]]; then
-    error "--profile must be 'personal' or 'work'"
-    exit 1
-  fi
 
   if ! [[ "$FROM_STEP" =~ ^[0-9]+$ ]] || [[ "$FROM_STEP" -lt 1 || "$FROM_STEP" -gt "$TOTAL_STEPS" ]]; then
     error "--from-step must be a number between 1 and $TOTAL_STEPS"
@@ -271,30 +251,6 @@ prompt_yes_no() {
       Y|y) return 0 ;;
       N|n) return 1 ;;
       *) echo "Please enter y or n." ;;
-    esac
-  done
-}
-
-choose_profile() {
-  local default_profile="$1"
-  local input
-
-  if has_gum; then
-    PROFILE=$(gum choose --header "Select profile" --selected="$default_profile" personal work)
-    return 0
-  fi
-
-  while true; do
-    read -rp "Profile [personal/work] (default: $default_profile): " input
-    input="${input:-$default_profile}"
-    case "$input" in
-      personal|work)
-        PROFILE="$input"
-        return 0
-        ;;
-      *)
-        echo "Please enter 'personal' or 'work'."
-        ;;
     esac
   done
 }
@@ -412,9 +368,6 @@ load_saved_preferences() {
   # shellcheck disable=SC1090
   source "$PREFERENCES_FILE"
 
-  if [[ -n "${PREF_PROFILE:-}" && -z "$PROFILE_OVERRIDE" ]]; then
-    PROFILE="$PREF_PROFILE"
-  fi
   if [[ "$MACOS_PREF" == "auto" && -n "${PREF_MACOS_DEFAULTS:-}" ]]; then
     MACOS_PREF="$PREF_MACOS_DEFAULTS"
   fi
@@ -432,7 +385,6 @@ load_saved_preferences() {
 save_selected_preferences() {
   mkdir -p "$(dirname "$PREFERENCES_FILE")"
   cat > "$PREFERENCES_FILE" <<EOF
-PREF_PROFILE="$PROFILE"
 PREF_MACOS_DEFAULTS="$APPLY_MACOS_DEFAULTS"
 PREF_SETUP_SSH="$SETUP_SSH"
 PREF_SETUP_GPG="$SETUP_GPG"
@@ -441,34 +393,17 @@ EOF
 }
 
 collect_preferences() {
-  local existing_profile=""
-  if [[ -f "$PROFILE_FILE" ]]; then
-    existing_profile="$(cat "$PROFILE_FILE")"
-  fi
-
-  local default_profile="${PROFILE_OVERRIDE:-${existing_profile:-personal}}"
-
   printf '\n'
   printf '%sInstaller Preferences%s\n' "${BLUE}" "${NC}"
   printf '%s\n' "----------------------------------------"
 
-  if [[ -n "$PROFILE_OVERRIDE" ]]; then
-    PROFILE="$PROFILE_OVERRIDE"
-  elif $NON_INTERACTIVE; then
-    PROFILE="$default_profile"
-  else
-    choose_profile "$default_profile"
-  fi
-
   APPLY_MACOS_DEFAULTS=$(resolve_preference "$MACOS_PREF" "no" "Apply macOS defaults?")
-
   SETUP_SSH=$(resolve_preference "$SSH_PREF" "no" "Generate SSH keys for Git?")
   SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Generate GPG key for commit signing?")
   REMOVE_BLOATWARE=$(resolve_preference "$BLOATWARE_PREF" "no" "Remove macOS bloatware apps (Tips, Chess, Stocks…)?")
 
   echo ""
   echo "Summary:"
-  echo "  Profile: $PROFILE"
   echo "  Apply macOS defaults: $APPLY_MACOS_DEFAULTS"
   echo "  Generate SSH keys: $SETUP_SSH"
   echo "  Generate GPG key: $SETUP_GPG"
@@ -571,12 +506,6 @@ step_detect_system() {
   fi
 }
 
-step_setup_profile() {
-  mkdir -p "$(dirname "$PROFILE_FILE")"
-  echo "$PROFILE" > "$PROFILE_FILE"
-  success "Profile: $PROFILE"
-}
-
 step_install_xcode_clt() {
   if ! xcode-select -p &>/dev/null; then
     xcode-select --install
@@ -618,21 +547,11 @@ step_install_homebrew() {
   success "Homebrew ready"
 }
 
-step_install_common_packages() {
+step_install_packages() {
   install_brew_bundle "$DOTFILES/brew/Brewfile.cli"
   install_brew_bundle "$DOTFILES/brew/Brewfile.apps"
   install_brew_bundle "$DOTFILES/brew/Brewfile.vscode"
-  success "Common packages installed"
-}
-
-step_install_profile_packages() {
-  install_brew_bundle "$DOTFILES/brew/Brewfile.$PROFILE"
-  # Personal machines also install work tools so they get the full development environment.
-  # Work tools are defined once in Brewfile.work and included here rather than duplicated.
-  if [[ "$PROFILE" == "personal" ]]; then
-    install_brew_bundle "$DOTFILES/brew/Brewfile.work"
-  fi
-  success "$PROFILE packages installed"
+  success "Packages installed"
 }
 
 step_stow_configs() {
@@ -725,11 +644,10 @@ step_final_setup() {
 print_next_steps() {
   printf '\n'
   printf '%s========================================%s\n' "${GREEN}" "${NC}"
-  printf '%s Setup complete! Profile: %s%s\n' "${GREEN}" "$PROFILE" "${NC}"
+  printf '%s Setup complete!%s\n' "${GREEN}" "${NC}"
   printf '%s========================================%s\n' "${GREEN}" "${NC}"
   echo ""
   echo "Configuration recap:"
-  echo "  Profile: $PROFILE"
   echo "  Apply macOS defaults: $APPLY_MACOS_DEFAULTS"
   echo "  Generated SSH keys: $SETUP_SSH"
   echo "  Generated GPG key: $SETUP_GPG"
@@ -741,10 +659,7 @@ print_next_steps() {
 
   if [[ "$SETUP_SSH" == "yes" ]]; then
     echo "  - Add SSH public keys to GitHub/GitLab"
-    echo "    Personal: pbcopy < ~/.ssh/id_ed25519_personal.pub"
-    if [[ "$PROFILE" == "work" ]]; then
-      echo "    Work: pbcopy < ~/.ssh/id_ed25519_work.pub"
-    fi
+    echo "    pbcopy < ~/.ssh/id_ed25519_personal.pub"
   fi
 
   if [[ "$SETUP_GPG" == "yes" ]]; then
@@ -796,11 +711,6 @@ main() {
     warning "DRY RUN mode enabled - no changes will be made"
   fi
   handle_resume
-
-  if [[ -z "$PROFILE" && -f "$PROFILE_FILE" ]]; then
-    PROFILE="$(cat "$PROFILE_FILE")"
-  fi
-
   collect_preferences
 
   if $FROM_STEP_SET; then
@@ -809,16 +719,14 @@ main() {
   fi
 
   run_step 1 step_detect_system
-  run_step 2 step_setup_profile
-  run_step 3 step_install_xcode_clt
-  run_step 4 step_install_homebrew
-  run_step 5 step_install_common_packages
-  run_step 6 step_install_profile_packages
-  run_step 7 step_stow_configs
-  run_step 8 step_setup_runtimes
-  run_step 9 step_apply_macos_defaults
-  run_step 10 step_remove_bloatware
-  run_step 11 step_final_setup
+  run_step 2 step_install_xcode_clt
+  run_step 3 step_install_homebrew
+  run_step 4 step_install_packages
+  run_step 5 step_stow_configs
+  run_step 6 step_setup_runtimes
+  run_step 7 step_apply_macos_defaults
+  run_step 8 step_remove_bloatware
+  run_step 9 step_final_setup
 
   if ! $DRY_RUN; then
     rm -f "$CHECKPOINT_FILE"

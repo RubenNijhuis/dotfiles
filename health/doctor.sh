@@ -140,7 +140,6 @@ should_run() {
 }
 
 run_checks() {
-  should_run profile && check_profile
   should_run stow && check_stow
   should_run ssh && check_ssh
   should_run gpg && check_gpg

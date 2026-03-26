@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Generate SSH keys for personal and work profiles
+# Generate SSH keys for personal and (optionally) work identities
 
 set -euo pipefail
 
@@ -12,7 +12,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Generate SSH keys for the current profile (personal/work).
+Generate SSH keys for personal and (optionally) work identities.
 EOF
 }
 
@@ -25,17 +25,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-PROFILE_FILE="$HOME/.config/dotfiles-profile"
-
-if [[ ! -f "$PROFILE_FILE" ]]; then
-    print_error "Profile not set. Run install.sh first."
-    exit 1
-fi
-
-PROFILE="$(cat "$PROFILE_FILE")"
-
 print_header "SSH Key Generation"
-print_key_value "Profile" "$PROFILE"
 printf '\n'
 
 # Ensure ~/.ssh exists with secure permissions
@@ -58,19 +48,19 @@ else
     print_success "Personal key already exists"
 fi
 
-# Generate work key (only if work profile)
-if [[ "$PROFILE" == "work" ]]; then
-    if [[ ! -f ~/.ssh/id_ed25519_work ]]; then
-        printf '\n'
+# Optionally generate work key
+if [[ ! -f ~/.ssh/id_ed25519_work ]]; then
+    printf '\n'
+    if confirm "Generate a work SSH key? [y/N] "; then
         print_info "Generating work SSH key..."
         read -rp "Work email [$WORK_EMAIL]: " email
         email="${email:-$WORK_EMAIL}"
         ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/id_ed25519_work
         ssh-add --apple-use-keychain ~/.ssh/id_ed25519_work
         print_success "Work key generated"
-    else
-        print_success "Work key already exists"
     fi
+else
+    print_success "Work key already exists"
 fi
 
 printf '\n'
@@ -79,7 +69,7 @@ printf '\n'
 print_section "Next steps"
 print_indent "1. Add your public keys to GitHub/GitLab:"
 print_indent "   Personal: pbcopy < ~/.ssh/id_ed25519_personal.pub"
-if [[ "$PROFILE" == "work" ]]; then
+if [[ -f ~/.ssh/id_ed25519_work ]]; then
     print_indent "   Work: pbcopy < ~/.ssh/id_ed25519_work.pub"
 fi
 print_indent "2. Test connection: ssh -T git@github.com"
