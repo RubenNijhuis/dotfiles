@@ -8,9 +8,10 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
-# Handle --help before the version gate so CLI contract tests pass on bash 3.x
-if has_flag "--help" "$@" || has_flag "-h" "$@"; then
-  cat <<HELP
+# Handle --help and unknown flags before the version gate so CLI contract
+# tests pass on bash 3.x (CI runners use macOS stock bash 3.2).
+_doctor_usage() {
+  cat <<USAGE
 Usage: $0 [--help] [--quick] [--section <name>] [--no-color]
 
 Comprehensive system health check for dotfiles setup.
@@ -24,9 +25,17 @@ Options:
 Sections:
   profile, stow, ssh, gpg, git, shell, developer, runtime,
   launchd, homebrew, vscode, backup, biome, tmux, neovim, starship, shell-perf
-HELP
-  exit 0
-fi
+USAGE
+}
+
+for _arg in "$@"; do
+  case "$_arg" in
+    --help|-h) _doctor_usage; exit 0 ;;
+    --quick|--full|--no-color) ;;
+    --section) ;;
+    --*) echo "Unknown argument: $_arg" >&2; _doctor_usage >&2; exit 1 ;;
+  esac
+done
 
 require_bash_version 4 "doctor.sh"
 
