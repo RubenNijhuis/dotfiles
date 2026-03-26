@@ -1,7 +1,7 @@
 # =============================================================================
 # VS Code Extensions Brewfile - Shared across all profiles
 # =============================================================================
-# Source of truth: stow/vscode/.../extensions.txt
+# Source of truth: config/vscode/.../extensions.txt
 # This file must stay in sync — run `make brew-audit` to detect drift.
 
 # AI Tools

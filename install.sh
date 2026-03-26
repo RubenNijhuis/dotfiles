@@ -4,7 +4,7 @@
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
-source "$DOTFILES/scripts/lib/env.sh"
+source "$DOTFILES/lib/env.sh"
 dotfiles_load_env "$DOTFILES"
 PROFILE_FILE="$HOME/.config/dotfiles-profile"
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
@@ -17,7 +17,7 @@ SELF_TEST_CHECKPOINT=false
 mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
 
 # Source shared output helpers (lives in the git clone, always available)
-source "$DOTFILES/scripts/lib/output.sh" "$@"
+source "$DOTFILES/lib/output.sh" "$@"
 
 # Thin wrappers mapping install.sh's naming convention to output.sh functions
 success() { print_success "$1"; }
@@ -636,7 +636,7 @@ step_install_profile_packages() {
 }
 
 step_stow_configs() {
-  bash "$DOTFILES/scripts/bootstrap/stow-all.sh"
+  bash "$DOTFILES/setup/stow-all.sh"
   success "Configs stowed"
 }
 
@@ -670,7 +670,7 @@ step_setup_runtimes() {
 
 step_apply_macos_defaults() {
   if [[ "$APPLY_MACOS_DEFAULTS" == "yes" ]]; then
-    bash "$DOTFILES/scripts/bootstrap/macos-defaults.sh"
+    bash "$DOTFILES/setup/macos-defaults.sh"
     success "macOS defaults applied"
   else
     success "Skipped"
@@ -679,7 +679,7 @@ step_apply_macos_defaults() {
 
 step_remove_bloatware() {
   if [[ "$REMOVE_BLOATWARE" == "yes" ]]; then
-    bash "$DOTFILES/scripts/bootstrap/remove-bloatware.sh" --yes
+    bash "$DOTFILES/setup/remove-bloatware.sh" --yes
     success "Bloatware removal complete"
   else
     success "Skipped"
@@ -696,16 +696,16 @@ step_final_setup() {
   success "Created developer structure at $DEVELOPER_ROOT"
 
   if [[ "$SETUP_SSH" == "yes" ]]; then
-    bash "$DOTFILES/templates/ssh/generate-keys.sh"
+    bash "$DOTFILES/setup/generate-ssh-keys.sh"
   fi
 
   if [[ "$SETUP_GPG" == "yes" ]]; then
-    bash "$DOTFILES/templates/gpg/generate-keys.sh"
+    bash "$DOTFILES/setup/generate-gpg-keys.sh"
   fi
 
   if command -v code &>/dev/null; then
     printf '%sInstalling VS Code extensions...%s\n' "${BLUE}" "${NC}"
-    local ext_file="$DOTFILES/stow/vscode/Library/Application Support/Code/User/extensions.txt"
+    local ext_file="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"
     if [[ -f "$ext_file" ]]; then
       grep -v '^#' "$ext_file" | grep -v '^$' | cut -d' ' -f1 | xargs -L 1 code --install-extension 2>/dev/null || true
       success "VS Code extensions installed"
@@ -715,7 +715,7 @@ step_final_setup() {
   fi
 
   printf '%sInstalling git hooks...%s\n' "${BLUE}" "${NC}"
-  if bash "$DOTFILES/git-hooks/install-hooks.sh"; then
+  if bash "$DOTFILES/setup/install-hooks.sh"; then
     success "Git hooks installed"
   else
     warning "Git hooks installation failed (non-critical)"
@@ -748,8 +748,8 @@ print_next_steps() {
   fi
 
   if [[ "$SETUP_GPG" == "yes" ]]; then
-    echo "  - Add GPG public key to GitHub/GitLab (see templates/gpg/README.md)"
-    echo "  - Update signingkey in git configs: bash scripts/health/gpg-info.sh"
+    echo "  - Add GPG public key to GitHub/GitLab"
+    echo "  - Update signingkey in git configs: bash health/gpg-info.sh"
   fi
 
   echo ""
@@ -760,14 +760,14 @@ run_post_install_health_check() {
   if $DRY_RUN; then
     return
   fi
-  if [[ ! -x "$DOTFILES/scripts/health/doctor.sh" ]]; then
+  if [[ ! -x "$DOTFILES/health/doctor.sh" ]]; then
     return
   fi
 
   printf '\n'
   printf '%sPost-install quick health check%s\n' "${BLUE}" "${NC}"
   set +e
-  bash "$DOTFILES/scripts/health/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
+  bash "$DOTFILES/health/doctor.sh" --quick --no-color >/tmp/dotfiles-install-doctor-quick.out 2>&1
   local doctor_code=$?
   set -e
 

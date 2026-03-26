@@ -3,40 +3,42 @@
 local/*
 !local/.gitkeep
 !local/machine.env.example
+!local/shell-local.sh.example
+!local/README.md
 *.local
 *.secret
 .env
 .claude
-!stow/claude/.claude/
-stow/claude/.claude/skills/
-!stow/claude/.claude/settings.json
-!stow/claude/.claude/statusline-command.sh
+!config/claude/.claude/
+config/claude/.claude/skills/
+!config/claude/.claude/settings.json
+!config/claude/.claude/statusline-command.sh
 
 # Backups
 .dotfiles-backup/
 
 # SSH - keep config, ignore keys and sensitive data
-stow/ssh/.ssh/id_*
-stow/ssh/.ssh/*.pub
-stow/ssh/.ssh/known_hosts*
-stow/ssh/.ssh/config.d/local.conf
+config/ssh/.ssh/id_*
+config/ssh/.ssh/*.pub
+config/ssh/.ssh/known_hosts*
+config/ssh/.ssh/config.d/local.conf
 
 # Shell - machine-specific local overrides (may contain secrets)
-stow/shell/.config/shell/local.sh
+config/shell/.config/shell/local.sh
 
 # GPG - keep config, ignore keys and trust database
-stow/gpg/.gnupg/*.gpg
-stow/gpg/.gnupg/*.kbx
-stow/gpg/.gnupg/random_seed
-stow/gpg/.gnupg/trustdb.gpg
-stow/gpg/.gnupg/private-keys-v1.d/
-stow/gpg/.gnupg/openpgp-revocs.d/
-stow/gpg/.gnupg/S.*
-stow/gpg/.gnupg/.gpg-v21-migrated
+config/gpg/.gnupg/*.gpg
+config/gpg/.gnupg/*.kbx
+config/gpg/.gnupg/random_seed
+config/gpg/.gnupg/trustdb.gpg
+config/gpg/.gnupg/private-keys-v1.d/
+config/gpg/.gnupg/openpgp-revocs.d/
+config/gpg/.gnupg/S.*
+config/gpg/.gnupg/.gpg-v21-migrated
 
 # Vim/Neovim - keep config, ignore runtime files
-stow/vim/.vim/plugged/
-stow/vim/.vim/.netrwhist
-stow/vim/.config/nvim/plugged/
-stow/vim/.config/nvim/plugin/
-stow/vim/.config/nvim/.luarc.json
+config/vim/.vim/plugged/
+config/vim/.vim/.netrwhist
+config/vim/.config/nvim/plugged/
+config/vim/.config/nvim/plugin/
+config/vim/.config/nvim/.luarc.json

@@ -21,5 +21,5 @@ Index for the dotfiles documentation.
 
 ## Reference
 
-- [CLI Reference](reference/cli.md) — generated command docs (`bash scripts/maintenance/generate-cli-reference.sh`)
+- [CLI Reference](reference/cli.md) — generated command docs (`bash ops/generate-cli-reference.sh`)
 - [Reference Index](reference/README.md)

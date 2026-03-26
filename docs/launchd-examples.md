@@ -7,15 +7,15 @@ Concise, reusable examples for creating new LaunchD automations.
 Use the manager as the canonical interface:
 
 ```bash
-~/dotfiles/scripts/automation/launchd-manager.sh list
-~/dotfiles/scripts/automation/launchd-manager.sh install <name>
-~/dotfiles/scripts/automation/launchd-manager.sh status
+~/dotfiles/ops/automation/launchd-manager.sh list
+~/dotfiles/ops/automation/launchd-manager.sh install <name>
+~/dotfiles/ops/automation/launchd-manager.sh status
 ```
 
 For managed built-in agents, prefer:
 
 ```bash
-~/dotfiles/scripts/automation/launchd-manager.sh install-all
+~/dotfiles/ops/automation/launchd-manager.sh install-all
 ```
 
 Operational status:
@@ -55,7 +55,7 @@ Use placeholders; they are rendered during install.
   <string>com.user.<task></string>
   <key>ProgramArguments</key>
   <array>
-    <string>__DOTFILES__/scripts/<task>.sh</string>
+    <string>__DOTFILES__/ops/<task>.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -102,13 +102,13 @@ Use placeholders; they are rendered during install.
 
 ## Installation Flow for New Task
 
-1. Add script: `scripts/<task>.sh`
-2. `chmod +x scripts/<task>.sh`
-3. Add plist: `templates/launchd/com.user.<task>.plist`
+1. Add script: `ops/<task>.sh`
+2. `chmod +x ops/<task>.sh`
+3. Add plist: `launchd/com.user.<task>.plist`
 4. Install:
 
 ```bash
-~/dotfiles/scripts/automation/launchd-manager.sh install <task>
+~/dotfiles/ops/automation/launchd-manager.sh install <task>
 ```
 
 5. Verify:
@@ -142,6 +142,6 @@ If install fails due to permissions, rerun the command outside sandboxed tooling
 
 ## Related
 
-- `templates/launchd/README.md`
-- `scripts/automation/launchd-manager.sh`
+- `launchd/README.md`
+- `ops/automation/launchd-manager.sh`
 - `docs/reference/cli.md`

@@ -1,6 +1,6 @@
 # Git Hooks
 
-Hooks live in `git-hooks/` and are symlinked into `.git/hooks/` via `make hooks`.
+Hooks live in `hooks/` and are symlinked into `.git/hooks/` via `make hooks`.
 
 ## pre-commit
 

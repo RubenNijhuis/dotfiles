@@ -1,7 +1,7 @@
 # VS Code Configuration
 
-Settings in `stow/vscode/Library/Application Support/Code/User/settings.json`.
-Extensions in `stow/vscode/.../extensions.txt` and `brew/Brewfile.vscode` (must stay in sync).
+Settings in `config/vscode/Library/Application Support/Code/User/settings.json`.
+Extensions in `config/vscode/.../extensions.txt` and `brew/Brewfile.vscode` (must stay in sync).
 
 ## Design Choices
 

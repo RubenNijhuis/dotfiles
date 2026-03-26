@@ -24,17 +24,21 @@ uv is the Python package and project manager. It also manages Python versions (`
 
 ## Directory Responsibilities
 
-- `stow/`: source-of-truth user config packages symlinked into `$HOME`.
-- `scripts/`: operational interfaces grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `backup/`), plus `lib/` and `tests/`.
-- `templates/launchd/`: managed launch agents and launchd contracts.
-- `templates/local/`: machine-local, untracked override templates.
+- `config/`: source-of-truth user config packages symlinked into `$HOME`.
+- `ops/`: operational interfaces (`ops/automation/` for launchd management, plus backup and maintenance scripts).
+- `setup/`: bootstrap and provisioning scripts.
+- `health/`: health check and profiling scripts.
+- `lib/`: shared shell libraries.
+- `tests/`: script tests.
+- `launchd/`: managed launch agents and launchd contracts.
+- `local/`: machine-local, untracked override templates.
 - `brew/`: package declarations split by profile (`common`, `personal`, `work`).
 - `docs/runbooks/`: operational procedures.
 - `docs/reference/`: generated or canonical references.
 
 ## Script Interface Contract
 
-All operational scripts in `scripts/**` (excluding `scripts/lib/` and `scripts/tests/`) must:
+All operational scripts (excluding `lib/` and `tests/`) must:
 
 - support `--help` and return exit code `0`.
 - reject unknown flags with non-zero exit and usage output.
@@ -48,7 +52,7 @@ Exception: launchd-internal scripts may be exempt only when explicitly marked wi
 
 ## Launchd Contract
 
-Each managed `templates/launchd/com.user.<name>.plist` must include:
+Each managed `launchd/com.user.<name>.plist` must include:
 
 - `Label`: `com.user.<name>`
 - `ProgramArguments`: absolute script path (rendered from `__DOTFILES__`)
@@ -56,19 +60,19 @@ Each managed `templates/launchd/com.user.<name>.plist` must include:
 - `StandardErrorPath`: `__HOME__/.local/log/<name>.err.log` (or documented variant)
 - deterministic schedule (`RunAtLoad`, `StartCalendarInterval`, or `StartInterval`)
 
-Install/uninstall/status is handled only via `scripts/automation/launchd-manager.sh`.
+Install/uninstall/status is handled only via `ops/automation/launchd-manager.sh`.
 
 ## Secrets and Local State
 
-- Secrets: macOS Keychain entries (checked by `scripts/bootstrap/check-keychain.sh`).
+- Secrets: macOS Keychain entries (checked by `setup/check-keychain.sh`).
 - Non-secret machine values: local untracked files under `local/`.
-- Local templates live in `templates/local/`.
+- Local templates live in `local/`.
 
 ## Add-New-Capability Checklist
 
 1. Define scope and owner in docs.
 2. Add/extend script with contract-compliant CLI flags.
-3. Add tests under `scripts/tests/` for parsing and behavior.
-4. Update or generate docs (`bash scripts/maintenance/generate-cli-reference.sh` + `make docs-sync`).
+3. Add tests under `tests/` for parsing and behavior.
+4. Update or generate docs (`bash ops/generate-cli-reference.sh` + `make docs-sync`).
 5. For automation: add launchd template + manager compatibility + `ops-status` visibility.
 6. Validate with `make maint-check` and `make bootstrap-verify`.

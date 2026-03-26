@@ -28,17 +28,23 @@ make docs-sync        # fail if generated CLI docs are stale
 - Architecture and conventions: `docs/architecture.md`
 - Runbooks: `docs/runbooks/`
 - Generated command reference: `docs/reference/cli.md`
-- Launchd templates and contracts: `templates/launchd/README.md`
+- Launchd templates and contracts: `launchd/README.md`
 
 ## Core Layout
 
 ```text
 dotfiles/
-├── stow/            # GNU Stow packages
-├── scripts/         # domain-organized scripts (automation/bootstrap/health/...)
-├── templates/       # launchd, ssh, gpg, local templates
-├── brew/            # profile-separated Brewfiles
-├── docs/            # architecture, runbooks, reference
-├── install.sh       # bootstrap installer
-└── Makefile         # operator entrypoint
+├── config/          # GNU Stow packages (symlinked into $HOME)
+├── setup/           # Setup scripts (stow, macos-defaults, key gen)
+├── ops/             # Operations (update, clean, backup, brew, automation)
+├── health/          # Diagnostics (doctor, checks, info scripts)
+├── tests/           # Script behavior tests
+├── lib/             # Shared shell libraries
+├── hooks/           # Git hooks (pre-commit, commit-msg, pre-push)
+├── launchd/         # Launchd plist templates
+├── brew/            # Profile-separated Brewfiles
+├── local/           # Machine-specific config (gitignored)
+├── docs/            # Architecture, runbooks, reference
+├── install.sh       # Bootstrap installer
+└── Makefile         # Operator entrypoint
 ```

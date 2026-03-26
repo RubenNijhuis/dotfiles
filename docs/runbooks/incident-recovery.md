@@ -14,8 +14,8 @@
 
 ```bash
 make ops-status
-~/dotfiles/scripts/automation/launchd-manager.sh status
-~/dotfiles/scripts/automation/launchd-manager.sh restart <agent>
+~/dotfiles/ops/automation/launchd-manager.sh status
+~/dotfiles/ops/automation/launchd-manager.sh restart <agent>
 ```
 
 ## Config Drift or Broken Links
@@ -30,5 +30,5 @@ make doctor
 ## Last-Resort Restore
 
 ```bash
-bash scripts/backup/restore-backup.sh
+bash ops/restore-backup.sh
 ```

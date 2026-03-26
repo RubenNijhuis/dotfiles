@@ -40,12 +40,12 @@ help-setup: ## Setup commands
 	@printf "  \033[36m%-20s\033[0m %s\n" "keychain-check" "Validate required keychain entries"
 	@printf "  \033[36m%-20s\033[0m %s\n" "automation-setup" "Setup all LaunchD automations"
 	@printf "  \033[36m%-20s\033[0m %s\n" "remove-bloatware" "Remove common macOS built-in apps"
-	@printf "  \033[36m%-20s\033[0m %s\n" "new-tool NAME=<n>" "Scaffold a new stow package"
+	@printf "  \033[36m%-20s\033[0m %s\n" "new-tool NAME=<n>" "Scaffold a new config package"
 	@printf ""
 
 help-brew: ## Brew management commands
 	@printf "\n\033[1m── Brew ──────────────────────\033[0m\n"
-	@printf "  \033[36m%-20s\033[0m %s\n" "brew-sync" "Sync installed packages to Brewfiles (--dry-run)"
+	@printf "  \033[36m%-20s\033[0m %s\n" "brew-sync" "Sync installed packages to Brewfiles"
 	@printf "  \033[36m%-20s\033[0m %s\n" "brew-audit" "Audit Brewfiles for drift"
 	@printf ""
 
@@ -74,115 +74,115 @@ install: ## Full install (bootstrap + brew + stow + macos)
 	@bash $(DOTFILES)/install.sh
 
 update: ## Update brew packages, runtimes, and re-stow configs
-	@bash $(DOTFILES)/scripts/maintenance/update.sh
+	@bash $(DOTFILES)/ops/update.sh
 
 stow: ## Stow all config packages
-	@bash $(DOTFILES)/scripts/bootstrap/stow-all.sh
+	@bash $(DOTFILES)/setup/stow-all.sh
 
 stow-report: ## Preview stow conflicts without changing files
-	@bash $(DOTFILES)/scripts/bootstrap/stow-report.sh
+	@bash $(DOTFILES)/setup/stow-report.sh
 
 unstow: ## Unstow all config packages
-	@bash $(DOTFILES)/scripts/bootstrap/unstow-all.sh
+	@bash $(DOTFILES)/setup/unstow-all.sh
 
 macos: ## Apply macOS defaults
-	@bash $(DOTFILES)/scripts/bootstrap/macos-defaults.sh
+	@bash $(DOTFILES)/setup/macos-defaults.sh
 
 # ── Health & Status ──────────────────────────────────────────────────
 
 status: ## Quick system status — shows only actionable items
-	@bash $(DOTFILES)/scripts/health/doctor.sh --status
+	@bash $(DOTFILES)/health/doctor.sh --status
 
 doctor: ## Run comprehensive system health check
-	@bash $(DOTFILES)/scripts/health/doctor.sh
+	@bash $(DOTFILES)/health/doctor.sh
 
 ops-status: ## Show consolidated automation and ops health status
-	@bash $(DOTFILES)/scripts/automation/ops-status.sh
+	@bash $(DOTFILES)/ops/automation/ops-status.sh
 
 # ── Setup (one-time) ────────────────────────────────────────────────
 
 ssh-setup: ## Generate SSH keys for current profile
-	@bash $(DOTFILES)/templates/ssh/generate-keys.sh
+	@bash $(DOTFILES)/setup/generate-ssh-keys.sh
 
 gpg-setup: ## Generate GPG key and configure Git signing
-	@bash $(DOTFILES)/templates/gpg/generate-keys.sh
+	@bash $(DOTFILES)/setup/generate-gpg-keys.sh
 
 vscode-setup: ## Install VS Code extensions from extensions.txt
-	@bash $(DOTFILES)/scripts/bootstrap/vscode-setup.sh
+	@bash $(DOTFILES)/setup/vscode-setup.sh
 
 hooks: ## Install git hooks for code quality checks
-	@bash $(DOTFILES)/git-hooks/install-hooks.sh
+	@bash $(DOTFILES)/setup/install-hooks.sh
 
 keychain-check: ## Validate required keychain entries
-	@bash $(DOTFILES)/scripts/bootstrap/check-keychain.sh
+	@bash $(DOTFILES)/setup/check-keychain.sh
 
 automation-setup: ## Setup all LaunchD automations
-	@bash $(DOTFILES)/scripts/automation/setup-automation.sh setup-all
+	@bash $(DOTFILES)/ops/automation/setup-automation.sh setup-all
 
 remove-bloatware: ## Remove common macOS built-in apps
-	@bash $(DOTFILES)/scripts/bootstrap/remove-bloatware.sh
+	@bash $(DOTFILES)/setup/remove-bloatware.sh
 
-new-tool: ## Scaffold a new stow package (usage: make new-tool NAME=<name>)
-	@bash $(DOTFILES)/scripts/bootstrap/new-tool.sh $(NAME)
+new-tool: ## Scaffold a new config package (usage: make new-tool NAME=<name>)
+	@bash $(DOTFILES)/setup/new-tool.sh $(NAME)
 
 # ── Backup ───────────────────────────────────────────────────────────
 
 backup: ## Backup current dotfiles before modifications
-	@bash $(DOTFILES)/scripts/backup/backup-dotfiles.sh
+	@bash $(DOTFILES)/ops/backup-dotfiles.sh
 
 # ── Brew ─────────────────────────────────────────────────────────────
 
 brew-sync: ## Sync manually installed packages to Brewfiles
-	@bash $(DOTFILES)/scripts/maintenance/sync-brew.sh
+	@bash $(DOTFILES)/ops/sync-brew.sh
 
 brew-audit: ## Audit Brewfiles for missing or undeclared packages
-	@bash $(DOTFILES)/scripts/maintenance/brew-audit.sh
+	@bash $(DOTFILES)/ops/brew-audit.sh
 
 # ── Maintenance ──────────────────────────────────────────────────────
 
 format: ## Format all files
-	@bash $(DOTFILES)/scripts/maintenance/format-all.sh
+	@bash $(DOTFILES)/ops/format-all.sh
 
 clean: ## Remove zsh caches, log files, and .DS_Stores in repo
-	@bash $(DOTFILES)/scripts/maintenance/clean.sh
+	@bash $(DOTFILES)/ops/clean.sh
 
 maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks
 
 docs-sync: ## Verify generated documentation is up to date
-	@bash $(DOTFILES)/scripts/maintenance/generate-cli-reference.sh --check
+	@bash $(DOTFILES)/ops/generate-cli-reference.sh --check
 
 docs-regen: ## Regenerate CLI reference documentation
-	@bash $(DOTFILES)/scripts/maintenance/generate-cli-reference.sh
+	@bash $(DOTFILES)/ops/generate-cli-reference.sh
 
 # ── LaunchD ──────────────────────────────────────────────────────────
 
 automation-list: ## List all managed LaunchD agents
-	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh list
+	@bash $(DOTFILES)/ops/automation/launchd-manager.sh list
 
 launchd-install-all: ## Install and load all LaunchD agents
-	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh install-all
+	@bash $(DOTFILES)/ops/automation/launchd-manager.sh install-all
 
 launchd-uninstall-all: ## Unload and remove all LaunchD agents
-	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh uninstall-all
+	@bash $(DOTFILES)/ops/automation/launchd-manager.sh uninstall-all
 
 launchd-status: ## Show status of all LaunchD agents
-	@bash $(DOTFILES)/scripts/automation/launchd-manager.sh status
+	@bash $(DOTFILES)/ops/automation/launchd-manager.sh status
 
 launchd-check: ## Validate launchd template contracts
-	@bash $(DOTFILES)/scripts/health/check-launchd-contracts.sh
+	@bash $(DOTFILES)/health/check-launchd-contracts.sh
 
 # ── Testing ──────────────────────────────────────────────────────────
 
 lint-shell: ## Run syntax and shellcheck on shell scripts
-	@bash $(DOTFILES)/scripts/maintenance/lint-shell.sh
+	@bash $(DOTFILES)/ops/lint-shell.sh
 
 test-scripts: ## Run lightweight script behavior tests
-	@bash $(DOTFILES)/scripts/tests/test-array-init.sh
-	@bash $(DOTFILES)/scripts/tests/test-idempotency.sh
-	@bash $(DOTFILES)/scripts/tests/test-cli-contract.sh
-	@bash $(DOTFILES)/scripts/tests/test-cli-parsing.sh
-	@bash $(DOTFILES)/scripts/tests/test-install-checkpoint.sh
+	@bash $(DOTFILES)/tests/test-array-init.sh
+	@bash $(DOTFILES)/tests/test-idempotency.sh
+	@bash $(DOTFILES)/tests/test-cli-contract.sh
+	@bash $(DOTFILES)/tests/test-cli-parsing.sh
+	@bash $(DOTFILES)/tests/test-install-checkpoint.sh
 	@printf "  \033[32m✓\033[0m Script tests passed\n"
 
 bootstrap-verify: ## Run strict bootstrap reliability verification suite
-	@bash $(DOTFILES)/scripts/bootstrap/bootstrap-verify.sh
+	@bash $(DOTFILES)/setup/bootstrap-verify.sh

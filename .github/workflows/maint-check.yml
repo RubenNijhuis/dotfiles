@@ -24,11 +24,11 @@ jobs:
 
       - name: Check docs freshness
         run: |
-          bash scripts/maintenance/generate-cli-reference.sh --check
+          bash ops/generate-cli-reference.sh --check
 
       - name: Check VS Code extension parity
         run: |
-          bash scripts/health/check-vscode-parity.sh --check
+          bash health/check-vscode-parity.sh --check
 
       - name: Install dry-run
         run: |

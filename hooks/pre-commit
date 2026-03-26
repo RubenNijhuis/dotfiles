@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# Pre-commit hook: validates staged shell scripts and JS/TS/JSON files.
+
+set -euo pipefail
+
+DOTFILES="$(git rev-parse --show-toplevel)"
+source "$DOTFILES/lib/output.sh"
+
+STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' | grep -v '\.config/shell/' || true)
+STAGED_BIOME=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
+STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM || true)
+
+[[ -z "$STAGED_SCRIPTS" && -z "$STAGED_BIOME" && -z "$STAGED_ALL" ]] && exit 0
+
+FAILED=0
+
+print_header "Pre-commit: Validating Staged Files"
+
+# ── Shell lint ───────────────────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  LINT="$DOTFILES/ops/lint-shell.sh"
+  if command -v shellcheck &>/dev/null && [[ -x "$LINT" ]]; then
+    files=()
+    while IFS= read -r s; do [[ -n "$s" ]] && files+=("$s"); done <<< "$STAGED_SCRIPTS"
+    if "$LINT" --no-color "${files[@]}"; then
+      print_success "Shell lint passed"
+    else
+      FAILED=1
+    fi
+  else
+    print_warning "shellcheck not installed — skipping shell lint"
+  fi
+fi
+
+# ── Executable permissions ───────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  while IFS= read -r script; do
+    [[ -f "$script" ]] || continue
+    if [[ ! -x "$script" ]]; then
+      chmod +x "$script"
+      git add "$script"
+      print_warning "$script — made executable"
+    fi
+  done <<< "$STAGED_SCRIPTS"
+fi
+
+# ── Shebang validation ──────────────────────────────────────────────
+
+if [[ -n "$STAGED_SCRIPTS" ]]; then
+  while IFS= read -r script; do
+    [[ -f "$script" ]] || continue
+    first=$(head -n 1 "$script")
+    if [[ ! "$first" =~ ^#!/usr/bin/env\ bash$ && ! "$first" =~ ^#!/bin/bash$ ]]; then
+      print_error "$script — invalid shebang: $first"
+      FAILED=1
+    fi
+  done <<< "$STAGED_SCRIPTS"
+fi
+
+# ── Biome formatting ────────────────────────────────────────────────
+
+if [[ -n "$STAGED_BIOME" ]] && command -v biome &>/dev/null; then
+  fixed=0
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    if ! biome check "$file" &>/dev/null; then
+      biome check --write "$file" &>/dev/null || true
+      git add "$file"
+      fixed=$((fixed + 1))
+    fi
+  done <<< "$STAGED_BIOME"
+  if [[ $fixed -gt 0 ]]; then
+    print_warning "Biome fixed $fixed file(s)"
+  else
+    print_success "Biome formatting OK"
+  fi
+fi
+
+# ── Secret detection ────────────────────────────────────────────────
+
+if [[ -n "$STAGED_ALL" ]]; then
+  SECRET_PATTERN='AKIA[0-9A-Z]{16}|sk_live_[0-9a-zA-Z]+|sk_test_[0-9a-zA-Z]+|ghp_[0-9a-zA-Z]+|gho_[0-9a-zA-Z]+|ghs_[0-9a-zA-Z]+|PRIVATE KEY|api_key=|apikey=|api_secret='
+  if git diff --cached -U0 -- ':!hooks/pre-commit' | grep -qE "$SECRET_PATTERN" 2>/dev/null; then
+    print_error "Possible secrets detected in staged changes"
+    while IFS= read -r file; do
+      [[ -n "$file" && "$file" != "hooks/pre-commit" ]] || continue
+      matches=$(git diff --cached -U0 -- "$file" | grep -E "$SECRET_PATTERN" || true)
+      [[ -n "$matches" ]] && print_dim "  $file"
+    done <<< "$STAGED_ALL"
+    FAILED=1
+  fi
+fi
+
+# ── Result ───────────────────────────────────────────────────────────
+
+if [[ $FAILED -eq 1 ]]; then
+  printf '\n'
+  print_error "Pre-commit checks failed"
+  exit 1
+fi
+
+print_success "All pre-commit checks passed"

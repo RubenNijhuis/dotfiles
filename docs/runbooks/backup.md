@@ -17,7 +17,7 @@ make ops-status         # check all automation statuses
 ## Recovery
 
 ```bash
-bash scripts/backup/restore-backup.sh
+bash ops/restore-backup.sh
 ```
 
 Use latest successful backup directory shown in status output.

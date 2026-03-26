@@ -89,14 +89,14 @@ eval "$(starship init zsh)"
 
 ### Profile Current Shell
 ```bash
-bash scripts/health/profile-shell.sh --full
+bash health/profile-shell.sh --full
 ```
 
 This generates timing data and measures actual startup time.
 
 ### Analyze Profile Data
 ```bash
-bash scripts/health/profile-shell.sh --full
+bash health/profile-shell.sh --full
 ```
 
 Shows breakdown of where time is spent during startup.

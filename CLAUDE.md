@@ -4,13 +4,17 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 
 ## Structure
 
-- `stow/` — Config packages symlinked into `$HOME`. Each subdirectory mirrors home directory structure.
-- `scripts/` — Operational scripts grouped by domain (`automation/`, `bootstrap/`, `health/`, `maintenance/`, `backup/`), plus `lib/` and `tests/`.
+- `config/` — Config packages symlinked into `$HOME` via GNU Stow. Each subdirectory mirrors home directory structure.
+- `setup/` — One-time and repeated setup scripts (stow, macos-defaults, key generation, hook installation).
+- `ops/` — Ongoing operational scripts (update, clean, backup, brew sync, format, lint). Contains `automation/` for launchd-managed jobs.
+- `health/` — Health checks and diagnostics (doctor, vscode parity, launchd contracts, ssh/gpg info).
+- `tests/` — Script behavior and contract tests.
+- `lib/` — Shared shell libraries sourced by all scripts.
+- `hooks/` — Git hooks (pre-commit, commit-msg, pre-push).
+- `launchd/` — Launchd plist templates with `__DOTFILES__`/`__HOME__` placeholders.
 - `brew/` — Brewfiles split by profile (see below).
-- `templates/` — Launchd plist templates and local override templates.
 - `docs/` — Runbooks and generated references.
-- `git-hooks/` — Pre-commit, commit-msg, pre-push hooks.
-- `local/` — Machine-specific config (gitignored).
+- `local/` — Machine-specific config (gitignored), with `.example` templates.
 
 ## Key Commands
 
@@ -36,7 +40,7 @@ Fresh machine → install.sh → make stow → make doctor → make ops-status
 
 ## Script Contract
 
-All scripts in `scripts/**` (except `lib/` and `tests/`) must:
+All scripts in `setup/`, `ops/`, and `health/` (except `health/checks/` and `ops/automation/launchd/`) must:
 - Support `--help` (exit 0)
 - Reject unknown flags (non-zero exit)
 - Accept `--no-color` for output formatting
@@ -51,7 +55,7 @@ Do NOT include Co-Authored-By lines.
 
 ## Tool Registry
 
-Each stow package maps to a tool config. Cross-tool dependencies are noted with `→`.
+Each config package maps to a tool config. Cross-tool dependencies are noted with `→`.
 
 | Package | Config Path | Purpose | Dependencies |
 |---------|------------|---------|--------------|
@@ -102,16 +106,16 @@ zsh/bash startup
 - **git includeIf**: Directory-based work/personal split auto-selects SSH key and email
 - **FZF colors**: Set globally in `exports.sh`, inherited by all FZF consumers (fzf, sesh picker, shell functions)
 
-## Stow Packages
+## Config Packages
 
-Packages live in `stow/`. Each subdirectory is a stow package symlinked into `$HOME`, mirroring the home directory structure. Use `make stow-report` to preview conflicts.
+Packages live in `config/`. Each subdirectory is a stow package symlinked into `$HOME`, mirroring the home directory structure. Use `make stow-report` to preview conflicts.
 
 ## Brewfiles
 
 Split by profile in `brew/`:
 - `Brewfile.cli` — Shared CLI tools
 - `Brewfile.apps` — Shared GUI apps
-- `Brewfile.vscode` — VS Code extensions (must stay in sync with `stow/vscode/.../extensions.txt`)
+- `Brewfile.vscode` — VS Code extensions (must stay in sync with `config/vscode/.../extensions.txt`)
 - `Brewfile.personal` — Personal-only packages
 - `Brewfile.work` — Work-only packages
 

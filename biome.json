@@ -10,12 +10,12 @@
     "includes": [
       "**",
       "!**/brew/",
-      "!**/scripts/lib/",
+      "!**/lib/",
       "!**/.git/",
       "!**/node_modules/",
       "!**/.cache/",
-      "!**/stow/vim/.config/nvim/lazy-lock.json",
-      "!**/stow/vim/.config/nvim/lazyvim.json"
+      "!**/config/vim/.config/nvim/lazy-lock.json",
+      "!**/config/vim/.config/nvim/lazyvim.json"
     ]
   },
   "formatter": {
@@ -52,7 +52,7 @@
   },
   "overrides": [
     {
-      "includes": ["stow/spicetify/**"],
+      "includes": ["config/spicetify/**"],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }
     }
