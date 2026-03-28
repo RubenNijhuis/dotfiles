@@ -53,19 +53,6 @@ entry_key_from_line() {
   return 1
 }
 
-array_contains() {
-  local needle="$1"
-  shift
-
-  local item
-  for item in "$@"; do
-    if [[ "$item" == "$needle" ]]; then
-      return 0
-    fi
-  done
-  return 1
-}
-
 # Parse all Brewfiles (cli, apps, vscode)
 for brewfile in "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode"; do
   while IFS= read -r line; do
@@ -91,7 +78,7 @@ while IFS= read -r line; do
     continue
   fi
 
-  if ! array_contains "$key" "${DECLARED_KEYS[@]}"; then
+  if [[ ! " ${DECLARED_KEYS[*]} " =~ [[:space:]]${key}[[:space:]] ]]; then
     NEW_PACKAGES+=("$line")
   fi
 done < "$TEMP_BREWFILE"

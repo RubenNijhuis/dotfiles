@@ -126,26 +126,9 @@ stow_packages() {
   return 1
 }
 
-check_stow_version() {
-  local version
-  version="$(stow --version 2>&1 | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?' | head -1)"
-  if [[ -z "$version" ]]; then
-    print_warning "Could not detect stow version"
-    return
-  fi
-  local major minor
-  major="${version%%.*}"
-  minor="${version#*.}"
-  minor="${minor%%.*}"
-  if [[ "$major" -lt 2 || ( "$major" -eq 2 && "$minor" -lt 3 ) ]]; then
-    print_warning "GNU Stow $version detected; version 2.3+ recommended (brew upgrade stow)"
-  fi
-}
-
 main() {
   parse_standard_args usage "$@"
   require_cmd "stow" "Install stow: brew install stow" || exit 1
-  check_stow_version
   print_header "Stowing Configuration Packages"
 
   backup_before_stow

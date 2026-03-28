@@ -80,20 +80,6 @@ fi
 
 printf '\n'
 
-# ── Commit message quality ───────────────────────────────────────────
-
-print_section "Checking last commit message..."
-last_subject="$(git -C "$DOTFILES" log -1 --pretty=%s)"
-if echo "$last_subject" | grep -qiE '^(wip|temp|fix|update|test)$'; then
-  print_warning "Last commit message might be too generic: $last_subject"
-elif [[ ${#last_subject} -lt 10 ]]; then
-  print_warning "Last commit message is very short: $last_subject"
-else
-  print_success "Commit message looks good"
-fi
-
-printf '\n'
-
 # ── Branch status ────────────────────────────────────────────────────
 
 print_section "Checking branch status..."

@@ -68,7 +68,7 @@ setopt CORRECT
 setopt GLOB_DOTS
 
 # ----- Hooks -----
-chpwd() { emulate -L zsh -o aliases; ls; }
+chpwd() { [[ -t 1 ]] && emulate -L zsh -o aliases && ls; }
 
 # ----- Plugins (from Homebrew, cached paths) -----
 [[ -f "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
@@ -120,9 +120,16 @@ unset cmd
 if command -v rbenv >/dev/null 2>&1; then
   _zsh_eval_cache rbenv init - --no-rehash zsh
 fi
-if command -v rustup >/dev/null 2>&1; then
-  _zsh_eval_cache rustup completions zsh
-fi
+_zsh_lazy_load_rustup() {
+  unfunction rustup cargo rustc 2>/dev/null
+  if command -v rustup >/dev/null 2>&1; then
+    _zsh_eval_cache rustup completions zsh
+  fi
+}
+for cmd in rustup cargo rustc; do
+  eval "${cmd}() { _zsh_lazy_load_rustup; ${cmd} \"\$@\" }"
+done
+unset cmd
 # Go, Zig, Cargo completions: auto-loaded by compinit via Homebrew site-functions
 # Load fzf key bindings (Ctrl-R, Ctrl-T, Alt-C); Tab is handled by fzf-tab.
 if [[ -f "$HOMEBREW_PREFIX/opt/fzf/shell/key-bindings.zsh" ]]; then

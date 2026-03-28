@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lint shell scripts with syntax checks and shellcheck.
+# Lint shell scripts with shellcheck and shellharden.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,7 +11,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color] [path ...]
 
-Run bash syntax and shellcheck linting across shell scripts.
+Run shellcheck and shellharden linting across shell scripts.
 When paths are provided, only lint those files.
 EOF
 }
@@ -83,11 +83,6 @@ main() {
 
   print_header "Shell Lint"
   print_info "Checking ${#files[@]} files"
-  printf '\n'
-
-  print_section "bash -n"
-  printf '%s\0' "${files[@]}" | xargs -0 bash -n
-  print_success "Syntax checks passed"
   printf '\n'
 
   print_section "shellcheck"

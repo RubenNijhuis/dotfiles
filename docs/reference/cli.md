@@ -222,7 +222,7 @@ Options:
 ```text
 Usage: ops/lint-shell.sh [--help] [--no-color] [path ...]
 
-Run bash syntax and shellcheck linting across shell scripts.
+Run shellcheck and shellharden linting across shell scripts.
 When paths are provided, only lint those files.
 ```
 
