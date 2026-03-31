@@ -142,14 +142,14 @@ should_run() {
 }
 
 run_checks() {
-  printf '  '; print_section "Core"
+  printf '  %s%s── Core ──%s\n' "${DIM}" "${BLUE}" "${NC}"
   should_run stow && check_stow
   should_run ssh && check_ssh
   should_run gpg && check_gpg
   should_run git && check_git
   should_run shell && check_shell
 
-  printf '\n  '; print_section "System"
+  printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}"
   should_run developer && check_developer
   should_run runtime && check_runtime
   should_run launchd && check_launchd
@@ -157,7 +157,7 @@ run_checks() {
   should_run backup && check_backup_system
   should_run shell-perf && check_shell_perf
 
-  printf '\n  '; print_section "Tools"
+  printf '\n  %s%s── Tools ──%s\n' "${DIM}" "${BLUE}" "${NC}"
   should_run biome && check_biome
   should_run tmux && check_tmux
   should_run neovim && check_neovim
@@ -180,13 +180,11 @@ print_summary() {
   printf '  %s%s/%s checks:%s %b\n' "${BOLD}" "$total" "$total" "${NC}" "$summary"
 
   if [[ ${#SUGGESTIONS[@]} -gt 0 ]]; then
-    printf '\n'
-    printf '  %s%sSuggested fixes:%s\n' "${BOLD}" "${YELLOW}" "${NC}"
     # Deduplicate suggestions while preserving order
     declare -A _seen_suggestions=()
     for suggestion in "${SUGGESTIONS[@]}"; do
       if [[ -z "${_seen_suggestions[$suggestion]:-}" ]]; then
-        printf '    %s→%s %s\n' "${YELLOW}" "${NC}" "$suggestion"
+        printf '  %s→%s %s\n' "${YELLOW}" "${NC}" "$suggestion"
         _seen_suggestions[$suggestion]=1
       fi
     done
