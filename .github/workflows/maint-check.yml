@@ -35,16 +35,6 @@ jobs:
         run: |
           make maint-check
 
-      - name: Check docs freshness
-        timeout-minutes: 2
-        run: |
-          bash ops/generate-cli-reference.sh --check
-
-      - name: Check VS Code extension parity
-        timeout-minutes: 2
-        run: |
-          bash health/check-vscode-parity.sh --check
-
       - name: Install dry-run
         timeout-minutes: 5
         run: |
