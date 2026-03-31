@@ -186,6 +186,8 @@ launchd-check: ## Validate launchd template contracts
 lint-shell: ## Run syntax and shellcheck on shell scripts
 	@bash $(DOTFILES)/ops/lint-shell.sh
 
+test: test-scripts ## Alias for test-scripts
+
 test-scripts: ## Run lightweight script behavior tests
 	@bash $(DOTFILES)/tests/test-idempotency.sh
 	@bash $(DOTFILES)/tests/test-cli-contract.sh

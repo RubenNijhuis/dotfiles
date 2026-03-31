@@ -118,11 +118,19 @@ check_tmux() {
     add_suggestion "Re-stow tmux config: cd $DOTFILES && make stow"
   fi
 
-  # Check tpm installed
+  # Check tpm and plugins
   if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
-    local plugin_count
-    plugin_count=$(find "$HOME/.tmux/plugins" -maxdepth 1 -mindepth 1 -type d | wc -l | xargs)
-    details+="Plugins: $plugin_count installed (tpm)"
+    local plugin_count declared_count
+    plugin_count=$(find "$HOME/.tmux/plugins" -maxdepth 1 -mindepth 1 -type d ! -name tpm | wc -l | xargs)
+    declared_count=$(grep -c '@plugin' "$HOME/.config/tmux/tmux.conf" 2>/dev/null || echo "0")
+    declared_count=$((declared_count - 1))  # exclude tpm itself
+    if [[ $plugin_count -lt $declared_count ]]; then
+      details+="Plugins: $plugin_count/$declared_count installed (tpm)"
+      issues=$((issues + 1))
+      add_suggestion "Install tmux plugins: ~/.tmux/plugins/tpm/bin/install_plugins"
+    else
+      details+="Plugins: $plugin_count installed (tpm)"
+    fi
   else
     details+="Plugins: tpm not installed"
     issues=$((issues + 1))
