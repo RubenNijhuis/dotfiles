@@ -1,6 +1,9 @@
 {
   "env": {
-    "DISABLE_AUTOUPDATER": "1"
+    "DISABLE_AUTOUPDATER": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_CODE_NEW_INIT": "true"
   },
   "permissions": {
     "allow": [
@@ -55,5 +58,7 @@
     "clbtx@celebratix-marketplace": true,
     "figma@claude-plugins-official": true
   },
+  "voiceEnabled": true,
+  "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true
 }
