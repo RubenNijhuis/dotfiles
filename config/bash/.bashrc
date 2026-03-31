@@ -61,8 +61,7 @@ fi
 
 _bash_eval_cache zoxide init bash 2>/dev/null || true
 _bash_eval_cache atuin init bash --disable-up-arrow 2>/dev/null || true
-_bash_eval_cache fnm env --use-on-cd --shell bash 2>/dev/null || true
-_bash_eval_cache rbenv init - --no-rehash bash 2>/dev/null || true
+_bash_eval_cache mise activate bash 2>/dev/null || true
 
 # FZF keybindings and completion
 _brew_prefix="${HOMEBREW_PREFIX:-/opt/homebrew}"

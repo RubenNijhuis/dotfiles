@@ -99,12 +99,12 @@ _zsh_eval_cache() {
 }
 
 # ----- Lazy-loaded tools (deferred until first use) -----
-_zsh_lazy_load_fnm() {
-  unfunction fnm node npm npx corepack 2>/dev/null
-  _zsh_eval_cache fnm env --use-on-cd --shell zsh
+_zsh_lazy_load_mise() {
+  unfunction mise node npm npx corepack ruby gem bundle 2>/dev/null
+  _zsh_eval_cache mise activate zsh
 }
-for cmd in fnm node npm npx corepack; do
-  eval "${cmd}() { _zsh_lazy_load_fnm; ${cmd} \"\$@\" }"
+for cmd in mise node npm npx corepack ruby gem bundle; do
+  eval "${cmd}() { _zsh_lazy_load_mise; ${cmd} \"\$@\" }"
 done
 unset cmd
 
@@ -117,9 +117,6 @@ for cmd in z zi; do
 done
 unset cmd
 
-if command -v rbenv >/dev/null 2>&1; then
-  _zsh_eval_cache rbenv init - --no-rehash zsh
-fi
 _zsh_lazy_load_rustup() {
   unfunction rustup cargo rustc 2>/dev/null
   if command -v rustup >/dev/null 2>&1; then

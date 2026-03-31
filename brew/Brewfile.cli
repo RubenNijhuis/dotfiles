@@ -53,8 +53,8 @@ brew "dust"          # Better du (disk usage)
 # -----------------------------------------------------------------------------
 brew "bash"          # Modern bash (macOS ships with old version)
 brew "biome"         # Fast formatter and linter (JS/TS/JSON)
-brew "fnm"           # Fast Node version manager
-brew "node"          # Fallback Node.js (fnm takes priority via PATH)
+brew "mise"          # Polyglot version manager (node, ruby, etc.)
+brew "node"          # Fallback Node.js (mise takes priority via PATH)
 brew "lua"           # Lua programming language
 brew "luarocks"      # Lua package manager
 brew "pnpm"          # Fast npm alternative
@@ -62,8 +62,6 @@ brew "ruff"          # Fast Python linter
 brew "rustup"        # Rust toolchain manager (rustc, cargo, rustfmt)
 brew "uv"            # Fast Python package and project manager
 brew "go"            # Go programming language
-brew "rbenv"         # Ruby version manager
-brew "ruby-build"    # rbenv plugin: install Ruby versions
 brew "zig"           # Zig programming language
 brew "dotnet@8"      # .NET 8 SDK
 brew "jq"            # JSON processor

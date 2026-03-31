@@ -285,7 +285,7 @@ check_shell() {
   fi
 
   # Check PATH
-  local path_items=(fnm bun brew)
+  local path_items=(mise bun brew)
   local path_ok=true
 
   for item in "${path_items[@]}"; do
@@ -296,7 +296,7 @@ check_shell() {
   done
 
   if $path_ok; then
-    details+="PATH: fnm, Bun, Homebrew found"
+    details+="PATH: mise, Bun, Homebrew found"
   fi
 
   if [[ $issues -eq 0 ]]; then
@@ -400,10 +400,10 @@ check_runtime() {
   if command -v node &>/dev/null; then
     local node_version
     node_version=$(node --version)
-    details+="Node.js: $node_version (via fnm)\n  "
+    details+="Node.js: $node_version (via mise)\n  "
   else
     details+="Node.js: not installed\n  "
-    add_suggestion "Install Node.js: fnm install --lts"
+    add_suggestion "Install Node.js: mise install node@lts"
   fi
 
   # Bun
