@@ -201,12 +201,12 @@ status_check_doctor() {
 
   if [[ $exit_code -eq 0 ]]; then
     local count
-    count=$(echo "$output" | grep -c "^✓" || echo "0")
+    count=$(echo "$output" | grep -c "✓" || echo "0")
     print_success "Health checks: $count passed"
   else
     local warnings errors
-    warnings=$(echo "$output" | grep -c "^⚠" || echo "0")
-    errors=$(echo "$output" | grep -c "^✗" || echo "0")
+    warnings=$(echo "$output" | grep -c "⚠" || echo "0")
+    errors=$(echo "$output" | grep -c "✗" || echo "0")
     if [[ $errors -gt 0 ]]; then
       print_error "Health checks: $errors errors, $warnings warnings"
     else

@@ -77,8 +77,8 @@ if [[ "$TARGET" == "setup-all" ]]; then
   done
   printf '\n'
   print_success "Installed: $ok"
-  [[ $skip -gt 0 ]] && print_info "Skipped: $skip (optional)"
-  [[ $fail -gt 0 ]] && { print_error "Failed: $fail"; exit 1; }
+  if [[ $skip -gt 0 ]]; then print_info "Skipped: $skip (optional)"; fi
+  if [[ $fail -gt 0 ]]; then print_error "Failed: $fail"; exit 1; fi
 else
   setup_agent "$(resolve_agent "$TARGET")"
 fi

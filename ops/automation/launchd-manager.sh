@@ -137,7 +137,7 @@ cmd_install_all() {
     if cmd_install "$name"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
   done
   print_info "Installed: $ok"
-  [[ $fail -gt 0 ]] && { print_warning "Failed: $fail"; return 1; }
+  if [[ $fail -gt 0 ]]; then print_warning "Failed: $fail"; return 1; fi
 }
 
 cmd_uninstall_all() {
