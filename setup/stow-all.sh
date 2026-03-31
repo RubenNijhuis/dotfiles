@@ -10,31 +10,36 @@ source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/cli.sh"
 
+QUIET=false
+
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color]
+Usage: $0 [--help] [--no-color] [--quiet]
 
 Stow all packages from config/ into \$HOME.
+
+Options:
+  --quiet            Output one-line summary only
+  --no-color         Disable colored output
 EOF
 }
 
+# Parse --quiet before standard arg parsing
+for _arg in "$@"; do
+  [[ "$_arg" == "--quiet" ]] && QUIET=true
+done
+
 backup_before_stow() {
-  print_section "Creating backup..."
   if [[ -f "$DOTFILES/ops/backup-dotfiles.sh" ]]; then
     if bash "$DOTFILES/ops/backup-dotfiles.sh" &>/dev/null; then
-      print_success "Backup created"
+      print_step "Pre-stow backup" success "created"
     else
-      print_warning "Backup failed, but continuing"
+      print_step "Pre-stow backup" warning "failed, continuing"
     fi
-  else
-    print_dim "    No backup script found, skipping"
   fi
 }
 
 cleanup_old_symlinks() {
-  printf '\n'
-  print_section "Cleaning up old symlinks..."
-
   local old_symlinks=(
     "$HOME/.zshrc"
     "$HOME/.zprofile"
@@ -50,9 +55,7 @@ cleanup_old_symlinks() {
   for link in "${old_symlinks[@]}"; do
     if [[ -L "$link" ]]; then
       target="$(readlink "$link")"
-      # Only remove if it points into dotfiles/ (old manual setup)
       if [[ "$target" == *dotfiles/* && "$target" != *dotfiles/config/* ]]; then
-        print_dim "    Removing old symlink: $(basename "$link")"
         rm "$link"
         removed_count=$((removed_count + 1))
       fi
@@ -60,75 +63,68 @@ cleanup_old_symlinks() {
   done
 
   if [[ $removed_count -gt 0 ]]; then
-    print_success "Removed $removed_count old symlinks"
-  else
-    print_dim "    No old symlinks found"
+    print_step "Old symlinks" success "$removed_count removed"
   fi
 }
 
 stow_packages() {
-  printf '\n'
-  print_section "Stowing packages..."
-
   local stowed_count=0
   local failed_count=0
-  local skipped_count=0
   local pkg_dir pkg stow_output filtered_output
-  local -a succeeded_pkgs=()
   local -a failed_pkgs=()
 
   for pkg_dir in "$STOW_DIR"/*/; do
     pkg="$(basename "$pkg_dir")"
 
     if stow_output=$(stow -d "$STOW_DIR" -t "$HOME" "$pkg" 2>&1); then
-      print_success "$pkg"
       stowed_count=$((stowed_count + 1))
-      succeeded_pkgs+=("$pkg")
-      # GNU Stow emits a spurious "BUG in find_stowed_path" warning when
-      # target directories already exist (known upstream issue). Filter it
-      # to avoid confusing output.
-      filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
-      if [[ -n "$filtered_output" ]]; then
-        print_dim "    $filtered_output"
-      fi
     else
-      print_error "$pkg failed"
+      # GNU Stow emits a spurious "BUG in find_stowed_path" warning
       filtered_output=$(printf '%s\n' "$stow_output" | grep -v "BUG in find_stowed_path" || true)
-      if [[ -n "$filtered_output" ]]; then
-        print_dim "    $filtered_output"
-      fi
-      print_dim "    Run 'make stow-report' to see conflicts, or 'make unstow' first"
+      print_step "$pkg" error "$filtered_output"
       failed_count=$((failed_count + 1))
       failed_pkgs+=("$pkg")
     fi
   done
 
   printf '\n'
-  if [[ $skipped_count -gt 0 ]]; then
-    print_warning "Skipped $skipped_count package(s) with expected local conflicts"
-  fi
-
   if [[ $failed_count -eq 0 ]]; then
-    print_header "Stow Complete"
-    if [[ $skipped_count -gt 0 ]]; then
-      print_success "Successfully stowed $stowed_count packages ($skipped_count skipped)"
-    else
-      print_success "Successfully stowed $stowed_count packages"
-    fi
-    print_dim "  Next: run 'make doctor' to verify system health"
+    print_success "Stowed $stowed_count packages"
     return 0
   fi
 
-  print_error "Failed to stow $failed_count package(s): ${failed_pkgs[*]}"
-  if [[ $stowed_count -gt 0 ]]; then
-    print_info "Successfully stowed: ${succeeded_pkgs[*]}"
-  fi
+  print_warning "Stowed $stowed_count packages, $failed_count failed (${failed_pkgs[*]})"
+  print_dim "  Run 'make stow-report' to see conflicts, or 'make unstow' first"
   return 1
 }
 
 main() {
   parse_standard_args usage "$@"
   require_cmd "stow" "Install stow: brew install stow" || exit 1
+
+  if $QUIET; then
+    # Silent mode: just stow, output one-line summary
+    local stowed=0 failed=0
+    local -a failed_pkgs=()
+    for pkg_dir in "$STOW_DIR"/*/; do
+      local pkg
+      pkg="$(basename "$pkg_dir")"
+      if stow -d "$STOW_DIR" -t "$HOME" "$pkg" &>/dev/null; then
+        stowed=$((stowed + 1))
+      else
+        failed=$((failed + 1))
+        failed_pkgs+=("$pkg")
+      fi
+    done
+    if [[ $failed -eq 0 ]]; then
+      echo "$stowed packages stowed"
+    else
+      echo "$stowed stowed, $failed failed (${failed_pkgs[*]})"
+      return 1
+    fi
+    return 0
+  fi
+
   print_header "Stowing Configuration Packages"
 
   backup_before_stow

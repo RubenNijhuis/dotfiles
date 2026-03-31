@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Full clean: dotfiles backups and Homebrew cache (runs after clean.sh).
+# Full clean: standard clean + log rotation + backups + Homebrew cache.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,72 +13,63 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color] [--dry-run]
 
-Remove dotfiles backup directories and Homebrew download cache.
-Run after clean.sh for a full cleanup.
+Full cleanup: zsh cache, logs, .DS_Store, old backups, and Homebrew cache.
 EOF
-}
-
-clean_dotfiles_backups() {
-  print_section "Dotfiles backups..."
-
-  local found=0 removed=0
-  local backup_root="$HOME/.dotfiles-backup"
-  shopt -s nullglob
-  for path in "$backup_root"/202*; do
-    [[ -d "$path" || -f "$path" ]] || continue
-    found=$((found + 1))
-    if $DRY_RUN; then
-      print_info "Would remove: $path"
-      continue
-    fi
-    rm -rf "$path"
-    print_success "Removed: $path"
-    removed=$((removed + 1))
-  done
-  shopt -u nullglob
-
-  if [[ $found -eq 0 ]]; then
-    print_success "No old backups found"
-  elif $DRY_RUN; then
-    print_info "Found $found backup(s)"
-  else
-    print_success "Removed $removed backup(s)"
-  fi
-}
-
-clean_brew_cache() {
-  print_section "Homebrew cache..."
-
-  if ! command -v brew &>/dev/null; then
-    print_warning "brew not found, skipping"
-    return 0
-  fi
-
-  if $DRY_RUN; then
-    print_info "Would run: brew cleanup --prune=all"
-  else
-    brew cleanup --prune=all
-    print_success "Homebrew cache cleared"
-  fi
 }
 
 main() {
   parse_standard_args usage --accept-dry-run "$@"
 
+  print_header "Clean All"
+  $DRY_RUN && print_warning "DRY RUN"
+
+  # Run standard clean (zsh cache, automation logs, .DS_Store)
+  local clean_args=(--quiet)
+  $DRY_RUN && clean_args+=(--dry-run)
+  bash "$SCRIPT_DIR/clean.sh" "${clean_args[@]}"
+
+  # Rotate old automation logs
   if $DRY_RUN; then
-    print_header "Clean All (dry run)"
+    print_step "Log rotation" skip "dry run"
   else
-    print_header "Clean All"
+    if bash "$SCRIPT_DIR/cleanup-logs.sh" &>/dev/null; then
+      print_step "Log rotation" success "cleaned"
+    else
+      print_step "Log rotation" skip "nothing to rotate"
+    fi
   fi
 
-  clean_dotfiles_backups
-  clean_brew_cache
+  # Dotfiles backups
+  local backup_root="$HOME/.dotfiles-backup"
+  shopt -s nullglob
+  local backup_dirs=("$backup_root"/202*)
+  shopt -u nullglob
+  if [[ ${#backup_dirs[@]} -gt 0 ]]; then
+    if $DRY_RUN; then
+      print_step "Old backups" warning "would remove ${#backup_dirs[@]}"
+    else
+      rm -rf "${backup_dirs[@]}"
+      print_step "Old backups" success "${#backup_dirs[@]} removed"
+    fi
+  else
+    print_step "Old backups" skip "none found"
+  fi
+
+  # Homebrew cache
+  if command -v brew &>/dev/null; then
+    if $DRY_RUN; then
+      print_step "Homebrew cache" warning "would clean"
+    else
+      brew cleanup --prune=all &>/dev/null
+      print_step "Homebrew cache" success "cleaned"
+    fi
+  else
+    print_step "Homebrew cache" skip "brew not found"
+  fi
 
   printf '\n'
-  if $DRY_RUN; then
-    print_info "Dry run complete — no files were removed"
-  else
-    print_success "Full clean complete"
+  if $DRY_RUN; then print_info "Dry run complete — no files were removed"
+  else print_success "Full clean complete"
   fi
 }
 

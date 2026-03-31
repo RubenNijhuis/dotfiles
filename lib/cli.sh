@@ -20,7 +20,7 @@ parse_standard_args() {
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --no-color)
+      --no-color|--quiet)
         shift
         ;;
       --dry-run)

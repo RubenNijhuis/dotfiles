@@ -13,7 +13,7 @@ DOTFILES := $(shell pwd)
 
 help: ## Show commands
 	@printf "\n\033[1m── Daily ─────────────────────\033[0m\n"
-	@printf "  \033[36m%-20s\033[0m %s\n" "update" "Update brew, runtimes, and re-stow"
+	@printf "  \033[36m%-20s\033[0m %s\n" "update" "Update repos, brew, runtimes, and re-stow"
 	@printf "  \033[36m%-20s\033[0m %s\n" "stow" "Stow all config packages"
 	@printf "  \033[36m%-20s\033[0m %s\n" "unstow" "Unstow all config packages"
 	@printf "  \033[36m%-20s\033[0m %s\n" "status" "Quick system status"
@@ -74,7 +74,7 @@ help-test: ## Testing & verification commands
 install: ## Full install (bootstrap + brew + stow + macos)
 	@bash $(DOTFILES)/install.sh
 
-update: ## Update brew packages, runtimes, and re-stow configs
+update: ## Update repos, brew packages, runtimes, and re-stow configs
 	@bash $(DOTFILES)/ops/update.sh
 
 stow: ## Stow all config packages
@@ -156,7 +156,7 @@ clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
 vscode-parity: ## Check VS Code extension parity with extensions.txt
 	@bash $(DOTFILES)/health/check-vscode-parity.sh --check
 
-maint-check: lint-shell test-scripts launchd-check ## Run maintenance validation checks
+maint-check: lint-shell test-scripts launchd-check docs-sync vscode-parity brew-audit ## Run maintenance validation checks
 
 docs-sync: ## Verify generated documentation is up to date
 	@bash $(DOTFILES)/ops/generate-cli-reference.sh --check

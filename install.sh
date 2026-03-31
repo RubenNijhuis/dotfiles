@@ -560,14 +560,11 @@ step_stow_configs() {
 }
 
 step_setup_runtimes() {
-  if command -v fnm &>/dev/null; then
-    eval "$(fnm env)"
-    if ! fnm ls | grep -q "lts"; then
-      fnm install --lts
-      success "Node LTS installed via fnm"
-    else
-      success "Node LTS already installed"
-    fi
+  if command -v mise &>/dev/null; then
+    mise install --yes
+    success "Runtimes installed via mise (node, ruby)"
+  else
+    warning "mise not found — install via Homebrew: brew install mise"
   fi
 
   if command -v bun &>/dev/null; then

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Update brew packages and re-stow configs
+# Update repos, brew packages, runtimes, global packages, and re-stow configs
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -13,82 +13,70 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Update Homebrew packages, runtime tools, and restow configs.
+Update repos, Homebrew packages, runtime tools, global packages, and restow configs.
 EOF
 }
 
-update_homebrew() {
-  print_section "Updating Homebrew packages..."
-  if ! require_cmd "brew" "Install Homebrew first: https://brew.sh"; then
-    print_error "Homebrew not found"
-    return 1
-  fi
-
-  # Remove orphaned dependencies first to avoid noisy "Skipping/Autoremoving" warnings
-  brew autoremove &>/dev/null || true
-
-  if brew update && brew upgrade && brew cleanup; then
-    print_success "Homebrew packages updated"
+update_repos() {
+  local output
+  if output=$(bash "$DOTFILES/ops/update-repos.sh" --quiet ${NO_COLOR:+--no-color} 2>&1); then
+    print_step "Repositories" success "$output"
     return 0
   fi
-
-  print_error "Homebrew update failed"
+  print_step "Repositories" error "$output"
   return 1
 }
 
-update_node_lts() {
-  printf '\n'
-  print_section "Updating Node.js (fnm)..."
+update_homebrew() {
+  if ! command -v brew &>/dev/null; then
+    print_step "Homebrew" warning "not found"
+    return 1
+  fi
 
-  if ! command -v fnm &>/dev/null; then
-    print_warning "fnm not found, skipping Node update"
-    print_dim "    Install with: brew install fnm"
+  brew autoremove &>/dev/null || true
+
+  if brew update &>/dev/null && brew upgrade &>/dev/null && brew cleanup &>/dev/null; then
+    print_step "Homebrew" success "updated"
     return 0
   fi
 
-  local current_version new_version
-  current_version=$(node --version 2>/dev/null || echo "none")
-  print_dim "    Current version: $current_version"
+  print_step "Homebrew" error "update failed"
+  return 1
+}
 
-  if fnm install --lts &>/dev/null; then
-    new_version=$(node --version)
-    if [[ "$new_version" != "$current_version" ]]; then
-      print_success "Updated to $new_version"
-    else
-      print_success "Already on latest LTS: $new_version"
-    fi
+update_runtimes() {
+  if ! command -v mise &>/dev/null; then
+    print_step "Runtimes (mise)" skip "not installed"
+    return 0
+  fi
+
+  if mise upgrade &>/dev/null; then
+    print_step "Runtimes (mise)" success "updated"
   else
-    print_warning "Failed to update Node.js"
+    print_step "Runtimes (mise)" warning "upgrade failed"
   fi
 }
 
 update_global_packages() {
-  printf '\n'
-  print_section "Updating global packages..."
-
   if ! command -v pnpm &>/dev/null; then
-    print_warning "pnpm not found, skipping global package update"
-    print_dim "    Install with: brew install pnpm"
+    print_step "Global packages" skip "pnpm not installed"
     return 0
   fi
 
   if pnpm update -g &>/dev/null; then
-    print_success "Global packages updated"
+    print_step "Global packages" success "updated"
   else
-    print_warning "Failed to update global packages"
+    print_step "Global packages" warning "update failed"
   fi
 }
 
 restow_configs() {
-  printf '\n'
-  print_section "Re-stowing configuration files..."
-
-  if bash "$DOTFILES/setup/stow-all.sh"; then
-    print_success "Configurations re-stowed"
+  local output
+  if output=$(bash "$DOTFILES/setup/stow-all.sh" --quiet ${NO_COLOR:+--no-color} 2>&1); then
+    print_step "Stow configs" success "$output"
     return 0
   fi
-
-  print_error "Failed to re-stow configurations"
+  print_step "Stow configs" error "failed"
   return 1
 }
 
@@ -98,20 +86,19 @@ main() {
 
   local failures=0
 
-  update_homebrew  || failures=$((failures + 1))
-  update_node_lts  || failures=$((failures + 1))
+  update_repos           || failures=$((failures + 1))
+  update_homebrew        || failures=$((failures + 1))
+  update_runtimes        || failures=$((failures + 1))
   update_global_packages || failures=$((failures + 1))
-  restow_configs   || failures=$((failures + 1))
+  restow_configs         || failures=$((failures + 1))
 
   printf '\n'
   if [[ $failures -gt 0 ]]; then
-    print_warning "Update finished with $failures failed step(s)"
-    print_info "Run 'make doctor' to diagnose issues"
+    print_warning "$failures step(s) had issues — run 'make doctor' to check"
     exit 1
   fi
 
-  print_success "All updates finished successfully"
-  print_info "Run 'make doctor' to verify system health"
+  print_success "All up to date"
 }
 
 main "$@"
