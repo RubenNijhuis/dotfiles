@@ -158,7 +158,8 @@ Summarize automation health over the past 7 days and send a notification.
 ```text
 Usage: ops/backup-dotfiles.sh [--help] [--no-color]
 
-Create a timestamped backup of local dotfile files before stow operations.
+Back up machine-specific files not tracked by git: local overrides,
+SSH keys, GPG keys, and shell local config.
 ```
 
 ## `ops/brew-audit.sh`
@@ -230,7 +231,7 @@ When paths are provided, only lint those files.
 ```text
 Usage: ops/restore-backup.sh [--help] [--no-color] [--dry-run]
 
-Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
+Restore machine-specific files from the latest backup.
 ```
 
 ## `ops/sync-brew.sh`

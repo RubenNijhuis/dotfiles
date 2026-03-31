@@ -3,6 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/cli.sh"
@@ -13,8 +14,30 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color] [--dry-run]
 
-Restore files from the latest backup recorded in ~/.dotfiles-backup/latest.
+Restore machine-specific files from the latest backup.
 EOF
+}
+
+# Map backup paths back to their original locations.
+resolve_destination() {
+  local rel_path="$1"
+  local filename dir
+
+  filename="$(basename "$rel_path")"
+  dir="$(dirname "$rel_path")"
+
+  case "$dir" in
+    .ssh)     echo "$HOME/.ssh/$filename" ;;
+    local)    echo "$DOTFILES/local/$filename" ;;
+    .)
+      case "$filename" in
+        local.sh)     echo "$HOME/.config/shell/local.sh" ;;
+        common.conf)  echo "$HOME/.gnupg/common.conf" ;;
+        *)            echo "$HOME/$filename" ;;
+      esac
+      ;;
+    *)        echo "$HOME/$dir/$filename" ;;
+  esac
 }
 
 main() {
@@ -47,17 +70,30 @@ main() {
   print_header "Restore Backup"
   print_info "Restoring from: $backup_dir"
   printf '\n'
+
+  # Collect all files with their destinations
+  local files=()
+  while IFS= read -r file; do
+    local rel_path="${file#"$backup_dir"/}"
+    local dest
+    dest="$(resolve_destination "$rel_path")"
+    files+=("$file|$dest")
+  done < <(find "$backup_dir" -type f ! -name 'README.txt' | sort)
+
+  if [[ ${#files[@]} -eq 0 ]]; then
+    print_warning "No files to restore"
+    exit 0
+  fi
+
   print_section "Files to restore:"
-  ls -1 "$backup_dir"
+  for entry in "${files[@]}"; do
+    local dest="${entry#*|}"
+    printf "  %s\n" "$dest"
+  done
   printf '\n'
 
   if $DRY_RUN; then
     print_warning "DRY RUN: no files will be copied"
-    for file in "$backup_dir"/*; do
-      filename="$(basename "$file")"
-      printf "  "
-      print_dim "Would restore $filename to $HOME/$filename"
-    done
     exit 0
   fi
 
@@ -66,12 +102,13 @@ main() {
     exit 0
   fi
 
-  local file filename
-  for file in "$backup_dir"/*; do
-    filename="$(basename "$file")"
-    cp -p "$file" "$HOME/"
+  for entry in "${files[@]}"; do
+    local src="${entry%%|*}"
+    local dest="${entry#*|}"
+    mkdir -p "$(dirname "$dest")"
+    cp -p "$src" "$dest"
     printf "  "
-    print_success "Restored $filename"
+    print_success "Restored $(basename "$dest") → $dest"
   done
 
   print_success "Restore complete"

@@ -13,9 +13,11 @@ test_backup_creates_files() {
   temp_home="$(make_temp_home)"
   trap 'rm -rf "$temp_home"' RETURN
 
-  # Create real files (not symlinks) that backup-dotfiles.sh looks for
-  echo "zshrc-content" > "$temp_home/.zshrc"
-  echo "gitconfig-content" > "$temp_home/.gitconfig"
+  # Create machine-specific files the script looks for
+  mkdir -p "$temp_home/.ssh"
+  echo "ssh-key-content" > "$temp_home/.ssh/id_ed25519_personal"
+  mkdir -p "$temp_home/.config/shell"
+  echo "local-config" > "$temp_home/.config/shell/local.sh"
 
   HOME="$temp_home" bash "$ROOT_DIR/ops/backup-dotfiles.sh" --no-color >/dev/null 2>&1
 
@@ -39,13 +41,15 @@ test_backup_creates_files() {
     return
   fi
 
-  if [[ ! -f "$backup_dir/.zshrc" ]]; then
-    print_error "FAIL(backup-creates): .zshrc not in backup"
+  # SSH key should be backed up
+  if ! find "$backup_dir" -name "id_ed25519_personal" -print -quit | grep -q .; then
+    print_error "FAIL(backup-creates): SSH key not in backup"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
-  if [[ ! -f "$backup_dir/.gitconfig" ]]; then
-    print_error "FAIL(backup-creates): .gitconfig not in backup"
+  # local.sh should be backed up
+  if [[ ! -f "$backup_dir/local.sh" ]]; then
+    print_error "FAIL(backup-creates): local.sh not in backup"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
@@ -61,22 +65,24 @@ test_backup_skips_symlinks() {
   trap 'rm -rf "$temp_home"' RETURN
 
   # Create a real file and a symlink
-  echo "real-file" > "$temp_home/.gitconfig"
-  ln -s /dev/null "$temp_home/.zshrc"
+  mkdir -p "$temp_home/.config/shell"
+  echo "real-local" > "$temp_home/.config/shell/local.sh"
+  mkdir -p "$temp_home/.gnupg"
+  ln -s /dev/null "$temp_home/.gnupg/common.conf"
 
   HOME="$temp_home" bash "$ROOT_DIR/ops/backup-dotfiles.sh" --no-color >/dev/null 2>&1
 
   local backup_dir
   backup_dir="$(cat "$temp_home/.dotfiles-backup/latest")"
 
-  # .gitconfig should be backed up (real file)
-  if [[ ! -f "$backup_dir/.gitconfig" ]]; then
+  # local.sh should be backed up (real file)
+  if [[ ! -f "$backup_dir/local.sh" ]]; then
     print_error "FAIL(backup-skips-symlinks): real file not backed up"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 
-  # .zshrc should NOT be backed up (symlink)
-  if [[ -f "$backup_dir/.zshrc" ]]; then
+  # common.conf should NOT be backed up (symlink)
+  if [[ -f "$backup_dir/common.conf" ]]; then
     print_error "FAIL(backup-skips-symlinks): symlink was backed up"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
