@@ -177,14 +177,13 @@ Options:
 ```text
 Usage: ops/clean-all.sh [--help] [--no-color] [--dry-run]
 
-Remove dotfiles backup directories and Homebrew download cache.
-Run after clean.sh for a full cleanup.
+Full cleanup: zsh cache, logs, .DS_Store, old backups, and Homebrew cache.
 ```
 
 ## `ops/clean.sh`
 
 ```text
-Usage: ops/clean.sh [--help] [--no-color] [--dry-run]
+Usage: ops/clean.sh [--help] [--no-color] [--dry-run] [--quiet]
 
 Remove zsh caches, automation log files, and .DS_Store files from the repo.
 ```
@@ -245,7 +244,7 @@ Sync manually installed Homebrew packages into tracked Brewfiles.
 ## `ops/update-repos.sh`
 
 ```text
-Usage: ops/update-repos.sh [--help] [--no-color] [--dry-run] [--jobs N] [--timeout N] [path]
+Usage: ops/update-repos.sh [--help] [--no-color] [--dry-run] [--quiet] [--jobs N] [--timeout N] [path]
 
 Update all git repositories under the provided path (default: $DOTFILES_DEVELOPER_ROOT).
 
@@ -253,6 +252,7 @@ Options:
   --jobs N, -j N     Parallel jobs (default: 15)
   --timeout N, -t N  Fetch timeout in seconds (default: 30)
   --dry-run          Preview without making changes
+  --quiet            Output one-line summary only
   --no-color         Disable colored output
 ```
 
@@ -261,7 +261,7 @@ Options:
 ```text
 Usage: ops/update.sh [--help] [--no-color]
 
-Update Homebrew packages, runtime tools, and restow configs.
+Update repos, Homebrew packages, runtime tools, global packages, and restow configs.
 ```
 
 ## `setup/bootstrap-verify.sh`
@@ -344,9 +344,13 @@ Remove common macOS bloatware apps (Tips, Chess, Stocks, etc.).
 ## `setup/stow-all.sh`
 
 ```text
-Usage: setup/stow-all.sh [--help] [--no-color]
+Usage: setup/stow-all.sh [--help] [--no-color] [--quiet]
 
 Stow all packages from config/ into $HOME.
+
+Options:
+  --quiet            Output one-line summary only
+  --no-color         Disable colored output
 ```
 
 ## `setup/stow-report.sh`
