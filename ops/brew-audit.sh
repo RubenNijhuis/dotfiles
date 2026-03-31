@@ -45,7 +45,6 @@ parse_args "$@"
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Brewfile Audit"
-printf '\n'
 
 # Get lists
 # Use brew leaves to get only explicitly installed formulae (not transitive deps)
@@ -66,7 +65,6 @@ DECLARED_VSCODE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.app
 
 # Find packages installed but not in Brewfiles
 print_section "Installed but not in Brewfiles:"
-printf '\n'
 
 UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 
@@ -112,7 +110,6 @@ fi
 
 # Find packages declared but not installed
 print_section "Declared but not installed:"
-printf '\n'
 
 # For missing check, use full install list (a declared package might be present as a dep)
 ALL_INSTALLED_FORMULAE=$(brew list --formula | sort)

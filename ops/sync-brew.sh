@@ -24,7 +24,6 @@ parse_standard_args usage --accept-dry-run "$@"
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Syncing Homebrew packages to Brewfiles"
-printf '\n'
 
 # Dump current system state
 brew bundle dump --file="$TEMP_BREWFILE" --force

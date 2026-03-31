@@ -44,8 +44,7 @@ print_header() {
 }
 
 print_section() {
-  printf '%s%s%s\n' "${BLUE}" "$1" "${NC}"
-  printf '\n'
+  printf '%s%s── %s ──%s\n\n' "${DIM}" "${BLUE}" "$1" "${NC}"
 }
 
 print_subsection() {

@@ -49,7 +49,6 @@ main() {
   parse_standard_args usage "$@"
 
   print_header "Weekly Automation Digest"
-  printf '\n'
 
   local total_ok=0
   local total_fail=0

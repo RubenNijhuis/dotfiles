@@ -10,8 +10,6 @@ developer_root() {
 }
 
 check_stow() {
-  print_subsection "Checking Stow Configuration..."
-  printf '\n'
 
   local stow_dir="$DOTFILES/config"
 
@@ -44,8 +42,6 @@ check_stow() {
 }
 
 check_ssh() {
-  print_subsection "Checking SSH Configuration..."
-  printf '\n'
 
   local issues=0
   local details=""
@@ -116,8 +112,6 @@ check_ssh() {
 }
 
 check_gpg() {
-  print_subsection "Checking GPG Configuration..."
-  printf '\n'
 
   local gpg_pref
   gpg_pref="$(get_preference "PREF_SETUP_GPG")"
@@ -173,8 +167,6 @@ check_gpg() {
 }
 
 check_git() {
-  print_subsection "Checking Git Configuration..."
-  printf '\n'
 
   local issues=0
   local details=""
@@ -235,8 +227,6 @@ check_git() {
 }
 
 check_shell() {
-  print_subsection "Checking Shell Configuration..."
-  printf '\n'
 
   local issues=0
   local details=""
@@ -307,8 +297,6 @@ check_shell() {
 }
 
 check_developer() {
-  print_subsection "Checking Developer Directory..."
-  printf '\n'
 
   local issues=0
   local warnings=0
@@ -391,8 +379,6 @@ check_developer() {
 }
 
 check_runtime() {
-  print_subsection "Checking Runtime Environments..."
-  printf '\n'
 
   local details=""
 

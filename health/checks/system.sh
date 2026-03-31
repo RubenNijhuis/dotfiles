@@ -6,8 +6,6 @@ check_launchd() {
     return
   fi
 
-  print_subsection "Checking LaunchD Agents..."
-  printf '\n'
 
   local details=""
   local loaded_agents=0
@@ -69,8 +67,6 @@ check_homebrew() {
     return
   fi
 
-  print_subsection "Checking Homebrew..."
-  printf '\n'
 
   local details=""
 
@@ -99,8 +95,6 @@ check_tmux() {
     return
   fi
 
-  print_subsection "Checking tmux..."
-  printf '\n'
 
   local issues=0
   local details=""
@@ -147,8 +141,6 @@ check_shell_perf() {
     return
   fi
 
-  print_subsection "Checking Shell Startup Time..."
-  printf '\n'
 
   if ! command -v zsh &>/dev/null; then
     record_result "Shell Performance" 1 "zsh not found"
@@ -187,8 +179,6 @@ check_backup_system() {
     return
   fi
 
-  print_subsection "Checking Backup System..."
-  printf '\n'
 
   local issues=0
   local details=""

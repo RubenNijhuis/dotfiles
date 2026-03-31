@@ -26,7 +26,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 print_header "SSH Key Generation"
-printf '\n'
 
 # Ensure ~/.ssh exists with secure permissions
 mkdir -p ~/.ssh

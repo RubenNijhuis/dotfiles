@@ -112,22 +112,24 @@ record_result() {
 
   case "$status" in
     0)
-      print_success "$name"
-      printf '  %b\n' "$message"
+      printf '  %s✓%s %s%s%s\n' "${GREEN}" "${NC}" "${BOLD}" "$name" "${NC}"
       PASSED=$((PASSED + 1))
       ;;
     1)
-      print_warning "$name"
-      printf '  %b\n' "$message"
+      printf '  %s⚠%s %s%s%s\n' "${YELLOW}" "${NC}" "${BOLD}" "$name" "${NC}"
       WARNINGS=$((WARNINGS + 1))
       ;;
     2)
-      print_error "$name"
-      printf '  %b\n' "$message"
+      printf '  %s✗%s %s%s%s\n' "${RED}" "${NC}" "${BOLD}" "$name" "${NC}"
       ERRORS=$((ERRORS + 1))
       ;;
   esac
-  printf '\n'
+  # Print details indented under the check name
+  while IFS= read -r line; do
+    line="${line#"${line%%[![:space:]]*}"}" # trim leading whitespace
+    [[ -z "$line" ]] && continue
+    printf '    %s%s%s\n' "${DIM}" "$line" "${NC}"
+  done <<< "$(printf '%b' "$message")"
 }
 
 add_suggestion() {
@@ -140,46 +142,56 @@ should_run() {
 }
 
 run_checks() {
+  printf '  '; print_section "Core"
   should_run stow && check_stow
   should_run ssh && check_ssh
   should_run gpg && check_gpg
   should_run git && check_git
   should_run shell && check_shell
+
+  printf '\n  '; print_section "System"
   should_run developer && check_developer
   should_run runtime && check_runtime
   should_run launchd && check_launchd
   should_run homebrew && check_homebrew
   should_run backup && check_backup_system
+  should_run shell-perf && check_shell_perf
+
+  printf '\n  '; print_section "Tools"
   should_run biome && check_biome
   should_run tmux && check_tmux
   should_run neovim && check_neovim
   should_run starship && check_starship
-  should_run shell-perf && check_shell_perf
 }
 
 print_summary() {
-  print_section "Summary"
-  print_key_value "Passed" "$PASSED checks"
-  if [[ $WARNINGS -gt 0 ]]; then
-    print_key_value "Warnings" "$WARNINGS"
-  fi
-  if [[ $ERRORS -gt 0 ]]; then
-    print_key_value "Errors" "$ERRORS"
-  fi
   printf '\n'
+  local total=$((PASSED + WARNINGS + ERRORS))
+  local parts=()
+  parts+=("${GREEN}${PASSED} passed${NC}")
+  [[ $WARNINGS -gt 0 ]] && parts+=("${YELLOW}${WARNINGS} warning(s)${NC}")
+  [[ $ERRORS -gt 0 ]] && parts+=("${RED}${ERRORS} error(s)${NC}")
+
+  local summary=""
+  for i in "${!parts[@]}"; do
+    [[ $i -gt 0 ]] && summary+=", "
+    summary+="${parts[$i]}"
+  done
+  printf '  %s%s/%s checks:%s %b\n' "${BOLD}" "$total" "$total" "${NC}" "$summary"
 
   if [[ ${#SUGGESTIONS[@]} -gt 0 ]]; then
-    print_section "Suggested fixes"
+    printf '\n'
+    printf '  %s%sSuggested fixes:%s\n' "${BOLD}" "${YELLOW}" "${NC}"
     # Deduplicate suggestions while preserving order
     declare -A _seen_suggestions=()
     for suggestion in "${SUGGESTIONS[@]}"; do
       if [[ -z "${_seen_suggestions[$suggestion]:-}" ]]; then
-        printf -- '- %s\n' "$suggestion"
+        printf '    %s→%s %s\n' "${YELLOW}" "${NC}" "$suggestion"
         _seen_suggestions[$suggestion]=1
       fi
     done
-    printf '\n'
   fi
+  printf '\n'
 }
 
 # ── Status mode ──────────────────────────────────────────────────────
@@ -325,8 +337,6 @@ main() {
   print_summary
 
   if [[ $ERRORS -gt 0 ]]; then
-    exit 2
-  elif [[ $WARNINGS -gt 0 ]]; then
     exit 1
   fi
 }
