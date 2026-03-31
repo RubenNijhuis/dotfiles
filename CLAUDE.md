@@ -78,7 +78,9 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 | `sesh` | `.config/sesh/sesh.toml` | Tmux session manager | → tmux, fzf, zoxide |
 | `spicetify` | `.config/spicetify/` | Spotify theming (Tokyo Night) | |
 | `vscode` | `Library/.../Code/User/{settings.json,extensions.txt}` | VS Code (Biome, ESLint, Tokyo Night) | |
-| `dotnet` | `path.sh`, `exports.sh` | .NET SDK (version-pinned, Rider as IDE) | → omnisharp (Neovim LSP) |
+| `hushlogin` | `.hushlogin` | Suppress login banner in terminal | |
+| `mise` | `.config/mise/config.toml` | Runtime version manager (Node LTS, Ruby latest) | |
+| `ripgrep` | `.config/ripgrep/ripgreprc` | Ripgrep defaults (smart-case, max-columns) | |
 | `claude` | `.claude/skills/` | Claude CLI skills (commit, review-pr, fix-issue) | |
 
 ### Shell Module Loading Order
@@ -88,7 +90,7 @@ zsh/bash startup
   → HOMEBREW_PREFIX (cached)
   → completions (zsh: cached 20h, bash: none)
   → plugins (zsh-autosuggestions, syntax-highlighting deferred)
-  → tool inits (fnm, zoxide, fzf, atuin, rbenv, gh, docker — all cached in ~/.cache/zsh/)
+  → tool inits (mise, zoxide, fzf, atuin, gh, docker — all cached in ~/.cache/zsh/)
   → shell/path.sh (zsh-only: typeset -U, path=())
   → shell/exports.sh (env vars, FZF colors, eza icons)
   → shell/aliases.sh (cat→bat, ls→eza, grep→rg, vim→nvim, top→btop)
