@@ -59,8 +59,8 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 
 | Package | Config Path | Purpose | Dependencies |
 |---------|------------|---------|--------------|
-| `zsh` | `.zshrc`, `.zprofile`, `.zshenv` | Primary shell (completions, plugins, eval caching) | → shell, starship, atuin, fzf, fnm, zoxide, gh, docker |
-| `bash` | `.bashrc`, `.bash_profile` | Fallback shell for subshells | → shell, starship, atuin, zoxide, fzf, fnm |
+| `zsh` | `.zshrc`, `.zprofile`, `.zshenv` | Primary shell (completions, plugins, eval caching) | → shell, starship, atuin, fzf, mise, zoxide, gh, docker |
+| `bash` | `.bashrc`, `.bash_profile` | Fallback shell for subshells | → shell, starship, atuin, zoxide, fzf, mise |
 | `shell` | `.config/shell/{exports,aliases,functions,path}.sh` | Shared shell modules (sourced by zsh+bash) | → bat, eza, rg, fd, fzf, nvim, btop, yazi, sesh |
 | `vim` | `.config/nvim/` (LazyVim) | Neovim editor (init.lua + plugin configs) | → tmux (vim-tmux-navigator), git (gitsigns, diffview) |
 | `tmux` | `.config/tmux/tmux.conf` | Terminal multiplexer (tpm plugins) | → vim (vim-tmux-navigator), sesh+fzf (session picker) |
@@ -81,7 +81,7 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 | `hushlogin` | `.hushlogin` | Suppress login banner in terminal | |
 | `mise` | `.config/mise/config.toml` | Runtime version manager (Node LTS, Ruby latest) | |
 | `ripgrep` | `.config/ripgrep/ripgreprc` | Ripgrep defaults (smart-case, max-columns) | |
-| `claude` | `.claude/skills/` | Claude CLI skills (commit, review-pr, fix-issue) | |
+| `claude` | `.claude/settings.json` | Claude Code settings and status line | |
 
 ### Shell Module Loading Order
 
