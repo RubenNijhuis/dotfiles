@@ -53,3 +53,4 @@ alias dclean='docker system prune -af --volumes'
 
 # Claude CLI
 alias clauded="claude --dangerously-skip-permissions"
+source "${XDG_CONFIG_HOME:-$HOME/.config}/shell/claude-agent.sh"
