@@ -16,7 +16,6 @@ cask "font-symbols-only-nerd-font"  # Standalone Nerd Font icons (fallback)
 # -----------------------------------------------------------------------------
 cask "claude"               # Claude AI desktop app
 cask "claude-code"          # Claude Code (coding assistant)
-cask "codexbar"             # Menu bar code snippets
 cask "ghostty"              # Fast, feature-rich terminal
 cask "google-chrome"        # Web browser
 cask "lm-studio"            # Local LLM GUI
@@ -77,3 +76,5 @@ cask "arduino-ide"          # Arduino development
 cask "dropbox"              # Cloud storage
 cask "epic-games"           # Epic Games launcher
 cask "trackweight"          # Weight tracking
+tap "spicetify/tap"
+cask "steipete/tap/codexbar"
