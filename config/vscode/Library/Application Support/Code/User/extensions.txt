@@ -61,3 +61,4 @@ tamasfe.even-better-toml       # TOML syntax and formatting
 ms-vscode-remote.remote-containers  # Dev containers support
 ms-azuretools.vscode-docker         # Docker/container management and Dockerfile support
 ms-azuretools.vscode-containers     # Dev container CLI support
+bierner.markdown-mermaid            # Mermaid diagram preview and markdown integration

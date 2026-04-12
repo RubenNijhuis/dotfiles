@@ -19,12 +19,6 @@ mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
 # Source shared output helpers (lives in the git clone, always available)
 source "$DOTFILES/lib/output.sh" "$@"
 
-# Thin wrappers mapping install.sh's naming convention to output.sh functions
-success() { print_success "$1"; }
-warning() { print_warning "$1"; }
-error()   { print_error "$1"; }
-info()    { print_info "$1"; }
-
 TOTAL_STEPS=9
 CURRENT_STEP=0
 OS="$(uname -s)"
@@ -109,7 +103,7 @@ step_begin() {
 }
 
 step_done() {
-  success "Done"
+  print_success "Done"
 }
 
 parse_args() {
@@ -125,7 +119,7 @@ parse_args() {
         ;;
       --from-step)
         if [[ $# -lt 2 ]]; then
-          error "Missing value for --from-step"
+          print_error "Missing value for --from-step"
           usage
           exit 1
         fi
@@ -177,7 +171,7 @@ parse_args() {
         exit 0
         ;;
       *)
-        error "Unknown argument: $1"
+        print_error "Unknown argument: $1"
         usage
         exit 1
         ;;
@@ -185,7 +179,7 @@ parse_args() {
   done
 
   if ! [[ "$FROM_STEP" =~ ^[0-9]+$ ]] || [[ "$FROM_STEP" -lt 1 || "$FROM_STEP" -gt "$TOTAL_STEPS" ]]; then
-    error "--from-step must be a number between 1 and $TOTAL_STEPS"
+    print_error "--from-step must be a number between 1 and $TOTAL_STEPS"
     exit 1
   fi
 }
@@ -222,12 +216,12 @@ install_brew_bundle() {
 
     retry=$((retry + 1))
     if [[ $retry -lt $max_retries ]]; then
-      warning "Retry $retry/$max_retries..."
+      print_warning "Retry $retry/$max_retries..."
       sleep 2
     fi
   done
 
-  error "Failed after $max_retries attempts"
+  print_error "Failed after $max_retries attempts"
   return 1
 }
 
@@ -466,7 +460,7 @@ run_step() {
       if [[ "$target_step" -eq 1 ]]; then
         "$handler"
       else
-        info "DRY RUN: would execute step logic"
+        print_info "DRY RUN: would execute step logic"
       fi
     else
       "$handler"
@@ -477,9 +471,9 @@ run_step() {
 }
 
 step_detect_system() {
-  success "OS: $OS ($ARCH)"
+  print_success "OS: $OS ($ARCH)"
   if [[ "$OS" != "Darwin" ]]; then
-    error "Unsupported OS: $OS. This repository is macOS-only."
+    print_error "Unsupported OS: $OS. This repository is macOS-only."
     exit 1
   fi
 
@@ -487,7 +481,7 @@ step_detect_system() {
   local cmd
   for cmd in osascript launchctl plutil security xcode-select; do
     if ! command -v "$cmd" &>/dev/null; then
-      error "Missing required macOS command: $cmd"
+      print_error "Missing required macOS command: $cmd"
       missing=$((missing + 1))
     fi
   done
@@ -499,9 +493,9 @@ step_detect_system() {
 
   local brew_bin
   if brew_bin="$(detect_brew_binary)"; then
-    info "Detected Homebrew binary: $brew_bin"
+    print_info "Detected Homebrew binary: $brew_bin"
   else
-    info "Homebrew not detected yet; installer will bootstrap it."
+    print_info "Homebrew not detected yet; installer will bootstrap it."
   fi
 }
 
@@ -518,13 +512,13 @@ step_install_xcode_clt() {
         sleep 5
         wait_count=$((wait_count + 1))
         if [[ $wait_count -ge 120 ]]; then
-          error "Xcode CLT installation timed out after 10 minutes"
+          print_error "Xcode CLT installation timed out after 10 minutes"
           exit 1
         fi
       done
     fi
   else
-    success "Xcode CLT already installed"
+    print_success "Xcode CLT already installed"
   fi
 }
 
@@ -538,12 +532,12 @@ step_install_homebrew() {
   fi
 
   if [[ -z "$brew_bin" ]]; then
-    error "Homebrew installation failed"
+    print_error "Homebrew installation failed"
     exit 1
   fi
 
   eval "$("$brew_bin" shellenv)"
-  success "Homebrew ready"
+  print_success "Homebrew ready"
 }
 
 step_install_packages() {
@@ -553,54 +547,54 @@ step_install_packages() {
     print_status_row "Brewfile" info "$brewfile_name"
     install_brew_bundle "$brewfile_path"
   done < <(dotfiles_profile_brewfiles)
-  success "Packages installed"
+  print_success "Packages installed"
 }
 
 step_stow_configs() {
   bash "$DOTFILES/setup/stow-all.sh"
-  success "Configs stowed"
+  print_success "Configs stowed"
 }
 
 step_setup_runtimes() {
   if command -v mise &>/dev/null; then
     mise install --yes
-    success "Runtimes installed via mise (node, ruby)"
+    print_success "Runtimes installed via mise (node, ruby)"
   else
-    warning "mise not found — install via Homebrew: brew install mise"
+    print_warning "mise not found — install via Homebrew: brew install mise"
   fi
 
   if command -v bun &>/dev/null; then
-    success "Bun already installed"
+    print_success "Bun already installed"
   else
     if curl -fsSL https://bun.sh/install | bash; then
-      success "Bun installed"
+      print_success "Bun installed"
     else
-      warning "Bun install failed — install manually: curl -fsSL https://bun.sh/install | bash"
+      print_warning "Bun install failed — install manually: curl -fsSL https://bun.sh/install | bash"
     fi
   fi
 
   if command -v uv &>/dev/null; then
-    success "uv already installed"
+    print_success "uv already installed"
   else
-    warning "uv not found — install via Homebrew: brew install uv"
+    print_warning "uv not found — install via Homebrew: brew install uv"
   fi
 }
 
 step_apply_macos_defaults() {
   if [[ "$APPLY_MACOS_DEFAULTS" == "yes" ]]; then
     bash "$DOTFILES/setup/macos-defaults.sh"
-    success "macOS defaults applied"
+    print_success "macOS defaults applied"
   else
-    success "Skipped"
+    print_success "Skipped"
   fi
 }
 
 step_remove_bloatware() {
   if [[ "$REMOVE_BLOATWARE" == "yes" ]]; then
     bash "$DOTFILES/setup/remove-bloatware.sh" --yes
-    success "Bloatware removal complete"
+    print_success "Bloatware removal complete"
   else
-    success "Skipped"
+    print_success "Skipped"
   fi
 }
 
@@ -610,7 +604,7 @@ step_final_setup() {
            "$DEVELOPER_ROOT/personal/learning" \
            "$DEVELOPER_ROOT/work/clients" \
            "$DEVELOPER_ROOT/archive"
-  success "Created developer structure at $DEVELOPER_ROOT"
+  print_success "Created developer structure at $DEVELOPER_ROOT"
 
   if [[ "$SETUP_SSH" == "yes" ]]; then
     bash "$DOTFILES/setup/generate-ssh-keys.sh"
@@ -625,17 +619,17 @@ step_final_setup() {
     local ext_file="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"
     if [[ -f "$ext_file" ]]; then
       grep -v '^#' "$ext_file" | grep -v '^$' | cut -d' ' -f1 | xargs -L 1 code --install-extension 2>/dev/null || true
-      success "VS Code extensions installed"
+      print_success "VS Code extensions installed"
     else
-      warning "VS Code extensions file not found"
+      print_warning "VS Code extensions file not found"
     fi
   fi
 
   printf '%sInstalling git hooks...%s\n' "${BLUE}" "${NC}"
   if bash "$DOTFILES/setup/install-hooks.sh"; then
-    success "Git hooks installed"
+    print_success "Git hooks installed"
   else
-    warning "Git hooks installation failed (non-critical)"
+    print_warning "Git hooks installation failed (non-critical)"
   fi
 }
 
@@ -666,10 +660,10 @@ run_post_install_health_check() {
   set -e
 
   if [[ $doctor_code -eq 0 ]]; then
-    success "doctor-quick passed"
+    print_success "doctor-quick passed"
   else
-    warning "doctor-quick reported issues (exit $doctor_code)"
-    info "Run: make doctor"
+    print_warning "doctor-quick reported issues (exit $doctor_code)"
+    print_info "Run: make doctor"
   fi
 }
 
@@ -687,14 +681,14 @@ main() {
   show_header
   load_saved_preferences
   if $DRY_RUN; then
-    warning "DRY RUN mode enabled - no changes will be made"
+    print_warning "DRY RUN mode enabled - no changes will be made"
   fi
   handle_resume
   collect_preferences
 
   if $FROM_STEP_SET; then
     CURRENT_STEP=$((FROM_STEP - 1))
-    info "Starting from step $FROM_STEP: ${STEP_NAMES[$((FROM_STEP - 1))]}"
+    print_info "Starting from step $FROM_STEP: ${STEP_NAMES[$((FROM_STEP - 1))]}"
   fi
 
   run_step 1 step_detect_system
