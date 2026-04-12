@@ -1,6 +1,6 @@
 .PHONY: help install update stow unstow macos ssh-setup gpg-setup \
 	backup brew-sync brew-audit \
-	doctor ops-status stow-report \
+	doctor ops-status stow-report spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
@@ -24,6 +24,7 @@ help: ## Show commands
 	@printf "  \033[36m%-20s\033[0m %s\n" "stow" "Apply all config packages into \$$HOME"
 	@printf "  \033[36m%-20s\033[0m %s\n" "unstow" "Remove all config packages from \$$HOME"
 	@printf "  \033[36m%-20s\033[0m %s\n" "backup" "Create a fresh dotfiles backup"
+	@printf "  \033[36m%-20s\033[0m %s\n" "spicetify-status" "Check Spotify theming health"
 	@printf "  \033[36m%-20s\033[0m %s\n" "clean" "Remove caches, logs, and repo clutter"
 	@printf "\n\033[1mSetup And Repair\033[0m\n"
 	@printf "  \033[36m%-20s\033[0m %s\n" "install" "Bootstrap a new machine"
@@ -167,6 +168,15 @@ brew-sync: ## Sync manually installed packages to Brewfiles
 
 brew-audit: ## Audit Brewfiles for missing or undeclared packages
 	@bash $(DOTFILES)/ops/brew-audit.sh
+
+spicetify-status: ## Check Spicetify and Spotify theming status
+	@bash $(DOTFILES)/ops/spicetify.sh status
+
+spicetify-apply: ## Apply the current Spicetify configuration
+	@bash $(DOTFILES)/ops/spicetify.sh apply
+
+spicetify-restore: ## Restore Spotify to the pre-Spicetify backup
+	@bash $(DOTFILES)/ops/spicetify.sh restore
 
 # ── Maintenance ──────────────────────────────────────────────────────
 

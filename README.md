@@ -19,6 +19,7 @@ make status       # fast "what needs attention?" snapshot
 make doctor       # full health check with next steps
 make ops-status   # launchd automation dashboard
 make update       # compact live progress for repos, brew, runtimes, and re-stow
+make spicetify-status # Spotify theming health check
 ```
 
 The CLI is designed to stay compact while still showing that work is happening. Long-running commands should stream progress in a condensed dashboard style instead of going silent.

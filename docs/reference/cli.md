@@ -259,6 +259,14 @@ Usage: ops/restore-backup.sh [--help] [--no-color] [--dry-run]
 Restore machine-specific files from the latest backup.
 ```
 
+## `ops/spicetify.sh`
+
+```text
+Usage: ops/spicetify.sh [--help] [--no-color] <status|apply|restore>
+
+Manage the local Spicetify setup used for Spotify theming.
+```
+
 ## `ops/sync-brew.sh`
 
 ```text
