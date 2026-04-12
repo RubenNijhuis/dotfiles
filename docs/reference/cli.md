@@ -135,7 +135,7 @@ Targets:
   log-cleanup    Setup log rotation
   brew-audit     Setup Brewfile drift detection
   weekly-digest  Setup weekly digest
-  setup-all      Setup all applicable automations
+  setup-all      Setup all profile-appropriate automations
 ```
 
 ## `ops/automation/sync-obsidian.sh`
@@ -216,6 +216,14 @@ Generate docs/reference/cli.md from --help output.
 
 Options:
   --check    Exit non-zero if generated output differs from committed file.
+```
+
+## `ops/help.sh`
+
+```text
+Usage: ops/help.sh [--help] [main|setup|brew|launchd|test]
+
+Render the dotfiles command-center help screens.
 ```
 
 ## `ops/lint-shell.sh`

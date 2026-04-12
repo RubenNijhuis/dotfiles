@@ -12,6 +12,8 @@ assert_exit "doctor-bad-section" 1 bash "$ROOT_DIR/health/doctor.sh" --section n
 assert_exit "profile-list-help" 0 bash "$ROOT_DIR/ops/profile/list.sh" --help
 assert_exit "profile-show-help" 0 bash "$ROOT_DIR/ops/profile/show.sh" --help
 assert_exit "profile-set-bad-arg" 1 bash "$ROOT_DIR/ops/profile/set.sh" --bogus
+assert_exit "help-main" 0 bash "$ROOT_DIR/ops/help.sh" main
+assert_exit "help-bad-section" 1 bash "$ROOT_DIR/ops/help.sh" nope
 assert_exit "spicetify-help" 0 bash "$ROOT_DIR/ops/spicetify.sh" --help
 assert_exit "spicetify-bad-arg" 1 bash "$ROOT_DIR/ops/spicetify.sh" nope
 assert_exit "launchd-help" 0 bash "$ROOT_DIR/ops/automation/launchd-manager.sh" --help

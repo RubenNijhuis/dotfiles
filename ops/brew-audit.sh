@@ -7,6 +7,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$SCRIPT_DIR/../lib/env.sh"
+source "$SCRIPT_DIR/../lib/brew.sh"
+dotfiles_load_env "$DOTFILES"
 
 usage() {
   cat <<EOF
@@ -45,25 +48,18 @@ parse_args "$@"
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Brewfile Audit"
-
-normalize_entry_name() {
-  local kind="$1"
-  local name="$2"
-
-  case "$kind" in
-    tap) printf '%s\n' "$name" ;;
-    *) printf '%s\n' "${name##*/}" ;;
-  esac
-}
+print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
+print_status_row "Tracked Brewfiles" info "$(brew_profile_summary)"
 
 extract_declared_entries() {
   local kind="$1"
-  cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" | \
-    grep "^${kind} " | while IFS= read -r line; do
-      local raw
-      raw=$(printf '%s\n' "$line" | sed "s/${kind} \"\\([^\"]*\\)\".*/\\1/")
-      normalize_entry_name "$kind" "$raw"
-    done | sort -u
+  while IFS= read -r brewfile; do
+    grep "^${kind} " "$brewfile" || true
+  done < <(brewfile_paths "$DOTFILES") | while IFS= read -r line; do
+    local raw
+    raw=$(printf '%s\n' "$line" | sed "s/${kind} \"\\([^\"]*\\)\".*/\\1/")
+    brew_normalize_entry_name "$kind" "$raw"
+  done | sort -u
 }
 
 # Get lists
@@ -198,7 +194,7 @@ fi
 
 if [[ $TOTAL_MISSING -gt 0 ]]; then
   print_error "$TOTAL_MISSING packages declared but not installed"
-  print_dim "  Run 'brew bundle --file=brew/Brewfile.cli && brew bundle --file=brew/Brewfile.apps && brew bundle --file=brew/Brewfile.vscode'"
+  print_dim "  Run 'make install' or brew bundle against the tracked Brewfiles"
 fi
 
 if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then

@@ -10,7 +10,10 @@ source "$SCRIPT_DIR/../../lib/env.sh"
 dotfiles_load_env "$DOTFILES"
 
 MANAGER="$DOTFILES/ops/automation/launchd-manager.sh"
-CORE_AGENTS=(dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest)
+
+profile_automations() {
+  dotfiles_profile_automations
+}
 
 usage() {
   cat <<EOF
@@ -25,7 +28,7 @@ Targets:
   log-cleanup    Setup log rotation
   brew-audit     Setup Brewfile drift detection
   weekly-digest  Setup weekly digest
-  setup-all      Setup all applicable automations
+  setup-all      Setup all profile-appropriate automations
 EOF
 }
 
@@ -66,15 +69,16 @@ setup_agent() {
 
 if [[ "$TARGET" == "setup-all" ]]; then
   print_header "Setting Up All Automations"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   ok=0 fail=0 skip=0
-  for agent in "${CORE_AGENTS[@]}"; do
-    if setup_agent "$agent"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
-  done
-  for optional in obsidian-sync lmstudio-server; do
-    if precheck "$optional" 2>/dev/null; then
-      if setup_agent "$optional"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
-    else skip=$((skip + 1)); fi
-  done
+  while IFS= read -r agent; do
+    [[ -n "$agent" ]] || continue
+    if precheck "$agent" 2>/dev/null; then
+      if setup_agent "$agent"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
+    else
+      skip=$((skip + 1))
+    fi
+  done < <(profile_automations)
   printf '\n'
   print_success "Installed: $ok"
   if [[ $skip -gt 0 ]]; then print_info "Skipped: $skip (optional)"; fi

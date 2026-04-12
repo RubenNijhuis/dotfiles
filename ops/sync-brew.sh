@@ -8,6 +8,9 @@ TEMP_BREWFILE="$(mktemp "${TMPDIR:-/tmp}/brewfile-current.XXXXXX")"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/cli.sh"
+source "$SCRIPT_DIR/../lib/env.sh"
+source "$SCRIPT_DIR/../lib/brew.sh"
+dotfiles_load_env "$DOTFILES"
 trap 'rm -f "$TEMP_BREWFILE"' EXIT
 DRY_RUN=false
 
@@ -24,6 +27,8 @@ parse_standard_args usage --accept-dry-run "$@"
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Syncing Homebrew packages to Brewfiles"
+print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
+print_status_row "Tracked Brewfiles" info "$(brew_profile_summary)"
 
 # Dump current system state
 brew bundle dump --file="$TEMP_BREWFILE" --force
@@ -32,37 +37,17 @@ brew bundle dump --file="$TEMP_BREWFILE" --force
 declare -a DECLARED_PACKAGES=()
 declare -a DECLARED_KEYS=()
 
-entry_key_from_line() {
-  local line="$1"
-  local kind name normalized
-
-  if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)[[:space:]]+\"([^\"]+)\" ]]; then
-    kind="${BASH_REMATCH[1]}"
-    name="${BASH_REMATCH[2]}"
-
-    case "$kind" in
-      tap) normalized="$name" ;;
-      *) normalized="${name##*/}" ;;
-    esac
-
-    printf '%s:%s\n' "$kind" "$normalized"
-    return 0
-  fi
-
-  return 1
-}
-
 # Parse all Brewfiles (cli, apps, vscode)
-for brewfile in "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode"; do
+while IFS= read -r brewfile; do
   while IFS= read -r line; do
     if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
       DECLARED_PACKAGES+=("$line")
-      if key=$(entry_key_from_line "$line"); then
+      if key=$(brew_entry_key_from_line "$line"); then
         DECLARED_KEYS+=("$key")
       fi
     fi
   done < "$brewfile"
-done
+done < <(brewfile_paths "$DOTFILES")
 
 # Find new packages (in current dump but not in any Brewfile)
 declare -a NEW_PACKAGES=()
@@ -73,7 +58,7 @@ while IFS= read -r line; do
 
   # Compare normalized keys so comments/options/tap-qualified names don't
   # appear as false positives.
-  if ! key=$(entry_key_from_line "$line"); then
+  if ! key=$(brew_entry_key_from_line "$line"); then
     continue
   fi
 

@@ -51,6 +51,24 @@ dotfiles_profile_packages() {
   done
 }
 
+dotfiles_profile_brewfiles() {
+  local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
+  local brewfile
+
+  for brewfile in $brewfiles; do
+    printf '%s\n' "$brewfile"
+  done
+}
+
+dotfiles_profile_automations() {
+  local agents="${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
+  local agent
+
+  for agent in $agents; do
+    printf '%s\n' "$agent"
+  done
+}
+
 dotfiles_load_env() {
   local dotfiles_root="${1:-${DOTFILES:-}}"
 

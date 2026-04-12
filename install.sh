@@ -6,6 +6,7 @@ set -euo pipefail
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 source "$DOTFILES/lib/env.sh"
 dotfiles_load_env "$DOTFILES"
+source "$DOTFILES/lib/brew.sh"
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 PREFERENCES_FILE="$HOME/.config/dotfiles-install-preferences"
 INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
@@ -290,11 +291,9 @@ resolve_preference() {
 }
 
 show_header() {
-  printf '%s========================================%s\n' "${BLUE}" "${NC}"
-  printf '%s Dotfiles Installation%s\n' "${BLUE}" "${NC}"
-  printf '%s========================================%s\n' "${BLUE}" "${NC}"
-  printf '\n'
-  printf 'Log: %s\n' "$INSTALL_LOG"
+  print_header "Dotfiles Installation"
+  print_status_row "Log" info "$INSTALL_LOG"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
 }
 
 handle_resume() {
@@ -548,9 +547,12 @@ step_install_homebrew() {
 }
 
 step_install_packages() {
-  install_brew_bundle "$DOTFILES/brew/Brewfile.cli"
-  install_brew_bundle "$DOTFILES/brew/Brewfile.apps"
-  install_brew_bundle "$DOTFILES/brew/Brewfile.vscode"
+  local brewfile_name brewfile_path
+  while IFS= read -r brewfile_name; do
+    brewfile_path="$DOTFILES/brew/$brewfile_name"
+    print_status_row "Brewfile" info "$brewfile_name"
+    install_brew_bundle "$brewfile_path"
+  done < <(dotfiles_profile_brewfiles)
   success "Packages installed"
 }
 
@@ -637,34 +639,15 @@ step_final_setup() {
   fi
 }
 
-print_next_steps() {
-  printf '\n'
-  printf '%s========================================%s\n' "${GREEN}" "${NC}"
-  printf '%s Setup complete!%s\n' "${GREEN}" "${NC}"
-  printf '%s========================================%s\n' "${GREEN}" "${NC}"
-  echo ""
-  echo "Configuration recap:"
-  echo "  Apply macOS defaults: $APPLY_MACOS_DEFAULTS"
-  echo "  Generated SSH keys: $SETUP_SSH"
-  echo "  Generated GPG key: $SETUP_GPG"
-  echo "  Removed bloatware: $REMOVE_BLOATWARE"
-  echo ""
-  echo "Next steps:"
-  echo "  - Open a new terminal to load the new shell config"
-  echo "  - Add machine-specific config to ~/.config/shell/local.sh"
-
-  if [[ "$SETUP_SSH" == "yes" ]]; then
-    echo "  - Add SSH public keys to GitHub/GitLab"
-    echo "    pbcopy < ~/.ssh/id_ed25519_personal.pub"
-  fi
-
-  if [[ "$SETUP_GPG" == "yes" ]]; then
-    echo "  - Add GPG public key to GitHub/GitLab"
-    echo "  - Update signingkey in git configs: bash health/gpg-info.sh"
-  fi
-
-  echo ""
-  echo "Installation log saved to: $INSTALL_LOG"
+print_install_summary() {
+  print_section "Install Summary"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
+  print_status_row "Brewfiles" info "$(brew_profile_summary)"
+  print_status_row "macOS defaults" info "$APPLY_MACOS_DEFAULTS"
+  print_status_row "SSH keys" info "$SETUP_SSH"
+  print_status_row "GPG key" info "$SETUP_GPG"
+  print_status_row "Bloatware removal" info "$REMOVE_BLOATWARE"
+  print_status_row "Install log" info "$INSTALL_LOG"
 }
 
 run_post_install_health_check() {
@@ -728,7 +711,17 @@ main() {
     rm -f "$CHECKPOINT_FILE"
   fi
   run_post_install_health_check
-  print_next_steps
+  print_success "Setup complete"
+  print_install_summary
+  local next_steps=("Open a new terminal to load the new shell config" "Add machine-specific config to ~/.config/shell/local.sh")
+  if [[ "$SETUP_SSH" == "yes" ]]; then
+    next_steps+=("Add SSH public keys to GitHub/GitLab: pbcopy < ~/.ssh/id_ed25519_personal.pub")
+  fi
+  if [[ "$SETUP_GPG" == "yes" ]]; then
+    next_steps+=("Add your GPG public key to GitHub/GitLab")
+    next_steps+=("Update signingkey in git configs: bash health/gpg-info.sh")
+  fi
+  print_next_steps "${next_steps[@]}"
 }
 
 main "$@"

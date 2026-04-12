@@ -29,6 +29,9 @@ main() {
     print_status_row "Stow packages" info "$(printf '%s' "${DOTFILES_PROFILE_STOW_PACKAGES}" | wc -w | xargs) selected"
     print_dim "  ${DOTFILES_PROFILE_STOW_PACKAGES}"
   fi
+  print_status_row "Brewfiles" info "${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
+  print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}" | wc -w | xargs) selected"
+  print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
 }
 
 main "$@"

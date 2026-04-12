@@ -7,6 +7,8 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/cli.sh"
+source "$SCRIPT_DIR/../../lib/env.sh"
+dotfiles_load_env "$DOTFILES"
 
 # shellcheck disable=SC2329
 usage() {
@@ -130,6 +132,7 @@ main() {
 
   print_header "Ops Status"
   print_dim "A quick dashboard for recurring automations, recent runs, and backup freshness."
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   printf '\n'
   render_agent_dashboard
   render_attention
