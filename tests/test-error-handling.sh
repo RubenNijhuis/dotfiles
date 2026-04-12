@@ -87,6 +87,13 @@ test_validate_launchd_malformed() {
   rm -rf "$temp_dir"
 }
 
+# ── health/doctor.sh section filtering exits cleanly ───────────────
+
+test_doctor_section_exit_code() {
+  assert_exit "doctor-section-stow" 0 \
+    bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
+}
+
 # ── Run all tests ───────────────────────────────────────────────────
 
 test_restore_no_backup
@@ -94,5 +101,6 @@ test_restore_stale_pointer
 test_clean_empty_home
 test_validate_launchd_empty_dir
 test_validate_launchd_malformed
+test_doctor_section_exit_code
 
 test_summary "error-handling"

@@ -19,6 +19,9 @@ export CARGO_HOME="$HOME/.cargo"
 export GOPATH="$HOME/go"
 export GOBIN="$GOPATH/bin"
 
+# Claude Code
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+
 # Homebrew
 export HOMEBREW_NO_ENV_HINTS=1
 

@@ -116,11 +116,17 @@ check_starship() {
       details+="Config: valid"
     else
       details+="Config: could not validate"
+      issues=$((issues + 1))
     fi
   else
     details+="Config: missing"
+    issues=$((issues + 1))
     add_suggestion "Re-stow starship config: cd $DOTFILES && make stow"
   fi
 
-  record_result "Starship" 0 "$details"
+  if [[ $issues -eq 0 ]]; then
+    record_result "Starship" 0 "$details"
+  else
+    record_result "Starship" 1 "$details"
+  fi
 }

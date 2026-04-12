@@ -66,7 +66,7 @@ main() {
     IFS=':' read -r name _desc <<< "$agent_info"
     local out_log err_log
     out_log="$(agent_log_file "$name")"
-    err_log="${out_log%.out.log}.err.log"
+    err_log="$(agent_error_log_file "$name")"
     show_recent_log "$name out" "$out_log"
     show_recent_log "$name err" "$err_log"
   done

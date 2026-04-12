@@ -12,12 +12,13 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 # tests pass on bash 3.x (CI runners use macOS stock bash 3.2).
 _doctor_usage() {
   cat <<USAGE
-Usage: $0 [--help] [--quick] [--status] [--section <name>] [--no-color]
+Usage: $0 [--help] [--quick] [--full] [--status] [--section <name>] [--no-color]
 
 Comprehensive system health check for dotfiles setup.
 
 Options:
   --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --full              Run the full check set (default)
   --status            Show quick actionable system status summary
   --section <name>    Run only the specified check section
   --no-color          Disable colored output
@@ -66,6 +67,10 @@ parse_args() {
     case "$1" in
       --quick)
         QUICK_MODE=true
+        shift
+        ;;
+      --full)
+        QUICK_MODE=false
         shift
         ;;
       --status)
@@ -143,25 +148,25 @@ should_run() {
 
 run_checks() {
   printf '  %s%s── Core ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  should_run stow && check_stow
-  should_run ssh && check_ssh
-  should_run gpg && check_gpg
-  should_run git && check_git
-  should_run shell && check_shell
+  if should_run stow; then check_stow; fi
+  if should_run ssh; then check_ssh; fi
+  if should_run gpg; then check_gpg; fi
+  if should_run git; then check_git; fi
+  if should_run shell; then check_shell; fi
 
   printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  should_run developer && check_developer
-  should_run runtime && check_runtime
-  should_run launchd && check_launchd
-  should_run homebrew && check_homebrew
-  should_run backup && check_backup_system
-  should_run shell-perf && check_shell_perf
+  if should_run developer; then check_developer; fi
+  if should_run runtime; then check_runtime; fi
+  if should_run launchd; then check_launchd; fi
+  if should_run homebrew; then check_homebrew; fi
+  if should_run backup; then check_backup_system; fi
+  if should_run shell-perf; then check_shell_perf; fi
 
   printf '\n  %s%s── Tools ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  should_run biome && check_biome
-  should_run tmux && check_tmux
-  should_run neovim && check_neovim
-  should_run starship && check_starship
+  if should_run biome; then check_biome; fi
+  if should_run tmux; then check_tmux; fi
+  if should_run neovim; then check_neovim; fi
+  if should_run starship; then check_starship; fi
 }
 
 print_summary() {

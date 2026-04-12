@@ -9,6 +9,7 @@ check_launchd() {
 
   local details=""
   local loaded_agents=0
+  local issues=0
 
   # Source agent registry from launchd common module
   LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
@@ -26,21 +27,28 @@ check_launchd() {
 
   if [[ $loaded_agents -gt 0 ]]; then
     details+="Managed agents loaded: $loaded_agents/${#managed_agents[@]}"
+    if [[ $loaded_agents -lt ${#managed_agents[@]} ]]; then
+      issues=$((issues + 1))
+      add_suggestion "Load managed agents: make automation-setup"
+    fi
   else
     details+="No managed agents loaded"
+    issues=$((issues + 1))
+    add_suggestion "Load managed agents: make automation-setup"
   fi
 
   # Check log directory exists
   local log_dir="$HOME/.local/log"
   if [[ ! -d "$log_dir" ]]; then
     details+="\n  ⚠ Log directory missing"
+    issues=$((issues + 1))
     add_suggestion "Create log directory: mkdir -p ~/.local/log"
   else
     # Check for recent errors in agent log files
     local agents_with_errors=()
     for agent in "${managed_agents[@]}"; do
-      local log_file="$log_dir/${agent}.out.log"
-      [[ "$agent" == "dotfiles-doctor" ]] && log_file="$log_dir/dotfiles-doctor-launchd.out.log"
+      local log_file
+      log_file="$(agent_log_file "$agent")"
       if [[ -f "$log_file" ]]; then
         local recent_errors
         recent_errors=$(tail -n 50 "$log_file" 2>/dev/null | grep -c "ERROR" || true)
@@ -55,11 +63,16 @@ check_launchd() {
       for entry in "${agents_with_errors[@]}"; do
         details+="\n    - $entry"
       done
+      issues=$((issues + 1))
       add_suggestion "Check agent logs: ls ~/.local/log/"
     fi
   fi
 
-  record_result "LaunchD Agents" 0 "$details"
+  if [[ $issues -eq 0 ]]; then
+    record_result "LaunchD Agents" 0 "$details"
+  else
+    record_result "LaunchD Agents" 1 "$details"
+  fi
 }
 
 check_homebrew() {
@@ -69,6 +82,7 @@ check_homebrew() {
 
 
   local details=""
+  local issues=0
 
   if command -v brew &>/dev/null; then
     local brew_version=$(brew --version | head -1)
@@ -78,16 +92,22 @@ check_homebrew() {
     local outdated=$(brew outdated 2>/dev/null | wc -l | xargs)
     if [[ $outdated -gt 0 ]]; then
       details+="⚠ $outdated outdated packages"
+      issues=$((issues + 1))
       add_suggestion "Update packages: brew upgrade"
     else
       details+="All packages up to date"
     fi
   else
     details+="Homebrew: not installed"
+    issues=$((issues + 1))
     add_suggestion "Install Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   fi
 
-  record_result "Homebrew" 0 "$details"
+  if [[ $issues -eq 0 ]]; then
+    record_result "Homebrew" 0 "$details"
+  else
+    record_result "Homebrew" 1 "$details"
+  fi
 }
 
 check_tmux() {
@@ -236,4 +256,3 @@ check_backup_system() {
     record_result "Backup System" 1 "$details"
   fi
 }
-

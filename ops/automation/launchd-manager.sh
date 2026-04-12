@@ -16,7 +16,7 @@ LAUNCHD_DIR="$HOME/Library/LaunchAgents"
 TEMPLATE_DIR="$DOTFILES/launchd"
 LOG_DIR="$HOME/.local/log"
 
-# shellcheck disable=SC2034  # AGENTS is consumed by ops-status.sh and weekly-digest.sh.
+# shellcheck disable=SC2034  # AGENTS and log helpers are consumed by sourced scripts.
 AGENTS=(
   "dotfiles-backup:Automated daily backups"
   "dotfiles-doctor:Daily health monitoring"
@@ -33,8 +33,16 @@ AGENTS=(
 agent_log_file() {
   local name="$1"
   case "$name" in
-    dotfiles-doctor) echo "$LOG_DIR/dotfiles-doctor-launchd.out.log" ;;
+    dotfiles-doctor) echo "$LOG_DIR/dotfiles-doctor.out.log" ;;
     *) echo "$LOG_DIR/${name}.out.log" ;;
+  esac
+}
+
+agent_error_log_file() {
+  local name="$1"
+  case "$name" in
+    dotfiles-doctor) echo "$LOG_DIR/dotfiles-doctor-launchd.err.log" ;;
+    *) echo "$LOG_DIR/${name}.err.log" ;;
   esac
 }
 

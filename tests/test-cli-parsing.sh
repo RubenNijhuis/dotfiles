@@ -7,6 +7,7 @@ source "$ROOT_DIR/lib/output.sh" "$@"
 source "$ROOT_DIR/lib/test-helpers.sh"
 
 assert_exit "doctor-help" 0 bash "$ROOT_DIR/health/doctor.sh" --help
+assert_exit "doctor-full-section" 0 bash "$ROOT_DIR/health/doctor.sh" --no-color --full --section stow
 assert_exit "doctor-bad-section" 1 bash "$ROOT_DIR/health/doctor.sh" --section nope
 assert_exit "launchd-help" 0 bash "$ROOT_DIR/ops/automation/launchd-manager.sh" --help
 assert_exit "launchd-bad-cmd" 1 bash "$ROOT_DIR/ops/automation/launchd-manager.sh" nope

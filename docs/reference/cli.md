@@ -57,12 +57,13 @@ Defaults to quick mode; use --full for full checks.
 ## `health/doctor.sh`
 
 ```text
-Usage: health/doctor.sh [--help] [--quick] [--status] [--section <name>] [--no-color]
+Usage: health/doctor.sh [--help] [--quick] [--full] [--status] [--section <name>] [--no-color]
 
 Comprehensive system health check for dotfiles setup.
 
 Options:
   --quick             Run a reduced set of checks (skip slow network/brew checks)
+  --full              Run the full check set (default)
   --status            Show quick actionable system status summary
   --section <name>    Run only the specified check section
   --no-color          Disable colored output

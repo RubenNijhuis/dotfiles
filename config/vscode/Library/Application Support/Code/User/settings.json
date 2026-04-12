@@ -42,5 +42,8 @@
   },
   "terminal.integrated.initialHint": false,
   "editor.lineNumbers": "relative",
-  "workbench.colorTheme": "Tokyo Night"
+  "workbench.colorTheme": "Tokyo Night",
+  "makefile.configureOnOpen": true,
+  "gitlens.ai.model": "vscode",
+  "gitlens.ai.vscode.model": "copilot:gpt-4.1"
 }

@@ -18,11 +18,8 @@ eval "$(echo "$input" | jq -r '
   @sh "used_pct=\(.context_window.used_percentage // "")",
   @sh "lines_add=\(.cost.total_lines_added // "")",
   @sh "lines_rm=\(.cost.total_lines_removed // "")",
-  @sh "model_name=\(.model.display_name // "")",
   @sh "agent_name=\(.agent.name // "")",
-  @sh "wt_name=\(.worktree.name // "")",
-  @sh "cost_usd=\(.cost.total_cost_usd // "")",
-  @sh "duration_ms=\(.cost.total_duration_ms // "")"
+  @sh "wt_name=\(.worktree.name // "")"
 ')"
 
 # -- Directory: basename only --
@@ -70,22 +67,6 @@ elif [[ -n "$wt_name" ]]; then
   active="🌳 ${AMB}${wt_name}${RST}"
 fi
 
-# -- Cost --
-cost=""
-if [[ -n "$cost_usd" && "$cost_usd" != "0" ]]; then
-  cost="💰 ${MUT}\$$(printf '%.2f' "$cost_usd")${RST}"
-fi
-
-# -- Duration --
-dur=""
-if [[ -n "$duration_ms" && "$duration_ms" != "0" ]]; then
-  secs=$(( duration_ms / 1000 ))
-  if (( secs >= 60 )); then
-    dur="⏱️ ${MUT}$(( secs / 60 ))m$(( secs % 60 ))s${RST}"
-  else
-    dur="⏱️ ${MUT}${secs}s${RST}"
-  fi
-fi
 
 # -- Context bar (6 chars) --
 ctx=""
@@ -114,12 +95,9 @@ for (( i=0; i<${#p1[@]}; i++ )); do
   line1+="${p1[$i]}"
 done
 
-# -- Line 2: context | cost | duration | model --
+# -- Line 2: context --
 p2=()
 [[ -n "$ctx" ]]        && p2+=("$ctx")
-[[ -n "$cost" ]]       && p2+=("$cost")
-[[ -n "$dur" ]]        && p2+=("$dur")
-[[ -n "$model_name" ]] && p2+=("🤖 ${SKY}${model_name}${RST}")
 
 line2=""
 for (( i=0; i<${#p2[@]}; i++ )); do
