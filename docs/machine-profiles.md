@@ -44,6 +44,7 @@ Profiles currently affect:
 
 - `make stow`
 - `make doctor` overview
+- `make doctor --section profile`
 - `make install`
 - `make brew-audit`
 - `make brew-sync`
@@ -54,6 +55,7 @@ That means:
 
 - `setup/stow-all.sh` only applies packages listed in the active profile
 - `health/doctor.sh` shows which profile is active
+- `health/doctor.sh --section profile` validates that the active machine satisfies that profile's declared contract
 - install-time Brew bundle selection follows the active profile's Brewfile list
 - Brew audit/sync report against the active profile's Brewfiles
 - `automation-setup` installs the profile's selected LaunchD agents
@@ -93,6 +95,9 @@ Current keys:
 - `DOTFILES_PROFILE_STOW_PACKAGES`
 - `DOTFILES_PROFILE_BREWFILES`
 - `DOTFILES_PROFILE_AUTOMATIONS`
+- `DOTFILES_PROFILE_REQUIRED_COMMANDS`
+- `DOTFILES_PROFILE_REQUIRED_PATHS`
+- `DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS`
 
 Example:
 
@@ -102,6 +107,27 @@ DOTFILES_PROFILE_LABEL="Minimal"
 DOTFILES_PROFILE_STOW_PACKAGES="bash bat eza git hushlogin ripgrep shell ssh starship tmux zsh"
 DOTFILES_PROFILE_BREWFILES="Brewfile.cli"
 DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-audit weekly-digest"
+DOTFILES_PROFILE_REQUIRED_COMMANDS="git"
+DOTFILES_PROFILE_REQUIRED_PATHS="$DOTFILES_DEVELOPER_ROOT::Developer root|$HOME/.ssh/id_ed25519_personal::Personal SSH key"
+```
+
+## Profile Contract Keys
+
+These keys let a profile declare what "healthy" means for that machine role.
+
+- `DOTFILES_PROFILE_REQUIRED_COMMANDS`
+  Space-separated commands that must be available on `PATH`.
+- `DOTFILES_PROFILE_REQUIRED_PATHS`
+  Pipe-separated `path::label` entries that must exist on disk.
+- `DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS`
+  Pipe-separated `service::label` entries that must exist in the macOS Keychain.
+
+Example:
+
+```bash
+DOTFILES_PROFILE_REQUIRED_COMMANDS="git brew tmux code"
+DOTFILES_PROFILE_REQUIRED_PATHS="$DOTFILES_DEVELOPER_ROOT::Developer root|$DOTFILES_OBSIDIAN_REPO_PATH::Obsidian vault"
+DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS="github.com::GitHub token|openai-api::OpenAI API key"
 ```
 
 ## Creating A New Profile

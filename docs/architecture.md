@@ -50,8 +50,9 @@ Current v1 behavior:
 
 - `setup/stow-all.sh` only stows packages listed by the active profile.
 - `health/doctor.sh` shows the active profile in the overview section.
+- `health/doctor.sh --section profile` validates profile-specific requirements declared in the profile env file.
 
-Profiles are intentionally simple shell env files so they stay readable and easy to extend into profile-aware Brew, launchd, and install flows later.
+Profiles remain simple shell env files so they stay readable and shell-native, but they can now also declare machine-role contracts such as required commands, paths, and keychain items.
 
 ## Script Interface Contract
 

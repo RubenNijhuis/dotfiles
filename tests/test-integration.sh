@@ -162,6 +162,41 @@ EOF
   rm -rf "$temp_home" "$temp_bin"
 }
 
+# ── doctor profile contract honors declared requirements ─────────────────────
+
+test_doctor_profile_contract_passes_with_required_prereqs() {
+  local temp_home temp_bin output
+  temp_home="$(make_temp_home)"
+  temp_bin="$(make_temp_home)"
+  trap 'rm -rf "$temp_home" "$temp_bin"' RETURN
+
+  mkdir -p "$temp_home/.ssh" \
+    "$temp_home/.lmstudio" \
+    "$temp_home/Developer/personal/projects/obsidian-store"
+  : > "$temp_home/.ssh/id_ed25519_personal"
+  : > "$temp_home/.ssh/id_ed25519_work"
+
+  for fake_cmd in git brew tmux code security; do
+    cat > "$temp_bin/$fake_cmd" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+exit 0
+EOF
+    chmod +x "$temp_bin/$fake_cmd"
+  done
+
+  output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
+    bash "$ROOT_DIR/health/doctor.sh" --no-color --section profile 2>&1)
+
+  if ! printf '%s' "$output" | /usr/bin/grep -q "✓ Profile Contract"; then
+    print_error "FAIL(profile-contract): expected profile contract check to pass"
+    TEST_FAILURES=$((TEST_FAILURES + 1))
+  fi
+
+  trap - RETURN
+  rm -rf "$temp_home" "$temp_bin"
+}
+
 # ── Run all tests ───────────────────────────────────────────────────
 
 test_clean_dry_run_safe
@@ -169,5 +204,6 @@ test_clean_all_dry_run_safe
 test_restore_dry_run_safe
 test_stow_then_doctor
 test_ops_status_uses_doctor_task_log
+test_doctor_profile_contract_passes_with_required_prereqs
 
 test_summary "integration"

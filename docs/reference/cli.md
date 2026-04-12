@@ -70,7 +70,7 @@ Options:
   --help, -h          Show this help message
 
 Sections:
-  stow, ssh, gpg, git, shell, developer, runtime,
+  stow, ssh, gpg, git, shell, developer, runtime, profile,
   launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf
 ```
 

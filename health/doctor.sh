@@ -25,7 +25,7 @@ Options:
   --help, -h          Show this help message
 
 Sections:
-  stow, ssh, gpg, git, shell, developer, runtime,
+  stow, ssh, gpg, git, shell, developer, runtime, profile,
   launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
@@ -50,12 +50,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
+    stow|ssh|gpg|git|shell|developer|runtime|profile|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, profile, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -170,6 +170,7 @@ run_checks() {
   printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}"
   if should_run developer; then check_developer; fi
   if should_run runtime; then check_runtime; fi
+  if should_run profile; then check_profile_contract; fi
   if should_run launchd; then check_launchd; fi
   if should_run homebrew; then check_homebrew; fi
   if should_run backup; then check_backup_system; fi

@@ -32,6 +32,11 @@ main() {
   print_status_row "Brewfiles" info "${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
   print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}" | wc -w | xargs) selected"
   print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
+  print_status_row "Required commands" info "$(dotfiles_profile_required_commands | grep -c . || true) declared"
+  if [[ -n "${DOTFILES_PROFILE_REQUIRED_COMMANDS:-}" ]]; then
+    print_dim "  ${DOTFILES_PROFILE_REQUIRED_COMMANDS}"
+  fi
+  print_status_row "Required paths" info "$(dotfiles_profile_required_paths | grep -c . || true) declared"
 }
 
 main "$@"

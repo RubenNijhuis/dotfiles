@@ -1,6 +1,45 @@
 #!/usr/bin/env bash
 # Shared environment defaults for dotfiles scripts.
 
+dotfiles_iter_words() {
+  local value="${1:-}"
+  local item
+
+  for item in $value; do
+    printf '%s\n' "$item"
+  done
+}
+
+dotfiles_iter_contract_entries() {
+  local value="${1:-}"
+  local old_ifs="$IFS"
+  local entry
+
+  IFS='|'
+  for entry in $value; do
+    entry="$(printf '%s' "$entry" | xargs)"
+    [[ -n "$entry" ]] && printf '%s\n' "$entry"
+  done
+  IFS="$old_ifs"
+}
+
+dotfiles_contract_entry_target() {
+  local entry="$1"
+  printf '%s\n' "${entry%%::*}"
+}
+
+dotfiles_contract_entry_label() {
+  local entry="$1"
+  local target label
+
+  target="$(dotfiles_contract_entry_target "$entry")"
+  label="${entry#*::}"
+  if [[ "$label" == "$entry" ]]; then
+    label="$target"
+  fi
+  printf '%s\n' "$label"
+}
+
 dotfiles_profile_file() {
   local dotfiles_root="${1:-${DOTFILES:-}}"
   printf '%s\n' "$dotfiles_root/local/profile.env"
@@ -45,28 +84,29 @@ dotfiles_profile_packages() {
     return 0
   fi
 
-  local pkg
-  for pkg in $packages; do
-    printf '%s\n' "$pkg"
-  done
+  dotfiles_iter_words "$packages"
 }
 
 dotfiles_profile_brewfiles() {
   local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
-  local brewfile
-
-  for brewfile in $brewfiles; do
-    printf '%s\n' "$brewfile"
-  done
+  dotfiles_iter_words "$brewfiles"
 }
 
 dotfiles_profile_automations() {
   local agents="${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
-  local agent
+  dotfiles_iter_words "$agents"
+}
 
-  for agent in $agents; do
-    printf '%s\n' "$agent"
-  done
+dotfiles_profile_required_commands() {
+  dotfiles_iter_words "${DOTFILES_PROFILE_REQUIRED_COMMANDS:-}"
+}
+
+dotfiles_profile_required_paths() {
+  dotfiles_iter_contract_entries "${DOTFILES_PROFILE_REQUIRED_PATHS:-}"
+}
+
+dotfiles_profile_required_keychain_items() {
+  dotfiles_iter_contract_entries "${DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS:-}"
 }
 
 dotfiles_load_env() {
@@ -82,7 +122,14 @@ dotfiles_load_env() {
     source "$dotfiles_root/local/machine.env"
   fi
 
-  dotfiles_load_profile "$dotfiles_root"
+  export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+  export DOTFILES_LMSTUDIO_HOME="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
+  export DOTFILES_EDITOR="${DOTFILES_EDITOR:-nvim}"
+  if [[ ! -d "$DOTFILES_DEVELOPER_ROOT" && -z "${DOTFILES_SKIP_DIR_CHECK:-}" ]]; then
+    mkdir -p "$DOTFILES_DEVELOPER_ROOT"
+  fi
+  export DOTFILES_OBSIDIAN_REPO_PATH="${DOTFILES_OBSIDIAN_REPO_PATH:-$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store}"
+  export DOTFILES_SCREENSHOTS_PATH="${DOTFILES_SCREENSHOTS_PATH:-$HOME/Desktop/Screenshots}"
 
   if [[ -z "${DOTFILES_HOMEBREW_PREFIX:-}" ]]; then
     if command -v brew >/dev/null 2>&1; then
@@ -90,14 +137,7 @@ dotfiles_load_env() {
     fi
     DOTFILES_HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
   fi
-
-  export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
-  if [[ ! -d "$DOTFILES_DEVELOPER_ROOT" && -z "${DOTFILES_SKIP_DIR_CHECK:-}" ]]; then
-    mkdir -p "$DOTFILES_DEVELOPER_ROOT"
-  fi
-  export DOTFILES_LMSTUDIO_HOME="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
-  export DOTFILES_EDITOR="${DOTFILES_EDITOR:-nvim}"
   export DOTFILES_HOMEBREW_PREFIX
-  export DOTFILES_OBSIDIAN_REPO_PATH="${DOTFILES_OBSIDIAN_REPO_PATH:-$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store}"
-  export DOTFILES_SCREENSHOTS_PATH="${DOTFILES_SCREENSHOTS_PATH:-$HOME/Desktop/Screenshots}"
+
+  dotfiles_load_profile "$dotfiles_root"
 }

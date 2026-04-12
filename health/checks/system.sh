@@ -1,6 +1,65 @@
 #!/usr/bin/env bash
 # Doctor checks: launchd, homebrew, backup checks.
 
+check_profile_contract() {
+  if $QUICK_MODE; then
+    return
+  fi
+
+  local issues=0
+  local details=""
+  local required_count=0
+
+  local command_name
+  while IFS= read -r command_name; do
+    [[ -n "$command_name" ]] || continue
+    required_count=$((required_count + 1))
+    if command -v "$command_name" >/dev/null 2>&1; then
+      details+="Command: $command_name\n  "
+    else
+      details+="Missing command: $command_name\n  "
+      issues=$((issues + 1))
+      add_suggestion "Install or expose '$command_name' for the ${DOTFILES_PROFILE:-unknown} profile"
+    fi
+  done < <(dotfiles_profile_required_commands)
+
+  local entry target label
+  while IFS= read -r entry; do
+    [[ -n "$entry" ]] || continue
+    required_count=$((required_count + 1))
+    target="$(dotfiles_contract_entry_target "$entry")"
+    label="$(dotfiles_contract_entry_label "$entry")"
+    if [[ -e "$target" ]]; then
+      details+="Path: $label\n  "
+    else
+      details+="Missing path: $label ($target)\n  "
+      issues=$((issues + 1))
+      add_suggestion "Create or restore '$label' for the ${DOTFILES_PROFILE:-unknown} profile"
+    fi
+  done < <(dotfiles_profile_required_paths)
+
+  while IFS= read -r entry; do
+    [[ -n "$entry" ]] || continue
+    required_count=$((required_count + 1))
+    target="$(dotfiles_contract_entry_target "$entry")"
+    label="$(dotfiles_contract_entry_label "$entry")"
+    if security find-generic-password -s "$target" >/dev/null 2>&1; then
+      details+="Keychain item: $label\n  "
+    else
+      details+="Missing keychain item: $label\n  "
+      issues=$((issues + 1))
+      add_suggestion "Add the '$label' keychain item required by the ${DOTFILES_PROFILE:-unknown} profile"
+    fi
+  done < <(dotfiles_profile_required_keychain_items)
+
+  if [[ $required_count -eq 0 ]]; then
+    record_result "Profile Contract" 0 "No profile-specific requirements declared"
+    return
+  fi
+
+  record_issue_count_result "Profile Contract" "$issues" 2 "$details"
+}
+
 check_launchd() {
   if $QUICK_MODE; then
     return
