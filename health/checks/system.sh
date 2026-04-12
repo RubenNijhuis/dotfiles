@@ -68,11 +68,7 @@ check_launchd() {
     fi
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "LaunchD Agents" 0 "$details"
-  else
-    record_result "LaunchD Agents" 1 "$details"
-  fi
+  record_issue_count_result "LaunchD Agents" "$issues" 1 "$details"
 }
 
 check_homebrew() {
@@ -103,11 +99,7 @@ check_homebrew() {
     add_suggestion "Install Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "Homebrew" 0 "$details"
-  else
-    record_result "Homebrew" 1 "$details"
-  fi
+  record_issue_count_result "Homebrew" "$issues" 1 "$details"
 }
 
 check_tmux() {
@@ -157,11 +149,7 @@ check_tmux() {
     add_suggestion "Install tpm: git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "tmux" 0 "$details"
-  else
-    record_result "tmux" 1 "$details"
-  fi
+  record_issue_count_result "tmux" "$issues" 1 "$details"
 }
 
 check_shell_perf() {
@@ -250,9 +238,5 @@ check_backup_system() {
     add_suggestion "Setup automation: make automation-setup"
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "Backup System" 0 "$details"
-  else
-    record_result "Backup System" 1 "$details"
-  fi
+  record_issue_count_result "Backup System" "$issues" 1 "$details"
 }

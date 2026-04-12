@@ -141,6 +141,19 @@ add_suggestion() {
   SUGGESTIONS+=("$1")
 }
 
+record_issue_count_result() {
+  local name="$1"
+  local issues="$2"
+  local nonzero_status="$3"
+  local message="$4"
+
+  if [[ "$issues" -eq 0 ]]; then
+    record_result "$name" 0 "$message"
+  else
+    record_result "$name" "$nonzero_status" "$message"
+  fi
+}
+
 should_run() {
   local section_name="$1"
   [[ -z "$SECTION" || "$SECTION" == "$section_name" ]]

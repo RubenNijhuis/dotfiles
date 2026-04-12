@@ -28,11 +28,7 @@ check_biome() {
     add_suggestion "Install Biome: brew install biome"
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "Biome" 0 "$details"
-  else
-    record_result "Biome" 1 "$details"
-  fi
+  record_issue_count_result "Biome" "$issues" 1 "$details"
 }
 
 check_neovim() {
@@ -83,11 +79,7 @@ check_neovim() {
     add_suggestion "Run :Lazy sync in nvim to generate lazy-lock.json"
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "Neovim" 0 "$details"
-  else
-    record_result "Neovim" 1 "$details"
-  fi
+  record_issue_count_result "Neovim" "$issues" 1 "$details"
 }
 
 check_starship() {
@@ -95,8 +87,8 @@ check_starship() {
     return
   fi
 
-
   local details=""
+  local issues=0
 
   if ! command -v starship &>/dev/null; then
     record_result "Starship" 1 "Starship not installed"
@@ -124,9 +116,5 @@ check_starship() {
     add_suggestion "Re-stow starship config: cd $DOTFILES && make stow"
   fi
 
-  if [[ $issues -eq 0 ]]; then
-    record_result "Starship" 0 "$details"
-  else
-    record_result "Starship" 1 "$details"
-  fi
+  record_issue_count_result "Starship" "$issues" 1 "$details"
 }

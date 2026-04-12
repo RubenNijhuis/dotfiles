@@ -105,13 +105,11 @@ test_stow_then_doctor() {
 
   HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null 2>&1
 
-  # Doctor --section stow checks stow health. It may exit non-zero due to a
-  # known set -e interaction with should_run's short-circuit return value, so
-  # verify success via output instead of exit code.
-  set +e
   local output
   output=$(HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow 2>&1)
-  set -e
+
+  assert_exit "stow-then-doctor-exit" 0 \
+    env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
 
   if ! printf '%s' "$output" | /usr/bin/grep -q "✓ Stow Configuration"; then
     print_error "FAIL(stow-then-doctor): stow check did not pass"
@@ -122,11 +120,54 @@ test_stow_then_doctor() {
   rm -rf "$temp_home"
 }
 
+# ── ops-status uses the doctor task log, not the launchd wrapper log ───────
+
+test_ops_status_uses_doctor_task_log() {
+  local temp_home temp_bin fake_launchctl output
+  temp_home="$(make_temp_home)"
+  temp_bin="$(make_temp_home)"
+  trap 'rm -rf "$temp_home" "$temp_bin"' RETURN
+
+  mkdir -p "$temp_home/.local/log"
+  cat > "$temp_home/.local/log/dotfiles-doctor.out.log" <<'EOF'
+System Health Check
+15/15 checks: 15 passed
+EOF
+  : > "$temp_home/.local/log/dotfiles-doctor-launchd.err.log"
+
+  touch -t 202604120209 "$temp_home/.local/log/dotfiles-doctor.out.log"
+  touch -t 202604101158 "$temp_home/.local/log/dotfiles-doctor-launchd.err.log"
+
+  fake_launchctl="$temp_bin/launchctl"
+  cat > "$fake_launchctl" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+cmd="${1:-}"
+case "$cmd" in
+  print) exit 0 ;;
+  *) exit 0 ;;
+esac
+EOF
+  chmod +x "$fake_launchctl"
+
+  output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
+    bash "$ROOT_DIR/ops/automation/ops-status.sh" --no-color 2>&1)
+
+  if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor out: 2026-04-12 02:09"; then
+    print_error "FAIL(ops-status-doctor-log): expected task log timestamp"
+    TEST_FAILURES=$((TEST_FAILURES + 1))
+  fi
+
+  trap - RETURN
+  rm -rf "$temp_home" "$temp_bin"
+}
+
 # ── Run all tests ───────────────────────────────────────────────────
 
 test_clean_dry_run_safe
 test_clean_all_dry_run_safe
 test_restore_dry_run_safe
 test_stow_then_doctor
+test_ops_status_uses_doctor_task_log
 
 test_summary "integration"
