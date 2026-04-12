@@ -85,6 +85,35 @@ print_key_value() {
   printf '  %s%s:%s %s\n' "${BOLD}" "$key" "${NC}" "$value"
 }
 
+print_status_row() {
+  local label="$1"
+  local status="$2"
+  local detail="${3:-}"
+  local symbol color
+
+  case "$status" in
+    ok) symbol="OK"; color="${GREEN}" ;;
+    warn) symbol="WARN"; color="${YELLOW}" ;;
+    error) symbol="FAIL"; color="${RED}" ;;
+    info|*) symbol="INFO"; color="${BLUE}" ;;
+  esac
+
+  printf '  %-18s [%s%s%s] %s\n' "$label" "${color}" "$symbol" "${NC}" "$detail"
+}
+
+print_next_steps() {
+  if [[ $# -eq 0 ]]; then
+    return
+  fi
+
+  print_section "Next Steps"
+  local step
+  for step in "$@"; do
+    [[ -n "$step" ]] || continue
+    print_bullet "$step"
+  done
+}
+
 # Compact step result — prints label and status on one line
 # Usage: print_step "Label" success|warning|error|skip "detail"
 print_step() {
@@ -104,4 +133,4 @@ print_step() {
 export RED GREEN YELLOW BLUE CYAN MAGENTA BOLD DIM NC
 export -f print_header print_section print_subsection
 export -f print_success print_error print_warning print_info print_dim
-export -f print_bullet print_indent print_key_value print_step
+export -f print_bullet print_indent print_key_value print_status_row print_next_steps print_step

@@ -64,3 +64,4 @@ vscode "ms-azuretools.vscode-docker"         # Docker/container management and D
 vscode "ms-azuretools.vscode-containers"     # Dev container CLI support
 vscode "ms-dotnettools.csharp"
 vscode "ms-dotnettools.vscode-dotnet-runtime"
+vscode "bierner.markdown-mermaid"

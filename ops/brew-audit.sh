@@ -46,6 +46,26 @@ require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Brewfile Audit"
 
+normalize_entry_name() {
+  local kind="$1"
+  local name="$2"
+
+  case "$kind" in
+    tap) printf '%s\n' "$name" ;;
+    *) printf '%s\n' "${name##*/}" ;;
+  esac
+}
+
+extract_declared_entries() {
+  local kind="$1"
+  cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" | \
+    grep "^${kind} " | while IFS= read -r line; do
+      local raw
+      raw=$(printf '%s\n' "$line" | sed "s/${kind} \"\\([^\"]*\\)\".*/\\1/")
+      normalize_entry_name "$kind" "$raw"
+    done | sort -u
+}
+
 # Get lists
 # Use brew leaves to get only explicitly installed formulae (not transitive deps)
 # Strip tap prefixes (e.g. "user/tap/pkg" → "pkg") to match Brewfile short names
@@ -54,14 +74,9 @@ INSTALLED_CASKS=$(brew list --cask | sort)
 INSTALLED_VSCODE=$(code --list-extensions 2>/dev/null | sort || echo "")
 
 # Get declared packages
-DECLARED_FORMULAE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" | \
-  grep '^brew ' | sed 's/brew "\([^"]*\)".*/\1/' | sort)
-
-DECLARED_CASKS=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" | \
-  grep '^cask ' | sed 's/cask "\([^"]*\)".*/\1/' | sort)
-
-DECLARED_VSCODE=$(cat "$DOTFILES/brew/Brewfile.cli" "$DOTFILES/brew/Brewfile.apps" "$DOTFILES/brew/Brewfile.vscode" | \
-  grep '^vscode ' | sed 's/vscode "\([^"]*\)".*/\1/' | sort)
+DECLARED_FORMULAE=$(extract_declared_entries brew)
+DECLARED_CASKS=$(extract_declared_entries cask)
+DECLARED_VSCODE=$(extract_declared_entries vscode)
 
 # Find packages installed but not in Brewfiles
 print_section "Installed but not in Brewfiles:"

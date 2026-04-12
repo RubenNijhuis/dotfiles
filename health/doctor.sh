@@ -182,31 +182,51 @@ run_checks() {
   if should_run starship; then check_starship; fi
 }
 
+print_run_context() {
+  local mode_label="full"
+  [[ "$QUICK_MODE" == true ]] && mode_label="quick"
+  [[ -n "$SECTION" ]] && mode_label="section:$SECTION"
+
+  print_section "Overview"
+  print_status_row "Mode" info "$mode_label"
+  print_status_row "Scope" info "machine health, tooling, and automation checks"
+}
+
 print_summary() {
   printf '\n'
   local total=$((PASSED + WARNINGS + ERRORS))
-  local parts=()
-  parts+=("${GREEN}${PASSED} passed${NC}")
-  [[ $WARNINGS -gt 0 ]] && parts+=("${YELLOW}${WARNINGS} warning(s)${NC}")
-  [[ $ERRORS -gt 0 ]] && parts+=("${RED}${ERRORS} error(s)${NC}")
+  local overall_status="ok"
+  local overall_detail="everything looks healthy"
+  if [[ $ERRORS -gt 0 ]]; then
+    overall_status="error"
+    overall_detail="$ERRORS error(s) need attention"
+  elif [[ $WARNINGS -gt 0 ]]; then
+    overall_status="warn"
+    overall_detail="$WARNINGS warning(s) worth checking"
+  fi
 
-  local summary=""
-  for i in "${!parts[@]}"; do
-    [[ $i -gt 0 ]] && summary+=", "
-    summary+="${parts[$i]}"
-  done
-  printf '  %s%s/%s checks:%s %b\n' "${BOLD}" "$total" "$total" "${NC}" "$summary"
+  print_section "Summary"
+  print_status_row "Overall" "$overall_status" "$overall_detail"
+  print_status_row "Checks" info "$total total"
+  print_status_row "Passed" ok "$PASSED"
+  print_status_row "Warnings" warn "$WARNINGS"
+  print_status_row "Errors" error "$ERRORS"
 
   if [[ ${#SUGGESTIONS[@]} -gt 0 ]]; then
-    # Deduplicate suggestions while preserving order
+    local next_steps=()
     declare -A _seen_suggestions=()
+    local suggestion
     for suggestion in "${SUGGESTIONS[@]}"; do
       if [[ -z "${_seen_suggestions[$suggestion]:-}" ]]; then
-        printf '  %s→%s %s\n' "${YELLOW}" "${NC}" "$suggestion"
+        next_steps+=("$suggestion")
         _seen_suggestions[$suggestion]=1
       fi
     done
+    print_next_steps "${next_steps[@]}"
+  else
+    print_next_steps "No action needed."
   fi
+
   printf '\n'
 }
 
@@ -220,17 +240,16 @@ status_check_doctor() {
   if [[ $exit_code -eq 0 ]]; then
     local count
     count=$(echo "$output" | grep -c "✓" || echo "0")
-    print_success "Health checks: $count passed"
+    print_status_row "Doctor" ok "$count quick checks passed"
   else
     local warnings errors
     warnings=$(echo "$output" | grep -c "⚠" || echo "0")
     errors=$(echo "$output" | grep -c "✗" || echo "0")
     if [[ $errors -gt 0 ]]; then
-      print_error "Health checks: $errors errors, $warnings warnings"
+      print_status_row "Doctor" error "$errors errors, $warnings warnings"
     else
-      print_warning "Health checks: $warnings warnings"
+      print_status_row "Doctor" warn "$warnings warnings"
     fi
-    print_dim "  → Run: make doctor"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -242,10 +261,9 @@ status_check_stow() {
   broken=$(count_broken_symlinks "$HOME")
 
   if [[ $broken -eq 0 ]]; then
-    print_success "Stow: $total packages, no broken symlinks"
+    print_status_row "Stow" ok "$total packages, no broken symlinks"
   else
-    print_error "Stow: $broken broken symlinks"
-    print_dim "  → Run: make unstow && make stow"
+    print_status_row "Stow" error "$broken broken symlinks"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -262,14 +280,12 @@ status_check_launchd() {
   done
 
   if [[ $loaded -eq $managed ]]; then
-    print_success "LaunchD: $loaded/$managed agents loaded"
+    print_status_row "Launchd" ok "$loaded/$managed agents loaded"
   elif [[ $loaded -gt 0 ]]; then
-    print_warning "LaunchD: $loaded/$managed agents loaded"
-    print_dim "  → $((managed - loaded)) not loaded. Run: make automation-setup"
+    print_status_row "Launchd" warn "$loaded/$managed agents loaded"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   else
-    print_warning "LaunchD: no agents loaded"
-    print_dim "  → Run: make automation-setup"
+    print_status_row "Launchd" warn "no agents loaded"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -277,8 +293,7 @@ status_check_launchd() {
 status_check_backup() {
   local backup_dir="$HOME/.dotfiles-backup"
   if [[ ! -d "$backup_dir" ]]; then
-    print_warning "Backup: no backups found"
-    print_dim "  → Run: make backup"
+    print_status_row "Backup" warn "no backups found"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
     return
   fi
@@ -286,8 +301,7 @@ status_check_backup() {
   local latest
   latest=$(find "$backup_dir" -maxdepth 1 -type d -name "202*" | sort -r | head -n1)
   if [[ -z "$latest" ]]; then
-    print_warning "Backup: no backups found"
-    print_dim "  → Run: make backup"
+    print_status_row "Backup" warn "no backups found"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
     return
   fi
@@ -295,20 +309,18 @@ status_check_backup() {
   local age_days
   age_days=$(( ($(date +%s) - $(stat -f %m "$latest")) / 86400 ))
   if [[ $age_days -le 7 ]]; then
-    print_success "Backup: ${age_days}d ago"
+    print_status_row "Backup" ok "${age_days}d ago"
   else
-    print_warning "Backup: ${age_days}d ago (stale)"
-    print_dim "  → Run: make backup"
+    print_status_row "Backup" warn "${age_days}d ago (stale)"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
 
 status_check_docs() {
   if bash "$DOTFILES/ops/generate-cli-reference.sh" --check --no-color >/dev/null 2>&1; then
-    print_success "Docs: up to date"
+    print_status_row "Docs" ok "generated reference is current"
   else
-    print_warning "Docs: generated reference is stale"
-    print_dim "  → Run: make docs-regen"
+    print_status_row "Docs" warn "generated reference is stale"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -319,6 +331,9 @@ run_status() {
 
   STATUS_ISSUES=0
   print_header "System Status"
+  print_dim "Quick readout for the machine state that needs action today."
+  printf '\n'
+  print_section "Today"
 
   status_check_doctor
   status_check_stow
@@ -326,11 +341,17 @@ run_status() {
   status_check_backup
   status_check_docs
 
-  printf '\n'
+  print_section "Summary"
   if [[ $STATUS_ISSUES -eq 0 ]]; then
-    print_success "All clear"
+    print_status_row "Overall" ok "all clear"
+    print_next_steps "No action needed."
   else
-    print_dim "$STATUS_ISSUES item(s) need attention"
+    print_status_row "Overall" warn "$STATUS_ISSUES item(s) need attention"
+    print_next_steps \
+      "Run: make doctor" \
+      "Run: make ops-status" \
+      "Run: make automation-setup if launchd agents are missing" \
+      "Run: make backup if backup status is stale"
   fi
 }
 
@@ -349,6 +370,9 @@ main() {
   source "$SCRIPT_DIR/checks/editor.sh"
 
   print_header "System Health Check"
+  print_dim "Use this when you want a deeper read on machine health, config drift, and tooling."
+  printf '\n'
+  print_run_context
   run_checks
   print_summary
 

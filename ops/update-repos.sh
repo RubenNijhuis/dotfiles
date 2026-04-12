@@ -11,13 +11,14 @@ dotfiles_load_env "$(cd "$SCRIPT_DIR/.." && pwd)"
 UPDATED=0 FAILED=0 SKIPPED=0
 DRY_RUN=false
 QUIET=false
+COMPACT=false
 JOBS=15
 FETCH_TIMEOUT=30
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] [--dry-run] [--quiet] [--jobs N] [--timeout N] [path]
+Usage: $0 [--help] [--no-color] [--dry-run] [--quiet] [--compact] [--jobs N] [--timeout N] [path]
 
 Update all git repositories under the provided path (default: \$DOTFILES_DEVELOPER_ROOT).
 
@@ -26,6 +27,7 @@ Options:
   --timeout N, -t N  Fetch timeout in seconds (default: 30)
   --dry-run          Preview without making changes
   --quiet            Output one-line summary only
+  --compact          Stream only updated/failed repositories plus summary
   --no-color         Disable colored output
 EOF
 }
@@ -38,6 +40,7 @@ while [[ $# -gt 0 ]]; do
     --no-color) shift ;;
     --dry-run) DRY_RUN=true; shift ;;
     --quiet) QUIET=true; shift ;;
+    --compact) COMPACT=true; shift ;;
     --jobs|-j) JOBS="$2"; shift 2 ;;
     --timeout|-t) FETCH_TIMEOUT="$2"; shift 2 ;;
     -*) print_error "Unknown argument: $1"; usage; exit 1 ;;
@@ -76,7 +79,16 @@ update_repo() {
   # Stash uncommitted changes
   local stashed=false
   if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-    $DRY_RUN && { $QUIET || { printf "  "; print_info "$repo_name: would stash and update"; }; exit 0; }
+    $DRY_RUN && {
+      if ! $QUIET; then
+        if $COMPACT; then
+          print_status_row "$repo_name" info "would stash and update"
+        else
+          printf "  "; print_info "$repo_name: would stash and update"
+        fi
+      fi
+      exit 0
+    }
     git stash push --include-untracked -m "update-repos: auto-stash" &>/dev/null && stashed=true || exit 2
   fi
 
@@ -86,7 +98,13 @@ update_repo() {
   elif command -v timeout &>/dev/null; then fetch_cmd="timeout $FETCH_TIMEOUT $fetch_cmd"; fi
   if ! eval "$fetch_cmd" &>/dev/null; then
     $stashed && git stash pop &>/dev/null || true
-    $QUIET || { printf "  "; print_error "$repo_name: fetch failed"; }
+    if ! $QUIET; then
+      if $COMPACT; then
+        print_status_row "$repo_name" error "fetch failed"
+      else
+        printf "  "; print_error "$repo_name: fetch failed"
+      fi
+    fi
     exit 1
   fi
 
@@ -100,16 +118,38 @@ update_repo() {
     exit 2
   fi
 
-  $DRY_RUN && { $stashed && git stash pop &>/dev/null || true; $QUIET || { printf "  "; print_info "$repo_name: $behind commits behind"; }; exit 0; }
+  $DRY_RUN && {
+    $stashed && git stash pop &>/dev/null || true
+    if ! $QUIET; then
+      if $COMPACT; then
+        print_status_row "$repo_name" info "would update ($behind commits behind)"
+      else
+        printf "  "; print_info "$repo_name: $behind commits behind"
+      fi
+    fi
+    exit 0
+  }
 
   if git pull --rebase &>/dev/null; then
     $stashed && { git stash pop &>/dev/null || print_warning "$repo_name: stash conflict"; }
-    $QUIET || { printf "  "; print_success "$repo_name: updated ($behind commits)"; }
+    if ! $QUIET; then
+      if $COMPACT; then
+        print_status_row "$repo_name" ok "updated ($behind commits)"
+      else
+        printf "  "; print_success "$repo_name: updated ($behind commits)"
+      fi
+    fi
     exit 0
   else
     git rebase --abort &>/dev/null || true
     $stashed && git stash pop &>/dev/null || true
-    $QUIET || { printf "  "; print_error "$repo_name: pull failed"; }
+    if ! $QUIET; then
+      if $COMPACT; then
+        print_status_row "$repo_name" error "pull failed"
+      else
+        printf "  "; print_error "$repo_name: pull failed"
+      fi
+    fi
     exit 1
   fi
 }
@@ -143,10 +183,12 @@ fi
 total=$(echo "$repos" | wc -l | xargs)
 
 if ! $QUIET; then
-  print_header "Updating Git Repositories"
-  $DRY_RUN && print_warning "DRY RUN"
-  print_info "Found $total repositories"
-  printf '\n'
+  if ! $COMPACT; then
+    print_header "Updating Git Repositories"
+    $DRY_RUN && print_warning "DRY RUN"
+    print_info "Found $total repositories"
+    printf '\n'
+  fi
 fi
 
 if [[ "$JOBS" -gt 1 ]] && command -v parallel &>/dev/null; then
@@ -179,9 +221,23 @@ if $QUIET; then
   exit 0
 else
   printf '\n'
-  print_key_value "Updated" "$UPDATED"
-  print_key_value "Skipped" "$SKIPPED"
-  [[ $FAILED -gt 0 ]] && { print_key_value "Failed" "$FAILED"; exit 1; }
+  if $COMPACT; then
+    print_status_row "Updated" info "$UPDATED"
+    print_status_row "Skipped" info "$SKIPPED"
+    if [[ $FAILED -gt 0 ]]; then
+      print_status_row "Failed" error "$FAILED"
+    else
+      print_status_row "Failed" info "0"
+    fi
+  else
+    print_key_value "Updated" "$UPDATED"
+    print_key_value "Skipped" "$SKIPPED"
+    [[ $FAILED -gt 0 ]] && print_key_value "Failed" "$FAILED"
+  fi
   printf '\n'
-  print_success "All repositories processed"
+  if [[ $FAILED -gt 0 ]]; then
+    print_warning "Repository updates completed with issues"
+    exit 1
+  fi
+  print_success "Repository updates complete"
 fi

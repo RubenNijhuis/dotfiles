@@ -153,7 +153,7 @@ EOF
   output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
     bash "$ROOT_DIR/ops/automation/ops-status.sh" --no-color 2>&1)
 
-  if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor out: 2026-04-12 02:09"; then
+  if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor    \[OK\] loaded | out 2026-04-12 02:09"; then
     print_error "FAIL(ops-status-doctor-log): expected task log timestamp"
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
