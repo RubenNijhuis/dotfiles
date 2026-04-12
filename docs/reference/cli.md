@@ -227,6 +227,30 @@ Run shellcheck and shellharden linting across shell scripts.
 When paths are provided, only lint those files.
 ```
 
+## `ops/profile/list.sh`
+
+```text
+Usage: ops/profile/list.sh [--help] [--no-color]
+
+List available machine profiles.
+```
+
+## `ops/profile/set.sh`
+
+```text
+Usage: ops/profile/set.sh [--help] [--no-color] <profile-name>
+
+Set the active machine profile in local/profile.env.
+```
+
+## `ops/profile/show.sh`
+
+```text
+Usage: ops/profile/show.sh [--help] [--no-color]
+
+Show the active machine profile and its stow package selection.
+```
+
 ## `ops/restore-backup.sh`
 
 ```text

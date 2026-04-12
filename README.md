@@ -10,6 +10,40 @@ cd ~/dotfiles
 ./install.sh
 ```
 
+## Daily Use
+
+For normal day-to-day operation, start here:
+
+```bash
+make status       # fast "what needs attention?" snapshot
+make doctor       # full health check with next steps
+make ops-status   # launchd automation dashboard
+make update       # compact live progress for repos, brew, runtimes, and re-stow
+```
+
+The CLI is designed to stay compact while still showing that work is happening. Long-running commands should stream progress in a condensed dashboard style instead of going silent.
+
+## Machine Profiles
+
+This repo supports machine profiles so one dotfiles repo can serve multiple machine roles without becoming a giant compromise.
+
+Available profile commands:
+
+```bash
+make profile-list
+make profile-show
+make profile-set PROFILE=personal-laptop
+```
+
+Current profile behavior in v1:
+
+- the active profile is loaded from `local/profile.env` or defaults to `personal-laptop`
+- `make stow` only applies the packages allowed by the active profile
+- `make doctor` shows the active profile in its overview
+
+Tracked profile definitions live in `profiles/`.
+Machine-local profile selection lives in `local/profile.env`.
+
 ## Common Commands
 
 ```bash
@@ -26,6 +60,7 @@ make docs-sync        # fail if generated CLI docs are stale
 ## Documentation
 
 - Architecture and conventions: `docs/architecture.md`
+- Machine profiles: `docs/machine-profiles.md`
 - Runbooks: `docs/runbooks/`
 - Generated command reference: `docs/reference/cli.md`
 - Launchd templates and contracts: `launchd/README.md`

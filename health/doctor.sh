@@ -188,6 +188,7 @@ print_run_context() {
   [[ -n "$SECTION" ]] && mode_label="section:$SECTION"
 
   print_section "Overview"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Mode" info "$mode_label"
   print_status_row "Scope" info "machine health, tooling, and automation checks"
 }

@@ -3,6 +3,7 @@
 local/*
 !local/.gitkeep
 !local/machine.env.example
+!local/profile.env.example
 !local/shell-local.sh.example
 !local/README.md
 *.local

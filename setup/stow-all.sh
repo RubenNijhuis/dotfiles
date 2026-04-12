@@ -9,6 +9,8 @@ STOW_DIR="$DOTFILES/config"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/cli.sh"
+source "$SCRIPT_DIR/../lib/env.sh"
+dotfiles_load_env "$DOTFILES"
 
 QUIET=false
 
@@ -28,6 +30,24 @@ EOF
 for _arg in "$@"; do
   [[ "$_arg" == "--quiet" ]] && QUIET=true
 done
+
+selected_stow_packages() {
+  local -a packages=()
+  local pkg_dir pkg
+
+  if [[ -n "${DOTFILES_PROFILE_STOW_PACKAGES:-}" && "${DOTFILES_PROFILE_STOW_PACKAGES:-}" != "*" ]]; then
+    while IFS= read -r pkg; do
+      [[ -n "$pkg" ]] || continue
+      packages+=("$pkg")
+    done < <(dotfiles_profile_packages)
+  else
+    for pkg_dir in "$STOW_DIR"/*/; do
+      packages+=("$(basename "$pkg_dir")")
+    done
+  fi
+
+  printf '%s\n' "${packages[@]}"
+}
 
 backup_before_stow() {
   if [[ -f "$DOTFILES/ops/backup-dotfiles.sh" ]]; then
@@ -70,11 +90,11 @@ cleanup_old_symlinks() {
 stow_packages() {
   local stowed_count=0
   local failed_count=0
-  local pkg_dir pkg stow_output filtered_output
+  local pkg stow_output filtered_output
   local -a failed_pkgs=()
 
-  for pkg_dir in "$STOW_DIR"/*/; do
-    pkg="$(basename "$pkg_dir")"
+  while IFS= read -r pkg; do
+    [[ -n "$pkg" ]] || continue
 
     if stow_output=$(stow -d "$STOW_DIR" -t "$HOME" "$pkg" 2>&1); then
       stowed_count=$((stowed_count + 1))
@@ -85,7 +105,7 @@ stow_packages() {
       failed_count=$((failed_count + 1))
       failed_pkgs+=("$pkg")
     fi
-  done
+  done < <(selected_stow_packages)
 
   printf '\n'
   if [[ $failed_count -eq 0 ]]; then
@@ -106,18 +126,18 @@ main() {
     # Silent mode: just stow, output one-line summary
     local stowed=0 failed=0
     local -a failed_pkgs=()
-    for pkg_dir in "$STOW_DIR"/*/; do
-      local pkg
-      pkg="$(basename "$pkg_dir")"
+    local pkg
+    while IFS= read -r pkg; do
+      [[ -n "$pkg" ]] || continue
       if stow -d "$STOW_DIR" -t "$HOME" "$pkg" &>/dev/null; then
         stowed=$((stowed + 1))
       else
         failed=$((failed + 1))
         failed_pkgs+=("$pkg")
       fi
-    done
+    done < <(selected_stow_packages)
     if [[ $failed -eq 0 ]]; then
-      echo "$stowed packages stowed"
+      echo "$stowed packages stowed for profile ${DOTFILES_PROFILE:-unknown}"
     else
       echo "$stowed stowed, $failed failed (${failed_pkgs[*]})"
       return 1
@@ -126,6 +146,7 @@ main() {
   fi
 
   print_header "Stowing Configuration Packages"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
 
   backup_before_stow
   cleanup_old_symlinks

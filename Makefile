@@ -5,7 +5,8 @@
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean clean-all restore status launchd-check vscode-parity \
-	help-setup help-brew help-launchd help-test
+	help-setup help-brew help-launchd help-test \
+	profile-list profile-show profile-set
 
 DOTFILES := $(shell pwd)
 
@@ -26,6 +27,8 @@ help: ## Show commands
 	@printf "  \033[36m%-20s\033[0m %s\n" "clean" "Remove caches, logs, and repo clutter"
 	@printf "\n\033[1mSetup And Repair\033[0m\n"
 	@printf "  \033[36m%-20s\033[0m %s\n" "install" "Bootstrap a new machine"
+	@printf "  \033[36m%-20s\033[0m %s\n" "profile-show" "Show the active machine profile"
+	@printf "  \033[36m%-20s\033[0m %s\n" "profile-list" "List available machine profiles"
 	@printf "  \033[36m%-20s\033[0m %s\n" "automation-setup" "Install and load all launchd agents"
 	@printf "  \033[36m%-20s\033[0m %s\n" "restore" "Restore from the latest backup"
 	@printf "  \033[36m%-20s\033[0m %s\n" "macos" "Apply macOS defaults"
@@ -133,6 +136,15 @@ keychain-check: ## Validate required keychain entries
 
 automation-setup: ## Setup all LaunchD automations
 	@bash $(DOTFILES)/ops/automation/setup-automation.sh setup-all
+
+profile-list: ## List available machine profiles
+	@bash $(DOTFILES)/ops/profile/list.sh
+
+profile-show: ## Show the active machine profile
+	@bash $(DOTFILES)/ops/profile/show.sh
+
+profile-set: ## Set the active machine profile (usage: make profile-set PROFILE=<name>)
+	@bash $(DOTFILES)/ops/profile/set.sh $(PROFILE)
 
 remove-bloatware: ## Remove common macOS built-in apps
 	@bash $(DOTFILES)/setup/remove-bloatware.sh

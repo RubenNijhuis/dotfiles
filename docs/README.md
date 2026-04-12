@@ -5,6 +5,7 @@ Index for the dotfiles documentation.
 ## Architecture & Design
 
 - [Architecture](architecture.md) — repo structure, scope, and design decisions
+- [Machine Profiles](machine-profiles.md) — how profile selection works and how to use it
 - [Shell Performance](shell-performance.md) — startup time optimisation
 
 ## Tool Configuration
