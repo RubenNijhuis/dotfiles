@@ -54,7 +54,7 @@ main() {
   local total_fail=0
   local summary_lines=()
 
-  for agent_info in "${AGENTS[@]}"; do
+  while IFS= read -r agent_info; do
     IFS=':' read -r name _desc <<< "$agent_info"
     local log_file
     log_file="$(agent_log_file "$name")"
@@ -81,7 +81,7 @@ main() {
 
     total_ok=$((total_ok + ok))
     total_fail=$((total_fail + fail))
-  done
+  done < <(profile_agent_infos)
 
   printf '\n'
 

@@ -8,12 +8,9 @@ source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/env.sh"
 dotfiles_load_env "$DOTFILES"
+LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
 MANAGER="$DOTFILES/ops/automation/launchd-manager.sh"
-
-profile_automations() {
-  dotfiles_profile_automations
-}
 
 usage() {
   cat <<EOF
@@ -71,14 +68,15 @@ if [[ "$TARGET" == "setup-all" ]]; then
   print_header "Setting Up All Automations"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   ok=0 fail=0 skip=0
-  while IFS= read -r agent; do
-    [[ -n "$agent" ]] || continue
+  while IFS= read -r agent_info; do
+    [[ -n "$agent_info" ]] || continue
+    IFS=':' read -r agent _desc <<< "$agent_info"
     if precheck "$agent" 2>/dev/null; then
       if setup_agent "$agent"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
     else
       skip=$((skip + 1))
     fi
-  done < <(profile_automations)
+  done < <(profile_agent_infos)
   printf '\n'
   print_success "Installed: $ok"
   if [[ $skip -gt 0 ]]; then print_info "Skipped: $skip (optional)"; fi

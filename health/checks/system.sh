@@ -14,10 +14,10 @@ check_launchd() {
   # Source agent registry from launchd common module
   LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
   local managed_agents=()
-  for agent_info in "${AGENTS[@]}"; do
+  while IFS= read -r agent_info; do
     IFS=':' read -r name _desc <<< "$agent_info"
     managed_agents+=("$name")
-  done
+  done < <(profile_agent_infos)
 
   for agent in "${managed_agents[@]}"; do
     if launchctl print "gui/$(id -u)/com.user.$agent" >/dev/null 2>&1; then

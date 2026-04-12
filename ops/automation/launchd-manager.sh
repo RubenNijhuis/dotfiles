@@ -28,6 +28,34 @@ AGENTS=(
   "lmstudio-server:LM Studio local server"
 )
 
+profile_has_agent() {
+  local target="$1"
+  local selected="${DOTFILES_PROFILE_AUTOMATIONS:-}"
+  local agent
+
+  if [[ -z "$selected" ]]; then
+    return 0
+  fi
+
+  for agent in $selected; do
+    if [[ "$agent" == "$target" ]]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+profile_agent_infos() {
+  local agent_info name
+  for agent_info in "${AGENTS[@]}"; do
+    IFS=':' read -r name _ <<< "$agent_info"
+    if profile_has_agent "$name"; then
+      printf '%s\n' "$agent_info"
+    fi
+  done
+}
+
 # --- Helpers -----------------------------------------------------------------
 
 agent_log_file() {
@@ -88,7 +116,7 @@ cmd_list() {
 cmd_status() {
   print_header "LaunchD Agent Status"
   local loaded=0
-  for info in "${AGENTS[@]}"; do
+  while IFS= read -r info; do
     IFS=':' read -r name _ <<< "$info"
     printf "  "
     if is_agent_loaded "$name"; then
@@ -103,7 +131,7 @@ cmd_status() {
     else
       print_dim "$name (not loaded)"
     fi
-  done
+  done < <(profile_agent_infos)
   if [[ $loaded -eq 0 ]]; then print_warning "No managed agents loaded"; fi
 }
 

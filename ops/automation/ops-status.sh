@@ -60,7 +60,7 @@ render_agent_dashboard() {
 
   local loaded_count=0 warn_count=0 error_count=0
   local agent_info name desc loaded_state out_log err_log
-  for agent_info in "${AGENTS[@]}"; do
+  while IFS= read -r agent_info; do
     IFS=':' read -r name desc <<< "$agent_info"
     out_log="$(agent_log_file "$name")"
     err_log="$(agent_error_log_file "$name")"
@@ -85,10 +85,12 @@ render_agent_dashboard() {
 
     print_status_row "$name" "${out_status}" "$loaded_state | out $(log_timestamp "$out_log") ($out_detail) | err $(log_timestamp "$err_log") ($err_detail)"
     print_dim "    $desc"
-  done
+  done < <(profile_agent_infos)
 
   printf '\n'
-  print_status_row "Loaded agents" info "${loaded_count}/${#AGENTS[@]}"
+  local selected_count
+  selected_count=$(profile_agent_infos | grep -c . || true)
+  print_status_row "Loaded agents" info "${loaded_count}/${selected_count}"
   print_status_row "Warnings" warn "$warn_count"
   print_status_row "Errors" error "$error_count"
 }
@@ -98,7 +100,7 @@ render_attention() {
 
   local alerts=0
   local agent_info name out_log err_log out_status out_detail err_status err_detail
-  for agent_info in "${AGENTS[@]}"; do
+  while IFS= read -r agent_info; do
     IFS=':' read -r name _desc <<< "$agent_info"
     out_log="$(agent_log_file "$name")"
     err_log="$(agent_error_log_file "$name")"
@@ -117,7 +119,7 @@ render_attention() {
       print_bullet "$name err log indicates: $err_detail"
       alerts=$((alerts + 1))
     fi
-  done
+  done < <(profile_agent_infos)
 
   if [[ $alerts -eq 0 ]]; then
     print_bullet "No immediate action needed."
