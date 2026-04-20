@@ -76,5 +76,4 @@ cask "arduino-ide"          # Arduino development
 cask "dropbox"              # Cloud storage
 cask "epic-games"           # Epic Games launcher
 cask "trackweight"          # Weight tracking
-tap "spicetify/tap"
 cask "steipete/tap/codexbar"
