@@ -62,21 +62,39 @@ source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 **Impact:** Removes ~20ms from critical path
 
-### 4. Lazy-Load fnm and zoxide
-**Problem:** `fnm env` and `zoxide init` run eagerly on every startup even when not needed in that session.
+### 4. Lazy-Load mise, zoxide, and rustup
+**Problem:** `mise activate`, `zoxide init`, and `rustup completions` run eagerly on every startup even when not needed in that session.
 
 **Solution:** Stub the commands and defer real init until first use
 ```zsh
-_zsh_lazy_load_fnm() {
-  unfunction fnm node npm npx corepack 2>/dev/null
-  _zsh_eval_cache fnm env --use-on-cd --shell zsh
+_zsh_lazy_load_mise() {
+  unfunction mise node npm npx corepack ruby gem bundle 2>/dev/null
+  _zsh_eval_cache mise activate zsh
 }
-for cmd in fnm node npm npx corepack; do
-  eval "${cmd}() { _zsh_lazy_load_fnm; ${cmd} \"\$@\" }"
+for cmd in mise node npm npx corepack ruby gem bundle; do
+  eval "${cmd}() { _zsh_lazy_load_mise; ${cmd} \"\$@\" }"
+done
+
+_zsh_lazy_load_zoxide() {
+  unfunction z zi __zoxide_z __zoxide_zi 2>/dev/null
+  _zsh_eval_cache zoxide init zsh
+}
+for cmd in z zi; do
+  eval "${cmd}() { _zsh_lazy_load_zoxide; ${cmd} \"\$@\" }"
+done
+
+_zsh_lazy_load_rustup() {
+  unfunction rustup cargo rustc 2>/dev/null
+  if command -v rustup >/dev/null 2>&1; then
+    _zsh_eval_cache rustup completions zsh
+  fi
+}
+for cmd in rustup cargo rustc; do
+  eval "${cmd}() { _zsh_lazy_load_rustup; ${cmd} \"\$@\" }"
 done
 ```
 
-**Impact:** Removes ~30-50ms from startup when node/zoxide not used in that session. First-use delay is negligible (cache hit via `_zsh_eval_cache`).
+**Impact:** Removes ~30-50ms from startup when these tools aren't used in that session. First-use delay is negligible (cache hit via `_zsh_eval_cache`).
 
 ### 5. Starship Prompt
 **Goal:** Keep prompt rendering fast and stable with a single backend.
@@ -114,7 +132,7 @@ zprof
 Could load multiple slow operations in parallel:
 ```zsh
 {
-  eval "$(fnm env)"
+  eval "$(mise activate zsh)"
 } &
 {
   eval "$(zoxide init zsh)"
@@ -122,7 +140,7 @@ Could load multiple slow operations in parallel:
 wait
 ```
 
-**Trade-off:** Complex, may cause race conditions with prompt.
+**Trade-off:** Complex, may cause race conditions with prompt. Currently avoided in favor of lazy-loading.
 
 ## Best Practices
 
