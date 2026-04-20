@@ -286,17 +286,23 @@ Sync manually installed Homebrew packages into tracked Brewfiles.
 ## `ops/update-repos.sh`
 
 ```text
-Usage: ops/update-repos.sh [--help] [--no-color] [--dry-run] [--quiet] [--compact] [--jobs N] [--timeout N] [path]
+Usage: ops/update-repos.sh [--help] [--no-color] [--dry-run] [--quiet] [--compact] [--jobs N] [--timeout N] [--skip-recent N] [--no-cache] [path]
 
 Update all git repositories under the provided path (default: $DOTFILES_DEVELOPER_ROOT).
 
+For each repo, detects the base branch (main/master/develop/staging) and:
+  - If on the base branch: pulls with rebase
+  - If on a feature branch: fast-forwards the base branch and rebases onto it
+
 Options:
-  --jobs N, -j N     Parallel jobs (default: 15)
-  --timeout N, -t N  Fetch timeout in seconds (default: 30)
-  --dry-run          Preview without making changes
-  --quiet            Output one-line summary only
-  --compact          Stream only updated/failed repositories plus summary
-  --no-color         Disable colored output
+  --jobs N, -j N       Parallel jobs (default: 15)
+  --timeout N, -t N    Fetch timeout in seconds (default: 30)
+  --skip-recent N      Skip fetch for repos fetched within N seconds (default: 300, 0 to disable)
+  --no-cache           Force repo discovery instead of using cached list
+  --dry-run            Preview without making changes
+  --quiet              One-line summary only
+  --compact            Stream only updated/failed repositories plus summary
+  --no-color           Disable colored output
 ```
 
 ## `ops/update.sh`
