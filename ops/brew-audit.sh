@@ -51,6 +51,8 @@ print_header "Brewfile Audit"
 print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
 print_status_row "Tracked Brewfiles" info "$(brew_profile_summary)"
 
+# -- Helpers --
+
 extract_declared_entries() {
   local kind="$1"
   while IFS= read -r brewfile; do
@@ -62,130 +64,79 @@ extract_declared_entries() {
   done | sort -u
 }
 
-# Get lists
+# Print a list of packages or a success message.
+print_pkg_diff() {
+  local label="$1" list="$2" printer="$3"
+  if [[ -n "$list" ]]; then
+    print_subsection "${label}:"
+    while read -r pkg; do
+      printf "  "
+      "$printer" "$pkg"
+    done <<< "$list"
+    printf '\n'
+  else
+    print_success "All ${label,,} are declared"
+    printf '\n'
+  fi
+}
+
+count_lines() {
+  if [[ -n "$1" ]]; then echo "$1" | grep -c .; else echo 0; fi
+}
+
+# -- Gather installed state --
+# Exclude default homebrew/* taps — they don't need Brewfile entries
+INSTALLED_TAPS=$(brew tap | grep -v '^homebrew/' | sort)
 # Use brew leaves to get only explicitly installed formulae (not transitive deps)
 # Strip tap prefixes (e.g. "user/tap/pkg" → "pkg") to match Brewfile short names
 INSTALLED_FORMULAE=$(brew leaves --installed-on-request 2>/dev/null | sed 's|.*/||' | sort)
 INSTALLED_CASKS=$(brew list --cask | sort)
 INSTALLED_VSCODE=$(code --list-extensions 2>/dev/null | sort || echo "")
 
-# Get declared packages
+# -- Gather declared state --
+DECLARED_TAPS=$(extract_declared_entries tap)
 DECLARED_FORMULAE=$(extract_declared_entries brew)
 DECLARED_CASKS=$(extract_declared_entries cask)
 DECLARED_VSCODE=$(extract_declared_entries vscode)
 
-# Find packages installed but not in Brewfiles
+# -- Installed but not in Brewfiles --
 print_section "Installed but not in Brewfiles:"
 
+UNDECLARED_TAPS=$(comm -23 <(echo "$INSTALLED_TAPS") <(echo "$DECLARED_TAPS") || true)
 UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
-
 UNDECLARED_CASKS=$(comm -23 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
-
 UNDECLARED_VSCODE=$(comm -23 <(echo "$INSTALLED_VSCODE") <(echo "$DECLARED_VSCODE") || true)
 
-if [[ -n "$UNDECLARED_FORMULAE" ]]; then
-  print_subsection "Formulae:"
-  echo "$UNDECLARED_FORMULAE" | while read -r pkg; do
-    printf "  "
-    print_warning "$pkg"
-  done
-  printf '\n'
-else
-  print_success "All formulae are declared"
-  printf '\n'
-fi
+print_pkg_diff "Taps" "$UNDECLARED_TAPS" print_warning
+print_pkg_diff "Formulae" "$UNDECLARED_FORMULAE" print_warning
+print_pkg_diff "Casks" "$UNDECLARED_CASKS" print_warning
+print_pkg_diff "VS Code Extensions" "$UNDECLARED_VSCODE" print_warning
 
-if [[ -n "$UNDECLARED_CASKS" ]]; then
-  print_subsection "Casks:"
-  echo "$UNDECLARED_CASKS" | while read -r pkg; do
-    printf "  "
-    print_warning "$pkg"
-  done
-  printf '\n'
-else
-  print_success "All casks are declared"
-  printf '\n'
-fi
-
-if [[ -n "$UNDECLARED_VSCODE" ]]; then
-  print_subsection "VS Code Extensions:"
-  echo "$UNDECLARED_VSCODE" | while read -r ext; do
-    printf "  "
-    print_warning "$ext"
-  done
-  printf '\n'
-else
-  print_success "All VS Code extensions are declared"
-  printf '\n'
-fi
-
-# Find packages declared but not installed
+# -- Declared but not installed --
 print_section "Declared but not installed:"
 
 # For missing check, use full install list (a declared package might be present as a dep)
 ALL_INSTALLED_FORMULAE=$(brew list --formula | sort)
+
+MISSING_TAPS=$(comm -13 <(echo "$INSTALLED_TAPS") <(echo "$DECLARED_TAPS") || true)
 MISSING_FORMULAE=$(comm -13 <(echo "$ALL_INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 MISSING_CASKS=$(comm -13 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
 MISSING_VSCODE=$(comm -13 <(echo "$INSTALLED_VSCODE") <(echo "$DECLARED_VSCODE") || true)
 
-if [[ -n "$MISSING_FORMULAE" ]]; then
-  print_subsection "Formulae:"
-  echo "$MISSING_FORMULAE" | while read -r pkg; do
-    printf "  "
-    print_error "$pkg"
-  done
-  printf '\n'
-else
-  print_success "All declared formulae are installed"
-  printf '\n'
-fi
+print_pkg_diff "Taps" "$MISSING_TAPS" print_error
+print_pkg_diff "Formulae" "$MISSING_FORMULAE" print_error
+print_pkg_diff "Casks" "$MISSING_CASKS" print_error
+print_pkg_diff "VS Code Extensions" "$MISSING_VSCODE" print_error
 
-if [[ -n "$MISSING_CASKS" ]]; then
-  print_subsection "Casks:"
-  echo "$MISSING_CASKS" | while read -r pkg; do
-    printf "  "
-    print_error "$pkg"
-  done
-  printf '\n'
-else
-  print_success "All declared casks are installed"
-  printf '\n'
-fi
-
-if [[ -n "$MISSING_VSCODE" ]]; then
-  print_subsection "VS Code Extensions:"
-  echo "$MISSING_VSCODE" | while read -r ext; do
-    printf "  "
-    print_error "$ext"
-  done
-  printf '\n'
-else
-  print_success "All declared VS Code extensions are installed"
-  printf '\n'
-fi
-
-# Summary
+# -- Summary --
 print_section "Summary:"
 
-# Count non-empty lines
-TOTAL_UNDECLARED=0
-[[ -n "$UNDECLARED_FORMULAE" ]] && TOTAL_UNDECLARED=$((TOTAL_UNDECLARED + $(echo "$UNDECLARED_FORMULAE" | grep -c .)))
-[[ -n "$UNDECLARED_CASKS" ]] && TOTAL_UNDECLARED=$((TOTAL_UNDECLARED + $(echo "$UNDECLARED_CASKS" | grep -c .)))
-[[ -n "$UNDECLARED_VSCODE" ]] && TOTAL_UNDECLARED=$((TOTAL_UNDECLARED + $(echo "$UNDECLARED_VSCODE" | grep -c .)))
+TOTAL_UNDECLARED=$(( $(count_lines "$UNDECLARED_TAPS") + $(count_lines "$UNDECLARED_FORMULAE") + $(count_lines "$UNDECLARED_CASKS") + $(count_lines "$UNDECLARED_VSCODE") ))
+TOTAL_MISSING=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSING_FORMULAE") + $(count_lines "$MISSING_CASKS") + $(count_lines "$MISSING_VSCODE") ))
 
-TOTAL_MISSING=0
-[[ -n "$MISSING_FORMULAE" ]] && TOTAL_MISSING=$((TOTAL_MISSING + $(echo "$MISSING_FORMULAE" | grep -c .)))
-[[ -n "$MISSING_CASKS" ]] && TOTAL_MISSING=$((TOTAL_MISSING + $(echo "$MISSING_CASKS" | grep -c .)))
-[[ -n "$MISSING_VSCODE" ]] && TOTAL_MISSING=$((TOTAL_MISSING + $(echo "$MISSING_VSCODE" | grep -c .)))
-
-# Strict drift checks (used by --check) only cover formulae and casks.
-TOTAL_UNDECLARED_STRICT=0
-[[ -n "$UNDECLARED_FORMULAE" ]] && TOTAL_UNDECLARED_STRICT=$((TOTAL_UNDECLARED_STRICT + $(echo "$UNDECLARED_FORMULAE" | grep -c .)))
-[[ -n "$UNDECLARED_CASKS" ]] && TOTAL_UNDECLARED_STRICT=$((TOTAL_UNDECLARED_STRICT + $(echo "$UNDECLARED_CASKS" | grep -c .)))
-
-TOTAL_MISSING_STRICT=0
-[[ -n "$MISSING_FORMULAE" ]] && TOTAL_MISSING_STRICT=$((TOTAL_MISSING_STRICT + $(echo "$MISSING_FORMULAE" | grep -c .)))
-[[ -n "$MISSING_CASKS" ]] && TOTAL_MISSING_STRICT=$((TOTAL_MISSING_STRICT + $(echo "$MISSING_CASKS" | grep -c .)))
+# Strict drift checks (used by --check) cover taps, formulae, and casks only.
+TOTAL_UNDECLARED_STRICT=$(( $(count_lines "$UNDECLARED_TAPS") + $(count_lines "$UNDECLARED_FORMULAE") + $(count_lines "$UNDECLARED_CASKS") ))
+TOTAL_MISSING_STRICT=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSING_FORMULAE") + $(count_lines "$MISSING_CASKS") ))
 
 if [[ $TOTAL_UNDECLARED -gt 0 ]]; then
   print_warning "$TOTAL_UNDECLARED packages installed but not in Brewfiles"

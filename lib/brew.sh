@@ -16,7 +16,9 @@ brew_normalize_entry_name() {
   local name="$2"
 
   case "$kind" in
-    tap) printf '%s\n' "$name" ;;
+    # Homebrew strips 'homebrew-' prefix from tap repos on install:
+    # user/homebrew-repo → user/repo
+    tap) printf '%s\n' "${name/\/homebrew-/\/}" ;;
     *) printf '%s\n' "${name##*/}" ;;
   esac
 }
