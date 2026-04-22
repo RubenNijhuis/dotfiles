@@ -95,3 +95,5 @@ brew "obsidian-cli"         # Obsidian CLI tools
 brew "ollama", restart_service: :changed  # Local LLM runtime
 tap "manaflow-ai/cmux"
 cask "cmux"
+brew "k6"
+brew "libpq", link: true
