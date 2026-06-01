@@ -11,6 +11,9 @@ export VISUAL="$DOTFILES_EDITOR"
 export LANG="en_US.UTF-8"
 export BUN_INSTALL="$HOME/.bun"
 
+# pnpm
+export PNPM_HOME="$HOME/.local/share/pnpm"
+
 # Rust
 export RUSTUP_HOME="$HOME/.rustup"
 export CARGO_HOME="$HOME/.cargo"
