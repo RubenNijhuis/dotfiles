@@ -7,6 +7,7 @@ Use this directory as the source for machine-local templates.
 - `machine.env.example`: non-secret local machine values.
 - `profile.env.example`: active tracked profile selection for this machine.
 - `keychain-required.txt.example`: required macOS Keychain service names.
+- `focus-allowed-apps.txt.example`: reference list of apps allowed during Work Focus (mirror by hand in System Settings — not scriptable).
 ## Usage
 
 ```bash

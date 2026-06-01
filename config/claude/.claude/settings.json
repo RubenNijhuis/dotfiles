@@ -48,7 +48,8 @@
       "Bash(git reset --hard *)",
       "Bash(git checkout -- .)",
       "Bash(git clean -f *)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "statusLine": {
     "type": "command",
@@ -74,8 +75,14 @@
     ]
   },
   "effortLevel": "medium",
-  "voiceEnabled": true,
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
   "showThinkingSummaries": true,
   "skipDangerousModePermissionPrompt": true,
-  "skipAutoPermissionPrompt": true
+  "theme": "dark-ansi",
+  "teammateMode": "auto",
+  "skipAutoPermissionPrompt": true,
+  "voiceEnabled": true
 }
