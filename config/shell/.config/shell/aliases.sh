@@ -22,6 +22,16 @@ alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 
+# Shadow defaults with modern tools (forces habit formation)
+if command -v zoxide >/dev/null 2>&1; then alias cd="z"; fi
+if command -v dust >/dev/null 2>&1; then alias du="dust"; fi
+
+# Single-key launchers for interactive tools
+if command -v yazi >/dev/null 2>&1; then alias y="yazi"; fi
+if command -v sesh >/dev/null 2>&1; then
+  alias s='sesh connect $(sesh list -tz | fzf --height=40% --reverse)'
+fi
+
 # Utility
 alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'

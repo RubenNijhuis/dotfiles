@@ -165,6 +165,11 @@ else
   PROMPT='%n@%m %1~ %# '
 fi
 
+# ----- Keybindings for interactive tools -----
+bindkey -s '^g' 'lazygit\n'
+bindkey -s '^o' 'yazi\n'
+bindkey -s '^s' 'sesh connect $(sesh list -tz | fzf --height=40%% --reverse)\n'
+
 # ----- Local overrides (not committed) -----
 [[ -f ~/.config/shell/local.sh ]] && source ~/.config/shell/local.sh
 

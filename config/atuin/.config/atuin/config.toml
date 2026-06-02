@@ -13,6 +13,9 @@ filter_mode_shell_up_key_binding = "session"
 # Fuzzy search by default
 search_mode = "fuzzy"
 
+# Bias matches to commands run in the current directory (per-dir telepathy)
+filter_mode = "directory"
+
 # Show timestamps in search results
 show_preview = true
 
