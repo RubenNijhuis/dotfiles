@@ -27,7 +27,8 @@ if command -v zoxide >/dev/null 2>&1; then alias cd="z"; fi
 if command -v dust >/dev/null 2>&1; then alias du="dust"; fi
 
 # Single-key launchers for interactive tools
-if command -v yazi >/dev/null 2>&1; then alias y="yazi"; fi
+# Note: `y` (yazi) is defined as a function in functions.sh — it cd's into the
+# directory yazi quits into. Do not alias `y` here; it would shadow the function.
 if command -v sesh >/dev/null 2>&1; then
   alias s='sesh connect $(sesh list -tz | fzf --height=40% --reverse)'
 fi
