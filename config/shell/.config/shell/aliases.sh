@@ -8,13 +8,10 @@ if command -v eza >/dev/null 2>&1; then
   alias lt="eza --tree --level=2"
 fi
 
-# Git shortcuts
+# Git shortcuts (interactive ops go through lazygit — Ctrl-G)
 alias g="git"
 alias gs="git status"
 alias gd="git diff"
-alias gc="git commit"
-alias gp="git push"
-alias gl="git log --oneline --graph"
 alias lg="lazygit"
 
 # Navigation
@@ -38,13 +35,7 @@ alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew cleanup"
 
-# Development cleanup
-alias clean-node='find . -name "node_modules" -type d -prune -exec rm -rf {} +'
-alias clean-python='find . -name "__pycache__" -type d -prune -exec rm -rf {} +'
-alias clean-rust='cargo clean 2>/dev/null; find . -name "target" -type d -prune -exec rm -rf {} +'
-alias clean-go='go clean -cache'
-alias clean-dotnet='dotnet clean 2>/dev/null; find . -name "bin" -o -name "obj" -type d -prune -exec rm -rf {} +'
-alias clean-ds='find . -name ".DS_Store" -delete'
+# Development cleanup — functions defined in functions.sh (guarded against $HOME / massive sweeps)
 
 # Search
 if command -v rg >/dev/null 2>&1; then alias grep="rg"; fi

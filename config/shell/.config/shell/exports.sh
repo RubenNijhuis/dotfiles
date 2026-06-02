@@ -42,3 +42,12 @@ export FZF_DEFAULT_OPTS=" \
   --color=fg+:#c0caf5,bg+:#292e42,hl+:#ff9e64 \
   --color=info:#7aa2f7,prompt:#7dcfff,pointer:#7dcfff \
   --color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a"
+
+# Colored man pages — Tokyo Night palette
+export LESS_TERMCAP_mb=$'\e[1;38;2;122;162;247m'
+export LESS_TERMCAP_md=$'\e[1;38;2;122;162;247m'
+export LESS_TERMCAP_me=$'\e[0m'
+export LESS_TERMCAP_se=$'\e[0m'
+export LESS_TERMCAP_so=$'\e[38;2;192;202;245;48;2;41;46;66m'
+export LESS_TERMCAP_ue=$'\e[0m'
+export LESS_TERMCAP_us=$'\e[4;38;2;187;154;247m'

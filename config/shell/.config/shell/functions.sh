@@ -5,14 +5,10 @@ mkcd() {
     mkdir -p "$1" && cd "$1" || return
 }
 
-# Find and edit file (combines fd + fzf + editor)
+# Find and edit file (fd + fzf + editor)
 fe() {
     local file
-    if command -v fd >/dev/null 2>&1; then
-        file=$(fd --type f | fzf --preview 'bat --color=always {}')
-    else
-        file=$(find . -type f 2>/dev/null | sed 's#^\./##' | fzf --preview 'bat --color=always {}')
-    fi
+    file=$(fd --type f | fzf --preview 'bat --color=always {}')
     [[ -n "$file" ]] && ${=EDITOR:-nvim} "${file}"
 }
 
@@ -80,7 +76,7 @@ newproj() {
     echo "# $name" > README.md
     git add README.md
     git commit -m "Initial commit"
-    echo "✓ Created $name in $target"
+    echo "Created $name in $target"
 }
 
 # Yazi file manager wrapper — cd into directory on exit
@@ -94,12 +90,6 @@ y() {
     rm -f -- "$tmp"
 }
 
-# Git branch checkout with fzf
-fco() {
-    local branch
-    branch=$(git branch -a | fzf | tr -d '[:space:]') && git checkout "${branch}"
-}
-
 # Force-refresh shell caches (completions + eval caches)
 # Useful after brew install/upgrade to pick up new completions immediately.
 flush-cache() {
@@ -109,11 +99,53 @@ flush-cache() {
     echo "Shell caches cleared. Restart your shell to rebuild."
 }
 
-# Colored man pages — Tokyo Night palette
-export LESS_TERMCAP_mb=$'\e[1;38;2;122;162;247m'
-export LESS_TERMCAP_md=$'\e[1;38;2;122;162;247m'
-export LESS_TERMCAP_me=$'\e[0m'
-export LESS_TERMCAP_se=$'\e[0m'
-export LESS_TERMCAP_so=$'\e[38;2;192;202;245;48;2;41;46;66m'
-export LESS_TERMCAP_ue=$'\e[0m'
-export LESS_TERMCAP_us=$'\e[4;38;2;187;154;247m'
+# Guarded development cleanup
+# Refuses to run at $HOME or / (catches "ran in the wrong place" mistakes).
+# Refuses if more than 20 matches would be deleted (catches "ran one level
+# too high"). Override the cap with FORCE=1.
+_clean_guard() {
+    case "$PWD" in
+        "$HOME"|"/"|"$HOME/Developer"|"$DOTFILES_DEVELOPER_ROOT")
+            echo "clean: refusing to run at $PWD" >&2
+            return 1
+            ;;
+    esac
+}
+
+_clean_sweep() {
+    local label="$1" pattern="$2"
+    _clean_guard || return 1
+    local matches
+    matches=$(fd --hidden --no-ignore --type d --glob "$pattern" 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$matches" -eq 0 ]]; then
+        echo "clean-$label: nothing to remove."
+        return 0
+    fi
+    if [[ "$matches" -gt 20 && "${FORCE:-0}" != "1" ]]; then
+        echo "clean-$label: $matches matches under $PWD — refusing (set FORCE=1 to override)." >&2
+        return 1
+    fi
+    fd --hidden --no-ignore --type d --glob "$pattern" -X rm -rf
+    echo "clean-$label: removed $matches dir(s)."
+}
+
+clean-node()    { _clean_sweep node "node_modules"; }
+clean-python()  { _clean_sweep python "__pycache__"; }
+clean-rust()    { _clean_guard || return 1; cargo clean 2>/dev/null; _clean_sweep rust "target"; }
+clean-go()      { go clean -cache; }
+clean-dotnet()  {
+    _clean_guard || return 1
+    dotnet clean 2>/dev/null
+    local matches
+    matches=$(fd --hidden --no-ignore --type d --glob '{bin,obj}' 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$matches" -gt 20 && "${FORCE:-0}" != "1" ]]; then
+        echo "clean-dotnet: $matches matches under $PWD — refusing (set FORCE=1 to override)." >&2
+        return 1
+    fi
+    fd --hidden --no-ignore --type d --glob '{bin,obj}' -X rm -rf
+    echo "clean-dotnet: removed $matches dir(s)."
+}
+clean-ds() {
+    _clean_guard || return 1
+    fd --hidden --type f -g .DS_Store -X rm -f
+}
