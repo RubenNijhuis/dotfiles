@@ -44,7 +44,11 @@ brew "git"           # Git version control (prefer Homebrew over Apple Git)
 brew "git-delta"     # Better git diffs
 brew "lazygit"       # Terminal UI for git
 brew "neovim"        # Modern vim
-brew "vim"           # Classic vim (fallback)
+brew "jj"            # Git-compatible VCS (jujutsu)
+brew "git-cliff"     # Conventional-commits changelog generator
+brew "gh-dash"       # TUI dashboard for GitHub PRs/issues
+brew "difftastic"    # Syntax-aware diff (complements git-delta)
+brew "hyperfine"     # Command-line benchmarking
 
 brew "dust"          # Better du (disk usage)
 
@@ -97,3 +101,5 @@ tap "manaflow-ai/cmux"
 cask "cmux"
 brew "k6"
 brew "libpq", link: true
+brew "libyaml"       # YAML lib (required for ruby psych ext at build time)
+brew "tailscale"     # WireGuard mesh VPN

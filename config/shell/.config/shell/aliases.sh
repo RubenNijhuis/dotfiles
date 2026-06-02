@@ -35,6 +35,16 @@ alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew cleanup"
 
+# Dotfiles repo shortcuts (work from anywhere)
+_DOT="${DOTFILES_REPO:-$HOME/dotfiles}"
+alias dot="cd $_DOT"
+alias dots="make -C $_DOT status"
+alias dotd="make -C $_DOT doctor"
+alias dotu="make -C $_DOT update"
+alias doth="make -C $_DOT help"
+alias dotc="make -C $_DOT cheat"
+unset _DOT
+
 # Development cleanup — functions defined in functions.sh (guarded against $HOME / massive sweeps)
 
 # Search

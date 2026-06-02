@@ -6,7 +6,6 @@
 
 # AI Tools
 vscode "anthropic.claude-code"               # Claude Code AI coding assistant
-vscode "github.copilot-chat"                 # GitHub Copilot chat interface
 
 # Code Quality & Formatting
 vscode "biomejs.biome"                       # Fast formatter and linter (JS/TS/JSON)

@@ -8,7 +8,6 @@
 # -----------------------------------------------------------------------------
 cask "font-fira-code"            # Monospace font with ligatures
 cask "font-fira-code-nerd-font"  # Nerd Font variant (icons for Neovim)
-cask "font-hack-nerd-font"            # Patched font with icons
 cask "font-symbols-only-nerd-font"  # Standalone Nerd Font icons (fallback)
 
 # -----------------------------------------------------------------------------
@@ -78,3 +77,4 @@ cask "dropbox"              # Cloud storage
 cask "epic-games"           # Epic Games launcher
 cask "trackweight"          # Weight tracking
 cask "steipete/tap/codexbar"
+cask "jellyfin"             # Self-hosted media server

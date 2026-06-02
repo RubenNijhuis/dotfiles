@@ -3,7 +3,6 @@
 
 # AI Tools
 anthropic.claude-code          # Claude Code AI coding assistant
-github.copilot-chat            # GitHub Copilot chat interface
 
 # Code Quality & Formatting
 biomejs.biome                  # Fast formatter and linter (JS/TS/JSON)

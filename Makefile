@@ -5,7 +5,7 @@
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean clean-all restore status launchd-check vscode-parity \
-	help-setup help-brew help-launchd help-test \
+	help-setup help-brew help-launchd help-test cheat \
 	profile-list profile-show profile-set
 
 DOTFILES := $(shell pwd)
@@ -26,6 +26,9 @@ help-launchd: ## LaunchD automation commands
 
 help-test: ## Testing & verification commands
 	@bash $(DOTFILES)/ops/help.sh test
+
+cheat: ## One-page personal cheatsheet (shadowed defaults, keybindings, shortcuts)
+	@bash $(DOTFILES)/ops/cheat.sh
 
 # ── Core ─────────────────────────────────────────────────────────────
 

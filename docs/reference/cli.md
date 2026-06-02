@@ -174,6 +174,61 @@ Options:
   --check   Exit non-zero when drift is found.
 ```
 
+## `ops/cheat.sh`
+
+```text
+[3J[H[2J[1mCheatsheet[0m  [2m— the tools you forget you have[0m
+
+[1mShadowed defaults[0m
+  [36mcd <dir>[0m   really runs z — fuzzy directory jump after first visit
+  [36mdu[0m         really runs dust — colored, sorted by size
+  [36mcat[0m        really runs bat — syntax highlighted, paged
+  [36mgrep[0m       really runs rg — fast, ignores .gitignore
+  [36mtop[0m        really runs btop — live resource TUI
+  [36mvim / vi / v[0m  really runs nvim (LazyVim)
+
+[1mKeybindings (zsh)[0m
+  [36mCtrl-R[0m     atuin — search shell history (per-dir bias)
+  [36mCtrl-G[0m     lazygit in current repo
+  [36mCtrl-O[0m     yazi file manager
+  [36mCtrl-S[0m     sesh — switch tmux session
+  [36mCtrl-T[0m     fzf — pick a file path into the command line
+  [36mAlt-C[0m      fzf — pick a directory and cd into it
+
+[1mSingle-key launchers[0m
+  [36my[0m          yazi (cd's into exit dir)
+  [36ms[0m          sesh — fzf session picker
+  [36mlg[0m         lazygit
+  [36mg / gs / gd[0m  git / git status / git diff
+  [36mfe[0m         fzf-pick a file, open in $EDITOR
+  [36mproj[0m       fzf-pick a project under ~/Developer, open in $EDITOR
+
+[1mDotfiles shortcuts (from anywhere)[0m
+  [36mdot[0m        cd into ~/dotfiles
+  [36mdots[0m       make status — quick health snapshot
+  [36mdotd[0m       make doctor — full health check
+  [36mdotu[0m       make update — sync repos / brew / runtimes / stow
+  [36mdoth[0m       make help
+  [36mdotc[0m       make cheat — this page
+
+[1mUseful but easy to forget[0m
+  [36mmkcd <dir>[0m  mkdir + cd
+  [36mz -[0m        back to previous directory
+  [36mtldr <cmd>[0m  tealdeer — example-driven help
+  [36mhyperfine <cmd>[0m  benchmark a command
+  [36mdifft <a> <b>[0m  syntax-aware diff
+  [36mgh dash[0m    TUI for GitHub PRs/issues
+  [36mjj[0m         git-compatible VCS — try alongside git
+  [36muv[0m         Python venv/package/script runner
+  [36mFORCE=1 clean-*[0m  override the 20-match safety cap
+
+[1mConflict / safety[0m
+  [36m(deny list)[0m  rm -*r/-*R, git push --force*, git reset --hard, branch -D
+  [36mFORCE=1[0m    needed to override clean-* 20-match guard
+
+[2mEdit:[0m [2mops/cheat.sh[0m
+```
+
 ## `ops/clean-all.sh`
 
 ```text
