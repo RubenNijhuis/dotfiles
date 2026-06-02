@@ -46,9 +46,9 @@ brew "lazygit"       # Terminal UI for git
 brew "neovim"        # Modern vim
 brew "jj"            # Git-compatible VCS (jujutsu)
 brew "git-cliff"     # Conventional-commits changelog generator
-brew "gh-dash"       # TUI dashboard for GitHub PRs/issues
 brew "difftastic"    # Syntax-aware diff (complements git-delta)
 brew "hyperfine"     # Command-line benchmarking
+# gh-dash: install via `gh extension install dlvhdr/gh-dash` (not in core).
 
 brew "dust"          # Better du (disk usage)
 

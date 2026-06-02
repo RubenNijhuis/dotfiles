@@ -217,7 +217,7 @@ Options:
   [36mtldr <cmd>[0m  tealdeer — example-driven help
   [36mhyperfine <cmd>[0m  benchmark a command
   [36mdifft <a> <b>[0m  syntax-aware diff
-  [36mgh dash[0m    TUI for GitHub PRs/issues
+  [36mgh dash[0m    TUI for GitHub PRs/issues (gh extension install dlvhdr/gh-dash)
   [36mjj[0m         git-compatible VCS — try alongside git
   [36muv[0m         Python venv/package/script runner
   [36mFORCE=1 clean-*[0m  override the 20-match safety cap
