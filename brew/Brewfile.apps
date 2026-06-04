@@ -26,7 +26,7 @@ cask "visual-studio-code"   # Code editor
 # Productivity & Communication
 # -----------------------------------------------------------------------------
 cask "figma"                # Design and prototyping tool
-cask "linear-linear"        # Project management
+cask "linear"               # Project management
 cask "meetingbar"           # Meeting bar menu extra
 cask "orbstack"             # Docker and Linux VM manager
 cask "readdle-spark"        # Email client (macOS + iOS sync)
