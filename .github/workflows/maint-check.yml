@@ -18,10 +18,16 @@ jobs:
       - name: Install dependencies
         timeout-minutes: 10
         run: |
-          brew install shellcheck biome shellharden
+          brew install bash shellcheck biome shellharden
+          # Surface the new bash 5 before macOS's stock bash 3.2 so doctor.sh
+          # (which requires bash 4+) and tests that exec it succeed.
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
 
       - name: Run maintenance checks
         timeout-minutes: 5
+        env:
+          # Skip the stow idempotency / integration cases that require stow.
+          SKIP_STOW_TESTS: "1"
         run: |
           make maint-check
 
