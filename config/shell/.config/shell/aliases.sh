@@ -35,13 +35,21 @@ alias resource="source ~/.zshrc"
 alias paths='echo $PATH | tr ":" "\n"'
 alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew cleanup"
 
-# Dotfiles repo shortcuts (work from anywhere)
+# Dotfiles repo shortcuts (work from anywhere).
+# Intentionally expand the path at alias-definition time so the alias works
+# even after the helper var is unset; shellcheck SC2139 is a false positive here.
 _DOT="${DOTFILES_REPO:-$HOME/dotfiles}"
+# shellcheck disable=SC2139
 alias dot="cd $_DOT"
+# shellcheck disable=SC2139
 alias dots="make -C $_DOT status"
+# shellcheck disable=SC2139
 alias dotd="make -C $_DOT doctor"
+# shellcheck disable=SC2139
 alias dotu="make -C $_DOT update"
+# shellcheck disable=SC2139
 alias doth="make -C $_DOT help"
+# shellcheck disable=SC2139
 alias dotc="make -C $_DOT cheat"
 unset _DOT
 
