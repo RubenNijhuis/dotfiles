@@ -7,7 +7,7 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 
-EXTENSIONS_TXT="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"
+EXTENSIONS_TXT="$DOTFILES/chezmoi/Library/Application Support/Code/User/extensions.txt"
 BREWFILE_VSCODE="$DOTFILES/brew/Brewfile.vscode"
 CHECK_MODE=false
 

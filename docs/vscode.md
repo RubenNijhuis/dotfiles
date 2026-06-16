@@ -24,7 +24,7 @@ Extensions in `config/vscode/.../extensions.txt` and `brew/Brewfile.vscode` (mus
 ## Setup
 
 ```bash
-make stow          # symlink settings
+chezmoi apply          # symlink settings
 make vscode-setup  # install extensions
 ```
 

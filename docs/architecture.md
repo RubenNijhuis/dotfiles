@@ -19,7 +19,7 @@ uv is the Python package and project manager. It also manages Python versions (`
 
 1. Bootstrap with `install.sh`.
 2. Select a machine profile with `make profile-set PROFILE=<name>` when needed.
-3. Apply/stabilize config with `make stow`, `make doctor`, `make bootstrap-verify`.
+3. Apply/stabilize config with `chezmoi apply`, `make doctor`, `make bootstrap-verify`.
 4. Operate machine workflows via launchd (`make *-setup`, `make ops-status`).
 5. Maintain with `make maint-check`, `make docs-sync`, `make update`.
 
@@ -48,7 +48,7 @@ Profiles allow the repo to adapt to different machine roles without duplicating 
 
 Current v1 behavior:
 
-- `setup/stow-all.sh` only stows packages listed by the active profile.
+- `chezmoi apply` only stows packages listed by the active profile.
 - `health/doctor.sh` shows the active profile in the overview section.
 - `health/doctor.sh --section profile` validates profile-specific requirements declared in the profile env file.
 

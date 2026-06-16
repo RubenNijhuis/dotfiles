@@ -187,7 +187,7 @@ check_tmux() {
   else
     details+="Config: missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-stow tmux config: cd $DOTFILES && make stow"
+    add_suggestion "Re-apply tmux config: chezmoi apply"
   fi
 
   # Check tpm and plugins

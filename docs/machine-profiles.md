@@ -42,7 +42,7 @@ make profile-set PROFILE=minimal
 
 Profiles currently affect:
 
-- `make stow`
+- `chezmoi apply`
 - `make doctor` overview
 - `make doctor --section profile`
 - `make install`
@@ -53,7 +53,7 @@ Profiles currently affect:
 
 That means:
 
-- `setup/stow-all.sh` only applies packages listed in the active profile
+- `chezmoi apply` only applies packages listed in the active profile
 - `health/doctor.sh` shows which profile is active
 - `health/doctor.sh --section profile` validates that the active machine satisfies that profile's declared contract
 - install-time Brew bundle selection follows the active profile's Brewfile list
@@ -152,7 +152,7 @@ For a new machine:
 cp local/profile.env.example local/profile.env
 make profile-set PROFILE=personal-laptop
 make profile-show
-make stow
+chezmoi apply
 make doctor
 ```
 
@@ -160,7 +160,7 @@ For switching an existing machine to another role:
 
 ```bash
 make profile-set PROFILE=minimal
-make stow
+chezmoi apply
 make doctor
 ```
 

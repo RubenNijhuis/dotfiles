@@ -66,7 +66,7 @@ if [[ -f ~/.ssh/config ]]; then
     fi
 else
     print_error "Config file not found: ~/.ssh/config"
-    print_dim "    Create with: make stow"
+    print_dim "    Create with: chezmoi apply"
 fi
 
 printf -- "\n"

@@ -551,8 +551,19 @@ step_install_packages() {
 }
 
 step_stow_configs() {
-  bash "$DOTFILES/setup/stow-all.sh"
-  print_success "Configs stowed"
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_error "chezmoi not installed (expected from Brewfile.cli)"
+    return 1
+  fi
+  # Bootstrap chezmoi config to point at this repo's source state if absent.
+  local cfg="$HOME/.config/chezmoi/chezmoi.toml"
+  if [[ ! -f "$cfg" ]]; then
+    mkdir -p "$(dirname "$cfg")"
+    printf 'sourceDir = "%s/chezmoi"\n' "$DOTFILES" > "$cfg"
+    print_dim "Wrote $cfg"
+  fi
+  chezmoi apply
+  print_success "Configs applied via chezmoi"
 }
 
 step_setup_runtimes() {
@@ -616,7 +627,7 @@ step_final_setup() {
 
   if command -v code &>/dev/null; then
     printf '%sInstalling VS Code extensions...%s\n' "${BLUE}" "${NC}"
-    local ext_file="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"
+    local ext_file="$DOTFILES/chezmoi/Library/Application Support/Code/User/extensions.txt"
     if [[ -f "$ext_file" ]]; then
       grep -v '^#' "$ext_file" | grep -v '^$' | cut -d' ' -f1 | xargs -L 1 code --install-extension 2>/dev/null || true
       print_success "VS Code extensions installed"

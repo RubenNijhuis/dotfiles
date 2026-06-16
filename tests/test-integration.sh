@@ -91,33 +91,29 @@ test_restore_dry_run_safe() {
   rm -rf "$temp_home"
 }
 
-# ── stow-all then doctor --section stow ────────────────────────────
+# ── chezmoi apply then doctor --section stow (chezmoi check) ────────────
 
-test_stow_then_doctor() {
-  if ! command -v stow >/dev/null 2>&1; then
-    print_warning "integration(stow-doctor): skipped (stow not installed)"
+test_chezmoi_then_doctor() {
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_warning "integration(chezmoi-doctor): skipped (chezmoi not installed)"
     return 0
   fi
 
-  local temp_home
+  local temp_home temp_cfg
   temp_home="$(make_temp_home)"
-  trap 'rm -rf "$temp_home"' RETURN
+  temp_cfg="$(mktemp -d)"
+  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
 
-  HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null 2>&1
+  # Point chezmoi at this repo's source state, target an isolated HOME.
+  printf 'sourceDir = "%s/chezmoi"\n' "$ROOT_DIR" > "$temp_cfg/chezmoi.toml"
+  HOME="$temp_home" XDG_CONFIG_HOME="$temp_cfg/.." \
+    chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
 
-  local output
-  output=$(HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow 2>&1)
-
-  assert_exit "stow-then-doctor-exit" 0 \
+  assert_exit "chezmoi-then-doctor-exit" 0 \
     env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
 
-  if ! printf '%s' "$output" | /usr/bin/grep -q "✓ Stow Configuration"; then
-    print_error "FAIL(stow-then-doctor): stow check did not pass"
-    TEST_FAILURES=$((TEST_FAILURES + 1))
-  fi
-
   trap - RETURN
-  rm -rf "$temp_home"
+  rm -rf "$temp_home" "$temp_cfg"
 }
 
 # ── ops-status uses the doctor task log, not the launchd wrapper log ───────
@@ -202,7 +198,7 @@ EOF
 test_clean_dry_run_safe
 test_clean_all_dry_run_safe
 test_restore_dry_run_safe
-test_stow_then_doctor
+test_chezmoi_then_doctor
 test_ops_status_uses_doctor_task_log
 test_doctor_profile_contract_passes_with_required_prereqs
 

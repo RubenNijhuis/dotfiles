@@ -82,16 +82,21 @@ update_global_packages() {
   fi
 }
 
-restow_configs() {
+apply_chezmoi() {
   print_section "Config Sync"
-  print_status_row "Start" info "reapplying stow packages"
+  print_status_row "Start" info "reapplying chezmoi source state to \$HOME"
 
-  local output
-  if output=$(bash "$DOTFILES/setup/stow-all.sh" --quiet ${NO_COLOR:+--no-color} 2>&1); then
-    print_status_row "Stow" ok "$output"
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_status_row "chezmoi" error "not installed (brew install chezmoi)"
+    return 1
+  fi
+  if chezmoi apply 2>/dev/null; then
+    local pending
+    pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
+    print_status_row "chezmoi" ok "applied (${pending} pending after)"
     return 0
   fi
-  print_status_row "Stow" error "failed"
+  print_status_row "chezmoi" error "apply failed — run: chezmoi diff"
   return 1
 }
 
@@ -117,7 +122,7 @@ main() {
   parallel_replay "$UPDATE_TMP" "${steps[@]}"
   failures=$((failures + $(parallel_failures "$UPDATE_TMP" "${steps[@]}")))
 
-  restow_configs || failures=$((failures + 1))
+  apply_chezmoi || failures=$((failures + 1))
 
   printf '\n'
   if [[ $failures -gt 0 ]]; then

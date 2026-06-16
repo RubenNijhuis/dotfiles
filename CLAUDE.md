@@ -1,11 +1,11 @@
 # CLAUDE.md
 
-macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for packages, launchd for automation. No Linux/cross-platform support.
+macOS-only dotfiles repo. Uses chezmoi for dotfile management, Homebrew for packages, launchd for automation. No Linux/cross-platform support.
 
 ## Structure
 
-- `config/` — Config packages symlinked into `$HOME` via GNU Stow. Each subdirectory mirrors home directory structure.
-- `setup/` — One-time and repeated setup scripts (stow, macos-defaults, key generation, hook installation).
+- `chezmoi/` — chezmoi source state. Files here mirror `$HOME`, with `dot_` prefix encoding for hidden files (`dot_zshrc` → `~/.zshrc`) and `private_` for 0600/0700 permissions.
+- `setup/` — One-time and repeated setup scripts (macos-defaults, key generation, hook installation, vscode extensions).
 - `ops/` — Ongoing operational scripts (update, clean, backup, brew sync, format, lint). Contains `automation/` for launchd-managed jobs.
 - `health/` — Health checks and diagnostics (doctor, vscode parity, launchd contracts, ssh/gpg info).
 - `tests/` — Script behavior and contract tests.
@@ -18,8 +18,8 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 
 ## Key Commands
 
-- `make update` — Update packages, runtimes, and re-stow configs
-- `make stow` / `make unstow` — Manage symlinks
+- `make update` — Update packages, runtimes, and re-apply chezmoi
+- `make apply` / `make diff` — `chezmoi apply` / `chezmoi diff`
 - `make status` — Quick actionable system status
 - `make doctor` — Comprehensive health check
 - `make clean` — Remove caches, logs, .DS_Stores
@@ -31,11 +31,11 @@ macOS-only dotfiles repo. Uses GNU Stow for symlink management, Homebrew for pac
 ## Lifecycle
 
 ```
-Fresh machine → install.sh → make stow → make doctor → make ops-status
-                                ↓
-                         make brew-sync (ongoing)
-                                ↓
-                         make maint-check (pre-push)
+Fresh machine → install.sh → chezmoi apply → make doctor → make ops-status
+                                  ↓
+                           make brew-sync (ongoing)
+                                  ↓
+                           make maint-check (pre-push)
 ```
 
 ## Script Contract
@@ -110,7 +110,7 @@ zsh/bash startup
 
 ## Config Packages
 
-Packages live in `config/`. Each subdirectory is a stow package symlinked into `$HOME`, mirroring the home directory structure. Use `make stow-report` to preview conflicts.
+Config files live under `chezmoi/`, organized to mirror `$HOME`. The `dot_` prefix encodes a leading dot (`dot_config/bat/config` → `~/.config/bat/config`), `private_` enforces 0600 file / 0700 dir permissions (used for `.ssh/` and `.gnupg/`), and `executable_` preserves the `+x` bit (used for Claude's statusline script). Empty files need an `empty_` prefix to materialize. Run `make diff` to preview pending changes and `make apply` to materialize them.
 
 ## Brewfiles
 

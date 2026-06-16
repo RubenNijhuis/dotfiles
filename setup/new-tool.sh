@@ -1,69 +1,38 @@
 #!/usr/bin/env bash
-# Scaffold a new config package for a tool.
+# Scaffold a new chezmoi-managed config file.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
-source "$SCRIPT_DIR/../lib/common.sh"
-source "$SCRIPT_DIR/../lib/output.sh" "$@"
+source "$DOTFILES/lib/common.sh"
+source "$DOTFILES/lib/output.sh" "$@"
+source "$DOTFILES/lib/cli.sh"
 
 usage() {
-  cat <<EOF
-Usage: $0 <name> [--brew <formula>] [--cask <cask>] [--config-dir] [--help] [--no-color]
+  cat <<USAGE
+Usage: $0 [--help] [--no-color] <tool-name>
 
-Scaffold a new config package.
-
-Options:
-  --brew <formula>  Add a brew formula to Brewfile.cli
-  --cask <cask>     Add a cask to Brewfile.apps
-  --config-dir      Create .config/<name>/ structure
-  --no-color        Disable colored output
-  --help, -h        Show this help message
-EOF
+Scaffold a chezmoi-managed config for <tool-name> at
+chezmoi/dot_config/<tool-name>/config. After editing, run 'make apply'.
+USAGE
 }
-
-TOOL_NAME="" BREW_FORMULA="" BREW_CASK="" CONFIG_DIR=false
 
 show_help_if_requested usage "$@"
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --brew)  BREW_FORMULA="$2"; shift 2 ;;
-    --cask)  BREW_CASK="$2"; shift 2 ;;
-    --config-dir) CONFIG_DIR=true; shift ;;
-    --no-color) shift ;;
-    -*) print_error "Unknown option: $1"; usage; exit 1 ;;
-    *)
-      if [[ -z "$TOOL_NAME" ]]; then TOOL_NAME="$1"; else print_error "Unexpected argument: $1"; exit 1; fi
-      shift ;;
+TOOL_NAME=""
+for arg in "$@"; do
+  case "$arg" in
+    --no-color|--help|-h) ;;
+    -*) print_error "Unknown argument: $arg"; usage; exit 1 ;;
+    *) TOOL_NAME="$arg" ;;
   esac
 done
+[[ -z "$TOOL_NAME" ]] && { usage; exit 1; }
 
-[[ -z "$TOOL_NAME" ]] && { print_error "Tool name is required"; usage; exit 1; }
+target="$DOTFILES/chezmoi/dot_config/$TOOL_NAME"
+[[ -d "$target" ]] && { print_error "Already exists at $target"; exit 1; }
 
-stow_dir="$DOTFILES/config/$TOOL_NAME"
-[[ -d "$stow_dir" ]] && { print_error "Package '$TOOL_NAME' already exists at $stow_dir"; exit 1; }
-
-if $CONFIG_DIR; then
-  mkdir -p "$stow_dir/.config/$TOOL_NAME"
-else
-  mkdir -p "$stow_dir"
-fi
-print_success "Created config/$TOOL_NAME/"
-
-if [[ -n "$BREW_FORMULA" ]]; then
-  if ! grep -q "\"$BREW_FORMULA\"" "$DOTFILES/brew/Brewfile.cli" 2>/dev/null; then
-    echo "brew \"$BREW_FORMULA\"" >> "$DOTFILES/brew/Brewfile.cli"
-    print_success "Added brew \"$BREW_FORMULA\" to Brewfile.cli"
-  fi
-fi
-
-if [[ -n "$BREW_CASK" ]]; then
-  if ! grep -q "\"$BREW_CASK\"" "$DOTFILES/brew/Brewfile.apps" 2>/dev/null; then
-    echo "cask \"$BREW_CASK\"" >> "$DOTFILES/brew/Brewfile.apps"
-    print_success "Added cask \"$BREW_CASK\" to Brewfile.apps"
-  fi
-fi
-
-printf '\n'
-print_info "Next: add config files, then run 'make stow'"
+mkdir -p "$target"
+touch "$target/config"
+print_success "Created $target/config"
+print_info "Next: edit the file, then run 'make apply' (chezmoi apply)."

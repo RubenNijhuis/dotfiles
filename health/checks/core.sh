@@ -21,34 +21,36 @@ find_git_dirs() {
 }
 
 check_stow() {
-
-  local stow_dir="$DOTFILES/config"
-
-  if [[ ! -d "$stow_dir" ]]; then
-    record_result "Stow Configuration" 2 "Config directory not found at $stow_dir"
-    add_suggestion "Ensure dotfiles are cloned correctly and config/ exists"
+  # Renamed concept: chezmoi replaced stow but the doctor section still
+  # advertises "stow" — keep the function name to avoid a wider rename
+  # in run_checks, but check chezmoi source-state sync instead.
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    record_result "chezmoi" 1 "chezmoi not installed"
+    add_suggestion "brew install chezmoi"
     return
   fi
 
-  # Discover packages dynamically from the stow directory
-  local packages=()
-  while IFS= read -r pkg_dir; do
-    packages+=("$(basename "$pkg_dir")")
-  done < <(find "$stow_dir" -maxdepth 1 -mindepth 1 -type d | sort)
-  local total=${#packages[@]}
+  # Soft warn when chezmoi isn't pointed at this repo's source state — common
+  # in CI/test sandboxes where ~/.config/chezmoi/chezmoi.toml isn't seeded.
+  local source_dir
+  source_dir="$(chezmoi source-path 2>/dev/null || echo "")"
+  if [[ -z "$source_dir" || ! -d "$source_dir" ]]; then
+    record_result "chezmoi" 1 "source dir not configured (no ~/.config/chezmoi/chezmoi.toml?)"
+    add_suggestion "echo 'sourceDir = \"$DOTFILES/chezmoi\"' > ~/.config/chezmoi/chezmoi.toml"
+    return
+  fi
 
-  # Check for broken symlinks in home directory
-  local broken_count
-  broken_count=$(count_broken_symlinks "$HOME")
+  # Count managed entries and detect pending changes.
+  local files dirs pending
+  files=$(chezmoi managed --include=files 2>/dev/null | wc -l | xargs)
+  dirs=$(chezmoi managed --include=dirs 2>/dev/null | wc -l | xargs)
+  pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
 
-  if [[ $total -gt 0 ]] && [[ $broken_count -eq 0 ]]; then
-    record_result "Stow Configuration" 0 "$total packages found, no broken symlinks"
-  elif [[ $broken_count -gt 0 ]]; then
-    record_result "Stow Configuration" 2 "Found $broken_count broken symlinks in home directory"
-    add_suggestion "Run: make unstow && make stow to fix symlinks"
+  if [[ "$pending" -eq 0 ]]; then
+    record_result "chezmoi" 0 "${files} files / ${dirs} dirs managed; source state matches \$HOME"
   else
-    record_result "Stow Configuration" 2 "No stow packages found in $stow_dir"
-    add_suggestion "Ensure dotfiles are cloned correctly and config/ is populated"
+    record_result "chezmoi" 1 "${files} files / ${dirs} dirs managed; ${pending} entries differ from source"
+    add_suggestion "Run: chezmoi diff (preview) then chezmoi apply"
   fi
 }
 
@@ -98,7 +100,7 @@ check_ssh() {
     else
       details+="SSH config: Include directive missing"
       issues=$((issues + 1))
-      add_suggestion "Re-stow SSH config: cd $DOTFILES && make stow"
+      add_suggestion "Re-apply SSH config: chezmoi apply"
     fi
   else
     details+="SSH config: missing"
@@ -189,12 +191,12 @@ check_git() {
     else
       details+="Conditional includes: missing from .gitconfig\n  "
       issues=$((issues + 1))
-      add_suggestion "Re-stow git config: cd $DOTFILES && make stow"
+      add_suggestion "Re-apply git config: chezmoi apply"
     fi
   else
     details+="No .gitconfig found\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-stow git config: cd $DOTFILES && make stow"
+    add_suggestion "Re-apply git config: chezmoi apply"
   fi
 
   local dev_root
@@ -282,7 +284,7 @@ check_shell() {
   else
     details+="Shell config files: $missing_files missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-stow shell config: cd $DOTFILES && make stow"
+    add_suggestion "Re-apply shell config: chezmoi apply"
   fi
 
   # Check PATH
