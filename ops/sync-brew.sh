@@ -13,16 +13,30 @@ source "$SCRIPT_DIR/../lib/brew.sh"
 dotfiles_load_env "$DOTFILES"
 trap 'rm -f "$TEMP_BREWFILE"' EXIT
 DRY_RUN=false
+AUTO=false
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] [--dry-run]
+Usage: $0 [--help] [--no-color] [--dry-run] [--auto]
 
 Sync manually installed Homebrew packages into tracked Brewfiles.
+
+Options:
+  --auto     Non-interactive: route brew→cli, cask/mas→apps, vscode→vscode,
+             tap→cli. Use from hooks/automation.
+  --dry-run  Show what would be added without modifying Brewfiles.
 EOF
 }
 
-parse_standard_args usage --accept-dry-run "$@"
+show_help_if_requested usage "$@"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --no-color|--quiet) shift ;;
+    --dry-run) DRY_RUN=true; shift ;;
+    --auto) AUTO=true; shift ;;
+    *) print_error "Unknown argument: $1"; usage; exit 1 ;;
+  esac
+done
 
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
@@ -101,8 +115,30 @@ append_if_missing() {
   fi
 }
 
+# Route a package line to the appropriate Brewfile by type.
+auto_route() {
+  local line="$1"
+  case "$line" in
+    brew\ *|tap\ *)    printf '%s\n' "$DOTFILES/brew/Brewfile.cli" ;;
+    cask\ *|mas\ *)    printf '%s\n' "$DOTFILES/brew/Brewfile.apps" ;;
+    vscode\ *)         printf '%s\n' "$DOTFILES/brew/Brewfile.vscode" ;;
+    *)                 return 1 ;;
+  esac
+}
+
 for pkg in "${NEW_PACKAGES[@]}"; do
   print_info "Package: $pkg"
+
+  if $AUTO; then
+    if dest=$(auto_route "$pkg"); then
+      append_if_missing "$pkg" "$dest"
+    else
+      print_warning "Cannot auto-route, skipped"
+    fi
+    printf '\n'
+    continue
+  fi
+
   print_subsection "Add to:"
   print_indent "1) Brewfile.cli (CLI tools)"
   print_indent "2) Brewfile.apps (GUI apps)"
