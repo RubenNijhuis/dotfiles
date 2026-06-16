@@ -3,6 +3,22 @@
 # Print with `make cheat` or `dotc` from anywhere.
 set -euo pipefail
 
+usage() {
+  cat <<EOF
+Usage: $0 [--help] [--no-color]
+
+Print a one-page cheatsheet of dotfile-provided commands and shortcuts.
+EOF
+}
+
+for arg in "$@"; do
+  case "$arg" in
+    --help|-h) usage; exit 0 ;;
+    --no-color) ;;
+    *) printf 'Unknown argument: %s\n' "$arg" >&2; usage >&2; exit 1 ;;
+  esac
+done
+
 bold()  { printf "\033[1m%s\033[0m" "$1"; }
 dim()   { printf "\033[2m%s\033[0m" "$1"; }
 cyan()  { printf "\033[36m%s\033[0m" "$1"; }
