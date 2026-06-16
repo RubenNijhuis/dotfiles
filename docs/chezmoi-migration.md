@@ -51,10 +51,14 @@ Cut over to chezmoi (deleted from `config/`):
 - [x] yazi        → `chezmoi/dot_config/yazi/` (pre-existing yazi.toml parse error — yazi schema changed; needs separate fix)
 - [x] sesh        → `chezmoi/dot_config/sesh/`
 - [x] atuin       → `chezmoi/dot_config/atuin/`
+- [x] tmux        → `chezmoi/dot_config/tmux/`
+- [x] shell       → `chezmoi/dot_config/shell/` (6 .sh files)
+- [x] spicetify   → `chezmoi/dot_config/spicetify/` (incl. Themes/TokyoNight)
+- [x] claude      → `chezmoi/dot_claude/` (nested .git skipped; statusline-command.sh uses executable_ prefix to preserve +x)
+- [x] nvim        → `chezmoi/dot_config/nvim/` (was stow package "vim"; LazyVim setup, 14 lua files + lockfile)
 
 Stow-only (not yet migrated):
-- bash, claude, ghostty, git, gpg, shell, spicetify, ssh, tmux, vim,
-  vscode, zsh
+- bash, ghostty, git, gpg, ssh, vscode, zsh
 
 ## Edge cases learned
 
@@ -65,3 +69,8 @@ Stow-only (not yet migrated):
   `docs/` instead.
 - **`~/.config/chezmoi/chezmoi.toml` is machine-local**, not committed.
   Each machine needs `sourceDir = "<absolute path to this repo>/chezmoi"`.
+- **Executable bits use a filename prefix.** `executable_foo.sh` in the
+  source state becomes `~/foo.sh` with `+x`. Hit by Claude's statusline.
+- **Nested `.git` directories in stow packages don't transfer.** Claude's
+  `.claude/.git/` was an orphan and would interfere with chezmoi's own
+  git working tree if left in. Just don't copy it.
