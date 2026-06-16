@@ -10,11 +10,15 @@ assert_exit() {
   local label="$1" expected="$2"
   shift 2
   set +e
-  "$@" >/dev/null 2>&1
+  local output
+  output=$("$@" 2>&1)
   local actual=$?
   set -e
   if [[ "$actual" -ne "$expected" ]]; then
     print_error "FAIL($label): expected exit $expected, got $actual"
+    if [[ "${TEST_VERBOSE:-1}" != "0" ]]; then
+      printf '%s\n' "$output" | sed 's/^/    /' >&2
+    fi
     TEST_FAILURES=$((TEST_FAILURES + 1))
   fi
 }
