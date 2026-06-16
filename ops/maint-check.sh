@@ -26,29 +26,32 @@ for arg in "$@"; do
   esac
 done
 
-# Each entry runs a shell command via `bash -c`. Order here defines the
-# replay order on failure summaries.
-STEPS=(lint-shell test-scripts launchd-check docs-regen vscode-parity brew-audit)
-declare -A CMDS=(
-  [lint-shell]="bash $DOTFILES/ops/lint-shell.sh"
-  [test-scripts]="bash $DOTFILES/tests/run-parallel.sh"
-  [launchd-check]="bash $DOTFILES/health/check-launchd-contracts.sh"
-  [docs-regen]="bash $DOTFILES/ops/generate-cli-reference.sh"
-  [vscode-parity]="bash $DOTFILES/health/check-vscode-parity.sh --check"
-  [brew-audit]="bash $DOTFILES/ops/brew-audit.sh"
+# Each entry pairs a label with a command (label|cmd). Order defines the
+# replay order on failure summaries. Kept as a flat list to stay
+# bash 3.2-compatible (macOS stock + CI).
+STEPS=(
+  "lint-shell|bash $DOTFILES/ops/lint-shell.sh"
+  "test-scripts|bash $DOTFILES/tests/run-parallel.sh"
+  "launchd-check|bash $DOTFILES/health/check-launchd-contracts.sh"
+  "docs-regen|bash $DOTFILES/ops/generate-cli-reference.sh"
+  "vscode-parity|bash $DOTFILES/health/check-vscode-parity.sh --check"
+  "brew-audit|bash $DOTFILES/ops/brew-audit.sh"
 )
 
 TMP="$(parallel_tmpdir maint)"
 trap 'rm -rf "$TMP"' EXIT
 
-for label in "${STEPS[@]}"; do
-  parallel_spawn "$TMP" "$label" bash -c "${CMDS[$label]}"
+for entry in "${STEPS[@]}"; do
+  label="${entry%%|*}"
+  cmd="${entry#*|}"
+  parallel_spawn "$TMP" "$label" bash -c "$cmd"
 done
 parallel_wait
 
 printf '\n=== Maintenance Check ===\n\n'
 FAILED=0
-for label in "${STEPS[@]}"; do
+for entry in "${STEPS[@]}"; do
+  label="${entry%%|*}"
   rc="$(parallel_rc "$TMP" "$label")"
   if [[ "$rc" == "0" ]]; then
     printf '  \033[32m✓\033[0m %s\n' "$label"
