@@ -55,6 +55,7 @@ brew "dust"          # Better du (disk usage)
 # -----------------------------------------------------------------------------
 # Development Tools
 # -----------------------------------------------------------------------------
+brew "act"           # Run GitHub Actions locally
 brew "bash"          # Modern bash (macOS ships with old version)
 brew "biome"         # Fast formatter and linter (JS/TS/JSON)
 brew "mise"          # Polyglot version manager (node, ruby, etc.)
