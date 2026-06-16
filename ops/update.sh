@@ -93,6 +93,17 @@ restow_configs() {
   return 1
 }
 
+# Run a subsystem function, capturing stdout/stderr to a buffer file and
+# its exit code to a sibling .rc file. Designed for backgrounded parallel use.
+run_buffered() {
+  local fn="$1" buf="$2"
+  if "$fn" >"$buf" 2>&1; then
+    printf '0\n' > "${buf}.rc"
+  else
+    printf '%s\n' "$?" > "${buf}.rc"
+  fi
+}
+
 main() {
   parse_standard_args usage "$@"
   print_header "System Update"
@@ -100,12 +111,27 @@ main() {
   printf '\n'
 
   local failures=0
+  UPDATE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-update.XXXXXX")"
+  trap 'rm -rf "${UPDATE_TMP:-}"' EXIT
+  local tmp="$UPDATE_TMP"
 
-  update_repos           || failures=$((failures + 1))
-  update_homebrew        || failures=$((failures + 1))
-  update_runtimes        || failures=$((failures + 1))
-  update_global_packages || failures=$((failures + 1))
-  restow_configs         || failures=$((failures + 1))
+  # Fan out independent steps. Restow must run after because brew/runtimes
+  # can change files the symlink farm references.
+  run_buffered update_repos           "$tmp/repos" &
+  run_buffered update_homebrew        "$tmp/brew" &
+  run_buffered update_runtimes        "$tmp/runtimes" &
+  run_buffered update_global_packages "$tmp/global" &
+  wait
+
+  # Replay buffered output in deterministic order.
+  for step in repos brew runtimes global; do
+    cat "$tmp/$step"
+    local rc
+    rc="$(cat "$tmp/${step}.rc" 2>/dev/null || echo 1)"
+    [[ "$rc" != "0" ]] && failures=$((failures + 1))
+  done
+
+  restow_configs || failures=$((failures + 1))
 
   printf '\n'
   if [[ $failures -gt 0 ]]; then
