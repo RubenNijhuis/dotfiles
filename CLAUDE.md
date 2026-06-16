@@ -20,8 +20,10 @@ macOS-only dotfiles repo. Uses chezmoi for dotfile management, Homebrew for pack
 
 - `make update` — Update packages, runtimes, and re-apply chezmoi
 - `make apply` / `make diff` — `chezmoi apply` / `chezmoi diff`
-- `make status` — Quick actionable system status
-- `make doctor` — Comprehensive health check
+- `make doctor` — Health summary + automation dashboard (default)
+- `make doctor ARGS=--full` — Deep health check suite (~15 checks)
+- `make doctor ARGS=--automation` — Just the automation dashboard
+- `make doctor ARGS=--quick` — Just the short summary
 - `make clean` — Remove caches, logs, .DS_Stores
 - `make backup` — Backup dotfiles
 - `make install` — Full bootstrap (new machine)
@@ -31,7 +33,7 @@ macOS-only dotfiles repo. Uses chezmoi for dotfile management, Homebrew for pack
 ## Lifecycle
 
 ```
-Fresh machine → install.sh → chezmoi apply → make doctor → make ops-status
+Fresh machine → install.sh → chezmoi apply → make doctor → make doctor --automation
                                   ↓
                            make brew-sync (ongoing)
                                   ↓

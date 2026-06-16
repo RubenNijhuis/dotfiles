@@ -21,7 +21,7 @@ For managed built-in agents, prefer:
 Operational status:
 
 ```bash
-make ops-status
+make doctor --automation
 ```
 
 ## Minimal Script Template

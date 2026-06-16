@@ -60,7 +60,7 @@ Every `com.user.<task>.plist` template must include:
 - `<key>StandardOutPath</key>` and `<key>StandardErrorPath</key>` under `__HOME__/.local/log/`
 - deterministic schedule (`RunAtLoad`, `StartCalendarInterval`, or `StartInterval`)
 
-If a job uses non-standard log names, document them in this file and surface them in `ops/automation/ops-status.sh`.
+If a job uses non-standard log names, document them in this file and surface them in `health/doctor.sh --automation`.
 
 ## Minimal Script Template
 
@@ -121,7 +121,7 @@ If install fails with permissions, run the command outside sandboxed tooling.
 
 ```bash
 make automation-setup
-make ops-status
+make doctor --automation
 ```
 
 ## More Examples

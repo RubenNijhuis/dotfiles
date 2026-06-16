@@ -5,7 +5,7 @@
 ```bash
 make backup
 make automation-setup   # sets up backup + doctor + repo-update automations
-make ops-status         # check all automation statuses
+make doctor --automation         # check all automation statuses
 ```
 
 ## Validation

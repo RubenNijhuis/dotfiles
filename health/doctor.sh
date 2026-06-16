@@ -14,28 +14,30 @@ source "$SCRIPT_DIR/../lib/parallel.sh"
 # tests pass on bash 3.x (CI runners use macOS stock bash 3.2).
 _doctor_usage() {
   cat <<USAGE
-Usage: $0 [--help] [--quick] [--full] [--status] [--section <name>] [--no-color]
+Usage: $0 [--help] [--full] [--quick] [--automation] [--section <name>] [--no-color]
 
-Comprehensive system health check for dotfiles setup.
+Unified health command. Default = quick summary + automation dashboard.
 
 Options:
-  --quick             Run a reduced set of checks (skip slow network/brew checks)
-  --full              Run the full check set (default)
-  --status            Show quick actionable system status summary
-  --section <name>    Run only the specified check section
+  (no flags)          Quick summary + automation dashboard (default)
+  --full              Run the full deep health-check suite
+  --quick             Just the quick actionable summary (no dashboard)
+  --automation        Just the launchd automation dashboard
+  --status            Deprecated alias for the default mode
+  --section <name>    Within --full, run only the specified check section
   --no-color          Disable colored output
   --help, -h          Show this help message
 
-Sections:
-  stow, ssh, gpg, git, shell, developer, runtime, profile,
-  launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf
+Sections (with --full --section):
+  stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
+  backup, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
 
 for _arg in "$@"; do
   case "$_arg" in
     --help|-h) _doctor_usage; exit 0 ;;
-    --quick|--status|--full|--no-color) ;;
+    --quick|--status|--full|--automation|--no-color) ;;
     --section) ;;
     --*) echo "Unknown argument: $_arg" >&2; _doctor_usage >&2; exit 1 ;;
   esac
@@ -44,7 +46,8 @@ done
 require_bash_version 4 "doctor.sh"
 
 QUICK_MODE=false
-STATUS_MODE=false
+FULL_MODE=false
+AUTOMATION_ONLY=false
 SECTION=""
 export DOTFILES QUICK_MODE
 
@@ -72,11 +75,15 @@ parse_args() {
         shift
         ;;
       --full)
-        QUICK_MODE=false
+        FULL_MODE=true
         shift
         ;;
       --status)
-        STATUS_MODE=true
+        # Deprecated alias — silently maps to default mode (no-op).
+        shift
+        ;;
+      --automation)
+        AUTOMATION_ONLY=true
         shift
         ;;
       --section)
@@ -85,6 +92,7 @@ parse_args() {
           exit 1
         fi
         SECTION="$2"
+        FULL_MODE=true
         shift 2
         ;;
       --no-color)
@@ -307,27 +315,6 @@ print_summary() {
 # ── Status mode ──────────────────────────────────────────────────────
 # Quick actionable summary: doctor health, stow, launchd, backup, docs.
 
-status_check_doctor() {
-  local output exit_code=0
-  output=$(bash "$SCRIPT_DIR/doctor.sh" --quick --no-color 2>&1) || exit_code=$?
-
-  if [[ $exit_code -eq 0 ]]; then
-    local count
-    count=$(echo "$output" | grep -c "✓" || echo "0")
-    print_status_row "Doctor" ok "$count quick checks passed"
-  else
-    local warnings errors
-    warnings=$(echo "$output" | grep -c "⚠" || echo "0")
-    errors=$(echo "$output" | grep -c "✗" || echo "0")
-    if [[ $errors -gt 0 ]]; then
-      print_status_row "Doctor" error "$errors errors, $warnings warnings"
-    else
-      print_status_row "Doctor" warn "$warnings warnings"
-    fi
-    STATUS_ISSUES=$((STATUS_ISSUES + 1))
-  fi
-}
-
 status_check_stow() {
   # Renamed concept: dotfiles are now managed by chezmoi, but the function
   # name is preserved to avoid a wider rename in the status pipeline.
@@ -405,17 +392,98 @@ status_check_docs() {
   fi
 }
 
-run_status() {
+# ── Automation dashboard (ported from ops/automation/ops-status.sh) ──
+
+_log_timestamp() {
+  local log_file="$1"
+  if [[ -f "$log_file" ]]; then
+    stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$log_file" 2>/dev/null || echo "unknown"
+  else
+    echo "no log"
+  fi
+}
+
+_log_status() {
+  local log_file="$1"
+  if [[ ! -f "$log_file" ]]; then
+    echo "warn|no log yet"
+    return
+  fi
+  if [[ "$log_file" == *.err.log ]]; then
+    if [[ -s "$log_file" ]]; then
+      echo "error|errors recorded"
+    else
+      echo "ok|clean"
+    fi
+    return
+  fi
+  local last_line
+  last_line=$(tail -1 "$log_file" 2>/dev/null || true)
+  if [[ "$last_line" =~ (✓|passed|success|complete) ]]; then
+    echo "ok|healthy"
+  elif [[ "$last_line" =~ (✗|error|fail) ]]; then
+    echo "error|failed"
+  else
+    echo "info|awaiting signal"
+  fi
+}
+
+run_automation_dashboard() {
+  LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
+
+  print_section "Automation Dashboard"
+  local loaded_count=0 warn_count=0 error_count=0
+  local agent_info name desc loaded_state out_log err_log
+  local out_status out_detail err_status err_detail
+  while IFS= read -r agent_info; do
+    IFS=':' read -r name desc <<< "$agent_info"
+    out_log="$(agent_log_file "$name")"
+    err_log="$(agent_error_log_file "$name")"
+
+    if is_agent_loaded "$name"; then
+      loaded_state="loaded"
+      loaded_count=$((loaded_count + 1))
+    else
+      loaded_state="not loaded"
+      warn_count=$((warn_count + 1))
+    fi
+
+    IFS='|' read -r out_status out_detail <<< "$(_log_status "$out_log")"
+    IFS='|' read -r err_status err_detail <<< "$(_log_status "$err_log")"
+
+    if [[ "$out_status" == "error" || "$err_status" == "error" ]]; then
+      error_count=$((error_count + 1))
+    elif [[ "$loaded_state" != "loaded" || "$out_status" == "warn" || "$err_status" == "warn" ]]; then
+      warn_count=$((warn_count + 1))
+    fi
+
+    print_status_row "$name" "${out_status}" "$loaded_state | out $(_log_timestamp "$out_log") ($out_detail) | err $(_log_timestamp "$err_log") ($err_detail)"
+    print_dim "    $desc"
+  done < <(profile_agent_infos)
+
+  printf '\n'
+  local selected_count
+  selected_count=$(profile_agent_infos | grep -c . || true)
+  print_status_row "Loaded agents" info "${loaded_count}/${selected_count}"
+  print_status_row "Warnings" warn "$warn_count"
+  print_status_row "Errors" error "$error_count"
+
+  print_section "Backup recency"
+  local latest_backup
+  latest_backup=$(find "$HOME/.dotfiles-backup" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1 || true)
+  if [[ -n "${latest_backup:-}" ]]; then
+    print_status_row "Latest backup" ok "$(basename "$latest_backup")"
+  else
+    print_status_row "Latest backup" warn "none found"
+  fi
+}
+
+run_quick() {
   source "$SCRIPT_DIR/../lib/env.sh"
   dotfiles_load_env "$DOTFILES"
 
   STATUS_ISSUES=0
-  print_header "System Status"
-  print_dim "Quick readout for the machine state that needs action today."
-  printf '\n'
   print_section "Today"
-
-  status_check_doctor
   status_check_stow
   status_check_launchd
   status_check_backup
@@ -424,14 +492,8 @@ run_status() {
   print_section "Summary"
   if [[ $STATUS_ISSUES -eq 0 ]]; then
     print_status_row "Overall" ok "all clear"
-    print_next_steps "No action needed."
   else
     print_status_row "Overall" warn "$STATUS_ISSUES item(s) need attention"
-    print_next_steps \
-      "Run: make doctor" \
-      "Run: make ops-status" \
-      "Run: make automation-setup if launchd agents are missing" \
-      "Run: make backup if backup status is stale"
   fi
 }
 
@@ -440,24 +502,65 @@ run_status() {
 main() {
   parse_args "$@"
 
-  if $STATUS_MODE; then
-    run_status
+  # --full: deep health-check suite (existing behavior)
+  if $FULL_MODE; then
+    source "$SCRIPT_DIR/checks/core.sh"
+    source "$SCRIPT_DIR/checks/system.sh"
+    source "$SCRIPT_DIR/checks/editor.sh"
+
+    print_header "System Health Check"
+    print_dim "Use this when you want a deeper read on machine health, config drift, and tooling."
+    printf '\n'
+    print_run_context
+    run_checks
+    print_summary
+
+    if [[ $ERRORS -gt 0 ]]; then
+      exit 1
+    fi
     return
   fi
 
-  source "$SCRIPT_DIR/checks/core.sh"
-  source "$SCRIPT_DIR/checks/system.sh"
-  source "$SCRIPT_DIR/checks/editor.sh"
+  # --automation: only the dashboard
+  if $AUTOMATION_ONLY; then
+    print_header "Automation Status"
+    print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
+    printf '\n'
+    run_automation_dashboard
+    return
+  fi
 
-  print_header "System Health Check"
-  print_dim "Use this when you want a deeper read on machine health, config drift, and tooling."
+  # --quick: only the short summary
+  if $QUICK_MODE; then
+    print_header "System Status"
+    print_dim "Quick actionable readout."
+    printf '\n'
+    run_quick
+    if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
+      print_next_steps "Run: make doctor --full for the deep checks"
+    else
+      print_next_steps "No action needed."
+    fi
+    return
+  fi
+
+  # Default (also --status): quick summary + automation dashboard.
+  print_header "System Status"
+  print_dim "Quick health + automation dashboard. Use --full for the deep checks."
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   printf '\n'
-  print_run_context
-  run_checks
-  print_summary
+  run_quick
+  printf '\n'
+  run_automation_dashboard
 
-  if [[ $ERRORS -gt 0 ]]; then
-    exit 1
+  printf '\n'
+  if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
+    print_next_steps \
+      "Run: make doctor --full for the deep checks" \
+      "Run: make automation-setup if launchd agents are missing" \
+      "Run: make backup if backup status is stale"
+  else
+    print_next_steps "No action needed."
   fi
 }
 

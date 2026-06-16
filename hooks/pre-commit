@@ -6,7 +6,7 @@ set -euo pipefail
 DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/lib/output.sh"
 
-STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' | grep -v '\.config/shell/' || true)
+STAGED_SCRIPTS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' | grep -Ev '(^|/)(\.config|dot_config)/shell/' || true)
 STAGED_BIOME=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|json|jsonc)$' || true)
 STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM || true)
 

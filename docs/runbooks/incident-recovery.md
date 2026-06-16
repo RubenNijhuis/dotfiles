@@ -13,7 +13,7 @@
 ## Launchd Automation Failure
 
 ```bash
-make ops-status
+make doctor --automation
 ~/dotfiles/ops/automation/launchd-manager.sh status
 ~/dotfiles/ops/automation/launchd-manager.sh restart <agent>
 ```

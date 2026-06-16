@@ -61,7 +61,7 @@ row "proj"            "fzf-pick a project under ~/Developer, open in \$EDITOR"
 
 section "Dotfiles shortcuts (from anywhere)"
 row "dot"             "cd into ~/dotfiles"
-row "dots"            "make status — quick health snapshot"
+row "dots"            "make doctor — health + automation dashboard"
 row "dotd"            "make doctor — full health check"
 row "dotu"            "make update — sync repos / brew / runtimes / chezmoi"
 row "doth"            "make help"

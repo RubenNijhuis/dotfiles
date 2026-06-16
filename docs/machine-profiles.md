@@ -49,7 +49,7 @@ Profiles currently affect:
 - `make brew-audit`
 - `make brew-sync`
 - `make automation-setup`
-- `make ops-status`
+- `make doctor --automation`
 
 That means:
 

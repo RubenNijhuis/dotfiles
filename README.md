@@ -15,9 +15,9 @@ cd ~/dotfiles
 For normal day-to-day operation, start here:
 
 ```bash
-make status       # fast "what needs attention?" snapshot
-make doctor       # full health check with next steps
-make ops-status   # launchd automation dashboard
+make doctor       # default: quick summary + automation dashboard
+make doctor --full  # full health check with all sections
+make doctor --automation   # launchd automation dashboard
 make update       # compact live progress for repos, brew, runtimes, and re-stow
 make spicetify-status # Spotify theming health check
 ```
@@ -41,10 +41,10 @@ Current profile behavior:
 - the active profile is loaded from `local/profile.env` or defaults to `personal-laptop`
 - `chezmoi apply` only applies the packages allowed by the active profile
 - `make doctor` shows the active profile in its overview
-- `make doctor --section profile` validates profile-specific required commands, paths, and keychain items
+- `# (profile section removed; chezmoi templates + per-check validation cover it)
 - `make install`, `make brew-audit`, and `make brew-sync` use the active profile's Brewfiles
 - `make automation-setup` installs the active profile's automation set
-- `make ops-status` shows which profile the automation dashboard reflects
+- `make doctor --automation` shows which profile the automation dashboard reflects
 
 Tracked profile definitions live in `profiles/`.
 Machine-local profile selection lives in `local/profile.env`.
@@ -56,7 +56,7 @@ make help             # show all commands
 make install          # full machine bootstrap
 make bootstrap-verify # strict bootstrap reliability checks
 make doctor           # full health checks
-make ops-status       # consolidated automation + ops status
+make doctor --automation       # consolidated automation + ops status
 make update           # package/runtime update + restow
 make maint-check      # lint + script tests
 make docs-sync        # fail if generated CLI docs are stale

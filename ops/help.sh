@@ -29,9 +29,8 @@ render_main() {
   printf "\n\033[1mDotfiles Command Center\033[0m\n"
   printf "%s\n\n" "Use the commands below by intent: daily checks first, setup tools second, deeper maintenance when needed."
   printf "\033[1mStart Here\033[0m\n"
-  print_command "status" "Fast daily snapshot of machine health"
+  print_command "doctor" "Health + automation dashboard (use --full for deep)"
   print_command "doctor" "Full diagnostic pass with next-step guidance"
-  print_command "ops-status" "Automation dashboard for launchd tasks"
   printf "\n\033[1mDaily Work\033[0m\n"
   print_command "update" "Update repos, brew, runtimes, and re-apply chezmoi"
   print_command "apply" "chezmoi apply — materialize source state into \$HOME"
@@ -57,7 +56,7 @@ render_main() {
   print_dim_command "help-brew" "Brew sync and audit commands"
   print_dim_command "help-launchd" "Automation and launchd commands"
   print_dim_command "help-test" "Tests and verification commands"
-  printf "\n\033[2mSuggested flow: make status -> make doctor -> make update\033[0m\n"
+  printf "\n\033[2mSuggested flow: make doctor -> make update\033[0m\n"
 }
 
 render_setup() {
@@ -88,13 +87,12 @@ render_brew() {
 render_launchd() {
   printf "\n\033[1mLaunchd Toolkit\033[0m\n"
   printf "%s\n\n" "Use these to inspect and manage recurring automations."
-  print_command "ops-status" "Automation dashboard with recent task results"
   print_command "automation-list" "List all managed agents"
   print_command "launchd-status" "Show agent load status"
   print_command "launchd-install-all" "Install and load all agents"
   print_command "launchd-uninstall-all" "Unload and remove all agents"
   print_command "automation-setup" "Install profile-appropriate automations"
-  printf "\n\033[2mSuggested flow: ops-status -> automation-list -> launchd-status\033[0m\n"
+  printf "\n\033[2mSuggested flow: automation-list -> launchd-status\033[0m\n"
 }
 
 render_test() {

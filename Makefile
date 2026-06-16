@@ -1,10 +1,10 @@
 .PHONY: help install update apply diff macos ssh-setup gpg-setup \
 	backup brew-sync brew-audit \
-	doctor ops-status spicetify-status spicetify-apply spicetify-restore \
+	doctor spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
-	clean clean-all restore status launchd-check vscode-parity \
+	clean clean-all restore launchd-check vscode-parity \
 	help-setup help-brew help-launchd help-test cheat \
 	profile-list profile-show profile-set
 
@@ -49,14 +49,8 @@ macos: ## Apply macOS defaults
 
 # ── Health & Status ──────────────────────────────────────────────────
 
-status: ## Quick system status — shows only actionable items
-	@bash $(DOTFILES)/health/doctor.sh --status
-
-doctor: ## Run comprehensive system health check
-	@bash $(DOTFILES)/health/doctor.sh
-
-ops-status: ## Show consolidated automation and ops health status
-	@bash $(DOTFILES)/ops/automation/ops-status.sh
+doctor: ## Quick health + automation dashboard (use --full for deep checks)
+	@bash $(DOTFILES)/health/doctor.sh $(ARGS)
 
 # ── Setup (one-time) ────────────────────────────────────────────────
 

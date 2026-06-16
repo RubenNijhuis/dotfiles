@@ -127,7 +127,7 @@ main() {
   printf '\n'
   if [[ $failures -gt 0 ]]; then
     print_status_row "Overall" warn "$failures step(s) had issues"
-    print_next_steps "Run: make doctor" "Run: make ops-status" "Run: make brew-audit if Brewfiles drifted"
+    print_next_steps "Run: make doctor" "Run: make doctor --automation" "Run: make brew-audit if Brewfiles drifted"
     exit 1
   fi
 

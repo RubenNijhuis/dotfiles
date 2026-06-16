@@ -157,7 +157,7 @@ EOF
   chmod +x "$fake_launchctl"
 
   output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
-    bash "$ROOT_DIR/ops/automation/ops-status.sh" --no-color 2>&1)
+    bash "$ROOT_DIR/health/doctor.sh" --automation --no-color 2>&1)
 
   if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor    \[OK\] loaded | out 2026-04-12 02:09"; then
     print_error "FAIL(ops-status-doctor-log): expected task log timestamp"
