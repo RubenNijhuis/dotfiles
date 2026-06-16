@@ -319,10 +319,11 @@ status_check_backup() {
 }
 
 status_check_docs() {
-  if bash "$DOTFILES/ops/generate-cli-reference.sh" --check --no-color >/dev/null 2>&1; then
-    print_status_row "Docs" ok "generated reference is current"
+  local ref="$DOTFILES/docs/reference/cli.md"
+  if [[ -f "$ref" ]]; then
+    print_status_row "Docs" ok "CLI reference present"
   else
-    print_status_row "Docs" warn "generated reference is stale"
+    print_status_row "Docs" warn "CLI reference missing — run: make docs-regen"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }

@@ -18,6 +18,9 @@ config/claude/.claude/skills/
 # Backups
 .dotfiles-backup/
 
+# Generated docs (built by ops/generate-cli-reference.sh)
+docs/reference/cli.md
+
 # SSH - keep config, ignore keys and sensitive data
 config/ssh/.ssh/id_*
 config/ssh/.ssh/*.pub

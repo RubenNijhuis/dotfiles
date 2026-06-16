@@ -135,13 +135,12 @@ clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
 vscode-parity: ## Check VS Code extension parity with extensions.txt
 	@bash $(DOTFILES)/health/check-vscode-parity.sh --check
 
-maint-check: lint-shell test-scripts launchd-check docs-sync vscode-parity brew-audit ## Run maintenance validation checks
+maint-check: lint-shell test-scripts launchd-check docs-regen vscode-parity brew-audit ## Run maintenance validation checks
 
-docs-sync: ## Verify generated documentation is up to date
-	@bash $(DOTFILES)/ops/generate-cli-reference.sh --check
-
-docs-regen: ## Regenerate CLI reference documentation
+docs-regen: ## Regenerate CLI reference documentation (idempotent — file is gitignored)
 	@bash $(DOTFILES)/ops/generate-cli-reference.sh
+
+docs-sync: docs-regen ## Alias for docs-regen (kept for backwards compatibility)
 
 # ── LaunchD ──────────────────────────────────────────────────────────
 
