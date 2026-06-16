@@ -135,7 +135,8 @@ clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
 vscode-parity: ## Check VS Code extension parity with extensions.txt
 	@bash $(DOTFILES)/health/check-vscode-parity.sh --check
 
-maint-check: lint-shell test-scripts launchd-check docs-regen vscode-parity brew-audit ## Run maintenance validation checks
+maint-check: ## Run maintenance validation checks in parallel
+	@bash $(DOTFILES)/ops/maint-check.sh
 
 docs-regen: ## Regenerate CLI reference documentation (idempotent — file is gitignored)
 	@bash $(DOTFILES)/ops/generate-cli-reference.sh
@@ -166,15 +167,8 @@ lint-shell: ## Run syntax and shellcheck on shell scripts
 
 test: test-scripts ## Alias for test-scripts
 
-test-scripts: ## Run lightweight script behavior tests
-	@bash $(DOTFILES)/tests/test-idempotency.sh
-	@bash $(DOTFILES)/tests/test-cli-contract.sh
-	@bash $(DOTFILES)/tests/test-cli-parsing.sh
-	@bash $(DOTFILES)/tests/test-install-checkpoint.sh
-	@bash $(DOTFILES)/tests/test-error-handling.sh
-	@bash $(DOTFILES)/tests/test-backup-restore.sh
-	@bash $(DOTFILES)/tests/test-integration.sh
-	@printf "  \033[32m✓\033[0m Script tests passed\n"
+test-scripts: ## Run lightweight script behavior tests in parallel
+	@bash $(DOTFILES)/tests/run-parallel.sh
 
 bootstrap-verify: ## Run strict bootstrap reliability verification suite
 	@bash $(DOTFILES)/setup/bootstrap-verify.sh
