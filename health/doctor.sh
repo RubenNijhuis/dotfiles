@@ -159,28 +159,90 @@ should_run() {
   [[ -z "$SECTION" || "$SECTION" == "$section_name" ]]
 }
 
+# Run a list of check functions concurrently and replay output in order.
+# Each check runs in a subshell so its counter mutations and SUGGESTIONS
+# additions stay isolated; we extract them via a state file and fold back
+# into the parent's totals.
+_doctor_tmp=""
+run_section_parallel() {
+  # shellcheck disable=SC2030,SC2031  # Subshell mutations are intentional — counters round-trip through state files.
+  local section_label="$1"; shift
+  local checks=("$@")
+  [[ ${#checks[@]} -eq 0 ]] && return 0
+
+  printf '%s\n' "$section_label"
+
+  local check
+  for check in "${checks[@]}"; do
+    (
+      # Subshell mutation is intentional — values are written to a state file.
+      # shellcheck disable=SC2030
+      PASSED=0
+      # shellcheck disable=SC2030
+      WARNINGS=0
+      # shellcheck disable=SC2030
+      ERRORS=0
+      # shellcheck disable=SC2030
+      declare -a SUGGESTIONS=()
+      # shellcheck disable=SC2086  # check is a function name
+      $check >"$_doctor_tmp/$check.out" 2>&1
+      {
+        printf '%d|%d|%d\n' "$PASSED" "$WARNINGS" "$ERRORS"
+        local s
+        for s in "${SUGGESTIONS[@]}"; do
+          printf 'SUGGEST:%s\n' "$s"
+        done
+      } > "$_doctor_tmp/$check.state"
+    ) &
+  done
+  wait
+
+  # Replay output in fixed order, fold counters/suggestions into parent state.
+  for check in "${checks[@]}"; do
+    cat "$_doctor_tmp/$check.out"
+    local p w e
+    IFS='|' read -r p w e < "$_doctor_tmp/$check.state"
+    # shellcheck disable=SC2031  # Counters were updated via the state file, not by a leaked subshell scope.
+    PASSED=$((PASSED + p))
+    # shellcheck disable=SC2031
+    WARNINGS=$((WARNINGS + w))
+    # shellcheck disable=SC2031
+    ERRORS=$((ERRORS + e))
+    while IFS= read -r line; do
+      if [[ "$line" == SUGGEST:* ]]; then
+        # shellcheck disable=SC2031
+        SUGGESTIONS+=("${line#SUGGEST:}")
+      fi
+    done < "$_doctor_tmp/$check.state"
+  done
+}
+
 run_checks() {
-  printf '  %s%s── Core ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  if should_run stow; then check_stow; fi
-  if should_run ssh; then check_ssh; fi
-  if should_run gpg; then check_gpg; fi
-  if should_run git; then check_git; fi
-  if should_run shell; then check_shell; fi
+  _doctor_tmp="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-doctor.XXXXXX")"
+  [[ -z "${DOCTOR_KEEP_TMP:-}" ]] && trap 'rm -rf "${_doctor_tmp:-}"' EXIT
 
-  printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  if should_run developer; then check_developer; fi
-  if should_run runtime; then check_runtime; fi
-  if should_run profile; then check_profile_contract; fi
-  if should_run launchd; then check_launchd; fi
-  if should_run homebrew; then check_homebrew; fi
-  if should_run backup; then check_backup_system; fi
-  if should_run shell-perf; then check_shell_perf; fi
+  local core=() system=() tools=()
+  should_run stow      && core+=(check_stow)
+  should_run ssh       && core+=(check_ssh)
+  should_run gpg       && core+=(check_gpg)
+  should_run git       && core+=(check_git)
+  should_run shell     && core+=(check_shell)
+  run_section_parallel "$(printf '  %s%s── Core ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${core[@]}"
 
-  printf '\n  %s%s── Tools ──%s\n' "${DIM}" "${BLUE}" "${NC}"
-  if should_run biome; then check_biome; fi
-  if should_run tmux; then check_tmux; fi
-  if should_run neovim; then check_neovim; fi
-  if should_run starship; then check_starship; fi
+  should_run developer && system+=(check_developer)
+  should_run runtime   && system+=(check_runtime)
+  should_run profile   && system+=(check_profile_contract)
+  should_run launchd   && system+=(check_launchd)
+  should_run homebrew  && system+=(check_homebrew)
+  should_run backup    && system+=(check_backup_system)
+  should_run shell-perf && system+=(check_shell_perf)
+  run_section_parallel "$(printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${system[@]}"
+
+  should_run biome    && tools+=(check_biome)
+  should_run tmux     && tools+=(check_tmux)
+  should_run neovim   && tools+=(check_neovim)
+  should_run starship && tools+=(check_starship)
+  run_section_parallel "$(printf '\n  %s%s── Tools ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${tools[@]}"
 }
 
 print_run_context() {

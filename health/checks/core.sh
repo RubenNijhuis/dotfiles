@@ -9,6 +9,17 @@ developer_root() {
   printf '%s\n' "$DOTFILES_DEVELOPER_ROOT"
 }
 
+# Find .git directories under a path, pruning heavy/unrelated trees.
+# Constraints: max depth 5, skip node_modules/vendor/.build/Pods/.git/modules.
+# Returns paths to .git dirs/files; safe to wc -l.
+find_git_dirs() {
+  local root="$1"
+  [[ -d "$root" ]] || return 0
+  find "$root" -maxdepth 5 \
+    \( -name node_modules -o -name vendor -o -name .build -o -name Pods -o -path '*/.git/modules' \) -prune -o \
+    -name .git -print 2>/dev/null
+}
+
 check_stow() {
 
   local stow_dir="$DOTFILES/config"
@@ -205,7 +216,7 @@ check_git() {
   # Test in work repo (if exists)
   if [[ -d "$dev_root/work/clients" ]]; then
     local work_repo
-    work_repo=$(find "$dev_root/work/clients" -name ".git" -type d | head -1)
+    work_repo=$(find_git_dirs "$dev_root/work/clients" | head -1)
     if [[ -n "$work_repo" ]]; then
       local ssh_cmd
       ssh_cmd=$(git -C "$(dirname "$work_repo")" config core.sshCommand || echo "")
@@ -329,14 +340,14 @@ check_developer() {
     add_suggestion "Create structure: mkdir -p \"$dev_root\"/{personal/{projects,experiments,learning},work/clients,archive}"
   fi
 
-  # Count repos per category
+  # Count repos per category (depth-bounded, prunes node_modules/vendor/.build/Pods)
   local total personal_projects personal_experiments personal_learning work archive
-  total=$(find "$dev_root" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  personal_projects=$(find "$dev_root/personal/projects" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  personal_experiments=$(find "$dev_root/personal/experiments" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  personal_learning=$(find "$dev_root/personal/learning" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  work=$(find "$dev_root/work" -name ".git" -type d 2>/dev/null | wc -l | xargs)
-  archive=$(find "$dev_root/archive" -name ".git" -type d 2>/dev/null | wc -l | xargs)
+  personal_projects=$(find_git_dirs "$dev_root/personal/projects" | wc -l | xargs)
+  personal_experiments=$(find_git_dirs "$dev_root/personal/experiments" | wc -l | xargs)
+  personal_learning=$(find_git_dirs "$dev_root/personal/learning" | wc -l | xargs)
+  work=$(find_git_dirs "$dev_root/work" | wc -l | xargs)
+  archive=$(find_git_dirs "$dev_root/archive" | wc -l | xargs)
+  total=$((personal_projects + personal_experiments + personal_learning + work + archive))
 
   details+="Repositories: $total total\n  "
   details+="  - personal/projects: $personal_projects\n  "
