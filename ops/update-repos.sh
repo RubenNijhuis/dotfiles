@@ -422,6 +422,7 @@ fi
 
 if [[ "$JOBS" -gt 1 ]] && command -v parallel &>/dev/null; then
   result_log=$(mktemp)
+  trap 'rm -f "${result_log:-}"' EXIT
   export DRY_RUN FETCH_TIMEOUT REPOS_DIR QUIET COMPACT SKIP_RECENT_SECONDS FAILURE_LOG REBASE_CURRENT
   export -f update_repo is_submodule detect_base_branch classify_fetch_failure report_msg
   echo "$repos" | parallel --jobs "$JOBS" --keep-order --joblog "$result_log" update_repo || true

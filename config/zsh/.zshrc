@@ -88,12 +88,15 @@ _zsh_eval_cache() {
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${cmd}.zsh"
   if [[ ! -f "$cache_file" ]] || [[ "$(command -v "$cmd")" -nt "$cache_file" ]]; then
     mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
-    "$@" > "$cache_file"
-    if [[ ! -s "$cache_file" ]]; then
-      rm -f "$cache_file"
+    # Write atomically — two concurrent shells starting on a cold cache would
+    # otherwise interleave bytes in the same file via "> cache_file".
+    local tmp="${cache_file}.$$"
+    if ! "$@" > "$tmp" 2>/dev/null || [[ ! -s "$tmp" ]]; then
+      rm -f "$tmp"
       echo "[eval-cache] warning: ${cmd} produced empty output" >&2
       return 1
     fi
+    mv -f "$tmp" "$cache_file"
   fi
   source "$cache_file"
 }
