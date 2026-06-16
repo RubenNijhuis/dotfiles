@@ -75,7 +75,7 @@ print_pkg_diff() {
     done <<< "$list"
     printf '\n'
   else
-    print_success "All ${label,,} are declared"
+    print_success "All $(printf '%s' "$label" | tr '[:upper:]' '[:lower:]') are declared"
     printf '\n'
   fi
 }
