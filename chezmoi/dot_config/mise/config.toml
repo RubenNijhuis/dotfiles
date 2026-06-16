@@ -1,0 +1,6 @@
+[settings]
+experimental = false
+
+[tools]
+node = "lts"
+ruby = "latest"

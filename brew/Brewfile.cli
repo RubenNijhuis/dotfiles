@@ -57,6 +57,7 @@ brew "dust"          # Better du (disk usage)
 # -----------------------------------------------------------------------------
 brew "act"           # Run GitHub Actions locally
 brew "bash"          # Modern bash (macOS ships with old version)
+brew "chezmoi"       # Declarative dotfile manager (migrating off stow)
 brew "biome"         # Fast formatter and linter (JS/TS/JSON)
 brew "mise"          # Polyglot version manager (node, ruby, etc.)
 brew "node"          # Fallback Node.js (mise takes priority via PATH)
