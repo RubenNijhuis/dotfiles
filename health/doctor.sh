@@ -346,10 +346,11 @@ status_check_stow() {
 status_check_launchd() {
   LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
   local managed=0 loaded=0
-  while IFS= read -r agent_info; do
-    IFS=':' read -r name _desc <<< "$agent_info"
+  local _agent_entry _agent_name _agent_desc
+  while IFS= read -r _agent_entry; do
+    IFS=':' read -r _agent_name _agent_desc <<< "$_agent_entry"
     managed=$((managed + 1))
-    if is_agent_loaded "$name"; then
+    if is_agent_loaded "$_agent_name"; then
       loaded=$((loaded + 1))
     fi
   done < <(profile_agent_infos)
