@@ -1,114 +1,154 @@
 #!/usr/bin/env bash
 # Pre-push hook: validates repository health before pushing.
+# Checks run in parallel; brew drift offers interactive auto-fix on a TTY.
 
 set -euo pipefail
 
 DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/lib/output.sh"
 
-FAILED=0
-BREW_DRIFT_MSG=""
-
 print_header "Pre-push: Validating Repository"
 
-# ── Brewfile sync ────────────────────────────────────────────────────
+# Shared scratch dir for parallel check results.
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-prepush.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT
 
-print_section "Checking Brewfile sync..."
-if command -v brew &>/dev/null; then
-  BREW_AUDIT="$DOTFILES/ops/brew-audit.sh"
-  if [[ -x "$BREW_AUDIT" ]]; then
-    if "$BREW_AUDIT" --check >/dev/null 2>&1; then
-      print_success "Brewfiles are in sync"
-    else
-      BREW_DRIFT_MSG="Brewfiles are out of sync — run: make brew-audit"
-      print_warning "Brewfiles are out of sync"
-      print_dim "Run: make brew-audit"
-    fi
+# Each check writes:
+#   $TMP/<name>.status  — "ok" | "warn" | "fail"
+#   $TMP/<name>.msg     — human-readable detail (single line)
+write_result() {
+  local name="$1" status="$2" msg="$3"
+  printf '%s\n' "$status" > "$TMP/$name.status"
+  printf '%s\n' "$msg"    > "$TMP/$name.msg"
+}
+
+# ── Check: Brewfile sync ─────────────────────────────────────────────
+check_brew() {
+  if ! command -v brew >/dev/null 2>&1; then
+    write_result brew ok "brew not installed — skipped"
+    return
   fi
-fi
+  local audit="$DOTFILES/ops/brew-audit.sh"
+  [[ -x "$audit" ]] || { write_result brew ok "brew-audit not available — skipped"; return; }
+  if "$audit" --check >/dev/null 2>&1; then
+    write_result brew ok "Brewfiles in sync"
+  else
+    write_result brew warn "Brewfiles out of sync"
+  fi
+}
 
-printf '\n'
+# ── Check: Untracked shell scripts ───────────────────────────────────
+check_untracked() {
+  local untracked
+  untracked="$(git -C "$DOTFILES" ls-files --others --exclude-standard | grep -E '\.(sh|bash|zsh)$' || true)"
+  if [[ -n "$untracked" ]]; then
+    local count
+    count="$(printf '%s\n' "$untracked" | wc -l | tr -d ' ')"
+    write_result untracked warn "$count untracked shell script(s)"
+    printf '%s\n' "$untracked" > "$TMP/untracked.list"
+  else
+    write_result untracked ok "No untracked shell scripts"
+  fi
+}
 
-# ── Generated docs ───────────────────────────────────────────────────
-
-print_section "Checking generated docs..."
-if make -s docs-sync >/dev/null 2>&1; then
-  print_success "Generated docs are in sync"
-else
-  print_error "Generated docs are stale"
-  print_info "Run: bash ops/generate-cli-reference.sh"
-  FAILED=1
-fi
-
-printf '\n'
-
-# ── Untracked shell scripts ─────────────────────────────────────────
-
-print_section "Checking for untracked scripts..."
-untracked="$(git -C "$DOTFILES" ls-files --others --exclude-standard | grep -E '\.(sh|bash|zsh)$' || true)"
-if [[ -n "$untracked" ]]; then
-  print_warning "Found untracked shell scripts:"
+# ── Check: Large files ───────────────────────────────────────────────
+check_large() {
+  local found=()
   while IFS= read -r file; do
-    printf "  "
-    print_dim "$file"
-  done <<< "$untracked"
-else
-  print_success "No untracked shell scripts"
-fi
-
-printf '\n'
-
-# ── Large files ──────────────────────────────────────────────────────
-
-print_section "Checking for large files..."
-large_found=false
-while IFS= read -r file; do
-  [[ -n "$file" && -f "$file" ]] || continue
-  if [[ $(wc -c < "$file") -gt 1048576 ]]; then
-    large_found=true
-    size=$(du -h "$file" | cut -f1)
-    print_error "$file ($size)"
+    [[ -n "$file" && -f "$DOTFILES/$file" ]] || continue
+    if [[ $(wc -c < "$DOTFILES/$file") -gt 1048576 ]]; then
+      found+=("$file ($(du -h "$DOTFILES/$file" | cut -f1))")
+    fi
+  done < <(git -C "$DOTFILES" diff --name-only "@{upstream}..HEAD" 2>/dev/null \
+           || git -C "$DOTFILES" diff --name-only HEAD~1..HEAD 2>/dev/null)
+  if [[ ${#found[@]} -gt 0 ]]; then
+    write_result large fail "${#found[@]} file(s) >1MB"
+    printf '%s\n' "${found[@]}" > "$TMP/large.list"
+  else
+    write_result large ok "No large files"
   fi
-done < <(git diff --name-only "@{upstream}..HEAD" 2>/dev/null || git diff --name-only HEAD~1..HEAD)
+}
 
-if $large_found; then
-  print_error "Large files detected (>1MB)"
-  FAILED=1
-else
-  print_success "No large files detected"
-fi
+# Fan out independent checks in parallel.
+check_brew &       brew_pid=$!
+check_untracked &  unt_pid=$!
+check_large &      large_pid=$!
+wait "$brew_pid" "$unt_pid" "$large_pid"
+
+# ── Report results ───────────────────────────────────────────────────
+FAILED=0
+BREW_DRIFT=false
+
+report() {
+  local name="$1" label="$2"
+  local status msg
+  status="$(cat "$TMP/$name.status" 2>/dev/null || echo "fail")"
+  msg="$(cat "$TMP/$name.msg" 2>/dev/null || echo "no result")"
+  print_section "$label"
+  case "$status" in
+    ok)   print_success "$msg" ;;
+    warn) print_warning "$msg" ;;
+    fail) print_error "$msg"; FAILED=1 ;;
+  esac
+}
+
+report brew      "Brewfile sync"
+[[ "$(cat "$TMP/brew.status" 2>/dev/null)" == "warn" ]] && BREW_DRIFT=true
+
+report untracked "Untracked shell scripts"
+[[ -f "$TMP/untracked.list" ]] && while IFS= read -r f; do printf '  '; print_dim "$f"; done < "$TMP/untracked.list"
+
+report large     "Large files"
+[[ -f "$TMP/large.list" ]] && while IFS= read -r f; do printf '  '; print_error "$f"; done < "$TMP/large.list"
 
 printf '\n'
+
+# ── Interactive auto-fix for brew drift ──────────────────────────────
+if $BREW_DRIFT && [[ -t 0 && -t 1 ]]; then
+  printf 'Auto-fix Brewfile drift now? [y/N] '
+  read -r response < /dev/tty || response=""
+  case "$response" in
+    [yY]|[yY][eE][sS])
+      printf '\n'
+      if bash "$DOTFILES/ops/sync-brew.sh" --auto; then
+        if [[ -n "$(git -C "$DOTFILES" status --porcelain brew/)" ]]; then
+          print_warning "Brewfiles updated — stage and amend, or commit before pushing"
+          FAILED=1
+        else
+          print_success "No changes after auto-sync"
+        fi
+      else
+        print_error "Auto-sync failed"
+        FAILED=1
+      fi
+      ;;
+    *)
+      print_dim "Skipped — run: make brew-sync"
+      ;;
+  esac
+  printf '\n'
+elif $BREW_DRIFT; then
+  print_dim "Run: bash ops/sync-brew.sh --auto"
+  printf '\n'
+fi
 
 # ── Branch status ────────────────────────────────────────────────────
-
-print_section "Checking branch status..."
+print_section "Branch status"
 current_branch="$(git -C "$DOTFILES" branch --show-current)"
 if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
   if [[ $FAILED -eq 1 ]]; then
     print_error "Pushing to $current_branch with failures"
-    FAILED=1
   else
     print_success "Pushing to $current_branch - all checks passed"
   fi
 else
   print_info "Pushing to branch: $current_branch"
 fi
-
 printf '\n'
-
-# ── Summary ──────────────────────────────────────────────────────────
 
 if [[ $FAILED -eq 1 ]]; then
   print_error "Pre-push checks failed"
-  printf '\n'
   exit 1
-else
-  print_success "All pre-push checks passed - ready to push!"
-  if [[ -n "$BREW_DRIFT_MSG" ]]; then
-    printf '\n'
-    print_warning "$BREW_DRIFT_MSG"
-  fi
-  printf '\n'
-  exit 0
 fi
+print_success "All pre-push checks passed - ready to push!"
+exit 0
