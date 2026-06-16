@@ -1,0 +1,19 @@
+# Single source of truth for launchd automation agents.
+# Format (pipe-delimited):
+#   name|description|in_default_profile|friendly_alias
+# - name:               canonical agent name (matches launchd/com.user.<name>.plist)
+# - description:        human-readable summary shown in list/install output
+# - in_default_profile: yes|no — whether enabled when DOTFILES_PROFILE_AUTOMATIONS is unset
+# - friendly_alias:     short name accepted by setup-automation.sh (optional)
+#
+# Lines starting with # and blank lines are ignored.
+
+dotfiles-backup|Automated daily backups|yes|backup
+dotfiles-doctor|Daily health monitoring|yes|doctor
+obsidian-sync|Obsidian vault synchronization|no|
+repo-update|Repository updates|yes|
+log-cleanup|Weekly log rotation|yes|
+brew-audit|Weekly Brewfile drift detection|yes|
+weekly-digest|Weekly automation health digest|yes|
+lmstudio-server|LM Studio local server|no|lmstudio
+spicetify-reapply|Re-apply spicetify on Spotify updates|yes|

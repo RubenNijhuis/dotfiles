@@ -93,7 +93,17 @@ dotfiles_profile_brewfiles() {
 }
 
 dotfiles_profile_automations() {
-  local agents="${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest spicetify-reapply}"
+  local agents="${DOTFILES_PROFILE_AUTOMATIONS:-}"
+  if [[ -z "$agents" ]]; then
+    # Default from manifest (single source of truth).
+    local registry_lib
+    registry_lib="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/automation-registry.sh"
+    if [[ -f "$registry_lib" ]]; then
+      # shellcheck source=/dev/null
+      source "$registry_lib"
+      agents="$(automation_default_profile_names | tr '\n' ' ')"
+    fi
+  fi
   dotfiles_iter_words "$agents"
 }
 

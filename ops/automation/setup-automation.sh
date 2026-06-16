@@ -7,6 +7,8 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/env.sh"
+# shellcheck source=../../lib/automation-registry.sh
+source "$SCRIPT_DIR/../../lib/automation-registry.sh"
 dotfiles_load_env "$DOTFILES"
 LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
@@ -17,38 +19,40 @@ usage() {
 Usage: $0 [--help] [--no-color] <target>
 
 Targets:
-  backup         Setup backup automation
-  doctor         Setup health monitoring
-  repo-update    Setup repository updates
-  obsidian-sync  Setup Obsidian vault sync
-  lmstudio       Setup LM Studio server
-  log-cleanup    Setup log rotation
-  brew-audit     Setup Brewfile drift detection
-  weekly-digest  Setup weekly digest
-  spicetify-reapply Re-apply spicetify when Spotify updates
-  setup-all      Setup all profile-appropriate automations
 EOF
+  # Build target list from manifest (single source of truth).
+  while IFS='|' read -r name desc _default alias; do
+    [[ -z "$name" ]] && continue
+    if [[ -n "$alias" ]]; then
+      printf '  %-18s %s (alias: %s)\n' "$name" "$desc" "$alias"
+    else
+      printf '  %-18s %s\n' "$name" "$desc"
+    fi
+  done < <(_automation_read_manifest)
+  printf '  %-18s %s\n' "setup-all" "Setup all profile-appropriate automations"
 }
 
 show_help_if_requested usage "$@"
+
+# Build valid-target set from manifest.
+_valid_targets=$(printf '%s\n' "$(automation_setup_targets)" "setup-all")
 
 TARGET=""
 for arg in "$@"; do
   case "$arg" in
     --no-color) ;;
-    backup|doctor|repo-update|obsidian-sync|lmstudio|log-cleanup|brew-audit|weekly-digest|spicetify-reapply|setup-all) TARGET="$arg" ;;
-    *) print_error "Unknown argument: $arg"; usage; exit 1 ;;
+    *)
+      if printf '%s\n' "$_valid_targets" | grep -qx "$arg"; then
+        TARGET="$arg"
+      else
+        print_error "Unknown argument: $arg"; usage; exit 1
+      fi
+      ;;
   esac
 done
 [[ -z "$TARGET" ]] && { usage; exit 1; }
 
-# Map friendly names to agent names
-resolve_agent() {
-  case "$1" in
-    lmstudio) echo "lmstudio-server" ;; doctor) echo "dotfiles-doctor" ;;
-    backup) echo "dotfiles-backup" ;; *) echo "$1" ;;
-  esac
-}
+resolve_agent() { automation_resolve_alias "$1"; }
 
 # Pre-checks for optional agents
 precheck() {

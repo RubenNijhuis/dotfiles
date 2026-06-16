@@ -8,6 +8,8 @@ DOTFILES="$(cd "$SCRIPT_DIR/../.." && pwd)"
 source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/env.sh"
+# shellcheck source=../../lib/automation-registry.sh
+source "$SCRIPT_DIR/../../lib/automation-registry.sh"
 dotfiles_load_env "$DOTFILES"
 
 # --- Configuration -----------------------------------------------------------
@@ -16,18 +18,15 @@ LAUNCHD_DIR="$HOME/Library/LaunchAgents"
 TEMPLATE_DIR="$DOTFILES/launchd"
 LOG_DIR="$HOME/.local/log"
 
+# AGENTS is populated from ops/automation/agents.manifest via the registry lib.
+# Format kept as "name:description" for backward compatibility with sourced consumers.
 # shellcheck disable=SC2034  # AGENTS and log helpers are consumed by sourced scripts.
-AGENTS=(
-  "dotfiles-backup:Automated daily backups"
-  "dotfiles-doctor:Daily health monitoring"
-  "obsidian-sync:Obsidian vault synchronization"
-  "repo-update:Repository updates"
-  "log-cleanup:Weekly log rotation"
-  "brew-audit:Weekly Brewfile drift detection"
-  "weekly-digest:Weekly automation health digest"
-  "lmstudio-server:LM Studio local server"
-  "spicetify-reapply:Re-apply spicetify on Spotify updates"
-)
+AGENTS=()
+while IFS='|' read -r _agent_name _agent_desc; do
+  [[ -z "$_agent_name" ]] && continue
+  AGENTS+=("$_agent_name:$_agent_desc")
+done < <(automation_agent_lines)
+unset _agent_name _agent_desc
 
 profile_has_agent() {
   local target="$1"
