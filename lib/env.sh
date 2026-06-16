@@ -93,7 +93,7 @@ dotfiles_profile_brewfiles() {
 }
 
 dotfiles_profile_automations() {
-  local agents="${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
+  local agents="${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest spicetify-reapply}"
   dotfiles_iter_words "$agents"
 }
 

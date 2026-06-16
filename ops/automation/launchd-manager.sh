@@ -26,6 +26,7 @@ AGENTS=(
   "brew-audit:Weekly Brewfile drift detection"
   "weekly-digest:Weekly automation health digest"
   "lmstudio-server:LM Studio local server"
+  "spicetify-reapply:Re-apply spicetify on Spotify updates"
 )
 
 profile_has_agent() {

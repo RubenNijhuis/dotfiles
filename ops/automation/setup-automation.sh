@@ -25,6 +25,7 @@ Targets:
   log-cleanup    Setup log rotation
   brew-audit     Setup Brewfile drift detection
   weekly-digest  Setup weekly digest
+  spicetify-reapply Re-apply spicetify when Spotify updates
   setup-all      Setup all profile-appropriate automations
 EOF
 }
@@ -35,7 +36,7 @@ TARGET=""
 for arg in "$@"; do
   case "$arg" in
     --no-color) ;;
-    backup|doctor|repo-update|obsidian-sync|lmstudio|log-cleanup|brew-audit|weekly-digest|setup-all) TARGET="$arg" ;;
+    backup|doctor|repo-update|obsidian-sync|lmstudio|log-cleanup|brew-audit|weekly-digest|spicetify-reapply|setup-all) TARGET="$arg" ;;
     *) print_error "Unknown argument: $arg"; usage; exit 1 ;;
   esac
 done
