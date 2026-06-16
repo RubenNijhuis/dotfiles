@@ -44,8 +44,9 @@ apply: ## Apply chezmoi source state to $$HOME (idempotent)
 diff: ## Preview pending chezmoi changes without applying
 	@chezmoi diff
 
-macos: ## Apply macOS defaults
-	@bash $(DOTFILES)/setup/macos-defaults.sh
+macos: ## Force-rerun the chezmoi macOS defaults script
+	@chezmoi state delete-bucket --bucket scriptState >/dev/null 2>&1 || true
+	@chezmoi apply --include scripts
 
 # ── Health & Status ──────────────────────────────────────────────────
 

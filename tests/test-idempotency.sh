@@ -38,14 +38,14 @@ test_chezmoi_apply_idempotent() {
 
   write_test_chezmoi_config "$temp_cfg"
 
-  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
     --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
   listing1="$(mktemp)"
   listing2="$(mktemp)"
   find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing1"
 
-  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
     --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
   find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing2"
 
@@ -153,7 +153,7 @@ test_chezmoi_source_files_are_regular() {
   trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
 
   write_test_chezmoi_config "$temp_cfg"
-  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
     --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
   local symlinks

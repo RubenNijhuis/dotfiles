@@ -116,7 +116,7 @@ sourceDir = "$ROOT_DIR/chezmoi"
   nuget_auth_token = "test"
 EOF
   HOME="$temp_home" \
-    chezmoi apply --config "$temp_cfg/chezmoi.toml" \
+    chezmoi apply --include=files,dirs --config "$temp_cfg/chezmoi.toml" \
       --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
 
   assert_exit "chezmoi-then-doctor-exit" 0 \

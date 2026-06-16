@@ -75,7 +75,7 @@ make docs-sync        # fail if generated CLI docs are stale
 ```text
 dotfiles/
 ├── config/          # GNU Stow packages (symlinked into $HOME)
-├── setup/           # Setup scripts (macos-defaults, key gen, vscode extensions)
+├── setup/           # Setup scripts (key gen, vscode extensions, bloatware removal)
 ├── ops/             # Operations (update, clean, backup, brew, automation)
 ├── health/          # Diagnostics (doctor, checks, info scripts)
 ├── tests/           # Script behavior tests

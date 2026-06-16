@@ -5,7 +5,7 @@ macOS-only dotfiles repo. Uses chezmoi for dotfile management, Homebrew for pack
 ## Structure
 
 - `chezmoi/` — chezmoi source state. Files here mirror `$HOME`, with `dot_` prefix encoding for hidden files (`dot_zshrc` → `~/.zshrc`) and `private_` for 0600/0700 permissions.
-- `setup/` — One-time and repeated setup scripts (macos-defaults, key generation, hook installation, vscode extensions).
+- `setup/` — One-time setup scripts (key generation, hook installation, vscode extensions, bloatware removal). macOS defaults live inside chezmoi as `chezmoi/run_onchange_macos-defaults.sh.tmpl` — `chezmoi apply` reapplies them when content changes.
 - `ops/` — Ongoing operational scripts (update, clean, backup, brew sync, format, lint). Contains `automation/` for launchd-managed jobs.
 - `health/` — Health checks and diagnostics (doctor, vscode parity, launchd contracts, ssh/gpg info).
 - `tests/` — Script behavior and contract tests.

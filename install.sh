@@ -593,7 +593,10 @@ step_setup_runtimes() {
 
 step_apply_macos_defaults() {
   if [[ "$APPLY_MACOS_DEFAULTS" == "yes" ]]; then
-    bash "$DOTFILES/setup/macos-defaults.sh"
+    # macOS defaults are managed by chezmoi/run_onchange_macos-defaults.sh.tmpl;
+    # chezmoi apply will have run it already. Force-rerun here for explicitness.
+    chezmoi state delete-bucket --bucket scriptState >/dev/null 2>&1 || true
+    chezmoi apply --include scripts
     print_success "macOS defaults applied"
   else
     print_success "Skipped"
