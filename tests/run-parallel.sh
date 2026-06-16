@@ -4,6 +4,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/parallel.sh
+source "$SCRIPT_DIR/../lib/parallel.sh"
 
 TESTS=(
   test-idempotency.sh
@@ -15,24 +17,19 @@ TESTS=(
   test-integration.sh
 )
 
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-tests.XXXXXX")"
+TMP="$(parallel_tmpdir tests)"
 trap 'rm -rf "$TMP"' EXIT
 
 for t in "${TESTS[@]}"; do
-  (
-    if bash "$SCRIPT_DIR/$t" >"$TMP/$t.out" 2>&1; then
-      printf '0\n' > "$TMP/$t.rc"
-    else
-      printf '%s\n' "$?" > "$TMP/$t.rc"
-    fi
-  ) &
+  parallel_spawn "$TMP" "$t" bash "$SCRIPT_DIR/$t"
 done
-wait
+parallel_wait
+
+parallel_replay "$TMP" "${TESTS[@]}"
 
 FAILED=0
 for t in "${TESTS[@]}"; do
-  cat "$TMP/$t.out"
-  rc="$(cat "$TMP/$t.rc" 2>/dev/null || echo 1)"
+  rc="$(parallel_rc "$TMP" "$t")"
   if [[ "$rc" != "0" ]]; then
     printf '  \033[31m✗\033[0m %s exit=%s\n' "$t" "$rc"
     FAILED=$((FAILED + 1))

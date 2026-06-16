@@ -8,6 +8,8 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/cli.sh"
+# shellcheck source=../lib/parallel.sh
+source "$SCRIPT_DIR/../lib/parallel.sh"
 
 usage() {
   cat <<EOF
@@ -93,17 +95,6 @@ restow_configs() {
   return 1
 }
 
-# Run a subsystem function, capturing stdout/stderr to a buffer file and
-# its exit code to a sibling .rc file. Designed for backgrounded parallel use.
-run_buffered() {
-  local fn="$1" buf="$2"
-  if "$fn" >"$buf" 2>&1; then
-    printf '0\n' > "${buf}.rc"
-  else
-    printf '%s\n' "$?" > "${buf}.rc"
-  fi
-}
-
 main() {
   parse_standard_args usage "$@"
   print_header "System Update"
@@ -111,25 +102,20 @@ main() {
   printf '\n'
 
   local failures=0
-  UPDATE_TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-update.XXXXXX")"
+  UPDATE_TMP="$(parallel_tmpdir update)"
   trap 'rm -rf "${UPDATE_TMP:-}"' EXIT
-  local tmp="$UPDATE_TMP"
 
   # Fan out independent steps. Restow must run after because brew/runtimes
   # can change files the symlink farm references.
-  run_buffered update_repos           "$tmp/repos" &
-  run_buffered update_homebrew        "$tmp/brew" &
-  run_buffered update_runtimes        "$tmp/runtimes" &
-  run_buffered update_global_packages "$tmp/global" &
-  wait
+  local steps=(repos brew runtimes global)
+  parallel_spawn "$UPDATE_TMP" repos    update_repos
+  parallel_spawn "$UPDATE_TMP" brew     update_homebrew
+  parallel_spawn "$UPDATE_TMP" runtimes update_runtimes
+  parallel_spawn "$UPDATE_TMP" global   update_global_packages
+  parallel_wait
 
-  # Replay buffered output in deterministic order.
-  for step in repos brew runtimes global; do
-    cat "$tmp/$step"
-    local rc
-    rc="$(cat "$tmp/${step}.rc" 2>/dev/null || echo 1)"
-    [[ "$rc" != "0" ]] && failures=$((failures + 1))
-  done
+  parallel_replay "$UPDATE_TMP" "${steps[@]}"
+  failures=$((failures + $(parallel_failures "$UPDATE_TMP" "${steps[@]}")))
 
   restow_configs || failures=$((failures + 1))
 

@@ -6,6 +6,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
+# shellcheck source=../lib/parallel.sh
+source "$DOTFILES/lib/parallel.sh"
 
 usage() {
   cat <<EOF
@@ -24,37 +26,30 @@ for arg in "$@"; do
   esac
 done
 
-# Steps: label|command
-STEPS=(
-  "lint-shell|bash $DOTFILES/ops/lint-shell.sh"
-  "test-scripts|bash $DOTFILES/tests/run-parallel.sh"
-  "launchd-check|bash $DOTFILES/health/check-launchd-contracts.sh"
-  "docs-regen|bash $DOTFILES/ops/generate-cli-reference.sh"
-  "vscode-parity|bash $DOTFILES/health/check-vscode-parity.sh --check"
-  "brew-audit|bash $DOTFILES/ops/brew-audit.sh"
+# Each entry runs a shell command via `bash -c`. Order here defines the
+# replay order on failure summaries.
+STEPS=(lint-shell test-scripts launchd-check docs-regen vscode-parity brew-audit)
+declare -A CMDS=(
+  [lint-shell]="bash $DOTFILES/ops/lint-shell.sh"
+  [test-scripts]="bash $DOTFILES/tests/run-parallel.sh"
+  [launchd-check]="bash $DOTFILES/health/check-launchd-contracts.sh"
+  [docs-regen]="bash $DOTFILES/ops/generate-cli-reference.sh"
+  [vscode-parity]="bash $DOTFILES/health/check-vscode-parity.sh --check"
+  [brew-audit]="bash $DOTFILES/ops/brew-audit.sh"
 )
 
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-maint.XXXXXX")"
+TMP="$(parallel_tmpdir maint)"
 trap 'rm -rf "$TMP"' EXIT
 
-for entry in "${STEPS[@]}"; do
-  label="${entry%%|*}"
-  cmd="${entry#*|}"
-  (
-    if eval "$cmd" >"$TMP/$label.out" 2>&1; then
-      printf '0\n' > "$TMP/$label.rc"
-    else
-      printf '%s\n' "$?" > "$TMP/$label.rc"
-    fi
-  ) &
+for label in "${STEPS[@]}"; do
+  parallel_spawn "$TMP" "$label" bash -c "${CMDS[$label]}"
 done
-wait
+parallel_wait
 
-FAILED=0
 printf '\n=== Maintenance Check ===\n\n'
-for entry in "${STEPS[@]}"; do
-  label="${entry%%|*}"
-  rc="$(cat "$TMP/$label.rc" 2>/dev/null || echo 1)"
+FAILED=0
+for label in "${STEPS[@]}"; do
+  rc="$(parallel_rc "$TMP" "$label")"
   if [[ "$rc" == "0" ]]; then
     printf '  \033[32m✓\033[0m %s\n' "$label"
   else

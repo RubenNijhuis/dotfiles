@@ -7,6 +7,8 @@ DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 source "$SCRIPT_DIR/../lib/common.sh"
 source "$SCRIPT_DIR/../lib/output.sh" "$@"
+# shellcheck source=../lib/parallel.sh
+source "$SCRIPT_DIR/../lib/parallel.sh"
 
 # Handle --help and unknown flags before the version gate so CLI contract
 # tests pass on bash 3.x (CI runners use macOS stock bash 3.2).
@@ -132,9 +134,11 @@ record_result() {
   # Print details indented under the check name
   while IFS= read -r line; do
     line="${line#"${line%%[![:space:]]*}"}" # trim leading whitespace
-    [[ -z "$line" ]] && continue
-    printf '    %s%s%s\n' "${DIM}" "$line" "${NC}"
+    if [[ -n "$line" ]]; then
+      printf '    %s%s%s\n' "${DIM}" "$line" "${NC}"
+    fi
   done <<< "$(printf '%b' "$message")"
+  return 0
 }
 
 add_suggestion() {
@@ -159,13 +163,38 @@ should_run() {
   [[ -z "$SECTION" || "$SECTION" == "$section_name" ]]
 }
 
-# Run a list of check functions concurrently and replay output in order.
-# Each check runs in a subshell so its counter mutations and SUGGESTIONS
-# additions stay isolated; we extract them via a state file and fold back
-# into the parent's totals.
+# Doctor checks mutate shared state (PASSED/WARNINGS/ERRORS counters and the
+# SUGGESTIONS array) via record_result/add_suggestion. To run them in parallel
+# we wrap each check in a subshell that resets that state, runs the check,
+# and writes the resulting deltas to a sidecar .state file. The parent then
+# folds those deltas back into its own counters during replay.
 _doctor_tmp=""
+
+# Run a single check function with its counter state captured to .state.
+# Intended to be invoked via parallel_spawn — stdout is already redirected.
+_doctor_run_check() {
+  # Use a deliberately-namespaced local — check functions (e.g. check_launchd)
+  # use `name` as a loop var; bash dynamic scoping would let them clobber ours.
+  local __doctor_check_fn="$1"
+  # shellcheck disable=SC2030  # Subshell mutation is intentional; values flow through .state.
+  PASSED=0
+  # shellcheck disable=SC2030
+  WARNINGS=0
+  # shellcheck disable=SC2030
+  ERRORS=0
+  # shellcheck disable=SC2030
+  declare -a SUGGESTIONS=()
+  "$__doctor_check_fn"
+  {
+    printf '%d|%d|%d\n' "$PASSED" "$WARNINGS" "$ERRORS"
+    local s
+    for s in "${SUGGESTIONS[@]}"; do
+      printf 'SUGGEST:%s\n' "$s"
+    done
+  } > "$_doctor_tmp/$__doctor_check_fn.state"
+}
+
 run_section_parallel() {
-  # shellcheck disable=SC2030,SC2031  # Subshell mutations are intentional — counters round-trip through state files.
   local section_label="$1"; shift
   local checks=("$@")
   [[ ${#checks[@]} -eq 0 ]] && return 0
@@ -174,35 +203,17 @@ run_section_parallel() {
 
   local check
   for check in "${checks[@]}"; do
-    (
-      # Subshell mutation is intentional — values are written to a state file.
-      # shellcheck disable=SC2030
-      PASSED=0
-      # shellcheck disable=SC2030
-      WARNINGS=0
-      # shellcheck disable=SC2030
-      ERRORS=0
-      # shellcheck disable=SC2030
-      declare -a SUGGESTIONS=()
-      # shellcheck disable=SC2086  # check is a function name
-      $check >"$_doctor_tmp/$check.out" 2>&1
-      {
-        printf '%d|%d|%d\n' "$PASSED" "$WARNINGS" "$ERRORS"
-        local s
-        for s in "${SUGGESTIONS[@]}"; do
-          printf 'SUGGEST:%s\n' "$s"
-        done
-      } > "$_doctor_tmp/$check.state"
-    ) &
+    parallel_spawn "$_doctor_tmp" "$check" _doctor_run_check "$check"
   done
-  wait
+  parallel_wait
 
-  # Replay output in fixed order, fold counters/suggestions into parent state.
+  parallel_replay "$_doctor_tmp" "${checks[@]}"
+
+  # Fold each check's counter deltas and suggestions back into parent state.
   for check in "${checks[@]}"; do
-    cat "$_doctor_tmp/$check.out"
     local p w e
     IFS='|' read -r p w e < "$_doctor_tmp/$check.state"
-    # shellcheck disable=SC2031  # Counters were updated via the state file, not by a leaked subshell scope.
+    # shellcheck disable=SC2031  # Updated via state file, not a leaked subshell scope.
     PASSED=$((PASSED + p))
     # shellcheck disable=SC2031
     WARNINGS=$((WARNINGS + w))
@@ -218,7 +229,7 @@ run_section_parallel() {
 }
 
 run_checks() {
-  _doctor_tmp="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-doctor.XXXXXX")"
+  _doctor_tmp="$(parallel_tmpdir doctor)"
   [[ -z "${DOCTOR_KEEP_TMP:-}" ]] && trap 'rm -rf "${_doctor_tmp:-}"' EXIT
 
   local core=() system=() tools=()

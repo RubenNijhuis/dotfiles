@@ -6,11 +6,13 @@ set -euo pipefail
 
 DOTFILES="$(git rev-parse --show-toplevel)"
 source "$DOTFILES/lib/output.sh"
+# shellcheck source=../lib/parallel.sh
+source "$DOTFILES/lib/parallel.sh"
 
 print_header "Pre-push: Validating Repository"
 
 # Shared scratch dir for parallel check results.
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-prepush.XXXXXX")"
+TMP="$(parallel_tmpdir prepush)"
 trap 'rm -rf "$TMP"' EXIT
 
 # Each check writes:
@@ -69,11 +71,12 @@ check_large() {
   fi
 }
 
-# Fan out independent checks in parallel.
-check_brew &       brew_pid=$!
-check_untracked &  unt_pid=$!
-check_large &      large_pid=$!
-wait "$brew_pid" "$unt_pid" "$large_pid"
+# Fan out independent checks in parallel. These checks write structured
+# .status/.msg files themselves, so parallel_spawn's .out/.rc are ignored.
+parallel_spawn "$TMP" brew      check_brew
+parallel_spawn "$TMP" untracked check_untracked
+parallel_spawn "$TMP" large     check_large
+parallel_wait
 
 # ── Report results ───────────────────────────────────────────────────
 FAILED=0
