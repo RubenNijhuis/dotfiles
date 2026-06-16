@@ -129,20 +129,6 @@ require_network() {
   /sbin/ping -c1 -W3 "$host" >/dev/null 2>&1
 }
 
-# Retry a command up to N times with exponential backoff.
-# Usage: retry <max_attempts> <command...>
-retry() {
-  local max="$1"; shift
-  local attempt=1 delay=5
-  while [[ $attempt -le $max ]]; do
-    if "$@"; then return 0; fi
-    [[ $attempt -eq $max ]] && return 1
-    sleep $delay
-    delay=$((delay * 2))
-    attempt=$((attempt + 1))
-  done
-}
-
 # Delete log files older than N days. Default: 30 days.
 # Usage: rotate_logs [log_dir] [max_days]
 rotate_logs() {
@@ -189,14 +175,19 @@ run_automation() {
 confirm() {
   local prompt="$1"
   local default="${2:-N}"
-  local answer
-
-  read -rp "$prompt" answer
-
-  if [[ -z "${answer:-}" ]]; then
-    answer="$default"
+  # Prefer `gum confirm` for a proper TUI (already in Brewfile.cli); fall back
+  # to plain `read` on non-TTY or when gum is missing (e.g. fresh bootstrap).
+  if command -v gum >/dev/null 2>&1 && [[ -t 0 && -t 1 ]]; then
+    if [[ "$default" =~ ^[Yy]$ ]]; then
+      gum confirm --default=true "$prompt"
+    else
+      gum confirm --default=false "$prompt"
+    fi
+    return
   fi
-
+  local answer
+  read -rp "$prompt" answer
+  [[ -z "${answer:-}" ]] && answer="$default"
   [[ "$answer" =~ ^[Yy]$ ]]
 }
 
@@ -221,4 +212,4 @@ get_preference() {
 export -f require_bash_version has_flag show_help_if_requested
 export -f require_cmd
 export -f log_msg acquire_lock notify require_network
-export -f retry rotate_logs run_automation confirm get_preference
+export -f rotate_logs run_automation confirm get_preference
