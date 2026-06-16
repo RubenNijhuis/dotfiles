@@ -14,8 +14,9 @@ QUIET=false
 COMPACT=false
 JOBS=15
 FETCH_TIMEOUT=30
-SKIP_RECENT_SECONDS=300
+SKIP_RECENT_SECONDS=1800
 NO_CACHE=false
+REBASE_CURRENT=false
 FAILURE_LOG="$HOME/.local/log/update-repos-failures.log"
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 CACHE_DIR="$HOME/.cache/dotfiles"
@@ -24,19 +25,21 @@ CACHE_TTL=3600
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] [--dry-run] [--quiet] [--compact] [--jobs N] [--timeout N] [--skip-recent N] [--no-cache] [path]
+Usage: $0 [--help] [--no-color] [--dry-run] [--quiet] [--compact] [--jobs N] [--timeout N] [--skip-recent N] [--no-cache] [--rebase-current] [path]
 
 Update all git repositories under the provided path (default: \$DOTFILES_DEVELOPER_ROOT).
 
 For each repo, detects the base branch (main/master/develop/staging) and:
   - If on the base branch: pulls with rebase
-  - If on a feature branch: fast-forwards the base branch and rebases onto it
+  - If on a feature branch: fast-forwards the base branch (no rebase of the
+    feature branch unless --rebase-current is passed)
 
 Options:
   --jobs N, -j N       Parallel jobs (default: 15)
   --timeout N, -t N    Fetch timeout in seconds (default: 30)
-  --skip-recent N      Skip fetch for repos fetched within N seconds (default: 300, 0 to disable)
+  --skip-recent N      Skip fetch for repos fetched within N seconds (default: 1800, 0 to disable)
   --no-cache           Force repo discovery instead of using cached list
+  --rebase-current     Also rebase the current feature branch onto its base (opt-in; can cause conflicts)
   --dry-run            Preview without making changes
   --quiet              One-line summary only
   --compact            Stream only updated/failed repositories plus summary
@@ -57,6 +60,7 @@ while [[ $# -gt 0 ]]; do
     --timeout|-t) FETCH_TIMEOUT="$2"; shift 2 ;;
     --skip-recent) SKIP_RECENT_SECONDS="$2"; shift 2 ;;
     --no-cache) NO_CACHE=true; shift ;;
+    --rebase-current) REBASE_CURRENT=true; shift ;;
     -*) print_error "Unknown argument: $1"; usage; exit 1 ;;
     *) REPOS_DIR="$1"; shift ;;
   esac
@@ -147,7 +151,11 @@ update_repo() {
     $DRY_RUN && {
       local dry_detail="would stash and update"
       if [[ -n "$base_branch" && "$branch" != "$base_branch" ]]; then
-        dry_detail="would stash, update $base_branch, and rebase $branch"
+        if $REBASE_CURRENT; then
+          dry_detail="would stash, update $base_branch, and rebase $branch"
+        else
+          dry_detail="would stash and update $base_branch ($branch left alone)"
+        fi
       elif [[ -n "$base_branch" ]]; then
         dry_detail="would stash and update $base_branch"
       fi
@@ -267,26 +275,37 @@ update_repo() {
 
     if [[ "$base_behind" -gt 0 ]]; then
       $DRY_RUN && {
-        local feat_behind
-        feat_behind=$(git rev-list HEAD.."$base_branch" --count 2>/dev/null || echo "0")
         restore_stash
-        report_msg "$repo_name" info "would update $base_branch (+$base_behind) and rebase $branch"
+        local dry_msg="would update $base_branch (+$base_behind)"
+        $REBASE_CURRENT && dry_msg="$dry_msg and rebase $branch"
+        report_msg "$repo_name" info "$dry_msg"
         exit 0
       }
       # Fast-forward base branch without checkout
       if git fetch origin "$base_branch:$base_branch" &>/dev/null; then
         base_updated=true
       else
-        report_msg "$repo_name" warn "$base_branch has local commits — skipped fast-forward"
+        report_msg "$repo_name" info "$base_branch has local unpushed commits — skipped fast-forward"
       fi
     fi
 
-    # Rebase feature branch onto base
     local feat_behind
     feat_behind=$(git rev-list HEAD.."$base_branch" --count 2>/dev/null || echo "0")
 
+    # Default (safe) path: fast-forward base only, leave the feature branch alone.
+    if ! $REBASE_CURRENT; then
+      if $base_updated; then
+        restore_stash
+        local detail="updated $base_branch (+$base_behind)"
+        [[ "$feat_behind" -gt 0 ]] && detail="$detail; $branch is $feat_behind behind"
+        report_msg "$repo_name" ok "$detail"
+        exit 0
+      fi
+      restore_stash; exit 2
+    fi
+
+    # --rebase-current: also rebase the feature branch and pull its upstream
     if [[ "$feat_behind" -eq 0 ]] && ! $base_updated; then
-      # Also check if the feature branch's own upstream has updates
       local upstream_behind=0
       local upstream
       upstream=$(git rev-parse --abbrev-ref "@{upstream}" 2>/dev/null || echo "")
@@ -296,7 +315,6 @@ update_repo() {
       if [[ "$upstream_behind" -eq 0 ]]; then
         restore_stash; exit 2
       fi
-      # Pull own upstream changes
       $DRY_RUN && { restore_stash; report_msg "$repo_name" info "would update $branch ($upstream_behind commits behind upstream)"; exit 0; }
       if git pull --rebase &>/dev/null; then
         restore_stash
@@ -324,7 +342,6 @@ update_repo() {
       exit 1
     }
 
-    # Also pull feature branch's own upstream if it has one
     local upstream
     upstream=$(git rev-parse --abbrev-ref "@{upstream}" 2>/dev/null || echo "")
     if [[ -n "$upstream" ]]; then
@@ -405,7 +422,7 @@ fi
 
 if [[ "$JOBS" -gt 1 ]] && command -v parallel &>/dev/null; then
   result_log=$(mktemp)
-  export DRY_RUN FETCH_TIMEOUT REPOS_DIR QUIET COMPACT SKIP_RECENT_SECONDS FAILURE_LOG
+  export DRY_RUN FETCH_TIMEOUT REPOS_DIR QUIET COMPACT SKIP_RECENT_SECONDS FAILURE_LOG REBASE_CURRENT
   export -f update_repo is_submodule detect_base_branch classify_fetch_failure report_msg
   echo "$repos" | parallel --jobs "$JOBS" --keep-order --joblog "$result_log" update_repo || true
   UPDATED=$(awk 'NR>1 && $7==0' "$result_log" | wc -l | xargs)
