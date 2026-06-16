@@ -1,7 +1,8 @@
-# chezmoi source state
+# chezmoi migration
 
-Migration target. `stow` still owns most of `config/`; this directory holds
-the chezmoi-managed slice. They coexist via `~/.config/chezmoi/chezmoi.toml`:
+Tracker for the move from `stow` (under `config/`) to `chezmoi` (under
+`chezmoi/`). Both tools coexist on this branch; each package crosses over
+one at a time. They share the repo via `~/.config/chezmoi/chezmoi.toml`:
 
 ```toml
 sourceDir = "~/Developer/personal/projects/dotfiles/chezmoi"
@@ -38,17 +39,29 @@ rm -rf config/<pkg>
 
 ## Status
 
-Migrated (in chezmoi/, also still in config/):
-- [x] hushlogin   → `chezmoi/dot_hushlogin`
+Cut over to chezmoi (deleted from `config/`):
+- [x] hushlogin   → `chezmoi/empty_dot_hushlogin` (empty_ attr required for 0-byte files)
 - [x] starship    → `chezmoi/dot_config/starship.toml`
 - [x] ripgrep     → `chezmoi/dot_config/ripgrep/`
 - [x] mise        → `chezmoi/dot_config/mise/`
 - [x] bat         → `chezmoi/dot_config/bat/`
+- [x] btop        → `chezmoi/dot_config/btop/`
+- [x] eza         → `chezmoi/dot_config/eza/`
+- [x] lazygit     → `chezmoi/dot_config/lazygit/`
+- [x] yazi        → `chezmoi/dot_config/yazi/` (pre-existing yazi.toml parse error — yazi schema changed; needs separate fix)
+- [x] sesh        → `chezmoi/dot_config/sesh/`
+- [x] atuin       → `chezmoi/dot_config/atuin/`
 
 Stow-only (not yet migrated):
-- atuin, btop, eza, gpg, ghostty, git, lazygit, sesh, shell, ssh,
-  spicetify, tmux, vim, vscode, yazi, zsh, bash, claude
+- bash, claude, ghostty, git, gpg, shell, spicetify, ssh, tmux, vim,
+  vscode, zsh
 
-Cutover for the first batch happens by running steps 3-5 above when you're
-ready. Until then, both tools live side-by-side and the symlinks are still
-authoritative in `$HOME`.
+## Edge cases learned
+
+- **0-byte source files are silently skipped** unless you prefix with
+  `empty_` (so `.hushlogin` → `empty_dot_hushlogin`).
+- **Anything in `chezmoi/` maps to `$HOME`.** Putting `README.md` in the
+  source state would copy it to `~/README.md` on apply. Doc lives in
+  `docs/` instead.
+- **`~/.config/chezmoi/chezmoi.toml` is machine-local**, not committed.
+  Each machine needs `sourceDir = "<absolute path to this repo>/chezmoi"`.
