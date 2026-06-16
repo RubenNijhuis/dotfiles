@@ -1,6 +1,6 @@
-.PHONY: help install update stow unstow macos ssh-setup gpg-setup \
+.PHONY: help install update apply diff macos ssh-setup gpg-setup \
 	backup brew-sync brew-audit \
-	doctor ops-status stow-report spicetify-status spicetify-apply spicetify-restore \
+	doctor ops-status spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
@@ -32,20 +32,17 @@ cheat: ## One-page personal cheatsheet (shadowed defaults, keybindings, shortcut
 
 # ── Core ─────────────────────────────────────────────────────────────
 
-install: ## Full install (bootstrap + brew + stow + macos)
+install: ## Full install (bootstrap + brew + chezmoi apply + macos)
 	@bash $(DOTFILES)/install.sh
 
-update: ## Update repos, brew packages, runtimes, and re-stow configs
+update: ## Update repos, brew packages, runtimes, and re-apply chezmoi
 	@bash $(DOTFILES)/ops/update.sh
 
-stow: ## Stow all config packages
-	@bash $(DOTFILES)/setup/stow-all.sh
+apply: ## Apply chezmoi source state to $$HOME (idempotent)
+	@chezmoi apply
 
-stow-report: ## Preview stow conflicts without changing files
-	@bash $(DOTFILES)/setup/stow-report.sh
-
-unstow: ## Unstow all config packages
-	@bash $(DOTFILES)/setup/unstow-all.sh
+diff: ## Preview pending chezmoi changes without applying
+	@chezmoi diff
 
 macos: ## Apply macOS defaults
 	@bash $(DOTFILES)/setup/macos-defaults.sh

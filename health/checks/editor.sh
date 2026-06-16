@@ -56,7 +56,7 @@ check_neovim() {
   else
     details+="Config: missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-stow neovim config: cd $DOTFILES && make stow"
+    add_suggestion "Re-apply neovim config: chezmoi apply"
   fi
 
   # Check lazy.nvim plugin manager
@@ -113,7 +113,7 @@ check_starship() {
   else
     details+="Config: missing"
     issues=$((issues + 1))
-    add_suggestion "Re-stow starship config: cd $DOTFILES && make stow"
+    add_suggestion "Re-apply starship config: chezmoi apply"
   fi
 
   record_issue_count_result "Starship" "$issues" 1 "$details"

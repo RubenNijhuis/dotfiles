@@ -109,7 +109,7 @@ print_status() {
 
   print_next_steps \
     "Run: make spicetify-apply to re-apply the current theme" \
-    "Run: make stow if repo-managed Spicetify files drifted"
+    "Run: chezmoi apply if repo-managed Spicetify files drifted"
 
   [[ $issues -eq 0 ]]
 }

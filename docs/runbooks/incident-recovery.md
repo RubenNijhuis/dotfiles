@@ -21,9 +21,9 @@ make ops-status
 ## Config Drift or Broken Links
 
 ```bash
-make stow-report
+chezmoi diff
 make unstow
-make stow
+chezmoi apply
 make doctor
 ```
 

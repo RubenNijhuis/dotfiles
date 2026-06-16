@@ -330,15 +330,19 @@ status_check_doctor() {
 }
 
 status_check_stow() {
-  local stow_dir="$DOTFILES/config"
-  local total broken
-  total=$(find "$stow_dir" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | xargs)
-  broken=$(count_broken_symlinks "$HOME")
-
-  if [[ $broken -eq 0 ]]; then
-    print_status_row "Stow" ok "$total packages, no broken symlinks"
+  # Renamed concept: dotfiles are now managed by chezmoi, but the function
+  # name is preserved to avoid a wider rename in the status pipeline.
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_status_row "chezmoi" error "not installed"
+    STATUS_ISSUES=$((STATUS_ISSUES + 1))
+    return
+  fi
+  local pending
+  pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
+  if [[ "$pending" -eq 0 ]]; then
+    print_status_row "chezmoi" ok "source state in sync"
   else
-    print_status_row "Stow" error "$broken broken symlinks"
+    print_status_row "chezmoi" warn "$pending entries differ — run: chezmoi apply"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }

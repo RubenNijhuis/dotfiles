@@ -11,7 +11,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--help]
 
-Install VS Code extensions declared in config/vscode/.../extensions.txt.
+Install VS Code extensions declared in chezmoi/Library/.../extensions.txt.
 Skips extensions that are already installed.
 EOF
 }
@@ -19,7 +19,7 @@ EOF
 parse_standard_args usage "$@"
 
 DOTFILES="$(cd "$SCRIPT_DIR/.." && pwd)"
-EXTENSIONS_FILE="$DOTFILES/config/vscode/Library/Application Support/Code/User/extensions.txt"
+EXTENSIONS_FILE="$DOTFILES/chezmoi/Library/Application Support/Code/User/extensions.txt"
 
 if [[ ! -f "$EXTENSIONS_FILE" ]]; then
   print_error "extensions.txt not found at $EXTENSIONS_FILE"

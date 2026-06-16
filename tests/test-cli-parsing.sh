@@ -20,7 +20,6 @@ assert_exit "launchd-help" 0 bash "$ROOT_DIR/ops/automation/launchd-manager.sh" 
 assert_exit "launchd-bad-cmd" 1 bash "$ROOT_DIR/ops/automation/launchd-manager.sh" nope
 assert_exit "restore-help" 0 bash "$ROOT_DIR/ops/restore-backup.sh" --help
 assert_exit "sync-brew-help" 0 bash "$ROOT_DIR/ops/sync-brew.sh" --help
-assert_exit "stow-report-help" 0 bash "$ROOT_DIR/setup/stow-report.sh" --help
 assert_exit "cli-ref-help" 0 bash "$ROOT_DIR/ops/generate-cli-reference.sh" --help
 assert_exit "cli-ref-bad-flag" 1 bash "$ROOT_DIR/ops/generate-cli-reference.sh" --wat
 assert_exit "bootstrap-help" 0 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --help

@@ -10,45 +10,36 @@ fail() {
   exit 1
 }
 
-test_stow_all_idempotent() {
-  if ! command -v stow >/dev/null 2>&1; then
-    print_warning "idempotency(stow): skipped (stow not installed)"
+test_chezmoi_apply_idempotent() {
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_warning "idempotency(chezmoi): skipped (chezmoi not installed)"
     return 0
   fi
 
-  local temp_home
-  local listing1
-  local listing2
-
+  local temp_home listing1 listing2
   temp_home="$(mktemp -d)"
   trap 'rm -rf "$temp_home"' RETURN
 
-  HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null
+  # Use an isolated HOME and source state — don't touch the real one.
+  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
   listing1="$(mktemp)"
   listing2="$(mktemp)"
+  find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing1"
 
-  find "$temp_home" -type l -print | sort > "$listing1"
-
-  HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null
-  find "$temp_home" -type l -print | sort > "$listing2"
+  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
+  find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing2"
 
   if ! diff -u "$listing1" "$listing2" >/dev/null; then
     diff -u "$listing1" "$listing2" || true
-    fail "stow-all changed symlink set on second run"
-  fi
-
-  local broken
-  broken=$(find -L "$temp_home" -type l | wc -l | xargs)
-  if [[ "$broken" -gt 0 ]]; then
-    fail "stow-all created $broken broken symlink(s)"
+    fail "chezmoi apply changed file set on second run"
   fi
 
   rm -f "$listing1" "$listing2"
   trap - RETURN
   rm -rf "$temp_home"
 
-  print_success "idempotency(stow): passed"
+  print_success "idempotency(chezmoi): passed"
 }
 
 test_launchd_manager_idempotent() {
@@ -129,46 +120,35 @@ EOS
   print_success "idempotency(launchd-manager): passed"
 }
 
-test_stow_symlinks_resolve_to_stow_dir() {
-  if ! command -v stow >/dev/null 2>&1; then
-    print_warning "idempotency(symlink-targets): skipped (stow not installed)"
+test_chezmoi_source_files_are_regular() {
+  # chezmoi materializes regular files (not symlinks) into $HOME — verify
+  # by applying into a fresh HOME and asserting no symlinks back into the repo.
+  if ! command -v chezmoi >/dev/null 2>&1; then
+    print_warning "idempotency(file-types): skipped (chezmoi not installed)"
     return 0
   fi
 
-  local temp_home real_root_dir
+  local temp_home
   temp_home="$(mktemp -d)"
-  # Resolve symlinks in ROOT_DIR so comparison works when repo is accessed via a symlink
-  real_root_dir="$(cd "$ROOT_DIR" && pwd -P)"
   trap 'rm -rf "$temp_home"' RETURN
 
-  HOME="$temp_home" bash "$ROOT_DIR/setup/stow-all.sh" --no-color >/dev/null
+  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
-  local bad=0
-  while IFS= read -r link; do
-    local target
-    target="$(readlink "$link")"
-    # Resolve relative targets to absolute
-    if [[ "$target" != /* ]]; then
-      target="$(cd "$(dirname "$link")" && cd "$(dirname "$target")" && pwd -P)/$(basename "$target")"
-    fi
-    if [[ "$target" != "$real_root_dir/config/"* ]]; then
-      print_error "Symlink $link points outside config dir: $target"
-      bad=$((bad + 1))
-    fi
-  done < <(find "$temp_home" -type l)
-
-  if [[ "$bad" -gt 0 ]]; then
-    fail "Found $bad symlink(s) pointing outside $real_root_dir/config/"
+  local symlinks
+  symlinks=$(find "$temp_home" -type l 2>/dev/null | wc -l | xargs)
+  if [[ "$symlinks" -gt 0 ]]; then
+    find "$temp_home" -type l 2>&1 | head -5
+    fail "chezmoi-applied destination contains $symlinks symlink(s); expected only regular files"
   fi
 
   trap - RETURN
   rm -rf "$temp_home"
 
-  print_success "idempotency(symlink-targets): passed"
+  print_success "idempotency(file-types): passed"
 }
 
-test_stow_all_idempotent
+test_chezmoi_apply_idempotent
 test_launchd_manager_idempotent
-test_stow_symlinks_resolve_to_stow_dir
+test_chezmoi_source_files_are_regular
 
 print_success "idempotency: all checks passed"

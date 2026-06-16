@@ -39,7 +39,7 @@ make profile-set PROFILE=personal-laptop
 Current profile behavior:
 
 - the active profile is loaded from `local/profile.env` or defaults to `personal-laptop`
-- `make stow` only applies the packages allowed by the active profile
+- `chezmoi apply` only applies the packages allowed by the active profile
 - `make doctor` shows the active profile in its overview
 - `make doctor --section profile` validates profile-specific required commands, paths, and keychain items
 - `make install`, `make brew-audit`, and `make brew-sync` use the active profile's Brewfiles

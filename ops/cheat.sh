@@ -63,7 +63,7 @@ section "Dotfiles shortcuts (from anywhere)"
 row "dot"             "cd into ~/dotfiles"
 row "dots"            "make status — quick health snapshot"
 row "dotd"            "make doctor — full health check"
-row "dotu"            "make update — sync repos / brew / runtimes / stow"
+row "dotu"            "make update — sync repos / brew / runtimes / chezmoi"
 row "doth"            "make help"
 row "dotc"            "make cheat — this page"
 
