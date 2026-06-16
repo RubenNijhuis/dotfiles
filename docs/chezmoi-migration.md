@@ -56,9 +56,19 @@ Cut over to chezmoi (deleted from `config/`):
 - [x] spicetify   → `chezmoi/dot_config/spicetify/` (incl. Themes/TokyoNight)
 - [x] claude      → `chezmoi/dot_claude/` (nested .git skipped; statusline-command.sh uses executable_ prefix to preserve +x)
 - [x] nvim        → `chezmoi/dot_config/nvim/` (was stow package "vim"; LazyVim setup, 14 lua files + lockfile)
+- [x] bash        → `chezmoi/dot_bashrc`, `chezmoi/dot_bash_profile`
+- [x] zsh         → `chezmoi/dot_zshrc`, `dot_zprofile`, `dot_zshenv`
+- [x] git         → `chezmoi/dot_gitconfig*`, `dot_gitignore_global`
+- [x] ssh         → `chezmoi/private_dot_ssh/private_config{,.d/*}` (0700 dir, 0600 config)
+- [x] gpg         → `chezmoi/private_dot_gnupg/private_gpg{,.agent}.conf`
+- [x] ghostty     → `chezmoi/Library/Application Support/com.mitchellh.ghostty/config`
+- [x] vscode      → `chezmoi/Library/Application Support/Code/User/{settings.json,extensions.txt}`
 
-Stow-only (not yet migrated):
-- bash, ghostty, git, gpg, ssh, vscode, zsh
+**All 23 stow packages migrated.** `config/` retains only gitignored
+machine-local files (`config/shell/.config/shell/local.sh`, an orphan
+`config/claude/.claude/.git`); stow infrastructure (setup/stow-all.sh,
+make stow target, health/checks/core.sh check_stow) is still in place
+and can be removed in a follow-up.
 
 ## Edge cases learned
 
@@ -74,3 +84,8 @@ Stow-only (not yet migrated):
 - **Nested `.git` directories in stow packages don't transfer.** Claude's
   `.claude/.git/` was an orphan and would interfere with chezmoi's own
   git working tree if left in. Just don't copy it.
+- **`private_` prefix on a directory sets 0700.** Used for `.ssh/` and
+  `.gnupg/`. On a file: 0600. Chezmoi enforces these on every apply.
+- **Library paths under `~/Library/...` need no encoding.** "Library"
+  doesn't start with a dot, so it nests inside `chezmoi/Library/...`
+  directly. Used for ghostty and VS Code.
