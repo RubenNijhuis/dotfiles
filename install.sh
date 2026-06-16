@@ -640,10 +640,13 @@ step_final_setup() {
   fi
 
   printf '%sInstalling git hooks...%s\n' "${BLUE}" "${NC}"
-  if bash "$DOTFILES/setup/install-hooks.sh"; then
-    print_success "Git hooks installed"
+  # Hooks are wired up by chezmoi/run_onchange_install-git-hooks.sh.tmpl
+  # (sets core.hooksPath). The script already ran during chezmoi apply;
+  # this is just confirmation.
+  if git -C "$DOTFILES" config --get core.hooksPath >/dev/null 2>&1; then
+    print_success "Git hooks: core.hooksPath = $(git -C "$DOTFILES" config --get core.hooksPath)"
   else
-    print_warning "Git hooks installation failed (non-critical)"
+    print_warning "Git hooks not configured — run: chezmoi apply --include scripts"
   fi
 }
 

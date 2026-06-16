@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Point the dotfiles repo at hooks/ via git's native core.hooksPath.
+# Re-runs on `chezmoi apply` only when this file changes — the body itself
+# is idempotent (git config is a write-replace).
+#
+# Replaces the previous symlink-farm approach in setup/install-hooks.sh.
+# Hook files in $DOTFILES/hooks/ are consulted directly; no .git/hooks/
+# symlinks involved. Adding a new hook file is now zero-step.
+
+set -euo pipefail
+
+DOTFILES_ROOT="{{ joinPath .chezmoi.sourceDir ".." }}"
+
+if [[ ! -d "$DOTFILES_ROOT/.git" ]]; then
+  echo "install-git-hooks: $DOTFILES_ROOT is not a git working tree — skipping" >&2
+  exit 0
+fi
+
+git -C "$DOTFILES_ROOT" config core.hooksPath hooks
+
+# Ensure each tracked hook is executable.
+for hook in "$DOTFILES_ROOT"/hooks/*; do
+  [[ -f "$hook" ]] && chmod +x "$hook"
+done
+
+echo "Git hooks: core.hooksPath = hooks ($DOTFILES_ROOT)"

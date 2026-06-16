@@ -64,8 +64,9 @@ gpg-setup: ## Generate GPG key and configure Git signing
 vscode-setup: ## Install VS Code extensions from extensions.txt
 	@bash $(DOTFILES)/setup/vscode-setup.sh
 
-hooks: ## Install git hooks for code quality checks
-	@bash $(DOTFILES)/setup/install-hooks.sh
+hooks: ## Force-rerun the chezmoi git-hooks setup (sets core.hooksPath)
+	@chezmoi state delete-bucket --bucket scriptState >/dev/null 2>&1 || true
+	@chezmoi apply --include scripts
 
 keychain-check: ## Validate required keychain entries
 	@bash $(DOTFILES)/setup/check-keychain.sh
