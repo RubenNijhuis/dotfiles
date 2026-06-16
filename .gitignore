@@ -4,7 +4,7 @@ local/*
 !local/.gitkeep
 !local/machine.env.example
 !local/profile.env.example
-!local/shell-local.sh.example
+!local/dock-apps.txt.example
 !local/README.md
 *.local
 *.secret

@@ -18,13 +18,12 @@ make doctor --automation
 ~/dotfiles/ops/automation/launchd-manager.sh restart <agent>
 ```
 
-## Config Drift or Broken Links
+## Config Drift
 
 ```bash
-chezmoi diff
-make unstow
-chezmoi apply
-make doctor
+chezmoi diff        # preview pending changes
+chezmoi apply       # materialize source state into $HOME
+make doctor         # verify
 ```
 
 ## Last-Resort Restore

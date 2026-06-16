@@ -4,11 +4,9 @@
 #
 # Provides:
 #   automation_agent_lines           — all manifest rows as "name|description"
-#   automation_agent_names           — all agent names, one per line
 #   automation_default_profile_names — names with in_default_profile=yes
 #   automation_resolve_alias <input> — echoes canonical name (or input)
 #   automation_setup_targets         — all valid setup-automation.sh targets (names + aliases)
-#   automation_describe <name>       — echoes description for a given agent name
 
 # Resolve manifest path relative to this lib file's parent dir.
 _automation_manifest_path() {
@@ -30,10 +28,6 @@ _automation_read_manifest() {
 
 automation_agent_lines() {
   _automation_read_manifest | awk -F'|' '{printf "%s|%s\n", $1, $2}'
-}
-
-automation_agent_names() {
-  _automation_read_manifest | awk -F'|' '{print $1}'
 }
 
 automation_default_profile_names() {
@@ -59,16 +53,4 @@ automation_setup_targets() {
     printf '%s\n' "$name"
     [[ -n "$alias" ]] && printf '%s\n' "$alias"
   done < <(_automation_read_manifest)
-}
-
-automation_describe() {
-  local target="$1" name desc
-  while IFS='|' read -r name desc _default _alias; do
-    [[ -z "$name" ]] && continue
-    if [[ "$name" == "$target" ]]; then
-      printf '%s\n' "$desc"
-      return 0
-    fi
-  done < <(_automation_read_manifest)
-  return 1
 }

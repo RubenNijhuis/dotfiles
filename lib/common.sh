@@ -52,20 +52,6 @@ require_cmd() {
   fi
 }
 
-# Count broken symlinks in a directory (default: $HOME, depth 1).
-# Usage: count_broken_symlinks [dir] [maxdepth]
-count_broken_symlinks() {
-  local dir="${1:-$HOME}"
-  local maxdepth="${2:-1}"
-  local count=0
-  while IFS= read -r link; do
-    if [[ -L "$link" ]] && [[ ! -e "$link" ]]; then
-      count=$((count + 1))
-    fi
-  done < <(find "$dir" -maxdepth "$maxdepth" -type l 2>/dev/null)
-  printf '%d' "$count"
-}
-
 # Log a timestamped message to a file (and optionally stdout).
 # Uses flock to prevent interleaved writes from parallel jobs.
 # Usage: log_msg <log_file> <message> [--quiet]
@@ -233,6 +219,6 @@ get_preference() {
 
 # Export functions so they're available in subshells (e.g. GNU parallel).
 export -f require_bash_version has_flag show_help_if_requested
-export -f require_cmd count_broken_symlinks
+export -f require_cmd
 export -f log_msg acquire_lock notify require_network
 export -f retry rotate_logs run_automation confirm get_preference

@@ -18,7 +18,7 @@ For normal day-to-day operation, start here:
 make doctor       # default: quick summary + automation dashboard
 make doctor --full  # full health check with all sections
 make doctor --automation   # launchd automation dashboard
-make update       # compact live progress for repos, brew, runtimes, and re-stow
+make update       # compact live progress for repos, brew, runtimes, and chezmoi apply
 make spicetify-status # Spotify theming health check
 ```
 
@@ -57,7 +57,7 @@ make install          # full machine bootstrap
 make bootstrap-verify # strict bootstrap reliability checks
 make doctor           # full health checks
 make doctor --automation       # consolidated automation + ops status
-make update           # package/runtime update + restow
+make update           # package/runtime update + chezmoi apply
 make maint-check      # lint + script tests
 make docs-sync        # fail if generated CLI docs are stale
 ```
@@ -75,7 +75,7 @@ make docs-sync        # fail if generated CLI docs are stale
 ```text
 dotfiles/
 ├── config/          # GNU Stow packages (symlinked into $HOME)
-├── setup/           # Setup scripts (stow, macos-defaults, key gen)
+├── setup/           # Setup scripts (macos-defaults, key gen, vscode extensions)
 ├── ops/             # Operations (update, clean, backup, brew, automation)
 ├── health/          # Diagnostics (doctor, checks, info scripts)
 ├── tests/           # Script behavior tests

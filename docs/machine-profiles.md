@@ -1,84 +1,58 @@
 # Machine Profiles
 
-Machine profiles let one dotfiles repo support multiple machine roles without forcing every machine to use the same config surface.
+Machine profiles let one dotfiles repo target multiple machine roles without
+forcing each one to use the same Brewfile + automation set. The profile
+system was slimmed when the repo moved from stow to chezmoi: chezmoi handles
+config-file variance via templates, so the profile is now only responsible
+for **which package list installs** and **which launchd agents register**.
 
 ## What A Profile Is
 
-A profile is a tracked shell env file in `profiles/` that describes how this repo should behave for a machine role.
+A profile is a tracked shell env file in `profiles/` describing how this
+repo should behave for a machine role.
 
-Examples:
+Tracked profiles:
 
 - `personal-laptop`
 - `work-laptop`
 - `minimal`
 
 The active profile is selected locally per machine in `local/profile.env`.
-
-If no local profile is set, the repo defaults to `personal-laptop`.
+If none is set, the repo defaults to `personal-laptop`.
 
 ## Commands
 
-List available profiles:
-
 ```bash
-make profile-list
-```
-
-Show the active profile:
-
-```bash
-make profile-show
-```
-
-Set the active profile:
-
-```bash
-make profile-set PROFILE=personal-laptop
-make profile-set PROFILE=work-laptop
-make profile-set PROFILE=minimal
+make profile-list                # list available profiles
+make profile-show                # show the active profile
+make profile-set PROFILE=name    # set the active profile (writes local/profile.env)
 ```
 
 ## Current Behavior
 
 Profiles currently affect:
 
-- `chezmoi apply`
-- `make doctor` overview
-- `make doctor --section profile`
-- `make install`
-- `make brew-audit`
-- `make brew-sync`
-- `make automation-setup`
-- `make doctor --automation`
+- `make install` — Brewfile selection follows the active profile
+- `make brew-audit` / `make brew-sync` — audit against the profile's Brewfiles
+- `make automation-setup` — installs the profile's selected launchd agents
+- `make doctor` — overview shows the active profile
 
-That means:
-
-- `chezmoi apply` only applies packages listed in the active profile
-- `health/doctor.sh` shows which profile is active
-- `health/doctor.sh --section profile` validates that the active machine satisfies that profile's declared contract
-- install-time Brew bundle selection follows the active profile's Brewfile list
-- Brew audit/sync report against the active profile's Brewfiles
-- `automation-setup` installs the profile's selected LaunchD agents
-- `ops-status` shows which profile the dashboard reflects
+Config files (zshrc, gitconfig, ssh, …) are managed by chezmoi and do **not**
+vary per profile today — chezmoi templates handle machine variance through
+`~/.config/chezmoi/chezmoi.toml` data instead.
 
 ## File Layout
-
-Tracked profile definitions:
 
 ```text
 profiles/
   personal-laptop.env
   work-laptop.env
   minimal.env
+
+local/profile.env       # machine-local selection (gitignored)
 ```
 
-Machine-local selection:
-
-```text
-local/profile.env
-```
-
-Example:
+`local/profile.env` example:
 
 ```bash
 DOTFILES_PROFILE="personal-laptop"
@@ -86,88 +60,49 @@ DOTFILES_PROFILE="personal-laptop"
 
 ## Profile Definition Format
 
-Each profile is a shell env file.
+Each profile is a shell env file with two relevant keys:
 
-Current keys:
+- `DOTFILES_PROFILE` — canonical name (must match filename without `.env`)
+- `DOTFILES_PROFILE_LABEL` — human-readable
+- `DOTFILES_PROFILE_BREWFILES` — space-separated list of `Brewfile.*` to apply
+- `DOTFILES_PROFILE_AUTOMATIONS` — space-separated list of launchd agent names
 
-- `DOTFILES_PROFILE`
-- `DOTFILES_PROFILE_LABEL`
-- `DOTFILES_PROFILE_STOW_PACKAGES`
-- `DOTFILES_PROFILE_BREWFILES`
-- `DOTFILES_PROFILE_AUTOMATIONS`
-- `DOTFILES_PROFILE_REQUIRED_COMMANDS`
-- `DOTFILES_PROFILE_REQUIRED_PATHS`
-- `DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS`
-
-Example:
+Example (`profiles/minimal.env`):
 
 ```bash
 DOTFILES_PROFILE="minimal"
 DOTFILES_PROFILE_LABEL="Minimal"
-DOTFILES_PROFILE_STOW_PACKAGES="bash bat eza git hushlogin ripgrep shell ssh starship tmux zsh"
 DOTFILES_PROFILE_BREWFILES="Brewfile.cli"
 DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-audit weekly-digest"
-DOTFILES_PROFILE_REQUIRED_COMMANDS="git"
-DOTFILES_PROFILE_REQUIRED_PATHS="$DOTFILES_DEVELOPER_ROOT::Developer root|$HOME/.ssh/id_ed25519_personal::Personal SSH key"
-```
-
-## Profile Contract Keys
-
-These keys let a profile declare what "healthy" means for that machine role.
-
-- `DOTFILES_PROFILE_REQUIRED_COMMANDS`
-  Space-separated commands that must be available on `PATH`.
-- `DOTFILES_PROFILE_REQUIRED_PATHS`
-  Pipe-separated `path::label` entries that must exist on disk.
-- `DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS`
-  Pipe-separated `service::label` entries that must exist in the macOS Keychain.
-
-Example:
-
-```bash
-DOTFILES_PROFILE_REQUIRED_COMMANDS="git brew tmux code"
-DOTFILES_PROFILE_REQUIRED_PATHS="$DOTFILES_DEVELOPER_ROOT::Developer root|$DOTFILES_OBSIDIAN_REPO_PATH::Obsidian vault"
-DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS="github.com::GitHub token|openai-api::OpenAI API key"
 ```
 
 ## Creating A New Profile
 
 1. Copy an existing profile in `profiles/`.
-2. Rename it to something meaningful like `travel-laptop.env`.
-3. Adjust `DOTFILES_PROFILE_LABEL`.
-4. Trim or expand `DOTFILES_PROFILE_STOW_PACKAGES`.
-5. Choose the Brewfiles to apply via `DOTFILES_PROFILE_BREWFILES`.
-6. Choose the automations to install via `DOTFILES_PROFILE_AUTOMATIONS`.
-7. Activate it locally with:
+2. Rename to something meaningful (`travel-laptop.env`).
+3. Adjust `DOTFILES_PROFILE`, `DOTFILES_PROFILE_LABEL`.
+4. Choose Brewfiles via `DOTFILES_PROFILE_BREWFILES`.
+5. Choose automations via `DOTFILES_PROFILE_AUTOMATIONS` (see
+   `ops/automation/agents.manifest` for valid agent names).
+6. Activate:
 
-```bash
-make profile-set PROFILE=travel-laptop
-```
+   ```bash
+   make profile-set PROFILE=travel-laptop
+   ```
 
-## Recommended Workflow
-
-For a new machine:
+## New Machine Workflow
 
 ```bash
 cp local/profile.env.example local/profile.env
 make profile-set PROFILE=personal-laptop
-make profile-show
-chezmoi apply
-make doctor
-```
-
-For switching an existing machine to another role:
-
-```bash
-make profile-set PROFILE=minimal
-chezmoi apply
-make doctor
+make install            # bootstrap + brew + chezmoi apply + macos
+make doctor             # health + automation dashboard
 ```
 
 ## Design Notes
 
-Profiles are kept as simple shell env files on purpose:
-
-- they are easy to source from existing scripts
-- they fit the shell-native architecture of the repo
-- they are easy to extend later for Brew, launchd, install, and readiness workflows
+The profile system used to also declare "required commands / paths /
+keychain items" as a machine-readiness contract. Those checks have been
+removed — chezmoi templates conditionally apply config based on tool
+availability, and the individual doctor checks (`check_ssh`,
+`check_developer`, etc.) already validate the paths that matter.

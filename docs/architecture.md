@@ -4,7 +4,7 @@ This repository is a strict, macOS-only operations hub for machine bootstrap, do
 
 ## Scope
 
-- In scope: macOS bootstrap, stow-managed config, launchd automation, developer environment reliability.
+- In scope: macOS bootstrap, chezmoi-managed config, launchd automation, developer environment reliability.
 - Out of scope: Linux portability and cross-platform abstractions.
 
 ## Session Management
@@ -33,7 +33,7 @@ uv is the Python package and project manager. It also manages Python versions (`
 - `tests/`: script tests.
 - `launchd/`: managed launch agents and launchd contracts.
 - `local/`: machine-local, untracked override templates.
-- `profiles/`: tracked machine profile definitions (stow selection, future profile-aware behavior).
+- `profiles/`: tracked machine profile definitions (Brewfile + launchd-agent selection).
 - `brew/`: package declarations (`cli`, `apps`, `vscode`).
 - `docs/runbooks/`: operational procedures.
 - `docs/reference/`: generated or canonical references.
@@ -48,7 +48,7 @@ Profiles allow the repo to adapt to different machine roles without duplicating 
 
 Current v1 behavior:
 
-- `chezmoi apply` only stows packages listed by the active profile.
+- `chezmoi apply` materializes the source state under `chezmoi/` into `$HOME`. The active profile controls Brewfile + automation selection, not chezmoi behavior.
 - `health/doctor.sh` shows the active profile in the overview section.
 - `health/doctor.sh --section profile` validates profile-specific requirements declared in the profile env file.
 
@@ -93,5 +93,5 @@ Install/uninstall/status is handled only via `ops/automation/launchd-manager.sh`
 2. Add/extend script with contract-compliant CLI flags.
 3. Add tests under `tests/` for parsing and behavior.
 4. Update or generate docs (`bash ops/generate-cli-reference.sh` + `make docs-sync`).
-5. For automation: add launchd template + manager compatibility + `ops-status` visibility.
+5. For automation: add launchd template + manager compatibility + the doctor automation dashboard (`make doctor --automation`).
 6. Validate with `make maint-check` and `make bootstrap-verify`.
