@@ -10,36 +10,6 @@ dotfiles_iter_words() {
   done
 }
 
-dotfiles_iter_contract_entries() {
-  local value="${1:-}"
-  local old_ifs="$IFS"
-  local entry
-
-  IFS='|'
-  for entry in $value; do
-    entry="$(printf '%s' "$entry" | xargs)"
-    [[ -n "$entry" ]] && printf '%s\n' "$entry"
-  done
-  IFS="$old_ifs"
-}
-
-dotfiles_contract_entry_target() {
-  local entry="$1"
-  printf '%s\n' "${entry%%::*}"
-}
-
-dotfiles_contract_entry_label() {
-  local entry="$1"
-  local target label
-
-  target="$(dotfiles_contract_entry_target "$entry")"
-  label="${entry#*::}"
-  if [[ "$label" == "$entry" ]]; then
-    label="$target"
-  fi
-  printf '%s\n' "$label"
-}
-
 dotfiles_profile_file() {
   local dotfiles_root="${1:-${DOTFILES:-}}"
   printf '%s\n' "$dotfiles_root/local/profile.env"
@@ -78,15 +48,6 @@ dotfiles_load_profile() {
   source "$profile_path"
 }
 
-dotfiles_profile_packages() {
-  local packages="${DOTFILES_PROFILE_STOW_PACKAGES:-}"
-  if [[ -z "$packages" || "$packages" == "*" ]]; then
-    return 0
-  fi
-
-  dotfiles_iter_words "$packages"
-}
-
 dotfiles_profile_brewfiles() {
   local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
   dotfiles_iter_words "$brewfiles"
@@ -105,18 +66,6 @@ dotfiles_profile_automations() {
     fi
   fi
   dotfiles_iter_words "$agents"
-}
-
-dotfiles_profile_required_commands() {
-  dotfiles_iter_words "${DOTFILES_PROFILE_REQUIRED_COMMANDS:-}"
-}
-
-dotfiles_profile_required_paths() {
-  dotfiles_iter_contract_entries "${DOTFILES_PROFILE_REQUIRED_PATHS:-}"
-}
-
-dotfiles_profile_required_keychain_items() {
-  dotfiles_iter_contract_entries "${DOTFILES_PROFILE_REQUIRED_KEYCHAIN_ITEMS:-}"
 }
 
 dotfiles_load_env() {

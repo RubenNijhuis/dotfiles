@@ -10,24 +10,43 @@ fail() {
   exit 1
 }
 
+# Write a stub chezmoi config so templates referencing machine data + secrets
+# can render in isolated test runs. Returns the absolute config path on stdout.
+write_test_chezmoi_config() {
+  local cfg_path="$1"
+  cat > "$cfg_path" <<EOF
+sourceDir = "$ROOT_DIR/chezmoi"
+[data.machine]
+  obsidian_vault_path = "/tmp/obsidian"
+  github_username     = "test"
+[data.secrets]
+  linear_api_key   = "test"
+  nuget_auth_token = "test"
+EOF
+}
+
 test_chezmoi_apply_idempotent() {
   if ! command -v chezmoi >/dev/null 2>&1; then
     print_warning "idempotency(chezmoi): skipped (chezmoi not installed)"
     return 0
   fi
 
-  local temp_home listing1 listing2
+  local temp_home temp_cfg listing1 listing2
   temp_home="$(mktemp -d)"
-  trap 'rm -rf "$temp_home"' RETURN
+  temp_cfg="$(mktemp -d)/chezmoi.toml"
+  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
 
-  # Use an isolated HOME and source state — don't touch the real one.
-  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
+  write_test_chezmoi_config "$temp_cfg"
+
+  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
   listing1="$(mktemp)"
   listing2="$(mktemp)"
   find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing1"
 
-  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
+  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
   find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing2"
 
   if ! diff -u "$listing1" "$listing2" >/dev/null; then
@@ -128,11 +147,14 @@ test_chezmoi_source_files_are_regular() {
     return 0
   fi
 
-  local temp_home
+  local temp_home temp_cfg
   temp_home="$(mktemp -d)"
-  trap 'rm -rf "$temp_home"' RETURN
+  temp_cfg="$(mktemp -d)/chezmoi.toml"
+  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
 
-  HOME="$temp_home" chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
+  write_test_chezmoi_config "$temp_cfg"
+  HOME="$temp_home" chezmoi apply --config "$temp_cfg" \
+    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
 
   local symlinks
   symlinks=$(find "$temp_home" -type l 2>/dev/null | wc -l | xargs)

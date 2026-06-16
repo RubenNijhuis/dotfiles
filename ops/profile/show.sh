@@ -13,7 +13,9 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Show the active machine profile and its stow package selection.
+Show the active machine profile, its Brewfile selection, and launchd
+automations. Config files themselves are now managed by chezmoi —
+run 'chezmoi managed' to inspect that side.
 EOF
 }
 
@@ -23,20 +25,14 @@ main() {
   print_header "Active Profile"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Label" info "${DOTFILES_PROFILE_LABEL:-${DOTFILES_PROFILE:-unknown}}"
-  if [[ "${DOTFILES_PROFILE_STOW_PACKAGES:-*}" == "*" ]]; then
-    print_status_row "Stow packages" info "all packages"
-  else
-    print_status_row "Stow packages" info "$(printf '%s' "${DOTFILES_PROFILE_STOW_PACKAGES}" | wc -w | xargs) selected"
-    print_dim "  ${DOTFILES_PROFILE_STOW_PACKAGES}"
-  fi
   print_status_row "Brewfiles" info "${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
   print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}" | wc -w | xargs) selected"
   print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
-  print_status_row "Required commands" info "$(dotfiles_profile_required_commands | grep -c . || true) declared"
-  if [[ -n "${DOTFILES_PROFILE_REQUIRED_COMMANDS:-}" ]]; then
-    print_dim "  ${DOTFILES_PROFILE_REQUIRED_COMMANDS}"
+  if command -v chezmoi >/dev/null 2>&1; then
+    local managed
+    managed=$(chezmoi managed --include=files 2>/dev/null | wc -l | xargs)
+    print_status_row "chezmoi files" info "$managed managed"
   fi
-  print_status_row "Required paths" info "$(dotfiles_profile_required_paths | grep -c . || true) declared"
 }
 
 main "$@"

@@ -104,10 +104,20 @@ test_chezmoi_then_doctor() {
   temp_cfg="$(mktemp -d)"
   trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
 
-  # Point chezmoi at this repo's source state, target an isolated HOME.
-  printf 'sourceDir = "%s/chezmoi"\n' "$ROOT_DIR" > "$temp_cfg/chezmoi.toml"
-  HOME="$temp_home" XDG_CONFIG_HOME="$temp_cfg/.." \
-    chezmoi apply --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
+  # Point chezmoi at this repo's source state, target an isolated HOME,
+  # and stub the template data so local.sh.tmpl can render.
+  cat > "$temp_cfg/chezmoi.toml" <<EOF
+sourceDir = "$ROOT_DIR/chezmoi"
+[data.machine]
+  obsidian_vault_path = "/tmp/obsidian"
+  github_username     = "test"
+[data.secrets]
+  linear_api_key   = "test"
+  nuget_auth_token = "test"
+EOF
+  HOME="$temp_home" \
+    chezmoi apply --config "$temp_cfg/chezmoi.toml" \
+      --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
 
   assert_exit "chezmoi-then-doctor-exit" 0 \
     env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
@@ -158,40 +168,9 @@ EOF
   rm -rf "$temp_home" "$temp_bin"
 }
 
-# ── doctor profile contract honors declared requirements ─────────────────────
-
-test_doctor_profile_contract_passes_with_required_prereqs() {
-  local temp_home temp_bin output
-  temp_home="$(make_temp_home)"
-  temp_bin="$(make_temp_home)"
-  trap 'rm -rf "$temp_home" "$temp_bin"' RETURN
-
-  mkdir -p "$temp_home/.ssh" \
-    "$temp_home/.lmstudio" \
-    "$temp_home/Developer/personal/projects/obsidian-store"
-  : > "$temp_home/.ssh/id_ed25519_personal"
-  : > "$temp_home/.ssh/id_ed25519_work"
-
-  for fake_cmd in git brew tmux code security; do
-    cat > "$temp_bin/$fake_cmd" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-exit 0
-EOF
-    chmod +x "$temp_bin/$fake_cmd"
-  done
-
-  output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
-    bash "$ROOT_DIR/health/doctor.sh" --no-color --section profile 2>&1)
-
-  if ! printf '%s' "$output" | /usr/bin/grep -q "✓ Profile Contract"; then
-    print_error "FAIL(profile-contract): expected profile contract check to pass"
-    TEST_FAILURES=$((TEST_FAILURES + 1))
-  fi
-
-  trap - RETURN
-  rm -rf "$temp_home" "$temp_bin"
-}
+# profile contract check removed in chezmoi migration — chezmoi templates
+# now handle config-presence variance, and individual doctor checks
+# already validate the paths and commands that mattered.
 
 # ── Run all tests ───────────────────────────────────────────────────
 
@@ -200,6 +179,5 @@ test_clean_all_dry_run_safe
 test_restore_dry_run_safe
 test_chezmoi_then_doctor
 test_ops_status_uses_doctor_task_log
-test_doctor_profile_contract_passes_with_required_prereqs
 
 test_summary "integration"

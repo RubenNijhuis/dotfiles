@@ -89,3 +89,26 @@ and can be removed in a follow-up.
 - **Library paths under `~/Library/...` need no encoding.** "Library"
   doesn't start with a dot, so it nests inside `chezmoi/Library/...`
   directly. Used for ghostty and VS Code.
+
+## Templates + machine-local data
+
+`chezmoi/dot_config/shell/local.sh.tmpl` is the first tracked template.
+It renders into `~/.config/shell/local.sh` using values from
+`~/.config/chezmoi/chezmoi.toml`:
+
+```toml
+sourceDir = "~/Developer/personal/projects/dotfiles/chezmoi"
+
+[data.machine]
+  obsidian_vault_path = "/Users/.../obsidian-store"
+  github_username     = "RubenNijhuis"
+
+[data.secrets]
+  linear_api_key   = "..."
+  nuget_auth_token = "..."
+```
+
+The template references `{{ .machine.* }}` and `{{ .secrets.* }}`. The
+structure is version-controlled; only the values stay machine-local.
+Add new machine-specific shell config by extending the .tmpl and
+adding the corresponding entry under `[data.machine]` or `[data.secrets]`.

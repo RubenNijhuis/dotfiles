@@ -52,12 +52,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    stow|ssh|gpg|git|shell|developer|runtime|profile|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
+    stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, profile, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -242,7 +242,6 @@ run_checks() {
 
   should_run developer && system+=(check_developer)
   should_run runtime   && system+=(check_runtime)
-  should_run profile   && system+=(check_profile_contract)
   should_run launchd   && system+=(check_launchd)
   should_run homebrew  && system+=(check_homebrew)
   should_run backup    && system+=(check_backup_system)

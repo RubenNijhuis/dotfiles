@@ -27,9 +27,10 @@ config/ssh/.ssh/*.pub
 config/ssh/.ssh/known_hosts*
 config/ssh/.ssh/config.d/local.conf
 
-# Shell - machine-specific local overrides (may contain secrets)
+# Shell - machine-specific local overrides
+# (chezmoi/dot_config/shell/local.sh.tmpl IS tracked; secrets stay in
+# ~/.config/chezmoi/chezmoi.toml which is machine-local)
 config/shell/.config/shell/local.sh
-chezmoi/dot_config/shell/local.sh
 
 # GPG - keep config, ignore keys and trust database
 config/gpg/.gnupg/*.gpg
