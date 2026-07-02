@@ -555,15 +555,93 @@ step_stow_configs() {
     print_error "chezmoi not installed (expected from Brewfile.cli)"
     return 1
   fi
-  # Bootstrap chezmoi config to point at this repo's source state if absent.
+
   local cfg="$HOME/.config/chezmoi/chezmoi.toml"
   if [[ ! -f "$cfg" ]]; then
-    mkdir -p "$(dirname "$cfg")"
-    printf 'sourceDir = "%s/chezmoi"\n' "$DOTFILES" > "$cfg"
-    print_dim "Wrote $cfg"
+    scaffold_chezmoi_config "$cfg"
+  elif ! chezmoi_config_complete "$cfg"; then
+    print_warning "chezmoi.toml exists but is missing required keys"
+    print_info "Edit $cfg to add: obsidian_vault_path, github_username, linear_api_key, nuget_auth_token"
+  else
+    print_dim "chezmoi.toml already complete — leaving untouched"
   fi
+
   chezmoi apply
   print_success "Configs applied via chezmoi"
+}
+
+chezmoi_config_complete() {
+  local cfg="$1"
+  grep -q '^[[:space:]]*obsidian_vault_path[[:space:]]*=' "$cfg" && \
+    grep -q '^[[:space:]]*github_username[[:space:]]*=' "$cfg" && \
+    grep -q '^[[:space:]]*linear_api_key[[:space:]]*=' "$cfg" && \
+    grep -q '^[[:space:]]*nuget_auth_token[[:space:]]*=' "$cfg"
+}
+
+prompt_input() {
+  # $1=prompt, $2=default (optional), $3=secret (optional, "secret" to hide input)
+  local prompt="$1" default="${2:-}" mode="${3:-}" answer
+  local shown_prompt="$prompt"
+  [[ -n "$default" ]] && shown_prompt="$prompt [$default]"
+
+  if has_gum; then
+    if [[ "$mode" == "secret" ]]; then
+      answer=$(gum input --password --placeholder "$prompt" || true)
+    else
+      answer=$(gum input --placeholder "$shown_prompt" --value "$default" || true)
+    fi
+  else
+    if [[ "$mode" == "secret" ]]; then
+      read -rsp "$shown_prompt: " answer; echo
+    else
+      read -rp "$shown_prompt: " answer
+    fi
+  fi
+  printf '%s' "${answer:-$default}"
+}
+
+scaffold_chezmoi_config() {
+  local cfg="$1"
+  mkdir -p "$(dirname "$cfg")"
+
+  print_info "Scaffolding chezmoi.toml (machine-local, not committed)"
+  local default_vault="$DEVELOPER_ROOT/personal/projects/obsidian-store"
+  local obsidian_path github_user linear_key nuget_token
+
+  if $NON_INTERACTIVE; then
+    obsidian_path="$default_vault"
+    github_user="${GITHUB_USERNAME:-}"
+    linear_key=""
+    nuget_token=""
+    print_warning "Non-interactive: writing empty secrets. Edit $cfg before daily use."
+  else
+    obsidian_path=$(prompt_input "Obsidian vault path" "$default_vault")
+    github_user=$(prompt_input "GitHub username" "${GITHUB_USERNAME:-}")
+    linear_key=$(prompt_input "Linear API key (blank to skip)" "" secret)
+    nuget_token=$(prompt_input "NuGet auth token / GitHub PAT (blank to skip)" "" secret)
+  fi
+
+  cat > "$cfg" <<EOF
+# chezmoi config — machine-local. Do NOT commit.
+# Regenerate via install.sh (deletes this file first).
+
+sourceDir = "$DOTFILES/chezmoi"
+
+[data.machine]
+  obsidian_vault_path = "$obsidian_path"
+  github_username     = "$github_user"
+
+[data.secrets]
+  linear_api_key   = "$linear_key"
+  nuget_auth_token = "$nuget_token"
+EOF
+  chmod 600 "$cfg"
+  print_success "Wrote $cfg (chmod 600)"
+
+  if [[ -z "$linear_key" || -z "$nuget_token" ]]; then
+    print_warning "One or more secrets are empty — chezmoi apply will render broken exports"
+    print_info "Fill in: $cfg then re-run: chezmoi apply"
+  fi
 }
 
 step_setup_runtimes() {
