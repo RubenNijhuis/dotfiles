@@ -104,3 +104,5 @@ brew "k6"
 brew "libpq", link: true
 brew "libyaml"       # YAML lib (required for ruby psych ext at build time)
 brew "tailscale"     # WireGuard mesh VPN
+brew "ffmpeg"
+brew "stow"
