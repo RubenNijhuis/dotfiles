@@ -18,8 +18,8 @@ Remove common macOS bloatware apps (Tips, Chess, Stocks, etc.).
 EOF
 }
 
-parse_standard_args usage --accept-dry-run "$@"
 has_flag "--yes" "$@" && AUTO_YES=true
+parse_standard_args usage --accept-dry-run --accept-yes "$@"
 
 BLOATWARE=(
   "/System/Applications/Tips.app"
