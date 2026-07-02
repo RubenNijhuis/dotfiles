@@ -497,6 +497,35 @@ step_detect_system() {
   else
     print_info "Homebrew not detected yet; installer will bootstrap it."
   fi
+
+  check_macos_and_clt_freshness
+}
+
+check_macos_and_clt_freshness() {
+  # Warn (don't fail) when macOS or Xcode Command Line Tools are old enough
+  # that Homebrew is likely to refuse compiling formulae from source.
+  # Homebrew supports current + 2 prior macOS majors; bump MIN_MACOS_MAJOR
+  # when that window shifts.
+  local MIN_MACOS_MAJOR=15
+  local macos_version macos_major clt_version clt_major
+  macos_version="$(sw_vers -productVersion 2>/dev/null || echo unknown)"
+  macos_major="${macos_version%%.*}"
+  print_info "macOS: $macos_version"
+
+  if [[ "$macos_major" =~ ^[0-9]+$ ]] && [[ "$macos_major" -lt "$MIN_MACOS_MAJOR" ]]; then
+    print_warning "macOS $macos_version is older than Homebrew's supported floor (macOS $MIN_MACOS_MAJOR+)"
+    print_info "Update via: System Settings > General > Software Update"
+  fi
+
+  if clt_version="$(pkgutil --pkg-info=com.apple.pkg.CLTools_Executables 2>/dev/null | awk '/^version:/{print $2}')"; then
+    clt_major="${clt_version%%.*}"
+    print_info "Xcode CLT: $clt_version"
+    if [[ "$macos_major" =~ ^[0-9]+$ ]] && [[ "$clt_major" =~ ^[0-9]+$ ]] && \
+       [[ "$clt_major" -lt "$macos_major" ]]; then
+      print_warning "CLT major ($clt_major) trails macOS major ($macos_major) — Homebrew source builds may fail"
+      print_info "Refresh: sudo rm -rf /Library/Developer/CommandLineTools && sudo xcode-select --install"
+    fi
+  fi
 }
 
 step_install_xcode_clt() {
@@ -542,11 +571,17 @@ step_install_homebrew() {
 
 trust_declared_taps() {
   # Homebrew requires explicit trust for third-party taps before bundle
-  # will load their formulae. Trust each `tap "..."` line found in our
-  # profile's Brewfiles. Idempotent — `brew trust` on an already-trusted
-  # tap is a no-op.
+  # will load their formulae. Trust every currently-installed tap plus
+  # every `tap "..."` line in the profile's Brewfiles. Covers both fresh
+  # installs and existing machines with leftover taps. Idempotent —
+  # `brew trust` on an already-trusted tap is a no-op.
   local brewfile_name brewfile_path tap
   local -a taps=()
+
+  while IFS= read -r tap; do
+    [[ -n "$tap" ]] && taps+=("$tap")
+  done < <(brew tap 2>/dev/null)
+
   while IFS= read -r brewfile_name; do
     brewfile_path="$DOTFILES/brew/$brewfile_name"
     [[ -f "$brewfile_path" ]] || continue

@@ -4,9 +4,23 @@ macOS laptop bootstrap and operations repo.
 
 ## Quick Start
 
+### Prerequisites
+
+Before running `install.sh`:
+
+1. Update macOS to the latest release (System Settings > General > Software Update). Homebrew tracks Apple's latest and refuses source builds on older SDKs.
+2. Refresh Xcode Command Line Tools:
+   ```bash
+   sudo rm -rf /Library/Developer/CommandLineTools
+   sudo xcode-select --install
+   ```
+   Wait for the GUI installer to finish before continuing.
+
+### Install
+
 ```bash
-git clone https://github.com/rubennijhuis/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/rubennijhuis/dotfiles.git ~/Developer/personal/projects/dotfiles
+cd ~/Developer/personal/projects/dotfiles
 ./install.sh
 ```
 
