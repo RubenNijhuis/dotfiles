@@ -540,7 +540,30 @@ step_install_homebrew() {
   print_success "Homebrew ready"
 }
 
+trust_declared_taps() {
+  # Homebrew requires explicit trust for third-party taps before bundle
+  # will load their formulae. Trust each `tap "..."` line found in our
+  # profile's Brewfiles. Idempotent — `brew trust` on an already-trusted
+  # tap is a no-op.
+  local brewfile_name brewfile_path tap
+  local -a taps=()
+  while IFS= read -r brewfile_name; do
+    brewfile_path="$DOTFILES/brew/$brewfile_name"
+    [[ -f "$brewfile_path" ]] || continue
+    while IFS= read -r tap; do
+      taps+=("$tap")
+    done < <(awk -F'"' '/^tap "/{print $2}' "$brewfile_path")
+  done < <(dotfiles_profile_brewfiles)
+
+  local unique_tap
+  for unique_tap in $(printf '%s\n' "${taps[@]}" | sort -u); do
+    brew trust "$unique_tap" >/dev/null 2>&1 || \
+      print_warning "Could not trust tap: $unique_tap"
+  done
+}
+
 step_install_packages() {
+  trust_declared_taps
   local brewfile_name brewfile_path
   while IFS= read -r brewfile_name; do
     brewfile_path="$DOTFILES/brew/$brewfile_name"
