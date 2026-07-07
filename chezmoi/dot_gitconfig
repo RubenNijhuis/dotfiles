@@ -1,7 +1,7 @@
 [user]
 	name = Ruben Nijhuis
 	email = contact@rubennijhuis.com
-	signingkey = DE4CA08C47F3ED87
+	signingkey = A2833E62D48831A1
 
 [commit]
 	gpgsign = true

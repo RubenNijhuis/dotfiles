@@ -102,9 +102,14 @@ _zsh_eval_cache() {
 }
 
 # ----- Lazy-loaded tools (deferred until first use) -----
+# Each stub tears itself (and its siblings) down BEFORE loading the cache so the
+# post-load re-exec can't recurse into the stub. If the cache load fails (e.g. a
+# cold-cache race where `<tool> init` momentarily produced empty output), we must
+# NOT leave the command undefined — for zoxide that would flood every `cd` (aliased
+# to `z`) with errors for the life of a persistent shell. A new shell retries.
 _zsh_lazy_load_mise() {
   unfunction mise node npm npx corepack ruby gem bundle 2>/dev/null
-  _zsh_eval_cache mise activate zsh
+  _zsh_eval_cache mise activate zsh || return 1  # binaries still resolve via PATH
 }
 for cmd in mise node npm npx corepack ruby gem bundle; do
   eval "${cmd}() { _zsh_lazy_load_mise; ${cmd} \"\$@\" }"
@@ -113,7 +118,12 @@ unset cmd
 
 _zsh_lazy_load_zoxide() {
   unfunction z zi __zoxide_z __zoxide_zi 2>/dev/null
-  _zsh_eval_cache zoxide init zsh
+  if ! _zsh_eval_cache zoxide init zsh; then
+    # Non-recursive fallbacks keep the shell usable (and `cd` quiet) until relaunch.
+    z()  { builtin cd "$@"; }
+    zi() { builtin cd "$@"; }
+    return 1
+  fi
 }
 for cmd in z zi; do
   eval "${cmd}() { _zsh_lazy_load_zoxide; ${cmd} \"\$@\" }"
@@ -123,7 +133,7 @@ unset cmd
 _zsh_lazy_load_rustup() {
   unfunction rustup cargo rustc 2>/dev/null
   if command -v rustup >/dev/null 2>&1; then
-    _zsh_eval_cache rustup completions zsh
+    _zsh_eval_cache rustup completions zsh || return 1
   fi
 }
 for cmd in rustup cargo rustc; do
