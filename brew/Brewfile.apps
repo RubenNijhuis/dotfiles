@@ -78,3 +78,7 @@ cask "epic-games"           # Epic Games launcher
 cask "trackweight"          # Weight tracking
 cask "steipete/tap/codexbar"
 cask "jellyfin"             # Self-hosted media server
+cask "ngrok"
+cask "prismlauncher"
+cask "zulu@11"
+cask "zulu@17"
