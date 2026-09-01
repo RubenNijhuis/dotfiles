@@ -6,7 +6,8 @@
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean clean-all restore launchd-check vscode-parity \
 	help-setup help-brew help-launchd help-test cheat \
-	profile-list profile-show profile-set nix-check nix-build nix-switch nix-home-switch files-init
+	profile-list profile-show profile-set nix-check nix-check-all nix-build nix-switch nix-home-switch \
+	nix-fmt nix-adopt files-init
 
 DOTFILES := $(shell pwd)
 
@@ -148,6 +149,9 @@ NIX_HOME_HOST ?=
 
 nix-check: ## Evaluate the cross-platform Nix flake
 	@$(NIX) flake check
+
+nix-check-all: ## Evaluate the Nix flake on every declared platform
+	@$(NIX) flake check --all-systems
 
 nix-build: ## Build the current macOS Nix configuration without switching
 	@$(NIX) build .#darwinConfigurations.$(NIX_DARWIN_HOST).system --no-link

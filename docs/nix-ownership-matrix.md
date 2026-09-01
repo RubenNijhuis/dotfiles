@@ -37,7 +37,7 @@ application's schema.
 | Neovim configuration and binary | `nix/home/editors.nix` | active. Lazy.nvim/Mason data stays local until the plugin graph is pinned; its writable runtime lockfile is in local state. Copilot remains unchanged pending an explicit FOSS replacement choice. |
 | `dot_config/mise/` | raw `home.file` entry, then improve selectively | pending; decide whether globally mutable Ruby belongs in mise or a pinned Nix profile |
 | Shared shell modules | `nix/home/shell-modules.nix` raw files | active; startup files consume these links |
-| `dot_zsh*`, `dot_bash*`, startup environment | Home Manager Zsh/Bash and session modules with canonical raw source | ready for atomic handoff; run `make nix-adopt PROFILE=shell`, then `make nix-switch` and verify a fresh Zsh and Bash session |
+| `dot_zsh*`, `dot_bash*`, startup environment | Home Manager Zsh/Bash and session modules with canonical raw source | active; prior startup files are private `.pre-nix` backups and fresh Zsh/Bash sessions resolve the Nix-managed tools |
 | `dot_config/spicetify/`, `dot_claude/` | app-specific opt-in configuration | retain outside the core profile until each app is retained |
 | `private_dot_ssh/`, `private_dot_gnupg/`, `local.sh.tmpl` | encrypted/local only | explicitly excluded from Nix |
 | macOS defaults | `nix/darwin/defaults.nix` | active; the narrow ChezMoi script keeps only opt-in local Dock placement and Library visibility |
@@ -80,5 +80,5 @@ The following are intentionally local or encrypted, never plain Nix source:
   possible tool on every machine.
 - `Files`, `Private`, and project repositories contain durable work. Downloads,
   Desktop, and caches are intake or temporary locations.
-- Verify with `nix flake check --all-systems` before a system switch and make
-  changes in small, reviewable commits.
+- Verify shared changes with `make nix-check-all` before a system switch and
+  make changes in small, reviewable commits.

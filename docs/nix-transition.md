@@ -65,6 +65,13 @@ paths are broadly readable on the machine.
    make nix-build
    ```
 
+   Before changing shared modules that affect Linux or WSL too, use the
+   cross-platform check:
+
+   ```bash
+   make nix-check-all
+   ```
+
 3. Apply the first, deliberately small macOS configuration:
 
    ```bash
