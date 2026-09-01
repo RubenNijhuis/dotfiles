@@ -21,9 +21,8 @@ find_git_dirs() {
 }
 
 check_stow() {
-  # Renamed concept: chezmoi replaced stow but the doctor section still
-  # advertises "stow" — keep the function name to avoid a wider rename
-  # in run_checks, but check chezmoi source-state sync instead.
+  # Compatibility name retained for the public doctor section. This checks
+  # chezmoi source-state sync; Stow is no longer part of the setup.
   if ! command -v chezmoi >/dev/null 2>&1; then
     record_result "chezmoi" 1 "chezmoi not installed"
     add_suggestion "brew install chezmoi"
@@ -74,21 +73,6 @@ check_ssh() {
     details+="Personal key: missing\n  "
     issues=$((issues + 1))
     add_suggestion "Generate personal SSH key: make ssh-setup"
-  fi
-
-  # Check work key (optional)
-  if [[ -f "$HOME/.ssh/id_ed25519_work" ]]; then
-    local perms
-    perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_work" 2>/dev/null || echo "")
-    if [[ "$perms" == "600" ]]; then
-      details+="Work key: ~/.ssh/id_ed25519_work (600)\n  "
-    else
-      details+="Work key: incorrect permissions ($perms, expected 600)\n  "
-      issues=$((issues + 1))
-      add_suggestion "Fix permissions: chmod 600 ~/.ssh/id_ed25519_work"
-    fi
-  else
-    details+="${DIM}Work key: not configured (optional)${NC}\n  "
   fi
 
   # Check SSH config includes
@@ -191,44 +175,34 @@ check_git() {
     else
       details+="Conditional includes: missing from .gitconfig\n  "
       issues=$((issues + 1))
-      add_suggestion "Re-apply git config: chezmoi apply"
+      add_suggestion "Apply Git configuration: make nix-switch"
     fi
   else
     details+="No .gitconfig found\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-apply git config: chezmoi apply"
+    add_suggestion "Apply Git configuration: make nix-switch"
   fi
 
   local dev_root
   dev_root="$(developer_root)"
 
   # Test in personal repo (if exists)
-  if [[ -d "$dev_root/personal/projects/dotfiles/.git" ]]; then
+  local personal_dotfiles=""
+  for candidate in "$dev_root/personal/dotfiles" "$dev_root/personal/projects/dotfiles"; do
+    if [[ -d "$candidate/.git" ]]; then
+      personal_dotfiles="$candidate"
+      break
+    fi
+  done
+  if [[ -n "$personal_dotfiles" ]]; then
     local ssh_cmd
-    ssh_cmd=$(git -C "$dev_root/personal/projects/dotfiles" config core.sshCommand || echo "")
+    ssh_cmd=$(git -C "$personal_dotfiles" config core.sshCommand || echo "")
     if [[ "$ssh_cmd" == *"id_ed25519_personal"* ]]; then
       details+="Personal repos: using id_ed25519_personal\n  "
     else
       details+="Personal repos: incorrect SSH key\n  "
       issues=$((issues + 1))
       add_suggestion "Check .gitconfig-personal conditional include"
-    fi
-  fi
-
-  # Test in work repo (if exists)
-  if [[ -d "$dev_root/work/clients" ]]; then
-    local work_repo
-    work_repo=$(find_git_dirs "$dev_root/work/clients" | head -1)
-    if [[ -n "$work_repo" ]]; then
-      local ssh_cmd
-      ssh_cmd=$(git -C "$(dirname "$work_repo")" config core.sshCommand || echo "")
-      if [[ "$ssh_cmd" == *"id_ed25519_work"* ]]; then
-        details+="Work repos: using id_ed25519_work"
-      else
-        details+="Work repos: incorrect SSH key"
-        issues=$((issues + 1))
-        add_suggestion "Check .gitconfig-work conditional include"
-      fi
     fi
   fi
 
@@ -284,11 +258,11 @@ check_shell() {
   else
     details+="Shell config files: $missing_files missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-apply shell config: chezmoi apply"
+    add_suggestion "Apply shared shell configuration: make nix-switch"
   fi
 
   # Check PATH
-  local path_items=(mise bun brew)
+  local path_items=(git node pnpm)
   local path_ok=true
 
   for item in "${path_items[@]}"; do
@@ -299,7 +273,7 @@ check_shell() {
   done
 
   if $path_ok; then
-    details+="PATH: mise, Bun, Homebrew found"
+    details+="Core PATH: Git, Node.js, pnpm found"
   fi
 
   if [[ $issues -eq 0 ]]; then
@@ -323,7 +297,7 @@ check_developer() {
     "$dev_root/personal/projects"
     "$dev_root/personal/experiments"
     "$dev_root/personal/learning"
-    "$dev_root/work/clients"
+    "$dev_root/work"
     "$dev_root/archive"
   )
 
@@ -344,7 +318,7 @@ check_developer() {
 
   # Count repos per category (depth-bounded, prunes node_modules/vendor/.build/Pods)
   local total personal_projects personal_experiments personal_learning work archive
-  personal_projects=$(find_git_dirs "$dev_root/personal/projects" | wc -l | xargs)
+  personal_projects=$(find_git_dirs "$dev_root/personal" | wc -l | xargs)
   personal_experiments=$(find_git_dirs "$dev_root/personal/experiments" | wc -l | xargs)
   personal_learning=$(find_git_dirs "$dev_root/personal/learning" | wc -l | xargs)
   work=$(find_git_dirs "$dev_root/work" | wc -l | xargs)
@@ -352,17 +326,17 @@ check_developer() {
   total=$((personal_projects + personal_experiments + personal_learning + work + archive))
 
   details+="Repositories: $total total\n  "
-  details+="  - personal/projects: $personal_projects\n  "
+  details+="  - personal: $personal_projects\n  "
   details+="  - personal/experiments: $personal_experiments\n  "
   details+="  - personal/learning: $personal_learning\n  "
-  details+="  - work/clients: $work\n  "
+  details+="  - work: $work\n  "
   details+="  - archive: $archive"
 
   # Detect multiple unique dotfiles clones to prevent stow ownership conflicts.
   local canonical_paths=""
   local unique_count=0
   local candidate canonical
-  for candidate in "$HOME/dotfiles" "$dev_root/personal/projects/dotfiles"; do
+  for candidate in "$HOME/dotfiles" "$dev_root/personal/dotfiles" "$dev_root/personal/projects/dotfiles"; do
     if [[ -d "$candidate/.git" ]]; then
       canonical="$(cd "$candidate" 2>/dev/null && pwd -P || true)"
       if [[ -n "$canonical" ]] && ! grep -qxF "$canonical" <<< "$canonical_paths"; then
@@ -379,7 +353,7 @@ check_developer() {
       [[ -n "$canonical" ]] || continue
       details+="\n    - $canonical"
     done <<< "$canonical_paths"
-    add_suggestion "Keep one clone only to avoid stow ownership conflicts"
+    add_suggestion "Keep one clone only to avoid configuration ownership conflicts"
   fi
 
   if [[ $issues -eq 0 ]] && [[ $warnings -gt 0 ]]; then
@@ -395,27 +369,17 @@ check_runtime() {
 
   local details=""
 
-  # Node.js via fnm
+  # Node.js is part of the shared Nix JavaScript capability.
   if command -v node &>/dev/null; then
     local node_version
     node_version=$(node --version)
-    details+="Node.js: $node_version (via mise)\n  "
+    details+="Node.js: $node_version\n  "
   else
     details+="Node.js: not installed\n  "
-    add_suggestion "Install Node.js: mise install node@lts"
+    add_suggestion "Apply the shared JavaScript capability: make nix-switch"
   fi
 
-  # Bun
-  if command -v bun &>/dev/null; then
-    local bun_version
-    bun_version=$(bun --version)
-    details+="Bun: $bun_version\n  "
-  else
-    details+="Bun: not installed\n  "
-    add_suggestion "Install Bun: curl -fsSL https://bun.sh/install | bash"
-  fi
-
-  # Python via uv
+  # uv is opt-in per project; it is not part of the shared machine baseline.
   if command -v uv &>/dev/null; then
     local uv_version
     uv_version=$(uv --version)
@@ -426,11 +390,10 @@ check_runtime() {
       details+="\n  Python: $py_version (via uv)"
     else
       details+="\n  ⚠ Python: no versions installed"
-      add_suggestion "Install Python: uv python install"
+      add_suggestion "Install the required Python version in that project: uv python install"
     fi
   else
-    details+="uv: not installed"
-    add_suggestion "Install uv: brew install uv"
+    details+="uv: not installed (optional per project)"
   fi
 
   record_result "Runtime Environments" 0 "$details"

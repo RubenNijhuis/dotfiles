@@ -6,6 +6,12 @@ system was slimmed when the repo moved from stow to chezmoi: chezmoi handles
 config-file variance via templates, so the profile is now only responsible
 for **which package list installs** and **which launchd agents register**.
 
+> The long-term, cross-platform capability model is in
+> [the Nix transition](nix-transition.md#capability-profiles). These legacy
+> profiles are transition-only: `minimal` installs the small Homebrew
+> bootstrap, while portable tools belong in the shared Nix core. They do not
+> install every desktop application on a new laptop.
+
 ## What A Profile Is
 
 A profile is a tracked shell env file in `profiles/` describing how this
@@ -14,7 +20,6 @@ repo should behave for a machine role.
 Tracked profiles:
 
 - `personal-laptop`
-- `work-laptop`
 - `minimal`
 
 The active profile is selected locally per machine in `local/profile.env`.
@@ -37,16 +42,16 @@ Profiles currently affect:
 - `make automation-setup` — installs the profile's selected launchd agents
 - `make doctor` — overview shows the active profile
 
-Config files (zshrc, gitconfig, ssh, …) are managed by chezmoi and do **not**
-vary per profile today — chezmoi templates handle machine variance through
-`~/.config/chezmoi/chezmoi.toml` data instead.
+The portable core is selected by the Nix host target, not these legacy
+profiles. See [Nix transition](nix-transition.md#capability-profiles) for the
+cross-platform capability model. ChezMoi only manages the paths that remain
+explicitly transition-owned.
 
 ## File Layout
 
 ```text
 profiles/
   personal-laptop.env
-  work-laptop.env
   minimal.env
 
 local/profile.env       # machine-local selection (gitignored)
@@ -72,7 +77,7 @@ Example (`profiles/minimal.env`):
 ```bash
 DOTFILES_PROFILE="minimal"
 DOTFILES_PROFILE_LABEL="Minimal"
-DOTFILES_PROFILE_BREWFILES="Brewfile.cli"
+DOTFILES_PROFILE_BREWFILES="Brewfile.bootstrap"
 DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-audit weekly-digest"
 ```
 
@@ -95,7 +100,8 @@ DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-a
 ```bash
 cp local/profile.env.example local/profile.env
 make profile-set PROFILE=personal-laptop
-make install            # bootstrap + brew + chezmoi apply + macos
+make install            # bootstrap transition tooling on a new Mac
+make nix-switch         # apply the Nix-managed macOS configuration
 make doctor             # health + automation dashboard
 ```
 

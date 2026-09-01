@@ -1,0 +1,83 @@
+# shellcheck shell=bash
+# Nix-owned; closest to zsh, which ShellCheck does not support directly.
+# Modern CLI replacements (guarded: fall back gracefully if tool missing)
+if command -v bat >/dev/null 2>&1; then alias cat="bat"; fi
+if command -v eza >/dev/null 2>&1; then
+  alias ls="eza --group-directories-first"
+  alias la="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all"
+  alias ll="eza -la --group-directories-first --header --smart-group --time-style=relative --color-scale=all --git"
+  alias lt="eza --tree --level=2"
+fi
+
+# Git shortcuts (interactive ops go through lazygit — Ctrl-G)
+alias g="git"
+alias gs="git status"
+alias gd="git diff"
+alias lg="lazygit"
+
+# Navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias files='cd "$DOTFILES_FILES_ROOT"'
+alias finbox='cd "$DOTFILES_FILES_INBOX"'
+alias fprojects='cd "$DOTFILES_FILES_PROJECTS"'
+
+# Shadow defaults with modern tools (forces habit formation)
+if command -v zoxide >/dev/null 2>&1; then alias cd="z"; fi
+if command -v dust >/dev/null 2>&1; then alias du="dust"; fi
+
+# Single-key launchers for interactive tools
+# Note: `y` (yazi) is defined as a function in functions.sh — it cd's into the
+# directory yazi quits into. Do not alias `y` here; it would shadow the function.
+if command -v sesh >/dev/null 2>&1; then
+  alias s='sesh connect $(sesh list -tz | fzf --height=40% --reverse)'
+fi
+
+# Utility
+alias resource="source ~/.zshrc"
+alias paths='echo $PATH | tr ":" "\n"'
+alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew cleanup"
+
+# Dotfiles repo shortcuts (work from anywhere).
+# Intentionally expand the path at alias-definition time so the alias works
+# even after the helper var is unset; shellcheck SC2139 is a false positive here.
+_DOT="${DOTFILES_REPO:-$HOME/dotfiles}"
+# shellcheck disable=SC2139
+alias dot="cd $_DOT"
+# shellcheck disable=SC2139
+alias dots="make -C $_DOT doctor"
+# shellcheck disable=SC2139
+alias dotd="make -C $_DOT doctor"
+# shellcheck disable=SC2139
+alias dotu="make -C $_DOT update"
+# shellcheck disable=SC2139
+alias doth="make -C $_DOT help"
+# shellcheck disable=SC2139
+alias dotc="make -C $_DOT cheat"
+unset _DOT
+
+# Development cleanup — functions defined in functions.sh (guarded against $HOME / massive sweeps)
+
+# Search
+if command -v rg >/dev/null 2>&1; then alias grep="rg"; fi
+
+# Neovim
+if command -v nvim >/dev/null 2>&1; then
+  alias vim="nvim"
+  alias vi="nvim"
+  alias v="nvim"
+fi
+
+# System monitor
+if command -v btop >/dev/null 2>&1; then alias top="btop"; fi
+
+# Docker cleanup (OrbStack)
+alias dclean='docker system prune -af --volumes'
+
+# Claude CLI extensions are optional and machine-local. Never create a global
+# shortcut that bypasses Claude's permission prompts.
+_claude_agent="${XDG_CONFIG_HOME:-$HOME/.config}/shell/claude-agent.sh"
+# shellcheck disable=SC1090  # optional machine-local extension
+[[ -f "$_claude_agent" ]] && source "$_claude_agent"
+unset _claude_agent

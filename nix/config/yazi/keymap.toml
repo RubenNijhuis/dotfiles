@@ -1,0 +1,10 @@
+# Nix-owned Yazi keybindings — zoxide integration and editor shortcuts
+
+[manager]
+prepend_keymap = [
+  # Open in editor (respect $EDITOR)
+  { on = ["e"], run = "open", desc = "Open selected file" },
+
+  # Toggle hidden files
+  { on = ["."], run = "hidden toggle", desc = "Toggle hidden files" },
+]

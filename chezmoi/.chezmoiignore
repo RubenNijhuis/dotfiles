@@ -1,0 +1,7 @@
+# Nix/Home Manager renders these targets from the canonical raw files below.
+# Keeping them here avoids duplicating app-native TOML during the transition.
+.zshrc
+.bashrc
+.zshenv
+.profile
+.bash_profile

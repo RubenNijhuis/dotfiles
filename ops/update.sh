@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Update repos, brew packages, runtimes, global packages, and re-stow configs
+# Update repos, brew packages, runtimes, global packages, and chezmoi config
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,7 +15,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Update repos, Homebrew packages, runtime tools, global packages, and restow configs.
+Update repos, Homebrew packages, runtime tools, global packages, and chezmoi config.
 EOF
 }
 
@@ -110,8 +110,7 @@ main() {
   UPDATE_TMP="$(parallel_tmpdir update)"
   trap 'rm -rf "${UPDATE_TMP:-}"' EXIT
 
-  # Fan out independent steps. Restow must run after because brew/runtimes
-  # can change files the symlink farm references.
+  # Fan out independent steps. Apply configuration after package/runtime updates.
   local steps=(repos brew runtimes global)
   parallel_spawn "$UPDATE_TMP" repos    update_repos
   parallel_spawn "$UPDATE_TMP" brew     update_homebrew

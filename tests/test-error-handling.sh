@@ -51,7 +51,8 @@ test_clean_empty_home() {
   trap 'rm -rf "$temp_home"' RETURN
 
   assert_exit "clean-empty-home" 0 \
-    env HOME="$temp_home" bash "$ROOT_DIR/ops/clean.sh" --no-color
+    env -u XDG_CACHE_HOME -u XDG_CONFIG_HOME -u XDG_DATA_HOME -u XDG_STATE_HOME \
+      HOME="$temp_home" bash "$ROOT_DIR/ops/clean.sh" --no-color
 
   trap - RETURN
   rm -rf "$temp_home"

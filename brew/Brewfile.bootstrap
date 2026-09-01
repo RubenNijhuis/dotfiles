@@ -1,0 +1,5 @@
+# Small macOS-only bootstrap. Everything portable belongs in Nix.
+brew "chezmoi"                 # Existing configuration handoff
+brew "zsh-autosuggestions"     # Loaded by the current Zsh startup
+brew "zsh-syntax-highlighting" # Loaded by the current Zsh startup
+brew "zsh-you-should-use"      # Loaded by the current Zsh startup

@@ -1,0 +1,49 @@
+# Nix-owned Yazi file manager configuration
+
+[manager]
+ratio = [1, 4, 3]
+sort_by = "natural"
+sort_sensitive = false
+sort_reverse = false
+sort_dir_first = true
+show_hidden = false
+show_symlink = true
+linemode = "size"
+
+[preview]
+wrap = "no"
+tab_size = 2
+max_width = 600
+max_height = 900
+
+[plugin]
+prepend_previewers = [
+  # Use bat for syntax-highlighted code previews
+  { mime = "text/*", run = "code" },
+  { mime = "application/json", run = "code" },
+  { mime = "*/xml", run = "code" },
+]
+
+[opener]
+edit = [
+  { run = '${EDITOR:-nvim} "$@"', block = true, for = "unix" },
+]
+open = [
+  { run = 'if command -v open >/dev/null 2>&1; then open "$@"; elif command -v wslview >/dev/null 2>&1; then wslview "$@"; else xdg-open "$@"; fi' },
+]
+reveal = [
+  { run = 'if command -v open >/dev/null 2>&1; then open -R "$@"; elif command -v wslview >/dev/null 2>&1; then wslview "$@"; else xdg-open "$(dirname "$1")"; fi' },
+]
+
+[open]
+rules = [
+  { mime = "text/*", use = "edit" },
+  { mime = "image/*", use = "open" },
+  { mime = "video/*", use = "open" },
+  { mime = "audio/*", use = "open" },
+  { mime = "application/json", use = "edit" },
+  { mime = "*/xml", use = "edit" },
+  { mime = "application/pdf", use = "open" },
+  { url = "*.html", use = "open" },
+  { url = "*", use = "open" },
+]

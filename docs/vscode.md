@@ -1,7 +1,8 @@
 # VS Code Configuration
 
-Settings in `config/vscode/Library/Application Support/Code/User/settings.json`.
-Extensions in `config/vscode/.../extensions.txt` and `brew/Brewfile.vscode` (must stay in sync).
+Settings live in `chezmoi/Library/Application Support/Code/User/settings.json`.
+Extensions live beside them in `extensions.txt`. `brew/Brewfile.vscode` is the
+legacy extension inventory; keep it in sync while VS Code remains transition-owned.
 
 ## Design Choices
 
@@ -24,11 +25,12 @@ Extensions in `config/vscode/.../extensions.txt` and `brew/Brewfile.vscode` (mus
 ## Setup
 
 ```bash
-chezmoi apply          # symlink settings
-make vscode-setup  # install extensions
+chezmoi apply       # materialize the transition-owned settings
+make vscode-setup  # install extensions from extensions.txt
 ```
 
 ## Adding Extensions
 
-1. Add to `extensions.txt` and `brew/Brewfile.vscode`
-2. Run `make brew-audit` to verify parity
+1. Add the extension ID to `chezmoi/Library/Application Support/Code/User/extensions.txt`
+   and `brew/Brewfile.vscode`.
+2. Run `make vscode-parity` to verify parity.

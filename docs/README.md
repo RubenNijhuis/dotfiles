@@ -5,7 +5,12 @@ Index for the dotfiles documentation.
 ## Architecture & Design
 
 - [Architecture](architecture.md) — repo structure, scope, and design decisions
+- [Nix Transition](nix-transition.md) — current cross-platform installation and ownership model
+- [Nix Ownership Matrix](nix-ownership-matrix.md) — source of truth for what Nix manages
 - [Machine Profiles](machine-profiles.md) — how profile selection works and how to use it
+- [Application Catalog](application-catalog.md) — portable daily tools and optional capabilities
+- [Personal File System](personal-file-system.md) — durable file placement, sync, and backup policy
+- [macOS Settings Migration](macos-settings-migration.md) — declarative macOS settings coverage
 - [Shell Performance](shell-performance.md) — startup time optimisation
 
 ## Tool Configuration

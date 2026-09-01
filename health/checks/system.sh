@@ -118,7 +118,7 @@ check_tmux() {
 
   if ! command -v tmux &>/dev/null; then
     record_result "tmux" 2 "tmux not installed"
-    add_suggestion "Install tmux: brew install tmux"
+    add_suggestion "Apply the terminal configuration: make nix-switch"
     return
   fi
 
@@ -132,27 +132,10 @@ check_tmux() {
   else
     details+="Config: missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-apply tmux config: chezmoi apply"
+    add_suggestion "Apply the terminal configuration: make nix-switch"
   fi
 
-  # Check tpm and plugins
-  if [[ -d "$HOME/.tmux/plugins/tpm" ]]; then
-    local plugin_count declared_count
-    plugin_count=$(find "$HOME/.tmux/plugins" -maxdepth 1 -mindepth 1 -type d ! -name tpm | wc -l | xargs)
-    declared_count=$(grep -c '@plugin' "$HOME/.config/tmux/tmux.conf" 2>/dev/null || echo "0")
-    declared_count=$((declared_count - 1))  # exclude tpm itself
-    if [[ $plugin_count -lt $declared_count ]]; then
-      details+="Plugins: $plugin_count/$declared_count installed (tpm)"
-      issues=$((issues + 1))
-      add_suggestion "Install tmux plugins: ~/.tmux/plugins/tpm/bin/install_plugins"
-    else
-      details+="Plugins: $plugin_count installed (tpm)"
-    fi
-  else
-    details+="Plugins: tpm not installed"
-    issues=$((issues + 1))
-    add_suggestion "Install tpm: git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm"
-  fi
+  details+="Plugins: declared by Home Manager"
 
   record_issue_count_result "tmux" "$issues" 1 "$details"
 }

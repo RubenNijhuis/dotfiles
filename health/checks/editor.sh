@@ -25,7 +25,7 @@ check_biome() {
   else
     details+="Biome: not installed"
     issues=$((issues + 1))
-    add_suggestion "Install Biome: brew install biome"
+    add_suggestion "Install Biome for the active project, not globally"
   fi
 
   record_issue_count_result "Biome" "$issues" 1 "$details"
@@ -42,7 +42,7 @@ check_neovim() {
 
   if ! command -v nvim &>/dev/null; then
     record_result "Neovim" 1 "Neovim not installed"
-    add_suggestion "Install Neovim: brew install neovim"
+    add_suggestion "Apply the editor configuration: make nix-switch"
     return
   fi
 
@@ -56,7 +56,7 @@ check_neovim() {
   else
     details+="Config: missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Re-apply neovim config: chezmoi apply"
+    add_suggestion "Apply the editor configuration: make nix-switch"
   fi
 
   # Check lazy.nvim plugin manager
@@ -71,12 +71,12 @@ check_neovim() {
   fi
 
   # Check for lazy-lock.json (ensures reproducible installs)
-  if [[ -f "$HOME/.config/nvim/lazy-lock.json" ]]; then
+  if [[ -f "$HOME/.local/state/nvim/lazy-lock.json" ]]; then
     details+="Lock file: present"
   else
     details+="Lock file: missing"
     issues=$((issues + 1))
-    add_suggestion "Run :Lazy sync in nvim to generate lazy-lock.json"
+    add_suggestion "Run :Lazy sync in nvim to create the local plugin lock"
   fi
 
   record_issue_count_result "Neovim" "$issues" 1 "$details"
@@ -92,7 +92,7 @@ check_starship() {
 
   if ! command -v starship &>/dev/null; then
     record_result "Starship" 1 "Starship not installed"
-    add_suggestion "Install Starship: brew install starship"
+    add_suggestion "Apply the terminal configuration: make nix-switch"
     return
   fi
 
@@ -113,7 +113,7 @@ check_starship() {
   else
     details+="Config: missing"
     issues=$((issues + 1))
-    add_suggestion "Re-apply starship config: chezmoi apply"
+    add_suggestion "Apply the terminal configuration: make nix-switch"
   fi
 
   record_issue_count_result "Starship" "$issues" 1 "$details"

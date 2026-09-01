@@ -21,10 +21,14 @@ make doctor --automation
 ## Config Drift
 
 ```bash
-chezmoi diff        # preview pending changes
-chezmoi apply       # materialize source state into $HOME
+make nix-check      # evaluate the declared configuration
+make nix-build      # build without changing the machine
+make nix-switch     # apply the macOS configuration
 make doctor         # verify
 ```
+
+Use `chezmoi diff` and `chezmoi apply` only when the affected path is still
+marked transition-owned in the [Nix ownership matrix](../nix-ownership-matrix.md).
 
 ## Last-Resort Restore
 

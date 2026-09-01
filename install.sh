@@ -43,7 +43,7 @@ STEP_NAMES=(
   "Xcode Command Line Tools"
   "Installing Homebrew"
   "Installing packages"
-  "Stowing config packages"
+  "Applying managed configuration"
   "Setting up runtime tools"
   "Applying macOS defaults"
   "Removing macOS bloatware"
@@ -608,7 +608,7 @@ step_install_packages() {
   print_success "Packages installed"
 }
 
-step_stow_configs() {
+step_apply_managed_config() {
   if ! command -v chezmoi >/dev/null 2>&1; then
     print_error "chezmoi not installed (expected from Brewfile.cli)"
     return 1
@@ -619,7 +619,7 @@ step_stow_configs() {
     scaffold_chezmoi_config "$cfg"
   elif ! chezmoi_config_complete "$cfg"; then
     print_warning "chezmoi.toml exists but is missing required keys"
-    print_info "Edit $cfg to add: obsidian_vault_path, github_username, linear_api_key, nuget_auth_token"
+    print_info "Edit $cfg to add: obsidian_vault_path and linear_api_key"
   else
     print_dim "chezmoi.toml already complete — leaving untouched"
   fi
@@ -631,9 +631,7 @@ step_stow_configs() {
 chezmoi_config_complete() {
   local cfg="$1"
   grep -q '^[[:space:]]*obsidian_vault_path[[:space:]]*=' "$cfg" && \
-    grep -q '^[[:space:]]*github_username[[:space:]]*=' "$cfg" && \
-    grep -q '^[[:space:]]*linear_api_key[[:space:]]*=' "$cfg" && \
-    grep -q '^[[:space:]]*nuget_auth_token[[:space:]]*=' "$cfg"
+    grep -q '^[[:space:]]*linear_api_key[[:space:]]*=' "$cfg"
 }
 
 prompt_input() {
@@ -664,19 +662,15 @@ scaffold_chezmoi_config() {
 
   print_info "Scaffolding chezmoi.toml (machine-local, not committed)"
   local default_vault="$DEVELOPER_ROOT/personal/projects/obsidian-store"
-  local obsidian_path github_user linear_key nuget_token
+  local obsidian_path linear_key
 
   if $NON_INTERACTIVE; then
     obsidian_path="$default_vault"
-    github_user="${GITHUB_USERNAME:-}"
     linear_key=""
-    nuget_token=""
     print_warning "Non-interactive: writing empty secrets. Edit $cfg before daily use."
   else
     obsidian_path=$(prompt_input "Obsidian vault path" "$default_vault")
-    github_user=$(prompt_input "GitHub username" "${GITHUB_USERNAME:-}")
     linear_key=$(prompt_input "Linear API key (blank to skip)" "" secret)
-    nuget_token=$(prompt_input "NuGet auth token / GitHub PAT (blank to skip)" "" secret)
   fi
 
   cat > "$cfg" <<EOF
@@ -687,17 +681,15 @@ sourceDir = "$DOTFILES/chezmoi"
 
 [data.machine]
   obsidian_vault_path = "$obsidian_path"
-  github_username     = "$github_user"
 
 [data.secrets]
-  linear_api_key   = "$linear_key"
-  nuget_auth_token = "$nuget_token"
+  linear_api_key = "$linear_key"
 EOF
   chmod 600 "$cfg"
   print_success "Wrote $cfg (chmod 600)"
 
-  if [[ -z "$linear_key" || -z "$nuget_token" ]]; then
-    print_warning "One or more secrets are empty — chezmoi apply will render broken exports"
+  if [[ -z "$linear_key" ]]; then
+    print_warning "The Linear API key is empty — add it before using Linear integrations"
     print_info "Fill in: $cfg then re-run: chezmoi apply"
   fi
 }
@@ -848,7 +840,7 @@ main() {
   run_step 2 step_install_xcode_clt
   run_step 3 step_install_homebrew
   run_step 4 step_install_packages
-  run_step 5 step_stow_configs
+  run_step 5 step_apply_managed_config
   run_step 6 step_setup_runtimes
   run_step 7 step_apply_macos_defaults
   run_step 8 step_remove_bloatware

@@ -17,32 +17,16 @@ tap "yakitrak/yakitrak"
 brew "zsh-autosuggestions"      # Fish-like autosuggestions
 brew "zsh-syntax-highlighting"  # Syntax highlighting in zsh
 brew "zsh-you-should-use"       # Reminds you of existing aliases
-brew "starship"                  # Cross-shell prompt (primary backend)
-brew "fzf"                       # Fuzzy finder for command line
 brew "gum"                       # Interactive terminal UI components
-brew "zoxide"                    # Smarter cd command (z)
-brew "atuin"                     # Shell history with search UI (local-only mode)
 brew "ghq"                       # Git repository manager for local checkouts
-brew "sesh"                      # Terminal session manager (zoxide/fzf driven)
-brew "fd"                        # Fast find alternative
-brew "yazi"                      # Terminal file manager
-brew "tmux"                      # Terminal multiplexer
 
 # -----------------------------------------------------------------------------
 # Core CLI Tools
 # -----------------------------------------------------------------------------
-brew "bat"           # Better cat with syntax highlighting
-brew "btop"          # Resource monitor with TUI
-brew "eza"           # Modern replacement for ls
 brew "grc"           # Colorize command output
-brew "ripgrep"       # Fast grep alternative (rg)
 brew "tree"          # Directory tree visualization
 brew "parallel"      # GNU parallel for concurrent job execution
 brew "gh"            # GitHub CLI
-brew "git"           # Git version control (prefer Homebrew over Apple Git)
-brew "git-delta"     # Better git diffs
-brew "lazygit"       # Terminal UI for git
-brew "neovim"        # Modern vim
 brew "jj"            # Git-compatible VCS (jujutsu)
 brew "git-cliff"     # Conventional-commits changelog generator
 brew "difftastic"    # Syntax-aware diff (complements git-delta)
@@ -54,83 +38,26 @@ brew "dust"          # Better du (disk usage)
 # -----------------------------------------------------------------------------
 # Development Tools
 # -----------------------------------------------------------------------------
-brew "act"           # Run GitHub Actions locally
 brew "bash"          # Modern bash (macOS ships with old version)
-brew "chezmoi"       # Declarative dotfile manager (migrating off stow)
-brew "biome"         # Fast formatter and linter (JS/TS/JSON)
-brew "mise"          # Polyglot version manager (node, ruby, etc.)
-brew "node"          # Fallback Node.js (mise takes priority via PATH)
-brew "lua"           # Lua programming language
-brew "luarocks"      # Lua package manager
-brew "pnpm"          # Fast npm alternative
-brew "ruff"          # Fast Python linter
-brew "rustup"        # Rust toolchain manager (rustc, cargo, rustfmt)
-brew "uv"            # Fast Python package and project manager
-brew "go"            # Go programming language
-brew "zig"           # Zig programming language
-brew "dotnet@8"      # .NET 8 SDK
-brew "jq"            # JSON processor
-brew "yq"            # YAML processor
-brew "prettier"      # Code formatter (multi-language)
-brew "shellcheck"    # Shell script linter
+brew "chezmoi"       # Existing home-config manager during the Nix transition
+brew "mise"          # Per-project runtime manager until devShells replace it
 brew "shellharden"   # Shell script hardening linter
 brew "tealdeer"      # Fast tldr client for quick command examples
 
-# Note: tsx not currently installed but available if needed
-# brew "tsx"         # TypeScript execution
+# Language runtimes and formatters are no longer part of this global bootstrap.
+# Use the Nix javascript/rust/python/go capabilities, then project devShells.
 
 # -----------------------------------------------------------------------------
 # Security & Privacy
 # -----------------------------------------------------------------------------
 brew "gnupg"         # GPG encryption
-brew "mailsy"        # Disposable email CLI
-brew "openclaw-cli"  # OpenClaw CLI
 brew "pinentry-mac"  # GPG passphrase entry for macOS
 brew "qrencode"      # QR code generator
-brew "signal-cli"    # Signal messenger CLI
-brew "spicetify-cli" # Spotify theming tool
 
 # -----------------------------------------------------------------------------
 # System Utilities
 # -----------------------------------------------------------------------------
 brew "dive"                  # Docker image layer explorer
 brew "dockutil"             # Manage Dock items declaratively
-brew "mac-cleanup-go"       # System cleanup utility
 brew "obsidian-cli"         # Obsidian CLI tools
-brew "ollama", restart_service: :changed  # Local LLM runtime
-tap "manaflow-ai/cmux"
-cask "cmux"
-brew "k6"
-brew "libpq", link: true
-brew "libyaml"       # YAML lib (required for ruby psych ext at build time)
-brew "tailscale"     # WireGuard mesh VPN
-brew "ffmpeg"
-brew "stow"
-tap "homebrew/cask-fonts"
-tap "homebrew/cask-versions"
-tap "homebrew/services"
-tap "ngrok/ngrok", trusted: true
-tap "planetscale/tap", trusted: true
-brew "asdf"
-brew "cmake"
-brew "cocoapods"
-brew "dotnet"
-brew "fastlane"
 brew "git-flow"
-brew "glfw"
-brew "harfbuzz"
-brew "graphviz"
-brew "kompose"
-brew "mplayer"
-brew "protobuf"
-brew "mysql"
-brew "mysql-client"
-brew "openvino"
-brew "python@3.10"
-brew "redis"
-brew "sl"
-brew "tesseract"
-brew "watchman"
-brew "wget"
-brew "planetscale/tap/pscale"
-brew "yakitrak/yakitrak/notesmd-cli"

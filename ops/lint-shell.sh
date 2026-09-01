@@ -32,11 +32,16 @@ collect_files() {
     return 0
   fi
 
-  {
+  local relative_file absolute_file
+  while IFS= read -r relative_file; do
+    absolute_file="${DOTFILES}/${relative_file}"
+    # `git ls-files` includes paths scheduled for deletion until they are
+    # committed. Do not pass those absent files to shellcheck.
+    [[ -f "$absolute_file" ]] && printf '%s\n' "$absolute_file"
+  done < <(
     git -C "$DOTFILES" ls-files --cached --others --exclude-standard \
-      '*.sh' '*.bash' '*.zsh' 2>/dev/null \
-      | sed "s|^|${DOTFILES}/|" || true
-  } | sort
+      '*.sh' '*.bash' '*.zsh' 2>/dev/null || true
+  ) | sort
 }
 
 parse_args() {

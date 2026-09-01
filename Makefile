@@ -6,7 +6,7 @@
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean clean-all restore launchd-check vscode-parity \
 	help-setup help-brew help-launchd help-test cheat \
-	profile-list profile-show profile-set
+	profile-list profile-show profile-set nix-check nix-build nix-switch nix-home-switch files-init
 
 DOTFILES := $(shell pwd)
 
@@ -83,6 +83,9 @@ profile-show: ## Show the active machine profile
 profile-set: ## Set the active machine profile (usage: make profile-set PROFILE=<name>)
 	@bash $(DOTFILES)/ops/profile/set.sh $(PROFILE)
 
+files-init: ## Create the portable personal file structure (never moves files)
+	@bash $(DOTFILES)/setup/create-files-root.sh
+
 remove-bloatware: ## Remove common macOS built-in apps
 	@bash $(DOTFILES)/setup/remove-bloatware.sh
 
@@ -135,6 +138,36 @@ docs-regen: ## Regenerate CLI reference documentation (idempotent — file is gi
 	@bash $(DOTFILES)/ops/generate-cli-reference.sh
 
 docs-sync: docs-regen ## Alias for docs-regen (kept for backwards compatibility)
+
+# ── Nix (cross-platform foundation) ─────────────────────────────────
+
+NIX_DARWIN_HOST ?= Rubens-MacBook-Pro
+NIX ?= $(or $(shell command -v nix 2>/dev/null),/nix/var/nix/profiles/default/bin/nix)
+PROFILE ?=
+NIX_HOME_HOST ?=
+
+nix-check: ## Evaluate the cross-platform Nix flake
+	@$(NIX) flake check
+
+nix-build: ## Build the current macOS Nix configuration without switching
+	@$(NIX) build .#darwinConfigurations.$(NIX_DARWIN_HOST).system --no-link
+
+nix-fmt: ## Format the Nix source using the pinned formatter
+	@$(NIX) fmt
+
+nix-adopt: ## Back up one named configuration profile before its Nix handoff
+	@bash $(DOTFILES)/setup/adopt-nix-configs.sh "$(PROFILE)"
+
+nix-switch: ## Apply the current macOS Nix configuration
+	@if command -v darwin-rebuild >/dev/null 2>&1; then \
+		sudo -H darwin-rebuild switch --flake .#$(NIX_DARWIN_HOST); \
+	else \
+		sudo -H $(NIX) run github:nix-darwin/nix-darwin -- switch --flake .#$(NIX_DARWIN_HOST); \
+	fi
+
+nix-home-switch: ## Apply a Linux/WSL Home Manager target (NIX_HOME_HOST=<name>)
+	@test -n "$(NIX_HOME_HOST)" || { echo "Usage: make nix-home-switch NIX_HOME_HOST=rubennijhuis-windows-wsl" >&2; exit 2; }
+	@home-manager switch --flake .#$(NIX_HOME_HOST)
 
 # ── LaunchD ──────────────────────────────────────────────────────────
 

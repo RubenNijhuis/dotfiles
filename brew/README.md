@@ -7,6 +7,8 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 ```
 brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
+├── Brewfile.bootstrap # minimum macOS transition bootstrap
+├── Brewfile.writing   # opt-in writing/everyday applications
 ├── Brewfile.apps      # GUI applications (casks + fonts)
 ├── Brewfile.vscode    # VS Code extensions
 └── README.md          # This file
@@ -21,6 +23,20 @@ brew/
 - Development tools (fnm, pnpm, shellcheck, rust)
 - Security (gnupg, pinentry-mac)
 - System utilities (dockutil, ollama)
+
+### Brewfile.bootstrap
+
+The only fresh-machine default: ChezMoi and the three Zsh plugins still used
+during the Nix handoff. It intentionally contains no portable CLI tooling,
+GUI applications, language runtimes, or local services.
+
+### Brewfile.writing
+
+Small, optional writing applications. Install it explicitly with:
+
+```bash
+brew bundle --file=brew/Brewfile.writing
+```
 
 ### Brewfile.apps
 **GUI applications:**

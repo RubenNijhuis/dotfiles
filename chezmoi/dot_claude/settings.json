@@ -50,7 +50,6 @@
       "Bash(gh repo view*)",
 
       "Bash(mise *)",
-      "Bash(stow *)",
       "Bash(brew list*)",
       "Bash(brew info*)",
       "Bash(brew search*)",
@@ -104,7 +103,6 @@
   },
   "enabledPlugins": {
     "typescript-lsp@claude-plugins-official": true,
-    "clbtx@celebratix-marketplace": true,
     "figma@claude-plugins-official": true
   },
   "language": "English",

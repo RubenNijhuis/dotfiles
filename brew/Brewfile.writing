@@ -1,0 +1,2 @@
+# Optional writing/everyday GUI applications for macOS.
+cask "thunderbird" # Cross-platform mail, calendar, and contacts
