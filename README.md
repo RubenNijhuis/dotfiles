@@ -89,6 +89,7 @@ make docs-sync        # fail if generated CLI docs are stale
 ## Documentation
 
 - Architecture and conventions: `docs/architecture.md`
+- Everyday assistant and application preferences: `docs/personal-application-policy.md`
 - Machine profiles: `docs/machine-profiles.md`
 - Runbooks: `docs/runbooks/`
 - Generated command reference: `docs/reference/cli.md`
