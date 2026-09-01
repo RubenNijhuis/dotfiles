@@ -12,6 +12,11 @@ Home Manager:
 - Nix itself, flakes, caches, and trusted build settings.
 - CLI packages and capability profiles: development, JavaScript, writing,
   design, media, gaming, and optional language toolchains.
+- Portable desktop applications where the pinned package supports the host:
+  Thunderbird, Obsidian, Signal, VS Code, cmux, Krita, and RawTherapee.
+  OrbStack and Raycast belong in a separate macOS capability. Krita,
+  RawTherapee, and HandBrake are documented Homebrew exceptions on this
+  Apple-Silicon Mac until the pinned Nix packages work here.
 - macOS defaults that `nix-darwin` supports: Finder, Dock, keyboard,
   trackpad, screen-capture defaults, and screen-lock policy.
 - Portable program configuration once migrated one at a time: Git, Starship,
@@ -69,8 +74,9 @@ The following are intentionally local or encrypted, never plain Nix source:
    chezmoi.
 4. Move editor and application settings as explicit raw `home.file` entries
    only after a backup and collision check.
-5. Keep GUI applications in Homebrew/manual ownership unless they become
-   demonstrably portable and reproducible through Nix on every target system.
+5. Prefer Nix for every package available in the pinned cross-platform package
+   set. Homebrew is limited to bootstrap needs and documented Nix-unavailable
+   macOS exceptions; ChezMoi gains no new owned paths.
 
 ## Rules that prevent drift
 

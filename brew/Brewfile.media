@@ -1,3 +1,3 @@
-# Opt-in macOS media utility profile. DaVinci Resolve remains a separately
-# managed professional editor; this adds the everyday visual converter.
-cask "handbrake-app" # video conversion and compression with a GUI
+# Temporary Nix exception: the pinned HandBrake package is currently marked
+# broken on macOS. Revisit this file after a Nixpkgs update.
+cask "handbrake-app" # graphical video conversion and compression

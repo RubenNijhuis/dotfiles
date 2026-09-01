@@ -8,9 +8,9 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
 ├── Brewfile.bootstrap # minimum macOS transition bootstrap
-├── Brewfile.core      # small everyday macOS GUI core
-├── Brewfile.design    # opt-in illustration and photography tools
-├── Brewfile.media     # opt-in visual media utilities
+├── Brewfile.core      # temporary Nix-unavailable GUI exception
+├── Brewfile.design    # temporary Apple-Silicon Nix exception
+├── Brewfile.media     # temporary broken-Nix-package exception
 ├── Brewfile.apps      # historical GUI inventory; never a default install
 ├── Brewfile.vscode    # VS Code extensions
 └── README.md          # This file
@@ -34,9 +34,10 @@ GUI applications, language runtimes, or local services.
 
 ### Brewfile.core
 
-The five everyday GUI applications for a fresh Mac: Zen, Thunderbird,
-Obsidian, Signal, and VS Code. It deliberately excludes games, alternative
-browsers, work chat, creative suites, local services, and specialist IDEs.
+The narrow Homebrew exception for a fresh Mac. Zen is currently the only
+everyday application without a compatible Nix package. Thunderbird, Obsidian,
+Signal, VS Code, and cmux are Nix-owned. The specialist design/media
+exceptions are documented separately below.
 
 ```bash
 brew bundle --file=brew/Brewfile.core
@@ -51,16 +52,14 @@ brew bundle --file=brew/Brewfile.core
 - Creative tools (Affinity, Processing)
 - Development (Rider, DBeaver, gcloud)
 
-### Capability Brewfiles
+### Nix capability applications
 
-`Brewfile.design` contains Krita and RawTherapee for visual work and RAW
-photography. `Brewfile.media` contains HandBrake for graphical video
-conversion. They are explicit opt-ins, not a laptop baseline:
-
-```bash
-brew bundle --file=brew/Brewfile.design
-brew bundle --file=brew/Brewfile.media
-```
+Krita and RawTherapee are Nix-managed on Linux, but the current pinned Krita
+package does not support Apple Silicon macOS, so `Brewfile.design` is their
+documented Mac exception. HandBrake remains in `Brewfile.media` because its
+current pinned Nix package is marked broken on macOS. Revisit both exceptions
+after a Nixpkgs update. Homebrew remains for the narrow bootstrap and these
+documented Nix-unavailable or Nix-broken macOS exceptions.
 
 ### Brewfile.vscode
 **VS Code extensions:**
@@ -74,7 +73,7 @@ brew bundle --file=brew/Brewfile.media
 # Install the active lean profile
 make install
 
-# Or install the same small macOS baseline manually
+# Or install the sole current Homebrew exception manually
 brew bundle --file=brew/Brewfile.bootstrap
 brew bundle --file=brew/Brewfile.core
 ```
@@ -128,7 +127,8 @@ brew update && brew upgrade
 
 2. **Choose the right file**
    - CLI tool? → `Brewfile.cli`
-   - Everyday cross-device GUI app? → `Brewfile.core`
+   - Available in Nix? → add it to the appropriate Nix capability module
+   - Nix-unavailable everyday GUI app? → `Brewfile.core`
    - Specialist GUI app? → keep it out of the default profile and record it in
      `Brewfile.apps` only as migration inventory
    - VS Code extension? → `Brewfile.vscode`

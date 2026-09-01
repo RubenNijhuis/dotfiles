@@ -1,8 +1,3 @@
-# Small macOS everyday core. These are the GUI applications worth restoring on
-# a fresh personal machine; platform-specific work belongs in capability
-# Brewfiles or remains a manual decision.
-cask "zen"                 # primary desktop browser
-cask "thunderbird"         # mail, calendar, and contacts
-cask "obsidian"            # local Markdown notes
-cask "signal"              # private messaging
-cask "visual-studio-code"  # current graphical editor
+# Zen is the only current everyday desktop application without a compatible
+# Nix package. Everything else in the desktop core is Nix-managed.
+cask "zen" # primary desktop browser

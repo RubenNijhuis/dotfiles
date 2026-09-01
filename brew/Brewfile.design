@@ -1,3 +1,4 @@
-# Opt-in macOS visual-work profile. Keep it separate from the everyday core.
+# Temporary Nix exception on Apple Silicon: the pinned Krita package is Linux
+# only. Keep these visual tools out of the default laptop profile.
 cask "krita"        # illustration, painting, and 2D art
 cask "rawtherapee"  # non-destructive RAW photo development

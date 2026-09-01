@@ -112,14 +112,14 @@ to remain lean on the MacBook.
 | --- | --- | --- | --- |
 | Development | Nix `development` | VS Code, Podman/Docker only when needed, DBeaver | MacBook, Linux desktop, WSL |
 | Writing | Nix `writing` | Zen, Thunderbird, Markdown/Logseq | Every personal computer |
-| Design | Nix `design` | Krita, RawTherapee, Inkscape, GIMP, Blender | Machines used for visual work |
-| Audio & video | Nix `media` | DaVinci Resolve, HandBrake, Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |
+| Design | Nix `design`: asset tools; Krita and RawTherapee are Nix-managed on Linux and a documented Apple-Silicon Homebrew exception | Inkscape, GIMP, Blender | Machines used for visual work |
+| Audio & video | Nix `media`: portable media tools; HandBrake is a temporary documented macOS Homebrew exception while its pinned Nix package is broken | DaVinci Resolve, Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |
 | Gaming | Nix `gaming` for helper tools | Steam, Heroic, Prism Launcher | Linux desktop only |
 | Hardware / local services | Project-specific tools | Arduino IDE, Jellyfin server, ngrok, LM Studio | Only the machine attached to that work |
 
-The Nix modules are deliberately small and portable. GUI apps stay in the
-platform catalog because macOS casks, Windows installers, and Linux packages
-have different release and permission models.
+The Nix modules are deliberately small and portable. Install a GUI app through
+Nix whenever its pinned package supports the host; keep only documented macOS
+exceptions in the platform catalog when upstream support is missing or broken.
 
 ## Current application inventory: what to stop installing by default
 
