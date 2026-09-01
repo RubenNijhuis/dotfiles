@@ -14,6 +14,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Zen Twilight is an intentional, separately profiled preview channel for
+    # experimenting across macOS and Linux. The stable macOS release remains
+    # installed independently as a rollback path.
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
+
   };
 
   outputs =
@@ -60,6 +69,7 @@
               imports = [
                 ./nix/home/common.nix
                 ./nix/profiles/core.nix
+                ./nix/profiles/browser.nix
                 ./nix/profiles/desktop-core.nix
                 ./nix/profiles/macos-apps.nix
                 ./nix/profiles/design.nix
@@ -74,15 +84,18 @@
       homeConfigurations = {
         rubennijhuis-windows-wsl = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
+          ./nix/profiles/browser.nix
         ];
         rubennijhuis-linux-desktop = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
+          ./nix/profiles/browser.nix
           ./nix/profiles/desktop-core.nix
           ./nix/profiles/gaming.nix
           ./nix/profiles/sync.nix
         ];
         rubennijhuis-linux-aarch64 = mkHome "aarch64-linux" [
           ./nix/profiles/core.nix
+          ./nix/profiles/browser.nix
         ];
       };
 
