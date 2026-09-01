@@ -14,14 +14,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Zen is not yet packaged by nixpkgs for macOS. Keep the browser itself
-    # declarative through its maintained cross-platform Nix flake instead of
-    # treating Homebrew as the browser's source of truth.
-    zen-browser = {
-      url = "github:0xc000022070/zen-browser-flake";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.home-manager.follows = "home-manager";
-    };
   };
 
   outputs =
@@ -68,7 +60,6 @@
               imports = [
                 ./nix/home/common.nix
                 ./nix/profiles/core.nix
-                ./nix/profiles/browser.nix
                 ./nix/profiles/desktop-core.nix
                 ./nix/profiles/macos-apps.nix
                 ./nix/profiles/design.nix
@@ -83,18 +74,15 @@
       homeConfigurations = {
         rubennijhuis-windows-wsl = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
-          ./nix/profiles/browser.nix
         ];
         rubennijhuis-linux-desktop = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
-          ./nix/profiles/browser.nix
           ./nix/profiles/desktop-core.nix
           ./nix/profiles/gaming.nix
           ./nix/profiles/sync.nix
         ];
         rubennijhuis-linux-aarch64 = mkHome "aarch64-linux" [
           ./nix/profiles/core.nix
-          ./nix/profiles/browser.nix
         ];
       };
 
