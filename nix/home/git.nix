@@ -1,5 +1,9 @@
 { ... }:
 
+let
+  identity = import ../lib/identity.nix;
+in
+
 {
   # This writes XDG Git configuration. `make nix-adopt PROFILE=git` performs
   # the explicit, backed-up handoff for any pre-Nix Git files.
@@ -7,8 +11,8 @@
     enable = true;
     settings = {
       user = {
-        name = "Ruben Nijhuis";
-        email = "contact@rubennijhuis.com";
+        name = identity.fullName;
+        email = identity.publicEmail;
       };
 
       core = {
@@ -82,14 +86,14 @@
       {
         condition = "gitdir:**/personal/**";
         contents = {
-          user.email = "contact@rubennijhuis.com";
+          user.email = identity.publicEmail;
           core.sshCommand = "ssh -i ~/.ssh/id_ed25519_personal -F ~/.ssh/config";
         };
       }
       {
         condition = "gitdir:**/archive/**";
         contents = {
-          user.email = "contact@rubennijhuis.com";
+          user.email = identity.publicEmail;
           core.sshCommand = "ssh -i ~/.ssh/id_ed25519_personal -F ~/.ssh/config";
         };
       }
