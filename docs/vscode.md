@@ -1,8 +1,8 @@
 # VS Code Configuration
 
-Settings live in `chezmoi/Library/Application Support/Code/User/settings.json`.
-Extensions live beside them in `extensions.txt`. `brew/Brewfile.vscode` is the
-legacy extension inventory; keep it in sync while VS Code remains transition-owned.
+Settings and the extension manifest live in `nix/config/vscode/`. Home Manager
+links both into VS Code's native macOS location. `brew/Brewfile.vscode` is a
+historical inventory only; the Nix manifest is the source of truth.
 
 ## Design Choices
 
@@ -25,12 +25,12 @@ legacy extension inventory; keep it in sync while VS Code remains transition-own
 ## Setup
 
 ```bash
-chezmoi apply       # materialize the transition-owned settings
-make vscode-setup  # install extensions from extensions.txt
+make nix-switch     # materialize the Nix-owned settings and manifest
+make vscode-setup   # install extensions from the manifest
 ```
 
 ## Adding Extensions
 
-1. Add the extension ID to `chezmoi/Library/Application Support/Code/User/extensions.txt`
-   and `brew/Brewfile.vscode`.
-2. Run `make vscode-parity` to verify parity.
+1. Add the extension ID to `nix/config/vscode/extensions.txt`.
+2. Run `make vscode-setup` to install it, then `make vscode-parity` to compare
+   against the historical inventory during the transition.

@@ -40,6 +40,8 @@ application's schema.
 | Btop, LazyGit | `nix/home/terminal-apps.nix` | active; prior files are `.pre-nix` backups. Btop's exit-time config writes are disabled; existing shell aliases remain in place. |
 | Eza theme | `nix/home/terminal-apps.nix` raw file | active; existing shell aliases remain in place |
 | Neovim configuration and binary | `nix/home/editors.nix` | active. Lazy.nvim/Mason data stays local until the plugin graph is pinned; its writable runtime lockfile is in local state. Copilot remains unchanged pending an explicit FOSS replacement choice. |
+| VS Code settings and extension manifest | `nix/home/editors.nix` + `nix/config/vscode/` | active; extensions install through `make vscode-setup` because marketplace binaries remain application-managed state. |
+| `.hushlogin`, repository Git hooks | `nix/home/editors.nix` + `make hooks` | active; neither needs ChezMoi ownership. |
 | `dot_config/mise/` | temporary local compatibility state | not installed on new machines; this Mac retains it only while its active global Ruby shim is migrated to a project environment or retired |
 | Shared shell modules | `nix/home/shell-modules.nix` raw files | active; startup files consume these links |
 | `dot_zsh*`, `dot_bash*`, startup environment | Home Manager Zsh/Bash and session modules with canonical raw source | active; prior startup files are private `.pre-nix` backups and fresh Zsh/Bash sessions resolve the Nix-managed tools |

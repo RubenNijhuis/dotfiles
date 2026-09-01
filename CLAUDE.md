@@ -95,8 +95,8 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 | `yazi` | `.config/yazi/{yazi,theme,keymap}.toml` | File manager with zoxide integration | → bat (previews), zoxide, editor |
 | `sesh` | `.config/sesh/sesh.toml` | Tmux session manager | → tmux, fzf, zoxide |
 | `spicetify` | `.config/spicetify/` | Spotify theming (Tokyo Night) | |
-| `vscode` | `Library/.../Code/User/{settings.json,extensions.txt}` | VS Code (Biome, ESLint, Tokyo Night) | |
-| `hushlogin` | `.hushlogin` | Suppress login banner in terminal | |
+| `vscode` | `nix/config/vscode/{settings.json,extensions.txt}` | VS Code (Biome, ESLint, Tokyo Night) | Nix-owned |
+| `hushlogin` | `.hushlogin` | Suppress login banner in terminal | Nix-owned |
 | `mise` | `.config/mise/config.toml` | Runtime version manager (Node LTS, Ruby latest) | |
 | `ripgrep` | `.config/ripgrep/ripgreprc` | Ripgrep defaults (smart-case, max-columns) | |
 | `claude` | `.claude/settings.json` | Claude Code settings and status line | |
