@@ -43,6 +43,7 @@ config/gpg/.gnupg/S.*
 config/gpg/.gnupg/.gpg-v21-migrated
 
 # Vim/Neovim - keep config, ignore runtime files
+nvim.log
 config/vim/.vim/plugged/
 config/vim/.vim/.netrwhist
 config/vim/.config/nvim/plugged/

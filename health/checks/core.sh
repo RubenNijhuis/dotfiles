@@ -25,7 +25,7 @@ check_stow() {
   # chezmoi source-state sync; Stow is no longer part of the setup.
   if ! command -v chezmoi >/dev/null 2>&1; then
     record_result "chezmoi" 1 "chezmoi not installed"
-    add_suggestion "brew install chezmoi"
+    add_suggestion "Apply the Nix configuration: make nix-switch"
     return
   fi
 
@@ -39,17 +39,28 @@ check_stow() {
     return
   fi
 
-  # Count managed entries and detect pending changes.
-  local files dirs pending
+  # ChezMoi retains stale status rows for paths that Nix has taken over. Count
+  # only rows whose target is still in its managed-file list; applying every
+  # status row here could overwrite a completed Nix handoff.
+  local files dirs pending managed_paths status line path
   files=$(chezmoi managed --include=files 2>/dev/null | wc -l | xargs)
   dirs=$(chezmoi managed --include=dirs 2>/dev/null | wc -l | xargs)
-  pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
+  managed_paths=$(chezmoi managed --include=files 2>/dev/null)
+  status=$(chezmoi status 2>/dev/null || true)
+  pending=0
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line:3}"
+    if printf '%s\n' "$managed_paths" | grep -Fxq "$path"; then
+      pending=$((pending + 1))
+    fi
+  done <<< "$status"
 
   if [[ "$pending" -eq 0 ]]; then
-    record_result "chezmoi" 0 "${files} files / ${dirs} dirs managed; source state matches \$HOME"
+    record_result "chezmoi" 0 "${files} files / ${dirs} dirs remain; Nix handoff rows ignored"
   else
     record_result "chezmoi" 1 "${files} files / ${dirs} dirs managed; ${pending} entries differ from source"
-    add_suggestion "Run: chezmoi diff (preview) then chezmoi apply"
+    add_suggestion "Review: chezmoi diff (do not apply blindly after a Nix handoff)"
   fi
 }
 
@@ -117,6 +128,15 @@ check_gpg() {
     return
   fi
 
+  # Signing is useful, but it is an opt-in identity decision: creating a key
+  # changes external developer identity and must never be presented as a broken
+  # machine when no key has been chosen yet.
+  if ! gpg --list-secret-keys 2>/dev/null | grep -q '^sec'; then
+    record_result "GPG Configuration" 1 "Not configured (optional; create a key only when you choose to sign commits)"
+    add_suggestion "Optional: create a GPG signing identity with make gpg-setup"
+    return
+  fi
+
   local issues=0
   local details=""
 
@@ -125,10 +145,6 @@ check_gpg() {
     local key_id
     key_id=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
     details+="Secret key: $key_id\n  "
-  else
-    details+="No GPG secret key found\n  "
-    issues=$((issues + 1))
-    add_suggestion "Generate GPG key: make gpg-setup"
   fi
 
   # Check Git signing config
@@ -168,17 +184,19 @@ check_git() {
   local issues=0
   local details=""
 
-  # Check conditional includes exist in .gitconfig
-  if [[ -f "$HOME/.gitconfig" ]]; then
-    if grep -q "includeIf" "$HOME/.gitconfig"; then
+  # Home Manager writes the global config at XDG_CONFIG_HOME/git/config rather
+  # than ~/.gitconfig. Ask Git for its resolved configuration so either valid
+  # layout is accepted.
+  if git config --global --get user.email >/dev/null 2>&1; then
+    if git config --global --get-regexp '^includeIf\..*\.path$' >/dev/null 2>&1; then
       details+="Conditional includes: configured\n  "
     else
-      details+="Conditional includes: missing from .gitconfig\n  "
+      details+="Conditional includes: missing from resolved Git config\n  "
       issues=$((issues + 1))
       add_suggestion "Apply Git configuration: make nix-switch"
     fi
   else
-    details+="No .gitconfig found\n  "
+    details+="No global Git configuration found\n  "
     issues=$((issues + 1))
     add_suggestion "Apply Git configuration: make nix-switch"
   fi
@@ -219,9 +237,10 @@ check_shell() {
   local details=""
 
   # Source shell config in subshell to check functions/aliases
-  # We need to check if the config files exist and are properly linked
+  # Home Manager sets ZDOTDIR, so its Zsh startup file intentionally lives in
+  # ~/.config/zsh/.zshrc instead of ~/.zshrc.
   local shell_files=(
-    "$HOME/.zshrc"
+    "${ZDOTDIR:-$HOME/.config/zsh}/.zshrc"
     "$HOME/.config/shell/functions.sh"
     "$HOME/.config/shell/aliases.sh"
   )

@@ -316,19 +316,27 @@ print_summary() {
 # Quick actionable summary: doctor health, stow, launchd, backup, docs.
 
 status_check_stow() {
-  # Renamed concept: dotfiles are now managed by chezmoi, but the function
-  # name is preserved to avoid a wider rename in the status pipeline.
+  # Compatibility name retained for the quick-status pipeline. Count only
+  # active ChezMoi targets; stale status rows can describe Nix-owned handoffs.
   if ! command -v chezmoi >/dev/null 2>&1; then
     print_status_row "chezmoi" error "not installed"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
     return
   fi
-  local pending
-  pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
+  local pending=0 managed_paths status line path
+  managed_paths=$(chezmoi managed --include=files 2>/dev/null)
+  status=$(chezmoi status 2>/dev/null || true)
+  while IFS= read -r line; do
+    [[ -n "$line" ]] || continue
+    path="${line:3}"
+    if printf '%s\n' "$managed_paths" | grep -Fxq "$path"; then
+      pending=$((pending + 1))
+    fi
+  done <<< "$status"
   if [[ "$pending" -eq 0 ]]; then
-    print_status_row "chezmoi" ok "source state in sync"
+    print_status_row "chezmoi" ok "remaining transition targets in sync"
   else
-    print_status_row "chezmoi" warn "$pending entries differ — run: chezmoi apply"
+    print_status_row "chezmoi" warn "$pending transition entries differ — review before applying"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }

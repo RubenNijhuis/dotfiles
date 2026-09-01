@@ -37,9 +37,9 @@ check_launchd() {
       add_suggestion "Load managed agents: make automation-setup"
     fi
   else
-    details+="No managed agents loaded"
-    issues=$((issues + 1))
-    add_suggestion "Load managed agents: make automation-setup"
+    # Background jobs are opt-in: do not turn an intentionally quiet machine
+    # into a health failure merely because no agents are enabled.
+    details+="No optional managed agents loaded"
   fi
 
   # Check log directory exists
@@ -82,29 +82,24 @@ check_homebrew() {
   fi
 
 
-  local details=""
-  local issues=0
-
-  if command -v brew &>/dev/null; then
-    local brew_version=$(brew --version | head -1)
-    details+="Homebrew: $brew_version\n  "
-
-    # Check for outdated packages (warning only)
-    local outdated=$(brew outdated 2>/dev/null | wc -l | xargs)
-    if [[ $outdated -gt 0 ]]; then
-      details+="⚠ $outdated outdated packages"
-      issues=$((issues + 1))
-      add_suggestion "Update packages: brew upgrade"
-    else
-      details+="All packages up to date"
-    fi
-  else
-    details+="Homebrew: not installed"
-    issues=$((issues + 1))
-    add_suggestion "Install Homebrew: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+  # This is a Nix-first system. Homebrew is deliberately limited to the
+  # explicit exception manifest (currently Zen) and is not a second package
+  # baseline. In particular, do not flag the historical global Brew inventory
+  # or propose a blanket `brew upgrade` here.
+  if ! command -v brew &>/dev/null; then
+    record_result "Homebrew exceptions" 1 "Homebrew unavailable; Zen is the documented macOS exception"
+    add_suggestion "Install the documented exception only: brew bundle --file brew/Brewfile.core"
+    return
   fi
 
-  record_issue_count_result "Homebrew" "$issues" 1 "$details"
+  if brew list --cask zen >/dev/null 2>&1; then
+    record_result "Homebrew exceptions" 0 "Zen installed; Nix owns the remaining baseline"
+  elif [[ -d "/Applications/Zen.app" || -d "$HOME/Applications/Zen.app" ]]; then
+    record_result "Homebrew exceptions" 1 "Zen is installed outside the exception manifest; review ownership before a future reinstall"
+  else
+    record_result "Homebrew exceptions" 1 "Zen is missing from the documented exception set"
+    add_suggestion "Install the documented exception only: brew bundle --file brew/Brewfile.core"
+  fi
 }
 
 check_tmux() {
@@ -222,8 +217,7 @@ check_backup_system() {
   if launchctl print "gui/$(id -u)/com.user.dotfiles-backup" >/dev/null 2>&1; then
     details+="Automation: LaunchD agent running"
   else
-    details+="Automation: not configured"
-    add_suggestion "Setup automation: make automation-setup"
+    details+="Automation: optional and not enabled"
   fi
 
   record_issue_count_result "Backup System" "$issues" 1 "$details"
