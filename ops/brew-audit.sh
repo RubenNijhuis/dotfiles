@@ -45,6 +45,13 @@ parse_args() {
 }
 
 parse_args "$@"
+if ! dotfiles_profile_brewfiles | grep -q .; then
+  print_header "Brewfile Audit"
+  print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
+  print_status_row "Result" ok "no Homebrew exceptions selected; Nix owns this profile"
+  exit 0
+fi
+
 require_cmd "brew" "Install Homebrew first: https://brew.sh" || exit 1
 
 print_header "Brewfile Audit"

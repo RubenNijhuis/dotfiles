@@ -13,7 +13,9 @@ Home Manager:
 - CLI packages and capability profiles: development, JavaScript, writing,
   design, media, gaming, and optional language toolchains.
 - Portable desktop applications where the pinned package supports the host:
-  Thunderbird, Obsidian, Signal, VS Code, cmux, Krita, and RawTherapee.
+  Zen Twilight, Thunderbird, Obsidian, Signal, VS Code, cmux, Krita, and
+  RawTherapee. Zen Twilight is a deliberately chosen preview channel; Zen
+  itself owns its profile, Sync, and private browsing data.
   OrbStack and Raycast belong in a separate macOS capability. Krita,
   RawTherapee, and HandBrake are documented Homebrew exceptions on this
   Apple-Silicon Mac until the pinned Nix packages work here.

@@ -45,6 +45,11 @@ update_repos() {
 
 update_homebrew_exceptions() {
   print_section "Homebrew Exceptions"
+  if ! dotfiles_profile_brewfiles | grep -q .; then
+    print_status_row "Homebrew" ok "no exceptions selected; Nix owns this profile"
+    return 0
+  fi
+
   if ! command -v brew &>/dev/null; then
     print_status_row "Homebrew" warn "not found"
     return 1

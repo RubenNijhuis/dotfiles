@@ -82,24 +82,20 @@ check_homebrew() {
   fi
 
 
-  # This is a Nix-first system. Homebrew is deliberately limited to the
-  # explicit exception manifest (currently Zen) and is not a second package
-  # baseline. In particular, do not flag the historical global Brew inventory
-  # or propose a blanket `brew upgrade` here.
-  if ! command -v brew &>/dev/null; then
-    record_result "Homebrew exceptions" 1 "Homebrew unavailable; Zen is the documented macOS exception"
-    add_suggestion "Install the documented exception only: brew bundle --file brew/Brewfile.core"
+  # This is a Nix-first system. A profile with no selected Brewfiles is fully
+  # Nix-owned; do not turn the historical global Brew inventory into drift.
+  if ! dotfiles_profile_brewfiles | grep -q .; then
+    record_result "Homebrew exceptions" 0 "None selected; Nix owns this profile"
     return
   fi
 
-  if brew list --cask zen >/dev/null 2>&1; then
-    record_result "Homebrew exceptions" 0 "Zen installed; Nix owns the remaining baseline"
-  elif [[ -d "/Applications/Zen.app" || -d "$HOME/Applications/Zen.app" ]]; then
-    record_result "Homebrew exceptions" 1 "Zen is installed outside the exception manifest; review ownership before a future reinstall"
-  else
-    record_result "Homebrew exceptions" 1 "Zen is missing from the documented exception set"
-    add_suggestion "Install the documented exception only: brew bundle --file brew/Brewfile.core"
+  if ! command -v brew &>/dev/null; then
+    record_result "Homebrew exceptions" 1 "Homebrew unavailable for selected specialist exceptions"
+    add_suggestion "Install only the selected specialist Homebrew exception"
+    return
   fi
+
+  record_result "Homebrew exceptions" 0 "Selected specialist exceptions are managed separately from the Nix baseline"
 }
 
 check_tmux() {

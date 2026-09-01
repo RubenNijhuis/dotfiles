@@ -1,3 +1,0 @@
-# Zen is the only current everyday desktop application without a compatible
-# Nix package. Everything else in the desktop core is Nix-managed.
-cask "zen" # primary desktop browser

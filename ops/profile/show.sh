@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/../../lib/common.sh"
 source "$SCRIPT_DIR/../../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../../lib/cli.sh"
 source "$SCRIPT_DIR/../../lib/env.sh"
+source "$SCRIPT_DIR/../../lib/brew.sh"
 dotfiles_load_env "$DOTFILES"
 
 usage() {
@@ -25,7 +26,7 @@ main() {
   print_header "Active Profile"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Label" info "${DOTFILES_PROFILE_LABEL:-${DOTFILES_PROFILE:-unknown}}"
-  print_status_row "Brewfiles" info "${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
+  print_status_row "Brewfiles" info "$(brew_profile_summary)"
   print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}" | wc -w | xargs) selected"
   print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
   if command -v chezmoi >/dev/null 2>&1; then

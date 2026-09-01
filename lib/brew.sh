@@ -3,7 +3,7 @@
 
 brewfile_paths() {
   local dotfiles_root="${1:-${DOTFILES:-}}"
-  local selection="${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
+  local selection="${DOTFILES_PROFILE_BREWFILES:-}"
   local name
 
   for name in $selection; do
@@ -39,7 +39,11 @@ brew_entry_key_from_line() {
 }
 
 brew_profile_summary() {
-  local selection="${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
+  local selection="${DOTFILES_PROFILE_BREWFILES:-}"
+  if [[ -z "$selection" ]]; then
+    printf '%s\n' "none (Nix-only)"
+    return
+  fi
   printf '%s\n' "$selection"
 }
 

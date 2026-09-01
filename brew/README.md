@@ -8,7 +8,6 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
 ├── Brewfile.bootstrap # empty compatibility placeholder
-├── Brewfile.core      # temporary Nix-unavailable GUI exception
 ├── Brewfile.design    # temporary Apple-Silicon Nix exception
 ├── Brewfile.media     # temporary broken-Nix-package exception
 ├── Brewfile.apps      # historical GUI inventory; never a default install
@@ -31,17 +30,6 @@ brew/
 An empty compatibility placeholder for older installer/profile references.
 Nix now owns ChezMoi (temporarily during the path migration) and the useful
 Zsh plugins. New profiles should not include this file.
-
-### Brewfile.core
-
-The narrow Homebrew exception for a fresh Mac. Zen is currently the only
-everyday application without a compatible Nix package. Thunderbird, Obsidian,
-Signal, VS Code, and cmux are Nix-owned. The specialist design/media
-exceptions are documented separately below.
-
-```bash
-brew bundle --file=brew/Brewfile.core
-```
 
 ### Brewfile.apps
 **GUI applications:**
@@ -73,8 +61,8 @@ Nix-unavailable or Nix-broken macOS exceptions.
 # Install the active lean profile
 make install
 
-# Or install the current Homebrew exception manually
-brew bundle --file=brew/Brewfile.core
+# Or opt into one documented specialist exception manually
+brew bundle --file=brew/Brewfile.design
 ```
 
 ### Add new packages
@@ -127,9 +115,9 @@ brew update && brew upgrade
 2. **Choose the right file**
    - CLI tool? → `Brewfile.cli`
    - Available in Nix? → add it to the appropriate Nix capability module
-   - Nix-unavailable everyday GUI app? → `Brewfile.core`
-   - Specialist GUI app? → keep it out of the default profile and record it in
-     `Brewfile.apps` only as migration inventory
+   - Nix-unavailable specialist app? → one narrow, opt-in `Brewfile.*`
+   - Historical GUI app? → keep it in `Brewfile.apps` only as migration
+     inventory
    - VS Code extension? → `Brewfile.vscode`
 
 3. **Keep categories organized**
