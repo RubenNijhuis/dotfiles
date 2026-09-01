@@ -47,7 +47,7 @@ The reasoning behind this structure and the staged migration plan are in
 | GUI apps and specialist macOS tools | Homebrew/manual | catalogued by capability; install only when needed |
 | Existing dotfiles | Nix or ChezMoi by path | Home Manager, one program at a time |
 | Cross-platform CLI packages | Home Manager | Home Manager |
-| Per-project runtimes | mise / uv / rustup | project `devShell`s |
+| Per-project runtimes | temporary local mise / uv / rustup state | project `devShell`s; do not add a global runtime manager to a new machine |
 | macOS defaults and launch agents | nix-darwin / launchd plists | nix-darwin / Home Manager where supported |
 | Secrets | Keychain and machine-local config | Keychain and machine-local config |
 

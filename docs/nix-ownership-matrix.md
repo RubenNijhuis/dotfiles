@@ -35,7 +35,7 @@ application's schema.
 | Btop, LazyGit | `nix/home/terminal-apps.nix` | active; prior files are `.pre-nix` backups. Btop's exit-time config writes are disabled; existing shell aliases remain in place. |
 | Eza theme | `nix/home/terminal-apps.nix` raw file | active; existing shell aliases remain in place |
 | Neovim configuration and binary | `nix/home/editors.nix` | active. Lazy.nvim/Mason data stays local until the plugin graph is pinned; its writable runtime lockfile is in local state. Copilot remains unchanged pending an explicit FOSS replacement choice. |
-| `dot_config/mise/` | raw `home.file` entry, then improve selectively | pending; decide whether globally mutable Ruby belongs in mise or a pinned Nix profile |
+| `dot_config/mise/` | temporary local compatibility state | not installed on new machines; this Mac retains it only while its active global Ruby shim is migrated to a project environment or retired |
 | Shared shell modules | `nix/home/shell-modules.nix` raw files | active; startup files consume these links |
 | `dot_zsh*`, `dot_bash*`, startup environment | Home Manager Zsh/Bash and session modules with canonical raw source | active; prior startup files are private `.pre-nix` backups and fresh Zsh/Bash sessions resolve the Nix-managed tools |
 | `dot_config/spicetify/`, `dot_claude/` | app-specific opt-in configuration | retain outside the core profile until each app is retained |
