@@ -30,7 +30,7 @@ valuable enough to maintain.
 | Calendar | **Google Calendar as the temporary operational source; Apple Calendar on Apple devices and Thunderbird elsewhere** | Google supplies the currently available ChatGPT calendar connection; Apple Calendar supplies native Apple notifications, while Thunderbird and the web cover Windows and Linux. | Keep calendars in separate named collections, use standard invitations and `.ics` exports, and review an optional CalDAV/Nextcloud pilot before treating Google as permanent. |
 | Passwords | **KeePassXC + a KDBX vault** | Free/open-source desktop client for Windows, macOS, and Linux; the encrypted vault is a portable file rather than an account silo. | Store the KDBX vault in an encrypted, backed-up sync location; use a compatible mobile client, never this repository. |
 | Notes | Markdown files now; evaluate **Logseq** before migrating | Existing Obsidian content remains portable Markdown, while Logseq is an open-source, local-first alternative. | Keep the present vault intact; trial a new Logseq graph before any migration. |
-| Terminal | Ghostty on macOS/Linux; Windows Terminal on Windows | Native choice where it is strongest, with the same shell, prompt, Git, and editor inside. | Nix and chezmoi own the shared shell configuration. |
+| Terminal | cmux on this Mac; Ghostty on macOS/Linux or Windows Terminal on Windows when chosen | The shell, prompt, Git, and editor remain the portable experience; terminal emulators are host-specific. | Nix owns the shared shell configuration. |
 | Editor | **VS Code** now; evaluate VSCodium later | VS Code is the smooth current GUI editor path; Neovim remains the portable terminal editor. VSCodium is worthwhile only if the required extension/debugging workflow remains intact. | Keep extensions small and project-relevant; do not copy editor profile databases between devices. |
 | Fonts | **Open Sans + Fira Code Nerd Font** | One readable proportional face for mail and documents, plus one coding face with terminal glyphs. | Nix declares both; applications may choose them but no application database is synchronized. |
 
@@ -80,7 +80,7 @@ current tool; it is not a removal instruction.
 
 | Profile | Adopted now | Next adoption | Kept available, not baseline |
 | --- | --- | --- | --- |
-| Shared core | Zen, Ghostty, Nix shell, Git, Neovim, Obsidian/Markdown, Signal | Thunderbird; KeePassXC test vault | Chrome only as a compatibility fallback; Raycast stays macOS-only |
+| Shared core | Zen, Thunderbird, cmux, Nix shell, Git, Neovim, Obsidian/Markdown, Signal | KeePassXC test vault | Chrome only as a compatibility fallback; Raycast stays macOS-only |
 | Development | Node/pnpm, VS Code where its debugging/extensions help, OrbStack on Mac | project-local devShells as projects reopen | databases, cloud SDKs, language runtimes, IDEs, and API clients |
 | Writing | Zen, Markdown/Obsidian | Thunderbird mail/calendar/contacts | Logseq trial only if it materially improves the current notes workflow |
 | Design | Affinity/Figma when a project needs them | Krita/Inkscape/Blender trial when an open tool fits the task | Processing and specialist tools |

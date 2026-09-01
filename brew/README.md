@@ -8,8 +8,8 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
 ├── Brewfile.bootstrap # minimum macOS transition bootstrap
-├── Brewfile.writing   # opt-in writing/everyday applications
-├── Brewfile.apps      # GUI applications (casks + fonts)
+├── Brewfile.core      # small everyday macOS GUI core
+├── Brewfile.apps      # historical GUI inventory; never a default install
 ├── Brewfile.vscode    # VS Code extensions
 └── README.md          # This file
 ```
@@ -30,12 +30,14 @@ The only fresh-machine default: ChezMoi and the three Zsh plugins still used
 during the Nix handoff. It intentionally contains no portable CLI tooling,
 GUI applications, language runtimes, or local services.
 
-### Brewfile.writing
+### Brewfile.core
 
-Small, optional writing applications. Install it explicitly with:
+The five everyday GUI applications for a fresh Mac: Zen, Thunderbird,
+Obsidian, Signal, and VS Code. It deliberately excludes games, alternative
+browsers, work chat, creative suites, local services, and specialist IDEs.
 
 ```bash
-brew bundle --file=brew/Brewfile.writing
+brew bundle --file=brew/Brewfile.core
 ```
 
 ### Brewfile.apps
@@ -56,13 +58,12 @@ brew bundle --file=brew/Brewfile.writing
 
 ### Install packages
 ```bash
-# Install all packages
+# Install the active lean profile
 make install
 
-# Or manually
-brew bundle --file=brew/Brewfile.cli
-brew bundle --file=brew/Brewfile.apps
-brew bundle --file=brew/Brewfile.vscode
+# Or install the same small macOS baseline manually
+brew bundle --file=brew/Brewfile.bootstrap
+brew bundle --file=brew/Brewfile.core
 ```
 
 ### Add new packages
@@ -114,7 +115,9 @@ brew update && brew upgrade
 
 2. **Choose the right file**
    - CLI tool? → `Brewfile.cli`
-   - GUI app? → `Brewfile.apps`
+   - Everyday cross-device GUI app? → `Brewfile.core`
+   - Specialist GUI app? → keep it out of the default profile and record it in
+     `Brewfile.apps` only as migration inventory
    - VS Code extension? → `Brewfile.vscode`
 
 3. **Keep categories organized**

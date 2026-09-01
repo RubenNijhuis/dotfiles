@@ -1,7 +1,8 @@
 # =============================================================================
 # CLI Brewfile - Command-line tools
 # =============================================================================
-# GUI apps go in Brewfile.apps, VS Code extensions in Brewfile.vscode
+# The shared GUI core is in Brewfile.core. Specialist macOS apps remain in
+# Brewfile.apps as a legacy inventory; VS Code extensions are in Brewfile.vscode.
 
 # -----------------------------------------------------------------------------
 # Taps

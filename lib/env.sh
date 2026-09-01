@@ -49,7 +49,7 @@ dotfiles_load_profile() {
 }
 
 dotfiles_profile_brewfiles() {
-  local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.cli Brewfile.apps Brewfile.vscode}"
+  local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.bootstrap Brewfile.core}"
   dotfiles_iter_words "$brewfiles"
 }
 
