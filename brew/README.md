@@ -9,6 +9,8 @@ brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
 ├── Brewfile.bootstrap # minimum macOS transition bootstrap
 ├── Brewfile.core      # small everyday macOS GUI core
+├── Brewfile.design    # opt-in illustration and photography tools
+├── Brewfile.media     # opt-in visual media utilities
 ├── Brewfile.apps      # historical GUI inventory; never a default install
 ├── Brewfile.vscode    # VS Code extensions
 └── README.md          # This file
@@ -48,6 +50,17 @@ brew bundle --file=brew/Brewfile.core
 - Media & Entertainment (Spotify, Steam, rekordbox)
 - Creative tools (Affinity, Processing)
 - Development (Rider, DBeaver, gcloud)
+
+### Capability Brewfiles
+
+`Brewfile.design` contains Krita and RawTherapee for visual work and RAW
+photography. `Brewfile.media` contains HandBrake for graphical video
+conversion. They are explicit opt-ins, not a laptop baseline:
+
+```bash
+brew bundle --file=brew/Brewfile.design
+brew bundle --file=brew/Brewfile.media
+```
 
 ### Brewfile.vscode
 **VS Code extensions:**

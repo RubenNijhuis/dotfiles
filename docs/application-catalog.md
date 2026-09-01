@@ -83,8 +83,8 @@ current tool; it is not a removal instruction.
 | Shared core | Zen, Thunderbird, cmux, Nix shell, Git, Neovim, Obsidian/Markdown, Signal | KeePassXC test vault | Chrome only as a compatibility fallback; Raycast stays macOS-only |
 | Development | Node/pnpm, VS Code where its debugging/extensions help, OrbStack on Mac | project-local devShells as projects reopen | databases, cloud SDKs, language runtimes, IDEs, and API clients |
 | Writing | Zen, Markdown/Obsidian | Thunderbird mail/calendar/contacts | Logseq trial only if it materially improves the current notes workflow |
-| Design | Affinity/Figma when a project needs them | Krita/Inkscape/Blender trial when an open tool fits the task | Processing and specialist tools |
-| Audio & video | DaVinci/Blackmagic and Rekordbox where actively used | VLC/Audacity/FFmpeg as portable complements | Spotify, Sonos, and other service-specific tools |
+| Design | Affinity/Figma when a project needs them; Krita and RawTherapee as opt-in open tools | Inkscape/Blender trial when an open tool fits the task | Processing and specialist tools |
+| Audio & video | DaVinci/Blackmagic where actively used; HandBrake as the GUI converter | VLC/Audacity as portable complements | Spotify, Sonos, Rekordbox, and other service-specific tools |
 | Gaming | none on the Mac baseline | Linux desktop gaming profile | Steam/Proton, Heroic, Prism, Discord, and game libraries |
 
 The practical independence rule is simple: use the smoothest tool that works,
@@ -112,8 +112,8 @@ to remain lean on the MacBook.
 | --- | --- | --- | --- |
 | Development | Nix `development` | VS Code, Podman/Docker only when needed, DBeaver | MacBook, Linux desktop, WSL |
 | Writing | Nix `writing` | Zen, Thunderbird, Markdown/Logseq | Every personal computer |
-| Design | Nix `design` | Krita, Inkscape, GIMP, Blender | Machines used for visual work |
-| Audio & video | Nix `media` | Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |
+| Design | Nix `design` | Krita, RawTherapee, Inkscape, GIMP, Blender | Machines used for visual work |
+| Audio & video | Nix `media` | DaVinci Resolve, HandBrake, Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |
 | Gaming | Nix `gaming` for helper tools | Steam, Heroic, Prism Launcher | Linux desktop only |
 | Hardware / local services | Project-specific tools | Arduino IDE, Jellyfin server, ngrok, LM Studio | Only the machine attached to that work |
 

@@ -1,0 +1,3 @@
+# Opt-in macOS media utility profile. DaVinci Resolve remains a separately
+# managed professional editor; this adds the everyday visual converter.
+cask "handbrake-app" # video conversion and compression with a GUI

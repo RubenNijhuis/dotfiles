@@ -1,0 +1,3 @@
+# Opt-in macOS visual-work profile. Keep it separate from the everyday core.
+cask "krita"        # illustration, painting, and 2D art
+cask "rawtherapee"  # non-destructive RAW photo development
