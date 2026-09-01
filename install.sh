@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Bootstrap script for a fresh machine
+# Nix-first bootstrap script for a fresh Mac.
 # Usage: git clone https://github.com/<user>/dotfiles.git ~/dotfiles && cd ~/dotfiles && ./install.sh
+#
+# The previous Homebrew/ChezMoi bootstrap remains available as
+# `./install.sh --legacy` while transition-owned paths are retired.
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
@@ -19,7 +22,7 @@ mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
 # Source shared output helpers (lives in the git clone, always available)
 source "$DOTFILES/lib/output.sh" "$@"
 
-TOTAL_STEPS=9
+TOTAL_STEPS=7
 CURRENT_STEP=0
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -39,6 +42,16 @@ SETUP_GPG="no"
 REMOVE_BLOATWARE="no"
 
 STEP_NAMES=(
+  "Detecting system"
+  "Xcode Command Line Tools"
+  "Installing Lix/Nix"
+  "Verifying the locked configuration"
+  "Applying the Nix configuration"
+  "Installing documented macOS exceptions"
+  "Final local setup"
+)
+
+LEGACY_STEP_NAMES=(
   "Detecting system"
   "Xcode Command Line Tools"
   "Installing Homebrew"
@@ -76,7 +89,8 @@ Usage: $0 [options]
 Options:
   --yes                         Non-interactive mode with defaults
   --dry-run                     Preview all steps without making changes
-  --from-step <1-9>             Start execution from a specific step
+  --from-step <1-$TOTAL_STEPS>             Start execution from a specific step
+  --legacy                      Use the previous Homebrew/ChezMoi bootstrap
   --with-macos-defaults         Apply macOS defaults
   --without-macos-defaults      Skip macOS defaults
   --with-ssh                    Generate SSH keys
@@ -164,6 +178,11 @@ parse_args() {
         ;;
       --self-test-checkpoint)
         SELF_TEST_CHECKPOINT=true
+        shift
+        ;;
+      --legacy)
+        TOTAL_STEPS=9
+        STEP_NAMES=("${LEGACY_STEP_NAMES[@]}")
         shift
         ;;
       --help|-h)
@@ -495,7 +514,7 @@ step_detect_system() {
   if brew_bin="$(detect_brew_binary)"; then
     print_info "Detected Homebrew binary: $brew_bin"
   else
-    print_info "Homebrew not detected yet; installer will bootstrap it."
+    print_info "Homebrew not detected; it is only installed for selected macOS exceptions."
   fi
 
   check_macos_and_clt_freshness
@@ -789,6 +808,135 @@ print_install_summary() {
   print_status_row "Install log" info "$INSTALL_LOG"
 }
 
+profile_has_brew_exceptions() {
+  local brewfile
+  while IFS= read -r brewfile; do
+    [[ -n "$brewfile" ]] && return 0
+  done < <(dotfiles_profile_brewfiles)
+  return 1
+}
+
+step_install_lix() {
+  if command -v nix >/dev/null 2>&1; then
+    print_success "$(nix --version)"
+    return
+  fi
+
+  print_info "Installing Lix with the supported installer"
+  curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+
+  # The installer updates shell startup files. Load its canonical location so
+  # this run can continue without requiring a new terminal.
+  if [[ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
+    # shellcheck disable=SC1091
+    source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+  fi
+  command -v nix >/dev/null 2>&1 || {
+    print_error "Lix installed, but nix is not available in this shell. Open a new terminal and rerun ./install.sh."
+    return 1
+  }
+}
+
+step_verify_nix_configuration() {
+  print_status_row "Nix" info "$(nix --version)"
+  make -C "$DOTFILES" nix-check
+  make -C "$DOTFILES" nix-build
+  print_success "Locked Nix configuration builds"
+}
+
+step_apply_nix_configuration() {
+  make -C "$DOTFILES" nix-switch
+  print_success "Nix configuration applied"
+}
+
+step_install_brew_exceptions() {
+  if ! profile_has_brew_exceptions; then
+    print_success "No Homebrew exceptions selected for this profile"
+    return
+  fi
+
+  print_info "Installing only the profile's documented macOS exceptions"
+  step_install_homebrew
+  step_install_packages
+}
+
+step_finish_nix_install() {
+  mkdir -p "$DEVELOPER_ROOT/personal/projects" \
+           "$DEVELOPER_ROOT/personal/experiments" \
+           "$DEVELOPER_ROOT/personal/learning" \
+           "$DEVELOPER_ROOT/work/clients" \
+           "$DEVELOPER_ROOT/archive"
+  print_success "Created developer structure at $DEVELOPER_ROOT"
+
+  if [[ "$SETUP_SSH" == "yes" ]]; then
+    bash "$DOTFILES/setup/generate-ssh-keys.sh"
+  fi
+  if [[ "$SETUP_GPG" == "yes" ]]; then
+    bash "$DOTFILES/setup/generate-gpg-keys.sh"
+  fi
+
+  git -C "$DOTFILES" config core.hooksPath "$DOTFILES/hooks"
+  print_success "Git hooks enabled for this repository"
+}
+
+collect_nix_preferences() {
+  printf '\n%sNix-first installer preferences%s\n' "${BLUE}" "${NC}"
+  printf '%s\n' "----------------------------------------"
+
+  SETUP_SSH=$(resolve_preference "$SSH_PREF" "no" "Generate SSH keys for Git?")
+  SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Generate GPG key for commit signing?")
+
+  if ! $NON_INTERACTIVE; then
+    if ! prompt_yes_no "Proceed with Nix-first installation? [Y/n] " "Y"; then
+      echo "Installation cancelled."
+      exit 0
+    fi
+  fi
+}
+
+nix_main() {
+  parse_args "$@"
+
+  if $SELF_TEST_CHECKPOINT; then
+    run_checkpoint_self_test
+    exit 0
+  fi
+
+  exec > >(tee -a "$INSTALL_LOG") 2>&1
+  trap cleanup_on_error ERR
+
+  show_header
+  load_saved_preferences
+  if $DRY_RUN; then
+    print_warning "DRY RUN mode enabled - no changes will be made"
+  fi
+  handle_resume
+  collect_nix_preferences
+
+  if $FROM_STEP_SET; then
+    CURRENT_STEP=$((FROM_STEP - 1))
+    print_info "Starting from step $FROM_STEP: ${STEP_NAMES[$((FROM_STEP - 1))]}"
+  fi
+
+  run_step 1 step_detect_system
+  run_step 2 step_install_xcode_clt
+  run_step 3 step_install_lix
+  run_step 4 step_verify_nix_configuration
+  run_step 5 step_apply_nix_configuration
+  run_step 6 step_install_brew_exceptions
+  # Runtimes and app configuration belong to Nix modules or their respective
+  # applications, not this installer.
+  run_step 7 step_finish_nix_install
+
+  if ! $DRY_RUN; then
+    rm -f "$CHECKPOINT_FILE"
+  fi
+  run_post_install_health_check
+  print_success "Nix-first setup complete"
+  print_install_summary
+  print_next_steps "Open a new terminal to load the managed shell configuration"
+}
+
 run_post_install_health_check() {
   if $DRY_RUN; then
     return
@@ -812,7 +960,7 @@ run_post_install_health_check() {
   fi
 }
 
-main() {
+legacy_main() {
   parse_args "$@"
 
   if $SELF_TEST_CHECKPOINT; then
@@ -863,4 +1011,8 @@ main() {
   print_next_steps "${next_steps[@]}"
 }
 
-main "$@"
+if [[ " ${*:-} " == *" --legacy "* ]]; then
+  legacy_main "$@"
+else
+  nix_main "$@"
+fi

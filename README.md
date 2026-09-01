@@ -6,9 +6,9 @@ Nix-first, cross-platform personal environment with a thin macOS layer.
 
 ### Prerequisites
 
-Before running `install.sh`:
+Before the first Nix activation:
 
-1. Update macOS to the latest release (System Settings > General > Software Update). Homebrew tracks Apple's latest and refuses source builds on older SDKs.
+1. Update macOS to the latest release (System Settings > General > Software Update).
 2. Refresh Xcode Command Line Tools:
    ```bash
    sudo rm -rf /Library/Developer/CommandLineTools
@@ -24,9 +24,10 @@ cd ~/Developer/personal/dotfiles
 ./install.sh
 ```
 
-`install.sh` retains the legacy macOS bootstrap path. The reproducible source of
-truth is the flake: inspect it with `make nix-check` and `make nix-build`, then
-apply it on macOS with `make nix-switch`.
+`install.sh` is the Nix-first bootstrap: it verifies and applies the flake,
+then uses Homebrew only for the small, documented macOS exceptions that the
+pinned Nix package set cannot currently provide. The prior workflow remains
+available as `make install-legacy` while ChezMoi is retired.
 
 ## Daily Use
 
@@ -39,7 +40,7 @@ make doctor --automation   # launchd automation dashboard
 make nix-check    # evaluate all declared Nix targets
 make nix-build    # build the macOS configuration without changing the system
 make nix-switch   # apply the macOS configuration
-make update       # update the remaining transition tooling and local state
+make update       # refresh flake inputs, then check and build without switching
 make spicetify-status # Spotify theming health check
 ```
 
@@ -63,7 +64,8 @@ Current profile behavior:
 - Nix/Home Manager owns the shared core; ChezMoi only materializes the few
   paths still explicitly marked transition-owned
 - `make doctor` shows the active profile in its overview
-- `make install`, `make brew-audit`, and `make brew-sync` use the active profile's Brewfiles
+- `make install` is Nix-first; `make brew-audit` and `make brew-sync` remain
+  transition tools. Homebrew is limited to documented macOS exceptions.
 - `make automation-setup` installs the active profile's automation set
 - `make doctor --automation` shows which profile the automation dashboard reflects
 
@@ -74,14 +76,16 @@ Machine-local profile selection lives in `local/profile.env`.
 
 ```bash
 make help             # show all commands
-make install          # bootstrap the transition tooling on a new Mac
+make install          # Nix-first macOS bootstrap
+make install-legacy   # temporary pre-Nix bootstrap, only for transition recovery
 make nix-check        # evaluate every supported target
 make nix-build        # build the current macOS target
 make nix-switch       # apply the current macOS target
 make bootstrap-verify # strict bootstrap reliability checks
 make doctor           # full health checks
 make doctor --automation       # consolidated automation + ops status
-make update           # package/runtime update + chezmoi apply
+make update           # refresh flake inputs, check, and build without switching
+make update-legacy    # broad pre-Nix Homebrew/runtime/ChezMoi maintenance
 make maint-check      # lint + script tests
 make docs-sync        # fail if generated CLI docs are stale
 ```
@@ -99,7 +103,7 @@ make docs-sync        # fail if generated CLI docs are stale
 
 ```text
 dotfiles/
-├── chezmoi/         # Current home configuration source state
+├── chezmoi/         # Remaining transition-owned home configuration only
 ├── nix/             # Cross-platform Home Manager and macOS nix-darwin modules
 ├── setup/           # Setup scripts (key gen, vscode extensions, bloatware removal)
 ├── ops/             # Operations (update, clean, backup, brew, automation)
@@ -108,7 +112,7 @@ dotfiles/
 ├── lib/             # Shared shell libraries
 ├── hooks/           # Git hooks (pre-commit, commit-msg, pre-push)
 ├── launchd/         # Launchd plist templates
-├── brew/            # Lean bootstrap plus legacy application inventories
+├── brew/            # Documented macOS exceptions plus legacy inventories
 ├── local/           # Machine-specific config (gitignored)
 ├── docs/            # Architecture, runbooks, reference
 ├── install.sh       # Bootstrap installer

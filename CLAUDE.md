@@ -1,44 +1,60 @@
 # CLAUDE.md
 
-macOS-only dotfiles repo. Uses chezmoi for dotfile management, Homebrew for packages, launchd for automation. No Linux/cross-platform support.
+Nix-first, cross-platform personal environment for macOS, Linux, and WSL.
+Home Manager owns shared user configuration and supported applications;
+nix-darwin owns declarative macOS state. ChezMoi remains only for explicitly
+transition-owned paths and Homebrew only for documented macOS package
+exceptions. Launchd manages the remaining macOS automation.
 
 ## Structure
 
-- `chezmoi/` — chezmoi source state. Files here mirror `$HOME`, with `dot_` prefix encoding for hidden files (`dot_zshrc` → `~/.zshrc`) and `private_` for 0600/0700 permissions.
-- `setup/` — One-time setup scripts (key generation, hook installation, vscode extensions, bloatware removal). macOS defaults live inside chezmoi as `chezmoi/run_onchange_macos-defaults.sh.tmpl` — `chezmoi apply` reapplies them when content changes.
+- `nix/` — flake modules: shared Home Manager configuration, capability
+  profiles, and the macOS nix-darwin host.
+- `chezmoi/` — residual transition source state only. Do not add new managed
+  paths here; migrate one path at a time to Nix or keep it explicitly local.
+- `setup/` — One-time setup scripts (key generation, hook installation, VS Code extensions, bloatware removal). Supported macOS defaults live in `nix/darwin/defaults.nix`.
 - `ops/` — Ongoing operational scripts (update, clean, backup, brew sync, format, lint). Contains `automation/` for launchd-managed jobs.
 - `health/` — Health checks and diagnostics (doctor, vscode parity, launchd contracts, ssh/gpg info).
 - `tests/` — Script behavior and contract tests.
 - `lib/` — Shared shell libraries sourced by all scripts.
 - `hooks/` — Git hooks (pre-commit, commit-msg, pre-push).
 - `launchd/` — Launchd plist templates with `__DOTFILES__`/`__HOME__` placeholders.
-- `brew/` — Brewfiles (cli, apps, vscode).
+- `brew/` — documented macOS exceptions plus historical inventories. Nix is
+  the default package source.
 - `docs/` — Runbooks and generated references.
 - `local/` — Machine-specific config (gitignored), with `.example` templates.
 
 ## Key Commands
 
-- `make update` — Update packages, runtimes, and re-apply chezmoi
-- `make apply` / `make diff` — `chezmoi apply` / `chezmoi diff`
+- `make nix-check-all` — Evaluate every supported Nix target
+- `make nix-build` / `make nix-switch` — Build / apply the current macOS configuration
+- `make nix-home-switch NIX_HOME_HOST=<host>` — Apply a Linux or WSL Home Manager target
+- `make update` — Refresh flake inputs and verify/build the Nix configuration
+- `make update ARGS=--exceptions` — Update only the active profile's documented Homebrew exceptions
+- `make update-legacy` — Run the old broad Homebrew/runtime/ChezMoi maintenance
+- `make apply` / `make diff` — ChezMoi transition-only commands
 - `make doctor` — Health summary + automation dashboard (default)
 - `make doctor ARGS=--full` — Deep health check suite (~15 checks)
 - `make doctor ARGS=--automation` — Just the automation dashboard
 - `make doctor ARGS=--quick` — Just the short summary
 - `make clean` — Remove caches, logs, .DS_Stores
 - `make backup` — Backup dotfiles
-- `make install` — Full bootstrap (new machine)
+- `make install` — Nix-first fresh-Mac installer
+- `make install-legacy` — Temporary pre-Nix bootstrap for a transition recovery
 - `make maint-check` — Lint + test + launchd validation
 - `make help` — Show all targets (+ `help-setup`, `help-brew`, `help-launchd`, `help-test`)
 
 ## Lifecycle
 
 ```
-Fresh machine → install.sh → chezmoi apply → make doctor → make doctor --automation
-                                  ↓
-                           make brew-sync (ongoing)
-                                  ↓
-                           make maint-check (pre-push)
+Fresh machine → make install → make doctor / make maint-check
+                           ↓
+                 Nix check → build → switch
 ```
+
+ChezMoi and `brew-sync` are compatibility tools while the remaining
+transition-owned paths and documented macOS exceptions are retired. The default
+installer and update workflow remain Nix-first.
 
 ## Script Contract
 
@@ -89,10 +105,9 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 
 ```
 zsh/bash startup
-  → HOMEBREW_PREFIX (cached)
   → completions (zsh: cached 20h, bash: none)
-  → plugins (zsh-autosuggestions, syntax-highlighting deferred)
-  → tool inits (mise, zoxide, fzf, atuin, gh, docker — all cached in ~/.cache/zsh/)
+  → plugins (Nix-managed zsh-autosuggestions and syntax-highlighting)
+  → tool inits (zoxide, fzf, atuin, gh, docker; temporary mise compatibility may remain locally)
   → shell/path.sh (zsh-only: typeset -U, path=())
   → shell/exports.sh (env vars, FZF colors, eza icons)
   → shell/aliases.sh (cat→bat, ls→eza, grep→rg, vim→nvim, top→btop)
@@ -110,18 +125,21 @@ zsh/bash startup
 - **git includeIf**: Directory-based work/personal split auto-selects SSH key and email
 - **FZF colors**: Set globally in `exports.sh`, inherited by all FZF consumers (fzf, sesh picker, shell functions)
 
-## Config Packages
+## Configuration Ownership
 
-Config files live under `chezmoi/`, organized to mirror `$HOME`. The `dot_` prefix encodes a leading dot (`dot_config/bat/config` → `~/.config/bat/config`), `private_` enforces 0600 file / 0700 dir permissions (used for `.ssh/` and `.gnupg/`), and `executable_` preserves the `+x` bit (used for Claude's statusline script). Empty files need an `empty_` prefix to materialize. Run `make diff` to preview pending changes and `make apply` to materialize them.
+Home Manager modules and raw sources under `nix/config/` are the canonical
+source for active shared configuration. The `chezmoi/` tree is a migration
+inventory for paths not yet moved. Never let Home Manager and ChezMoi own the
+same target. Secrets, SSH/GPG private material, application databases, and
+machine-local overrides stay outside the Nix store.
 
 ## Brewfiles
 
-Three Brewfiles in `brew/`:
-- `Brewfile.cli` — CLI tools
-- `Brewfile.apps` — GUI apps
-- `Brewfile.vscode` — VS Code extensions (must stay in sync with `config/vscode/.../extensions.txt`)
-
-When adding packages to Brewfiles, also run `brew install <package>` to install immediately.
+Homebrew is an exception mechanism, not the default installer. `Brewfile.core`
+contains Zen; `Brewfile.design` and `Brewfile.media` record Apple-Silicon
+packages that are currently unavailable or broken in the pinned Nixpkgs.
+Historical Brewfiles are inventory, never a default install. Prefer a Nix
+capability profile when the pinned package supports the target host.
 
 ## Testing / Validation
 

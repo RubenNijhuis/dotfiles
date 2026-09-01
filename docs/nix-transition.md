@@ -44,7 +44,8 @@ The reasoning behind this structure and the staged migration plan are in
 
 | Concern | Current owner | Planned owner |
 | --- | --- | --- |
-| GUI apps and specialist macOS tools | Homebrew/manual | catalogued by capability; install only when needed |
+| Portable desktop apps | Home Manager | Home Manager where the pinned package supports the host |
+| Specialist macOS apps | documented Homebrew/manual exception | revisit after each Nixpkgs update |
 | Existing dotfiles | Nix or ChezMoi by path | Home Manager, one program at a time |
 | Cross-platform CLI packages | Home Manager | Home Manager |
 | Per-project runtimes | temporary local mise / rustup state | project `devShell`s; use Nix-provided `uv` or language tools, not a global runtime manager, on a new machine |
@@ -72,18 +73,18 @@ paths are broadly readable on the machine.
    make nix-check-all
    ```
 
-3. Apply the first, deliberately small macOS configuration:
+3. Apply the macOS configuration:
 
    ```bash
    make nix-switch
    ```
 
 `make nix-switch` bootstraps nix-darwin through Lix if `darwin-rebuild` is not
-yet installed; later switches use the installed command. The first switch adds
-a small shared CLI package set plus development and JavaScript capabilities. It
-does not uninstall Homebrew packages. It takes over only files explicitly
+yet installed; later switches use the installed command. The Mac configuration
+includes its shared CLI and supported desktop application profiles. It does not
+uninstall Homebrew packages automatically. It takes over only files explicitly
 declared by the active Home Manager modules; the ownership matrix records each
-handoff.
+handoff and the small list of macOS package exceptions.
 
 If this Mac already has `/etc/pam.d/sudo_local` from a prior Touch ID setup,
 preserve it once before the first switch so Nix can take over that exact file:

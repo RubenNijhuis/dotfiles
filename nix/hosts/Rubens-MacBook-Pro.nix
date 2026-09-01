@@ -27,7 +27,7 @@
     nerd-fonts.fira-code
   ];
 
-  # Kept intentionally small for the first switch. Homebrew continues to own
-  # GUI apps and macOS-specific software while Nix takes over CLI tools.
+  # System-level packages stay minimal. Home Manager owns supported desktop
+  # applications; Homebrew is limited to documented macOS package exceptions.
   system.stateVersion = 6;
 }

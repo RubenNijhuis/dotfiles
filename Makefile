@@ -1,4 +1,4 @@
-.PHONY: help install update apply diff macos ssh-setup gpg-setup \
+.PHONY: help install install-legacy update update-legacy apply diff macos ssh-setup gpg-setup \
 	backup brew-sync brew-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
@@ -33,19 +33,25 @@ cheat: ## One-page personal cheatsheet (shadowed defaults, keybindings, shortcut
 
 # ── Core ─────────────────────────────────────────────────────────────
 
-install: ## Full install (bootstrap + brew + chezmoi apply + macos)
+install: ## Install the Nix-first macOS configuration
 	@bash $(DOTFILES)/install.sh
 
-update: ## Update repos, brew packages, runtimes, and re-apply chezmoi
+install-legacy: ## Run the temporary Homebrew/ChezMoi bootstrap
+	@bash $(DOTFILES)/install.sh --legacy $(ARGS)
+
+update: ## Refresh Nix inputs and verify the configuration
 	@bash $(DOTFILES)/ops/update.sh
 
-apply: ## Apply chezmoi source state to $$HOME (idempotent)
+update-legacy: ## Run broad legacy Homebrew/runtime/ChezMoi maintenance
+	@bash $(DOTFILES)/ops/update.sh --legacy $(ARGS)
+
+apply: ## Apply the remaining transition-owned ChezMoi paths
 	@chezmoi apply
 
-diff: ## Preview pending chezmoi changes without applying
+diff: ## Preview pending transition-owned ChezMoi changes
 	@chezmoi diff
 
-macos: ## Force-rerun the chezmoi macOS defaults script
+macos: ## Force-rerun the remaining transition macOS script
 	@chezmoi state delete-bucket --bucket scriptState >/dev/null 2>&1 || true
 	@chezmoi apply --include scripts
 

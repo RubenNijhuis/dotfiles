@@ -21,18 +21,21 @@ uv is the Python package and project manager. It also manages Python versions (`
 
 ## Lifecycle
 
-1. Bootstrap a new Mac with `install.sh`, then evaluate and build the flake with
-   `make nix-check` and `make nix-build`.
+1. On a fresh Mac, use the Nix-first `make install`, or evaluate and build the
+   flake directly with `make nix-check` and `make nix-build`.
 2. Apply macOS state with `make nix-switch`; use `make nix-home-switch` for a
    Linux or WSL target.
 3. Use `chezmoi apply` only for a path still marked transition-owned in the
    [ownership matrix](nix-ownership-matrix.md).
 4. Operate machine workflows via launchd (`make *-setup`, `make doctor --automation`).
-5. Maintain with `make nix-check`, `make maint-check`, `make docs-sync`, and `make update`.
+5. Maintain with `make update`, `make maint-check`, and `make docs-sync`.
+   The standard update refreshes flake inputs then checks and builds Nix without
+   switching; the broad pre-Nix routine is `make update-legacy`.
 
 ## Directory Responsibilities
 
-- `chezmoi/`: transition sources and raw configuration consumed by selected Nix modules.
+- `chezmoi/`: remaining transition-owned paths; it is not the source of truth
+  for new configuration.
 - `nix/`: shared Home Manager modules and host-specific system modules.
 - `ops/`: operational interfaces (`ops/automation/` for launchd management, plus backup and maintenance scripts).
 - `setup/`: bootstrap and provisioning scripts.
@@ -41,8 +44,9 @@ uv is the Python package and project manager. It also manages Python versions (`
 - `tests/`: script tests.
 - `launchd/`: managed launch agents and launchd contracts.
 - `local/`: machine-local, untracked override templates.
-- `profiles/`: transition-time machine profile definitions (bootstrap Brewfile + launchd selection).
-- `brew/`: lean bootstrap declaration plus legacy application inventories.
+- `profiles/`: transition-time machine profile definitions and launchd selection.
+- `brew/`: documented macOS exceptions plus historical inventories; Nix is the
+  package owner by default.
 - `docs/runbooks/`: operational procedures.
 - `docs/reference/`: generated or canonical references.
 
@@ -57,8 +61,9 @@ Profiles allow the repo to adapt to different machine roles without duplicating 
 Transition-time behavior:
 
 - `chezmoi apply` materializes only the remaining transition-owned paths under
-  `chezmoi/` into `$HOME`. The active profile controls bootstrap Brewfiles and
-  automation selection, not Nix capabilities.
+  `chezmoi/` into `$HOME`. It receives no new owned paths. The active profile
+  controls legacy Homebrew exceptions and automation selection, not Nix
+  capabilities.
 - `health/doctor.sh` shows the active profile in the overview section.
 
 Profiles remain simple shell env files so they stay readable and shell-native, but they can now also declare machine-role contracts such as required commands, paths, and keychain items.
