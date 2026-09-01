@@ -359,8 +359,7 @@ status_check_launchd() {
     print_status_row "Launchd" warn "$loaded/$managed agents loaded"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   else
-    print_status_row "Launchd" warn "no agents loaded"
-    STATUS_ISSUES=$((STATUS_ISSUES + 1))
+    print_status_row "Launchd" ok "no optional agents enabled"
   fi
 }
 
@@ -565,7 +564,6 @@ main() {
   if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
     print_next_steps \
       "Run: make doctor --full for the deep checks" \
-      "Run: make automation-setup if launchd agents are missing" \
       "Run: make backup if backup status is stale"
   else
     print_next_steps "No action needed."
