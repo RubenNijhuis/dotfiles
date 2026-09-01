@@ -1,5 +1,3 @@
 # Small macOS-only bootstrap. Everything portable belongs in Nix.
-brew "chezmoi"                 # Existing configuration handoff
-brew "zsh-autosuggestions"     # Loaded by the current Zsh startup
-brew "zsh-syntax-highlighting" # Loaded by the current Zsh startup
-brew "zsh-you-should-use"      # Loaded by the current Zsh startup
+# Empty by design. Nix now owns the transition binary and shell plugins.
+# Keep this file while the legacy installer still accepts profile Brewfiles.

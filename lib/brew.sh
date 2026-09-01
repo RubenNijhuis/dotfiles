@@ -3,7 +3,7 @@
 
 brewfile_paths() {
   local dotfiles_root="${1:-${DOTFILES:-}}"
-  local selection="${DOTFILES_PROFILE_BREWFILES:-Brewfile.bootstrap Brewfile.core}"
+  local selection="${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
   local name
 
   for name in $selection; do
@@ -39,7 +39,7 @@ brew_entry_key_from_line() {
 }
 
 brew_profile_summary() {
-  local selection="${DOTFILES_PROFILE_BREWFILES:-Brewfile.bootstrap Brewfile.core}"
+  local selection="${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
   printf '%s\n' "$selection"
 }
 

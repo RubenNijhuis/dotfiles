@@ -24,9 +24,9 @@ cd ~/Developer/personal/dotfiles
 ./install.sh
 ```
 
-`install.sh` bootstraps the transition tools. The reproducible configuration is
-the flake: inspect it with `make nix-check` and `make nix-build`, then apply it
-on macOS with `make nix-switch`.
+`install.sh` retains the legacy macOS bootstrap path. The reproducible source of
+truth is the flake: inspect it with `make nix-check` and `make nix-build`, then
+apply it on macOS with `make nix-switch`.
 
 ## Daily Use
 

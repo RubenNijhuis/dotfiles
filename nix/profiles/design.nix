@@ -11,8 +11,11 @@
       pngquant
       svgcleaner
     ])
-    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (with pkgs; [
-      krita
-      rawtherapee
-    ]);
+    ++ lib.optionals pkgs.stdenv.hostPlatform.isLinux (
+      with pkgs;
+      [
+        krita
+        rawtherapee
+      ]
+    );
 }

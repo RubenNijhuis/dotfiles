@@ -49,7 +49,8 @@ dotfiles_load_profile() {
 }
 
 dotfiles_profile_brewfiles() {
-  local brewfiles="${DOTFILES_PROFILE_BREWFILES:-Brewfile.bootstrap Brewfile.core}"
+  # An explicitly empty value means this host needs no Homebrew exceptions.
+  local brewfiles="${DOTFILES_PROFILE_BREWFILES-Brewfile.core}"
   dotfiles_iter_words "$brewfiles"
 }
 

@@ -8,8 +8,8 @@ for **which package list installs** and **which launchd agents register**.
 
 > The long-term, cross-platform capability model is in
 > [the Nix transition](nix-transition.md#capability-profiles). These legacy
-> profiles are transition-only: `minimal` installs the small Homebrew
-> bootstrap, while portable tools belong in the shared Nix core. They do not
+> profiles are transition-only: `minimal` has no Homebrew dependencies, while
+> portable tools belong in the shared Nix core. They do not
 > install every desktop application on a new laptop.
 
 ## What A Profile Is
@@ -82,7 +82,7 @@ Example (`profiles/minimal.env`):
 ```bash
 DOTFILES_PROFILE="minimal"
 DOTFILES_PROFILE_LABEL="Minimal"
-DOTFILES_PROFILE_BREWFILES="Brewfile.bootstrap"
+DOTFILES_PROFILE_BREWFILES=""
 DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-audit weekly-digest"
 ```
 

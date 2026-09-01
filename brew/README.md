@@ -7,7 +7,7 @@ Organized Homebrew package management with split Brewfiles for better maintainab
 ```
 brew/
 ├── Brewfile.cli       # CLI tools (brew formulae)
-├── Brewfile.bootstrap # minimum macOS transition bootstrap
+├── Brewfile.bootstrap # empty compatibility placeholder
 ├── Brewfile.core      # temporary Nix-unavailable GUI exception
 ├── Brewfile.design    # temporary Apple-Silicon Nix exception
 ├── Brewfile.media     # temporary broken-Nix-package exception
@@ -28,9 +28,9 @@ brew/
 
 ### Brewfile.bootstrap
 
-The only fresh-machine default: ChezMoi and the three Zsh plugins still used
-during the Nix handoff. It intentionally contains no portable CLI tooling,
-GUI applications, language runtimes, or local services.
+An empty compatibility placeholder for older installer/profile references.
+Nix now owns ChezMoi (temporarily during the path migration) and the useful
+Zsh plugins. New profiles should not include this file.
 
 ### Brewfile.core
 
@@ -58,8 +58,8 @@ Krita and RawTherapee are Nix-managed on Linux, but the current pinned Krita
 package does not support Apple Silicon macOS, so `Brewfile.design` is their
 documented Mac exception. HandBrake remains in `Brewfile.media` because its
 current pinned Nix package is marked broken on macOS. Revisit both exceptions
-after a Nixpkgs update. Homebrew remains for the narrow bootstrap and these
-documented Nix-unavailable or Nix-broken macOS exceptions.
+after a Nixpkgs update. Homebrew remains only for these documented
+Nix-unavailable or Nix-broken macOS exceptions.
 
 ### Brewfile.vscode
 **VS Code extensions:**
@@ -73,8 +73,7 @@ documented Nix-unavailable or Nix-broken macOS exceptions.
 # Install the active lean profile
 make install
 
-# Or install the sole current Homebrew exception manually
-brew bundle --file=brew/Brewfile.bootstrap
+# Or install the current Homebrew exception manually
 brew bundle --file=brew/Brewfile.core
 ```
 

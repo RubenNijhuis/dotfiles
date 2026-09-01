@@ -73,16 +73,9 @@ setopt GLOB_DOTS
 # ----- Hooks -----
 chpwd() { [[ -t 1 ]] && emulate -L zsh -o aliases && ls; }
 
-# ----- Plugins (from Homebrew, cached paths) -----
-[[ -f "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh" ]] && \
-  source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-[[ -f "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh" ]] && \
-  source "$HOMEBREW_PREFIX/share/zsh-you-should-use/you-should-use.plugin.zsh"
-export YSU_MESSAGE_POSITION="after"
-
-# Syntax highlighting (must be sourced synchronously — subshells can't modify parent)
-[[ -f "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
-  source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+# Autosuggestions and syntax highlighting are supplied declaratively by Home
+# Manager. The former Homebrew-only "you should use" reminder was intentionally
+# retired: it adds noise without being part of the essential shell workflow.
 
 # ----- Tool initialization (eval outputs cached per binary) -----
 # Cache is stored in $XDG_CACHE_HOME/zsh/ and invalidated when the binary changes.

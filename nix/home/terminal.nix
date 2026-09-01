@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   # Home Manager owns the generated startup files. The raw source remains in
@@ -6,6 +6,8 @@
   # but chezmoi ignores the target paths and cannot compete for ownership.
   programs.zsh = {
     enable = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
     initContent = builtins.readFile ../config/shell/zshrc;
   };
 
