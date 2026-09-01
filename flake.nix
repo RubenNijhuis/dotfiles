@@ -63,6 +63,7 @@
                 ./nix/profiles/macos-apps.nix
                 ./nix/profiles/design.nix
                 ./nix/profiles/media.nix
+                ./nix/profiles/sync.nix
               ];
             };
           }
@@ -77,6 +78,7 @@
           ./nix/profiles/core.nix
           ./nix/profiles/desktop-core.nix
           ./nix/profiles/gaming.nix
+          ./nix/profiles/sync.nix
         ];
         rubennijhuis-linux-aarch64 = mkHome "aarch64-linux" [
           ./nix/profiles/core.nix

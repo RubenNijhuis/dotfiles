@@ -16,6 +16,13 @@
     initExtra = builtins.readFile ../config/shell/bashrc;
   };
 
+  # Homebrew remains available only for documented macOS exceptions. Keep its
+  # environment setup declarative while the exception path still exists.
+  home.file.".zprofile" = {
+    source = ../config/shell/zprofile;
+    force = true;
+  };
+
   programs.starship = {
     enable = true;
     settings = builtins.fromTOML (builtins.readFile ../config/starship.toml);

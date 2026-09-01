@@ -10,6 +10,7 @@ Index for the dotfiles documentation.
 - [Machine Profiles](machine-profiles.md) — how profile selection works and how to use it
 - [Application Catalog](application-catalog.md) — portable daily tools and optional capabilities
 - [Personal File System](personal-file-system.md) — durable file placement, sync, and backup policy
+- [Runbook: Cross-device sync pilot](runbooks/sync-pilot.md) — a small, reversible Syncthing and Restic rollout
 - [macOS Settings Migration](macos-settings-migration.md) — declarative macOS settings coverage
 - [Shell Performance](shell-performance.md) — startup time optimisation
 
