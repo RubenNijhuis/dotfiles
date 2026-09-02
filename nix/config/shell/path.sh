@@ -45,7 +45,10 @@ while [ -n "$_dotfiles_old_path" ]; do
       _dotfiles_old_path=""
       ;;
   esac
-  [ -n "$_dotfiles_path_entry" ] && _dotfiles_path_add "$_dotfiles_path_entry"
+  # Keep useful inherited integrations (for example OrbStack) but do not carry
+  # stale paths from retired Homebrew runtimes into every new shell.
+  [ -n "$_dotfiles_path_entry" ] && [ -d "$_dotfiles_path_entry" ] \
+    && _dotfiles_path_add "$_dotfiles_path_entry"
 done
 
 export PATH
