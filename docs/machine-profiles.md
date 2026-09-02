@@ -48,7 +48,7 @@ cross-platform capability model. ChezMoi only manages the paths that remain
 explicitly transition-owned.
 
 The personal-laptop profile keeps only general maintenance automations. Local
-services such as LM Studio and a repository-backed Obsidian sync are opt-in:
+services such as LM Studio and a WebDAV-backed Obsidian sync are opt-in:
 add them to a machine-local profile only after the corresponding application
 and data location exist on that machine.
 

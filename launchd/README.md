@@ -12,21 +12,17 @@ Canonical launchd automation contract for this repository.
 ~/dotfiles/ops/automation/launchd-manager.sh install-all
 
 # Install one agent
-~/dotfiles/ops/automation/launchd-manager.sh install obsidian-sync
 
 # Show loaded status
 ~/dotfiles/ops/automation/launchd-manager.sh status
 
 # Restart or remove one agent
-~/dotfiles/ops/automation/launchd-manager.sh restart obsidian-sync
-~/dotfiles/ops/automation/launchd-manager.sh uninstall obsidian-sync
 ```
 
 ## Managed Agents
 
 - `dotfiles-backup`: daily dotfiles backup at 02:00.
 - `dotfiles-doctor`: daily health check + notifications at 09:00.
-- `obsidian-sync`: daily vault sync.
 - `repo-update`: scheduled repository updates with notification wrapper.
 - `log-cleanup`: weekly log rotation.
 - `brew-audit`: weekly Brewfile drift detection.

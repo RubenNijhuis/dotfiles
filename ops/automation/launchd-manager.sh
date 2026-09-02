@@ -83,13 +83,12 @@ is_agent_loaded() {
 
 render_plist_template() {
   local source="$1" dest="$2"
-  local e_dotfiles e_home e_prefix e_obsidian
+  local e_dotfiles e_home e_prefix
   e_dotfiles=$(printf '%s\n' "$DOTFILES" | sed 's/[|&]/\\&/g')
   e_home=$(printf '%s\n' "$HOME" | sed 's/[|&]/\\&/g')
   e_prefix=$(printf '%s\n' "${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}" | sed 's/[|&]/\\&/g')
-  e_obsidian=$(printf '%s\n' "${DOTFILES_OBSIDIAN_REPO_PATH:-$HOME/Developer/personal/projects/obsidian-store}" | sed 's/[|&]/\\&/g')
   sed -e "s|__DOTFILES__|${e_dotfiles}|g" -e "s|__HOME__|${e_home}|g" \
-      -e "s|__HOMEBREW_PREFIX__|${e_prefix}|g" -e "s|__OBSIDIAN_REPO_PATH__|${e_obsidian}|g" \
+      -e "s|__HOMEBREW_PREFIX__|${e_prefix}|g" \
       "$source" > "$dest"
 }
 

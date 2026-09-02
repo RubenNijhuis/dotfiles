@@ -37,7 +37,7 @@ only place that holds irreplaceable data.
 | --- | --- | --- | --- |
 | Google Chrome / Google account | Browser sync and possibly Google data | Firefox Sync; standard IMAP/CalDAV where applicable | Export browser data, make Firefox the daily browser for 30 days. |
 | Dropbox | File sync | Syncthing for device-to-device files; Nextcloud/WebDAV only if a hosted sync service is justified | Identify the folders and create an offline backup before moving one non-critical folder. |
-| Obsidian Sync | Notes sync | Keep Markdown vault; evaluate Logseq and a standard sync method | Trial a copy of one small vault; do not migrate the live vault yet. |
+| Obsidian Sync | Notes sync | Keep one Markdown vault with a standard WebDAV/Nextcloud sync endpoint | Trial an empty vault across devices; do not migrate the live vault until conflict handling is verified. |
 | Spotify / Sonos | Streaming and speaker control | Keep as optional entertainment; use local files with VLC/Strawberry where that suits | Export playlists/library metadata; decide whether streaming itself is worth retaining. |
 | Figma / Affinity | Design source files and workflow | Krita, Inkscape, GIMP, Blender; SVG/PNG/PDF source formats | Export active projects to open formats and trial one current task. |
 | Slack / Discord / WhatsApp | Communities and existing contacts | Signal for private messaging; Element/Matrix for communities you control | Do not migrate a community unilaterally; move personal conversations only where contacts agree. |

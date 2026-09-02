@@ -88,7 +88,8 @@ dotfiles_load_env() {
   if [[ ! -d "$DOTFILES_DEVELOPER_ROOT" && -z "${DOTFILES_SKIP_DIR_CHECK:-}" ]]; then
     mkdir -p "$DOTFILES_DEVELOPER_ROOT"
   fi
-  export DOTFILES_OBSIDIAN_REPO_PATH="${DOTFILES_OBSIDIAN_REPO_PATH:-$DOTFILES_DEVELOPER_ROOT/personal/projects/obsidian-store}"
+  export DOTFILES_FILES_ROOT="${DOTFILES_FILES_ROOT:-$HOME/Files}"
+  export DOTFILES_OBSIDIAN_VAULT_PATH="${DOTFILES_OBSIDIAN_VAULT_PATH:-$DOTFILES_FILES_ROOT/30 Resources/Knowledge/Ruben Knowledge}"
   export DOTFILES_SCREENSHOTS_PATH="${DOTFILES_SCREENSHOTS_PATH:-$HOME/Desktop/Screenshots}"
 
   if [[ -z "${DOTFILES_HOMEBREW_PREFIX:-}" ]]; then

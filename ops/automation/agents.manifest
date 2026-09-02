@@ -10,7 +10,6 @@
 
 dotfiles-backup|Automated daily backups|yes|backup
 dotfiles-doctor|Daily health monitoring|yes|doctor
-obsidian-sync|Obsidian vault synchronization|no|
 repo-update|Repository updates|yes|
 log-cleanup|Weekly log rotation|yes|
 brew-audit|Weekly Brewfile drift detection|yes|

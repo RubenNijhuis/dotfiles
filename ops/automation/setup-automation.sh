@@ -57,7 +57,6 @@ resolve_agent() { automation_resolve_alias "$1"; }
 # Pre-checks for optional agents
 precheck() {
   case "$1" in
-    obsidian-sync) [[ -d "$DOTFILES_OBSIDIAN_REPO_PATH" ]] || { print_warning "Obsidian vault not found"; return 1; } ;;
     lmstudio-server) [[ -x "$HOME/.lmstudio/bin/lms" ]] || { print_warning "LM Studio CLI not found"; return 1; } ;;
     repo-update) bash "$DOTFILES/setup/check-keychain.sh" --no-color 2>/dev/null || { print_warning "Keychain check failed"; return 1; } ;;
   esac
