@@ -14,7 +14,9 @@ source ~/.config/shell/path.sh
 # Only regenerate completions once per day
 autoload -Uz compinit
 setopt EXTENDEDGLOB
-zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
+zcompdump_dir="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+mkdir -p "$zcompdump_dir"
+zcompdump="$zcompdump_dir/.zcompdump"
 if [[ -n ${zcompdump}(#qNmh-20) ]]; then
   # Cached: use existing dump from last 20 hours
   compinit -C -d "$zcompdump"
@@ -23,6 +25,7 @@ else
   compinit -d "$zcompdump"
 fi
 unsetopt EXTENDEDGLOB
+unset zcompdump_dir
 
 # fzf-tab: replaces menu-select with FZF fuzzy picker for completions.
 # Must be sourced after compinit and before any zstyle ':fzf-tab:*' rules.

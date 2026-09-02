@@ -91,10 +91,8 @@ y() {
     rm -f -- "$tmp"
 }
 
-# Force-refresh shell caches (completions + eval caches)
-# Useful after brew install/upgrade to pick up new completions immediately.
+# Force-refresh shell caches (completions + eval caches).
 flush-cache() {
-    rm -f "${ZDOTDIR:-$HOME}/.zcompdump"*
     rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/bash"
     echo "Shell caches cleared. Restart your shell to rebuild."
