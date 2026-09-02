@@ -22,14 +22,6 @@ ms-python.python
 ms-python.vscode-pylance
 ms-python.debugpy
 charliermarsh.ruff
-ms-dotnettools.csdevkit
-ms-dotnettools.csharp
-ms-dotnettools.vscode-dotnet-runtime
-golang.go
-rust-lang.rust-analyzer
-shopify.ruby-lsp
-ziglang.vscode-zig
-sumneko.lua
 tamasfe.even-better-toml
 
 # Containers and documentation

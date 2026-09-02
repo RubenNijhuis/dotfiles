@@ -73,8 +73,6 @@
                 ./nix/profiles/browser.nix
                 ./nix/profiles/desktop-core.nix
                 ./nix/profiles/macos-apps.nix
-                ./nix/profiles/design.nix
-                ./nix/profiles/media.nix
                 ./nix/profiles/sync.nix
               ];
             };

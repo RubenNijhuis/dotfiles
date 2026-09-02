@@ -33,24 +33,6 @@ vscode "ms-python.vscode-pylance"            # Python language server
 vscode "ms-python.debugpy"                   # Python debugger
 vscode "charliermarsh.ruff"                  # Python linter and formatter (fast, Rust-based)
 
-# Language Support - C#
-vscode "ms-dotnettools.csdevkit"             # C# Dev Kit (LSP, debugging, project management)
-
-# Language Support - Go
-vscode "golang.go"                           # Go language support (gopls, debugging, testing)
-
-# Language Support - Rust
-vscode "rust-lang.rust-analyzer"             # Rust language server
-
-# Language Support - Ruby
-vscode "shopify.ruby-lsp"                    # Ruby language server
-
-# Language Support - Zig
-vscode "ziglang.vscode-zig"                  # Zig language support (ZLS)
-
-# Language Support - Lua
-vscode "sumneko.lua"                         # Lua language server
-
 # Language Support - Other
 vscode "tamasfe.even-better-toml"            # TOML syntax and formatting
 
@@ -58,6 +40,4 @@ vscode "tamasfe.even-better-toml"            # TOML syntax and formatting
 vscode "ms-vscode-remote.remote-containers"  # Dev containers support
 vscode "ms-azuretools.vscode-docker"         # Docker/container management and Dockerfile support
 vscode "ms-azuretools.vscode-containers"     # Dev container CLI support
-vscode "ms-dotnettools.csharp"
-vscode "ms-dotnettools.vscode-dotnet-runtime"
 vscode "bierner.markdown-mermaid"
