@@ -21,7 +21,16 @@ Language runtimes do not have global capability modules: an active repository
 gets its own pinned `devShell`. The shared core is Git, search/preview, and
 terminal/navigation; `developer` is the small portable maintenance layer.
 [`templates/nix-project/`](../templates/nix-project/) is the minimal starting
-point for a Node project that needs one.
+point for a Node project that needs one. Until an older project receives its
+own flake on its own branch, this repository offers one narrow compatibility
+shell without changing the Node 24 default:
+
+```bash
+nix develop .#node22
+```
+
+It supplies Node 22 and its matching Yarn 1.x; use it only for projects whose
+declared engine range excludes Node 24.
 The MacBook and Linux desktop also import `writing`. The Windows desktop's WSL
 peer imports only the command-line base and developer layers; its browser,
 mail, notes, and gaming applications remain native Windows applications. Add

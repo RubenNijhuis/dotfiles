@@ -108,6 +108,25 @@
         nixfmt-tree = (pkgsFor system).nixfmt-tree;
       });
 
+      # A temporary, opt-in compatibility shell for existing projects whose
+      # declared Node range excludes the shared Node 24 baseline. New projects
+      # should pin their own devShell instead of growing the global profile.
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = pkgsFor system;
+          yarn = pkgs.yarn.override { nodejs = pkgs.nodejs_22; };
+        in
+        {
+          node22 = pkgs.mkShell {
+            packages = [
+              pkgs.nodejs_22
+              yarn
+            ];
+          };
+        }
+      );
+
       formatter = forAllSystems (system: (pkgsFor system).nixfmt-tree);
     };
 }
