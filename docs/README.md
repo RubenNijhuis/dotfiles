@@ -11,7 +11,6 @@ Index for the dotfiles documentation.
 - [Application Catalog](application-catalog.md) — portable daily tools and optional capabilities
 - [Personal File System](personal-file-system.md) — durable file placement, sync, and backup policy
 - [File-sync options](file-sync-options.md) — iCloud, Nextcloud, Syncthing, and cross-platform tradeoffs
-- [Runbook: Cross-device sync pilot](runbooks/sync-pilot.md) — a small, reversible Syncthing and Restic rollout
 - [macOS Settings Migration](macos-settings-migration.md) — declarative macOS settings coverage
 - [Shell Performance](shell-performance.md) — startup time optimisation
 
@@ -20,7 +19,7 @@ Index for the dotfiles documentation.
 - [EditorConfig](editorconfig.md) — consistent coding styles across editors
 - [Git Hooks](git-hooks.md) — pre-commit and other repo hooks
 - [VS Code](vscode.md) — editor settings and extensions
-- [LaunchD Examples](launchd-examples.md) — reusable LaunchD automation templates
+- [Launchd automation](../launchd/README.md) — templates and management contract
 
 ## Operations & Runbooks
 

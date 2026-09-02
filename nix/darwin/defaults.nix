@@ -1,8 +1,7 @@
 { username, ... }:
 
 {
-  # Declarative macOS preferences migrated from the ChezMoi defaults script.
-  # That script now owns only Dock item placement and Library visibility.
+  # Declarative macOS preferences. ChezMoi no longer owns overlapping defaults.
   system.defaults = {
     NSGlobalDomain = {
       AppleInterfaceStyle = "Dark";

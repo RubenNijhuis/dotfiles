@@ -6,14 +6,13 @@ Use this directory as the source for machine-local templates.
 
 - `machine.env.example`: non-secret local machine values.
 - `profile.env.example`: active tracked profile selection for this machine.
-- `keychain-required.txt.example`: required macOS Keychain service names.
-- `focus-allowed-apps.txt.example`: reference list of apps allowed during Work Focus (mirror by hand in System Settings — not scriptable).
+- `keychain-required.txt` (optional, untracked): required macOS Keychain
+  service names, one per line. Never put secrets in the file.
 ## Usage
 
 ```bash
 cp local/machine.env.example local/machine.env
 cp local/profile.env.example local/profile.env
-cp local/keychain-required.txt.example local/keychain-required.txt
 ```
 
 Set the active profile for this machine:
@@ -27,7 +26,7 @@ make profile-show
 - Store secrets in Keychain, not in `local/` files.
 - Keep profile selection in `local/profile.env`; keep profile definitions in tracked `profiles/`.
 
-Validate keychain requirements:
+If you create a local Keychain requirements file, validate it with:
 
 ```bash
 make keychain-check

@@ -54,7 +54,7 @@ main() {
 
   if [[ ! -f "$CONFIG_FILE" ]]; then
     print_warning "No required keychain config file found at $CONFIG_FILE"
-    print_info "Create it from local/keychain-required.txt.example if needed"
+    print_info "Create local/keychain-required.txt with one service name per line if needed"
     exit 0
   fi
 

@@ -11,31 +11,5 @@ local/*
 # Backups
 .dotfiles-backup/
 
-# SSH - keep config, ignore keys and sensitive data
-config/ssh/.ssh/id_*
-config/ssh/.ssh/*.pub
-config/ssh/.ssh/known_hosts*
-config/ssh/.ssh/config.d/local.conf
-
-# Shell - machine-specific local overrides
-# (chezmoi/dot_config/shell/local.sh.tmpl IS tracked; secrets stay in
-# ~/.config/chezmoi/chezmoi.toml which is machine-local)
-config/shell/.config/shell/local.sh
-
-# GPG - keep config, ignore keys and trust database
-config/gpg/.gnupg/*.gpg
-config/gpg/.gnupg/*.kbx
-config/gpg/.gnupg/random_seed
-config/gpg/.gnupg/trustdb.gpg
-config/gpg/.gnupg/private-keys-v1.d/
-config/gpg/.gnupg/openpgp-revocs.d/
-config/gpg/.gnupg/S.*
-config/gpg/.gnupg/.gpg-v21-migrated
-
-# Vim/Neovim - keep config, ignore runtime files
+# Neovim runtime log
 nvim.log
-config/vim/.vim/plugged/
-config/vim/.vim/.netrwhist
-config/vim/.config/nvim/plugged/
-config/vim/.config/nvim/plugin/
-config/vim/.config/nvim/.luarc.json

@@ -120,7 +120,4 @@ make automation-setup
 make doctor --automation
 ```
 
-## More Examples
-
-- `docs/launchd-examples.md` for end-to-end examples.
-- `ops/automation/launchd-manager.sh` for the canonical command surface.
+`ops/automation/launchd-manager.sh` is the canonical command surface.

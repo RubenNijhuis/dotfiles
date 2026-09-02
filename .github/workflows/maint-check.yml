@@ -25,9 +25,6 @@ jobs:
 
       - name: Run maintenance checks
         timeout-minutes: 5
-        env:
-          # Skip the stow idempotency / integration cases that require stow.
-          SKIP_STOW_TESTS: "1"
         run: |
           make maint-check
 

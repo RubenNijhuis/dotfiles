@@ -63,8 +63,8 @@ Current profile behavior:
 - Nix/Home Manager owns the shared core; ChezMoi only materializes the few
   paths still explicitly marked transition-owned
 - `make doctor` shows the active profile in its overview
-- `make install` is Nix-first; `make brew-audit` and `make brew-sync` remain
-  transition tools. Homebrew is limited to documented macOS exceptions.
+- `make install` is Nix-first; `make brew-audit` reviews the documented
+  macOS exceptions. Homebrew is limited to those exceptions.
 - `make automation-setup` installs the active profile's automation set
 - `make doctor --automation` shows which profile the automation dashboard reflects
 
@@ -100,16 +100,16 @@ make maint-check      # lint + script tests
 dotfiles/
 ├── chezmoi/         # Remaining transition-owned home configuration only
 ├── nix/             # Cross-platform Home Manager and macOS nix-darwin modules
-├── setup/           # Setup scripts (key gen, vscode extensions, bloatware removal)
+├── setup/           # Setup scripts (key generation and VS Code extensions)
 ├── ops/             # Operations (update, clean, backup, brew, automation)
 ├── health/          # Diagnostics (doctor, checks, info scripts)
 ├── tests/           # Script behavior tests
 ├── lib/             # Shared shell libraries
 ├── hooks/           # Git hooks (pre-commit, commit-msg, pre-push)
 ├── launchd/         # Launchd plist templates
-├── brew/            # Documented macOS exceptions plus legacy inventories
+├── brew/            # Documented macOS exceptions only
 ├── local/           # Machine-specific config (gitignored)
-├── docs/            # Architecture, runbooks, reference
+├── docs/            # Architecture and current runbooks
 ├── install.sh       # Bootstrap installer
 └── Makefile         # Operator entrypoint
 ```

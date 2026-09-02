@@ -17,9 +17,12 @@ tmux is the session manager. The selected terminal application handles
 windowing; tmux handles session persistence, pane splits, and remote workflows.
 The tmux config uses Tokyo Night theming consistent with the rest of the stack.
 
-## Python
+## Project runtimes
 
-uv is the Python package and project manager. It also manages Python versions (`uv python install 3.x`). No separate version manager (pyenv, asdf) is needed. Pyright provides type checking in Neovim with `basic` mode.
+Language runtimes are project-local. Give an active project a pinned Nix
+`devShell`; use Python tools such as uv inside that shell only when the project
+needs them. The shared profile does not carry a global Python, asdf, or other
+language-version manager.
 
 ## Lifecycle
 
@@ -51,7 +54,6 @@ uv is the Python package and project manager. It also manages Python versions (`
 - `brew/`: narrow, documented macOS exceptions; Nix is the package owner by
   default.
 - `docs/runbooks/`: operational procedures.
-- `docs/reference/`: generated or canonical references.
 
 ## Machine Profiles
 
@@ -69,7 +71,9 @@ Transition-time behavior:
   capabilities.
 - `health/doctor.sh` shows the active profile in the overview section.
 
-Profiles remain simple shell env files so they stay readable and shell-native, but they can now also declare machine-role contracts such as required commands, paths, and keychain items.
+Profiles remain simple shell env files so they stay readable and shell-native.
+They select only documented Homebrew exceptions and launchd automation; machine
+readiness and secret checks stay local and optional.
 
 ## Script Interface Contract
 

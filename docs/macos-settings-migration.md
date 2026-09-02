@@ -26,10 +26,9 @@ profile. The first declarative macOS settings module is
 
 ## Transition rule
 
-The supported preferences are now owned by `nix/darwin/defaults.nix`. The
-remaining chezmoi script is intentionally narrow: an opt-in local Dock layout
-and a filesystem visibility flag which nix-darwin cannot model cleanly. It
-must not add another write for a preference already represented in Nix.
+The supported preferences are owned by `nix/darwin/defaults.nix`. Remaining
+ChezMoi paths are security- or application-specific transition state; they do
+not write macOS user-interface preferences already represented in Nix.
 
 ## Future additions, reviewed one category at a time
 
