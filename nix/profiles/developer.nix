@@ -12,5 +12,10 @@
     nixd
     nodejs_24
     pnpm
+    gh
+    biome
+    dust
+    hyperfine
+    jujutsu
   ];
 }
