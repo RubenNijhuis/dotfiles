@@ -130,17 +130,6 @@ for cmd in z zi; do
 done
 unset cmd
 
-_zsh_lazy_load_rustup() {
-  unfunction rustup cargo rustc 2>/dev/null
-  if command -v rustup >/dev/null 2>&1; then
-    _zsh_eval_cache rustup completions zsh || return 1
-  fi
-}
-for cmd in rustup cargo rustc; do
-  eval "${cmd}() { _zsh_lazy_load_rustup; ${cmd} \"\$@\" }"
-done
-unset cmd
-# Go, Zig, Cargo completions: auto-loaded by compinit via Homebrew site-functions
 # Load portable fzf completion and file/directory pickers. Ctrl-R belongs to
 # Atuin below, so do not let fzf install its competing history widget.
 if command -v fzf >/dev/null 2>&1; then

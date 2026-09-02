@@ -26,9 +26,6 @@ for _dotfiles_path_entry in \
   "$HOME/.bun/bin" \
   "$HOME/.local/share/pnpm/bin" \
   "$HOME/.cargo/bin" \
-  "$HOME/go/bin" \
-  "${_dotfiles_brew_prefix}/opt/rustup/bin" \
-  "${_dotfiles_brew_prefix}/opt/dotnet@${DOTFILES_DOTNET_VERSION:-8}/bin" \
   "${_dotfiles_brew_prefix}/bin" \
   "${_dotfiles_brew_prefix}/sbin" \
   "/usr/bin" "/bin" "/usr/sbin" "/sbin" \

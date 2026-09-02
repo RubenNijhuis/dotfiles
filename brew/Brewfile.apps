@@ -35,7 +35,6 @@ cask "yaak"                 # API client
 # Development
 # -----------------------------------------------------------------------------
 cask "dbeaver-community"    # Universal database tool
-cask "gcloud-cli"           # Google Cloud SDK
 cask "rider"                # .NET IDE
 
 # -----------------------------------------------------------------------------
@@ -77,5 +76,4 @@ cask "steipete/tap/codexbar"
 cask "jellyfin"             # Self-hosted media server
 cask "ngrok"
 cask "prismlauncher"
-cask "zulu@11"
 cask "zulu@17"

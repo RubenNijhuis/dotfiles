@@ -25,7 +25,6 @@ brew "grc"           # Colorize command output
 brew "tree"          # Directory tree visualization
 brew "parallel"      # GNU parallel for concurrent job execution
 brew "git-cliff"     # Conventional-commits changelog generator
-brew "difftastic"    # Syntax-aware diff (complements git-delta)
 # gh-dash: install via `gh extension install dlvhdr/gh-dash` (not in core).
 
 # -----------------------------------------------------------------------------

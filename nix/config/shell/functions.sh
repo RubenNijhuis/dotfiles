@@ -133,19 +133,6 @@ _clean_sweep() {
 clean-node()    { _clean_sweep node "node_modules"; }
 clean-python()  { _clean_sweep python "__pycache__"; }
 clean-rust()    { _clean_guard || return 1; cargo clean 2>/dev/null; _clean_sweep rust "target"; }
-clean-go()      { go clean -cache; }
-clean-dotnet()  {
-    _clean_guard || return 1
-    dotnet clean 2>/dev/null
-    local matches
-    matches=$(fd --hidden --no-ignore --type d --glob '{bin,obj}' 2>/dev/null | wc -l | tr -d ' ')
-    if [[ "$matches" -gt 20 && "${FORCE:-0}" != "1" ]]; then
-        echo "clean-dotnet: $matches matches under $PWD — refusing (set FORCE=1 to override)." >&2
-        return 1
-    fi
-    fd --hidden --no-ignore --type d --glob '{bin,obj}' -X rm -rf
-    echo "clean-dotnet: removed $matches dir(s)."
-}
 clean-ds() {
     _clean_guard || return 1
     fd --hidden --type f -g .DS_Store -X rm -f

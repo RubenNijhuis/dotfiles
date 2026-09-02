@@ -24,12 +24,7 @@ export BUN_INSTALL="$HOME/.bun"
 export PNPM_HOME="$HOME/.local/share/pnpm"
 
 # Rust
-export RUSTUP_HOME="$HOME/.rustup"
 export CARGO_HOME="$HOME/.cargo"
-
-# Go
-export GOPATH="$HOME/go"
-export GOBIN="$GOPATH/bin"
 
 # Homebrew
 export HOMEBREW_NO_ENV_HINTS=1

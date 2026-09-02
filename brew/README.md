@@ -38,7 +38,7 @@ Zsh plugins. New profiles should not include this file.
 - Communication (Discord, Signal, Slack, WhatsApp)
 - Media & Entertainment (Spotify, Steam, rekordbox)
 - Creative tools (Affinity, Processing)
-- Development (Rider, DBeaver, gcloud)
+- Development (Rider, DBeaver)
 
 ### Nix capability applications
 
