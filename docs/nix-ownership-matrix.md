@@ -36,7 +36,7 @@ application's schema.
 | Source / concern | Nix representation | State |
 | --- | --- | --- |
 | Git, global ignore | Home Manager Git module | active; prior files are `.pre-nix` backups |
-| ripgrep, Bat | native Home Manager modules | active; prior files are `.pre-nix` backups |
+| ripgrep, Bat, and the selected Bat theme | native Home Manager modules plus a raw theme file | active; prior files are `.pre-nix` backups |
 | Starship, Atuin | `nix/home/terminal.nix` | active; prior files are `.pre-nix` backups |
 | tmux, Yazi, fzf, zoxide, sesh | `nix/home/navigation.nix` | active; prior files are `.pre-nix` backups. TPM is replaced with pinned Nix plugins; Yazi has portable open/clipboard fallbacks. |
 | Btop, LazyGit | `nix/home/terminal-apps.nix` | active; prior files are `.pre-nix` backups. Btop's exit-time config writes are disabled; existing shell aliases remain in place. |

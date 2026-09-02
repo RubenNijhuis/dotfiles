@@ -20,7 +20,11 @@ case "$profile" in
     files=("$HOME/.gitconfig" "$HOME/.gitconfig-personal" "$HOME/.gitignore_global")
     ;;
   search)
-    files=("$HOME/.config/ripgrep/ripgreprc" "$HOME/.config/bat/config")
+    files=(
+      "$HOME/.config/ripgrep/ripgreprc"
+      "$HOME/.config/bat/config"
+      "$HOME/.config/bat/themes/tokyonight_night.tmTheme"
+    )
     ;;
   terminal)
     files=("$HOME/.config/starship.toml" "$HOME/.config/atuin/config.toml")

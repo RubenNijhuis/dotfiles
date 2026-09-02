@@ -26,4 +26,8 @@
       ];
     };
   };
+
+  # The selected theme is configuration, not mutable application state.
+  xdg.configFile."bat/themes/tokyonight_night.tmTheme".source =
+    ../config/bat/themes/tokyonight_night.tmTheme;
 }
