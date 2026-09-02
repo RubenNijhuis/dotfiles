@@ -29,7 +29,7 @@ valuable enough to maintain.
 | Desktop email | **Thunderbird** | A consistent mail, calendar, and contacts client on Windows, macOS, and Linux. | Add accounts with IMAP/OAuth on each device; do not copy profile databases or credentials. |
 | Calendar | **Google Calendar as the temporary operational source; Apple Calendar on Apple devices and Thunderbird elsewhere** | Google supplies the currently available ChatGPT calendar connection; Apple Calendar supplies native Apple notifications, while Thunderbird and the web cover Windows and Linux. | Keep calendars in separate named collections, use standard invitations and `.ics` exports, and review an optional CalDAV/Nextcloud pilot before treating Google as permanent. |
 | Passwords | **KeePassXC + a KDBX vault** | Free/open-source desktop client for Windows, macOS, and Linux; the encrypted vault is a portable file rather than an account silo. | Store the KDBX vault in an encrypted, backed-up sync location; use a compatible mobile client, never this repository. |
-| Notes | Markdown files now; evaluate **Logseq** before migrating | Existing Obsidian content remains portable Markdown, while Logseq is an open-source, local-first alternative. | Keep the present vault intact; trial a new Logseq graph before any migration. |
+| Notes | **Obsidian with a Markdown vault** | The vault is plain local files and Obsidian works on macOS, Linux, Windows, iPhone, and iPad. | Use iCloud Drive for the current Mac/iPhone pairing; keep the vault downloaded locally and do not sync application databases. |
 | Terminal | cmux on this Mac; Ghostty on macOS/Linux or Windows Terminal on Windows when chosen | The shell, prompt, Git, and editor remain the portable experience; terminal emulators are host-specific. | Nix owns the shared shell configuration. |
 | Editor | **VS Code** now; evaluate VSCodium later | VS Code is the smooth current GUI editor path; Neovim remains the portable terminal editor. VSCodium is worthwhile only if the required extension/debugging workflow remains intact. | Keep extensions small and project-relevant; do not copy editor profile databases between devices. |
 | Fonts | **Open Sans + Fira Code Nerd Font** | One readable proportional face for mail and documents, plus one coding face with terminal glyphs. | Nix declares both; applications may choose them but no application database is synchronized. |
@@ -82,7 +82,7 @@ current tool; it is not a removal instruction.
 | --- | --- | --- | --- |
 | Shared core | Zen, Thunderbird, cmux, Nix shell, Git, Neovim, Obsidian/Markdown, Signal | KeePassXC test vault | Chrome only as a compatibility fallback; Raycast stays macOS-only |
 | Development | Node/pnpm, VS Code where its debugging/extensions help, OrbStack on Mac | project-local devShells as projects reopen | databases, cloud SDKs, language runtimes, IDEs, and API clients |
-| Writing | Zen, Markdown/Obsidian | Thunderbird mail/calendar/contacts | Logseq trial only if it materially improves the current notes workflow |
+| Writing | Zen, Markdown/Obsidian | Thunderbird mail/calendar/contacts | A future WebDAV/Nextcloud pilot only when the Windows desktop needs phone sync |
 | Design | Affinity/Figma when a project needs them; Krita and RawTherapee as opt-in open tools | Inkscape/Blender trial when an open tool fits the task | Processing and specialist tools |
 | Audio & video | DaVinci/Blackmagic where actively used; HandBrake as the GUI converter | VLC/Audacity as portable complements | Spotify, Sonos, Rekordbox, and other service-specific tools |
 | Gaming | none on the Mac baseline | Linux desktop gaming profile | Steam/Proton, Heroic, Prism, Discord, and game libraries |
@@ -111,7 +111,7 @@ to remain lean on the MacBook.
 | Capability | Portable command-line layer | Native apps, installed only where needed | Intended hosts |
 | --- | --- | --- | --- |
 | Development | Nix `development` | VS Code, Podman/Docker only when needed, DBeaver | MacBook, Linux desktop, WSL |
-| Writing | Nix `writing` | Zen, Thunderbird, Markdown/Logseq | Every personal computer |
+| Writing | Nix `writing` | Zen, Thunderbird, Markdown/Obsidian | Every personal computer |
 | Design | Nix `design`: asset tools; Krita and RawTherapee are Nix-managed on Linux and a documented Apple-Silicon Homebrew exception | Inkscape, GIMP, Blender | Machines used for visual work |
 | Audio & video | Nix `media`: portable media tools; HandBrake is a temporary documented macOS Homebrew exception while its pinned Nix package is broken | DaVinci Resolve, Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |
 | Gaming | Nix `gaming` for helper tools | Steam, Heroic, Prism Launcher | Linux desktop only |
