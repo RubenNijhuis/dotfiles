@@ -25,7 +25,7 @@ tracked extension list.
 ## Setup
 
 ```bash
-make nix-switch     # materialize the Nix-owned settings and manifest
+make nix-switch     # materialize the Nix-owned settings
 make vscode-setup   # install extensions from the manifest
 ```
 
