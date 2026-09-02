@@ -22,6 +22,32 @@ iPhone yet: first move its complete contents, including `.obsidian`, into one
 named vault folder. This is a one-time file migration that happens only after
 a complete verified backup is available.
 
+## Target vault structure
+
+The vault mirrors the durable-file structure while keeping notes in one
+phone-accessible Markdown vault:
+
+```text
+Ruben Knowledge/
+├── 00 Inbox/                 # capture first; sort during review
+├── 10 Projects/              # active personal projects
+├── 20 Areas/                 # continuing responsibilities
+│   ├── Career & Employment/
+│   ├── Finance & Business/
+│   └── Legal & Records/
+├── 30 Resources/             # reusable notes and research
+│   └── Systems & Setup/
+├── 40 Archive/               # inactive notes and former-work material
+│   └── Former Work/
+└── .obsidian/                # application settings; retain as-is
+```
+
+Loose uncategorised notes go to `00 Inbox`; no content is deleted as part of
+this migration. Former-work notes move to `40 Archive/Former Work/`, while
+active non-code work goes to `10 Projects/` or the appropriate `20 Areas/`
+folder. The migration preserves original filenames until a later, deliberate
+review can improve titles or combine genuinely duplicate notes.
+
 ## Before connecting the iPhone
 
 1. In Finder, open **iCloud Drive → Obsidian**.
