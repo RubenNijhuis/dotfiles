@@ -9,12 +9,6 @@ local/*
 *.local
 *.secret
 .env
-.claude
-!config/claude/.claude/
-config/claude/.claude/skills/
-!config/claude/.claude/settings.json
-!config/claude/.claude/statusline-command.sh
-
 # Backups
 .dotfiles-backup/
 

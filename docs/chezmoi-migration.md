@@ -19,7 +19,7 @@ sourceDir = "~/Developer/personal/dotfiles/chezmoi"
 - **`~/.config/chezmoi/chezmoi.toml` is machine-local**, not committed.
   Each machine needs `sourceDir = "<absolute path to this repo>/chezmoi"`.
 - **Executable bits use a filename prefix.** `executable_foo.sh` in the
-  source state becomes `~/foo.sh` with `+x`. Hit by Claude's statusline.
+  source state becomes `~/foo.sh` with `+x`.
 - **Nested `.git` directories are not source state.** Do not copy an
   application-managed `.git` directory into chezmoi.
 - **`private_` prefix on a directory sets 0700.** Used for `.ssh/` and

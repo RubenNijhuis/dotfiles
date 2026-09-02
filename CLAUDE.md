@@ -99,7 +99,6 @@ Each config package maps to a tool config. Cross-tool dependencies are noted wit
 | `hushlogin` | `.hushlogin` | Suppress login banner in terminal | Nix-owned |
 | `mise` | `.config/mise/config.toml` | Runtime version manager (Node LTS, Ruby latest) | |
 | `ripgrep` | `.config/ripgrep/ripgreprc` | Ripgrep defaults (smart-case, max-columns) | |
-| `claude` | `.claude/settings.json` | Claude Code settings and status line | |
 
 ### Shell Module Loading Order
 
@@ -135,11 +134,11 @@ machine-local overrides stay outside the Nix store.
 
 ## Brewfiles
 
-Homebrew is an exception mechanism, not the default installer. `Brewfile.core`
-contains Zen; `Brewfile.design` and `Brewfile.media` record Apple-Silicon
-packages that are currently unavailable or broken in the pinned Nixpkgs.
-Historical Brewfiles are inventory, never a default install. Prefer a Nix
-capability profile when the pinned package supports the target host.
+Homebrew is an exception mechanism, not the default installer.
+`Brewfile.design` and `Brewfile.media` record Apple-Silicon packages that are
+currently unavailable or broken in the pinned Nixpkgs. Historical Brewfiles
+are inventory, never a default install. Prefer a Nix capability profile when
+the pinned package supports the target host.
 
 ## Testing / Validation
 

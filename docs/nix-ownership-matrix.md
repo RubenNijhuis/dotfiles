@@ -47,7 +47,7 @@ application's schema.
 | `dot_config/mise/` | temporary local compatibility state | not installed on new machines; this Mac retains it only while its active global Ruby shim is migrated to a project environment or retired |
 | Shared shell modules | `nix/home/shell-modules.nix` raw files | active; startup files consume these links |
 | `dot_zsh*`, `dot_bash*`, startup environment | Home Manager Zsh/Bash and session modules with canonical raw source | active; prior startup files are private `.pre-nix` backups and fresh Zsh/Bash sessions resolve the Nix-managed tools |
-| `dot_config/spicetify/`, `dot_claude/` | app-specific opt-in configuration | retain outside the core profile until each app is retained |
+| `dot_config/spicetify/` | app-specific opt-in configuration | retain outside the core profile while Spotify theming is retained |
 | `private_dot_ssh/`, `private_dot_gnupg/`, `local.sh.tmpl` | encrypted/local only | explicitly excluded from Nix |
 | macOS defaults | `nix/darwin/defaults.nix` | active; the narrow ChezMoi script keeps only opt-in local Dock placement and Library visibility |
 
