@@ -25,7 +25,6 @@ for _dotfiles_path_entry in \
   "$HOME/.local/share/mise/shims" \
   "$HOME/.bun/bin" \
   "$HOME/.local/share/pnpm/bin" \
-  "$HOME/.cargo/bin" \
   "${_dotfiles_brew_prefix}/bin" \
   "${_dotfiles_brew_prefix}/sbin" \
   "/usr/bin" "/bin" "/usr/sbin" "/sbin" \

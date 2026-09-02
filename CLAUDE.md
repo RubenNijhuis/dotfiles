@@ -19,7 +19,7 @@ exceptions. Launchd manages the remaining macOS automation.
 - `lib/` — Shared shell libraries sourced by all scripts.
 - `hooks/` — Git hooks (pre-commit, commit-msg, pre-push).
 - `launchd/` — Launchd plist templates with `__DOTFILES__`/`__HOME__` placeholders.
-- `brew/` — documented macOS exceptions plus historical inventories. Nix is
+- `brew/` — narrow, documented macOS exceptions. Nix is
   the default package source.
 - `docs/` — Runbooks and generated references.
 - `local/` — Machine-specific config (gitignored), with `.example` templates.
@@ -142,7 +142,7 @@ the pinned package supports the target host.
 
 ## Testing / Validation
 
-Run `make maint-check` before committing. CI runs `make maint-check` plus docs-sync, vscode-parity, install dry-run, and Biome checks.
+Run `make maint-check` before committing. CI runs `make maint-check` plus docs-sync, install dry-run, and Biome checks.
 Pre-push hook runs shellcheck, docs-sync check, and Brewfile drift warning.
 
 ## Theme

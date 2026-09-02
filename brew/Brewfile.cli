@@ -2,7 +2,7 @@
 # Homebrew CLI exceptions
 # =============================================================================
 # Nix owns portable terminal tooling. Keep only macOS-specific or unreplaced
-# exceptions here; VS Code extensions remain in Brewfile.vscode.
+# exceptions here. VS Code extensions are declared directly through Nix.
 
 # -----------------------------------------------------------------------------
 # Taps

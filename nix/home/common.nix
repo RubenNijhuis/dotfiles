@@ -11,9 +11,9 @@
     if pkgs.stdenv.hostPlatform.isDarwin then "/Users/${username}" else "/home/${username}";
   home.stateVersion = "26.05";
 
-  # Home Manager already supplies the standard XDG locations that previously
-  # lived in .zshenv. Keep the one unique .profile behavior declarative.
-  home.sessionPath = [ "$HOME/.cargo/bin" ];
+  # Home Manager supplies the standard XDG locations that previously lived in
+  # .zshenv. Language toolchains belong in explicit capability profiles or
+  # project devShells, never in a global mutable PATH.
 
   # Baseline tools without a dedicated Home Manager module. Programs with
   # native modules own their own packages next to their configuration.

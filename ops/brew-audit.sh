@@ -15,7 +15,7 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color] [--check]
 
-Audit Brewfiles against currently installed formulae, casks, and VS Code extensions.
+Audit the selected Homebrew exception Brewfiles against installed formulae and casks.
 
 Options:
   --check   Exit non-zero when drift is found.
@@ -98,13 +98,11 @@ INSTALLED_TAPS=$(brew tap | grep -v '^homebrew/' | sort)
 # Strip tap prefixes (e.g. "user/tap/pkg" → "pkg") to match Brewfile short names
 INSTALLED_FORMULAE=$(brew leaves --installed-on-request 2>/dev/null | sed 's|.*/||' | sort)
 INSTALLED_CASKS=$(brew list --cask | sort)
-INSTALLED_VSCODE=$(code --list-extensions 2>/dev/null | sort || echo "")
 
 # -- Gather declared state --
 DECLARED_TAPS=$(extract_declared_entries tap)
 DECLARED_FORMULAE=$(extract_declared_entries brew)
 DECLARED_CASKS=$(extract_declared_entries cask)
-DECLARED_VSCODE=$(extract_declared_entries vscode)
 
 # -- Installed but not in Brewfiles --
 print_section "Installed but not in Brewfiles:"
@@ -112,12 +110,10 @@ print_section "Installed but not in Brewfiles:"
 UNDECLARED_TAPS=$(comm -23 <(echo "$INSTALLED_TAPS") <(echo "$DECLARED_TAPS") || true)
 UNDECLARED_FORMULAE=$(comm -23 <(echo "$INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 UNDECLARED_CASKS=$(comm -23 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
-UNDECLARED_VSCODE=$(comm -23 <(echo "$INSTALLED_VSCODE") <(echo "$DECLARED_VSCODE") || true)
 
 print_pkg_diff "Taps" "$UNDECLARED_TAPS" print_warning
 print_pkg_diff "Formulae" "$UNDECLARED_FORMULAE" print_warning
 print_pkg_diff "Casks" "$UNDECLARED_CASKS" print_warning
-print_pkg_diff "VS Code Extensions" "$UNDECLARED_VSCODE" print_warning
 
 # -- Declared but not installed --
 print_section "Declared but not installed:"
@@ -128,18 +124,16 @@ ALL_INSTALLED_FORMULAE=$(brew list --formula | sort)
 MISSING_TAPS=$(comm -13 <(echo "$INSTALLED_TAPS") <(echo "$DECLARED_TAPS") || true)
 MISSING_FORMULAE=$(comm -13 <(echo "$ALL_INSTALLED_FORMULAE") <(echo "$DECLARED_FORMULAE") || true)
 MISSING_CASKS=$(comm -13 <(echo "$INSTALLED_CASKS") <(echo "$DECLARED_CASKS") || true)
-MISSING_VSCODE=$(comm -13 <(echo "$INSTALLED_VSCODE") <(echo "$DECLARED_VSCODE") || true)
 
 print_pkg_diff "Taps" "$MISSING_TAPS" print_error
 print_pkg_diff "Formulae" "$MISSING_FORMULAE" print_error
 print_pkg_diff "Casks" "$MISSING_CASKS" print_error
-print_pkg_diff "VS Code Extensions" "$MISSING_VSCODE" print_error
 
 # -- Summary --
 print_section "Summary:"
 
-TOTAL_UNDECLARED=$(( $(count_lines "$UNDECLARED_TAPS") + $(count_lines "$UNDECLARED_FORMULAE") + $(count_lines "$UNDECLARED_CASKS") + $(count_lines "$UNDECLARED_VSCODE") ))
-TOTAL_MISSING=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSING_FORMULAE") + $(count_lines "$MISSING_CASKS") + $(count_lines "$MISSING_VSCODE") ))
+TOTAL_UNDECLARED=$(( $(count_lines "$UNDECLARED_TAPS") + $(count_lines "$UNDECLARED_FORMULAE") + $(count_lines "$UNDECLARED_CASKS") ))
+TOTAL_MISSING=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSING_FORMULAE") + $(count_lines "$MISSING_CASKS") ))
 
 # Strict drift checks (used by --check) cover taps, formulae, and casks only.
 TOTAL_UNDECLARED_STRICT=$(( $(count_lines "$UNDECLARED_TAPS") + $(count_lines "$UNDECLARED_FORMULAE") + $(count_lines "$UNDECLARED_CASKS") ))
@@ -147,7 +141,7 @@ TOTAL_MISSING_STRICT=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSIN
 
 if [[ $TOTAL_UNDECLARED -gt 0 ]]; then
   print_warning "$TOTAL_UNDECLARED packages installed but not in Brewfiles"
-  print_dim "  Run 'make brew-sync' to add them"
+  print_dim "  Review Nix first; make brew-sync only adds formulae and taps"
 fi
 
 if [[ $TOTAL_MISSING -gt 0 ]]; then
@@ -157,10 +151,6 @@ fi
 
 if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then
   print_success "All packages are in sync!"
-fi
-
-if [[ -n "$MISSING_VSCODE" || -n "$UNDECLARED_VSCODE" ]]; then
-  print_warning "VS Code extension drift is warning-only and does not fail --check"
 fi
 
 if $CHECK_MODE && { [[ $TOTAL_UNDECLARED_STRICT -gt 0 ]] || [[ $TOTAL_MISSING_STRICT -gt 0 ]]; }; then

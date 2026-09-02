@@ -30,25 +30,35 @@ source ~/.config/shell/aliases.sh
 source ~/.config/shell/functions.sh
 
 # ----- Eval caching (mirrors zsh _zsh_eval_cache pattern) -----
-# Caches eval output in ~/.cache/bash/ and invalidates when the binary changes.
+# Caches eval output in ~/.cache/bash/ and keys it to the executable target.
+# Nix profile links have stable mtimes, so cache freshness cannot rely on mtime.
 _bash_eval_cache() {
   local cmd="$1"
   local cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/bash"
   local cache_file="$cache_dir/${cmd}.bash"
-  local bin_path
+  local identity_file="${cache_file}.identity"
+  local bin_path bin_identity
   bin_path="$(command -v "$cmd" 2>/dev/null || true)"
 
   if [[ -z "$bin_path" ]]; then
     return 1
   fi
 
-  if [[ ! -f "$cache_file" ]] || [[ "$bin_path" -nt "$cache_file" ]]; then
+  bin_identity="$(readlink "$bin_path" 2>/dev/null || printf '%s' "$bin_path")"
+  if [[ ! -f "$cache_file" ]] || [[ ! -f "$identity_file" ]] \
+    || [[ "$bin_path" -nt "$cache_file" ]] \
+    || [[ "$(cat "$identity_file" 2>/dev/null)" != "$bin_identity" ]]; then
     mkdir -p "$cache_dir"
-    "$@" > "$cache_file" 2>/dev/null
-    if [[ ! -s "$cache_file" ]]; then
-      rm -f "$cache_file"
+    local tmp="${cache_file}.$$"
+    local identity_tmp="${identity_file}.$$"
+    "$@" > "$tmp" 2>/dev/null
+    if [[ ! -s "$tmp" ]]; then
+      rm -f "$tmp" "$identity_tmp"
       return 1
     fi
+    printf '%s\n' "$bin_identity" > "$identity_tmp"
+    mv -f "$tmp" "$cache_file"
+    mv -f "$identity_tmp" "$identity_file"
   fi
   source "$cache_file"
 }

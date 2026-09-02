@@ -11,20 +11,19 @@ core in `nix/profiles/core.nix`, then imports only the capabilities it needs:
 
 | Capability | Scope | Contents |
 | --- | --- | --- |
-| `development` | macOS, Linux, WSL | direnv and Nix tooling only |
-| `javascript` | macOS, Linux, WSL | Node LTS and pnpm; selected by all current hosts |
+| `developer` | macOS, Linux, WSL | Node LTS, pnpm, GitHub CLI, formatting and measurement tools |
 | `rust`, `python`, `go` | macOS, Linux, WSL | Opt-in language environments, selected only by an active project |
 | `writing` | macOS, Linux, WSL | Typst, Pandoc, Vale, LanguageTool |
 | `design` | macOS, Linux, WSL | image and SVG optimization tools; native apps stay platform-specific |
 | `media` | macOS, Linux, WSL | FFmpeg, SoX, yt-dlp |
 | `gaming` | Linux desktop only | Heroic, MangoHud, Prism Launcher; host owns GPU/Steam setup |
 
-The shared core is Git, search/preview, terminal/navigation, development, and
-JavaScript. The MacBook is the primary device and imports that core. The
+The shared core is Git, search/preview, terminal/navigation, and development.
+The MacBook is the primary device and imports that core. The
 Windows desktop's WSL peer imports the same core; add `writing`, `design`, or
 `media` only when that capability is genuinely needed there. The Linux desktop
-adds the separate `gaming` capability, with no gaming software on the Mac or
-inside WSL.
+adds the separate `gaming` capability. The Mac keeps its occasional gaming
+launcher as a narrow, opt-in Homebrew exception; WSL has no GUI games.
 
 | Device role | Nix target | Deliberate difference |
 | --- | --- | --- |
@@ -48,7 +47,7 @@ The reasoning behind this structure and the staged migration plan are in
 | Specialist macOS apps | documented Homebrew/manual exception | revisit after each Nixpkgs update |
 | Existing dotfiles | Nix or ChezMoi by path | Home Manager, one program at a time |
 | Cross-platform CLI packages | Home Manager | Home Manager |
-| Per-project runtimes | temporary local mise / rustup state | project `devShell`s; use Nix-provided `uv` or language tools, not a global runtime manager, on a new machine |
+| Per-project runtimes | temporary local mise state where an active project needs it | project `devShell`s; use Nix-provided tools rather than a global mutable runtime manager on a new machine |
 | macOS defaults and launch agents | nix-darwin / launchd plists | nix-darwin / Home Manager where supported |
 | Secrets | Keychain and machine-local config | Keychain and machine-local config |
 

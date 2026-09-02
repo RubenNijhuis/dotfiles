@@ -1,8 +1,8 @@
 # VS Code Configuration
 
 Settings and the extension manifest live in `nix/config/vscode/`. Home Manager
-links both into VS Code's native macOS location. `brew/Brewfile.vscode` is a
-historical inventory only; the Nix manifest is the source of truth.
+links both into VS Code's native macOS location. The Nix manifest is the sole
+tracked extension list.
 
 ## Design Choices
 
@@ -32,5 +32,4 @@ make vscode-setup   # install extensions from the manifest
 ## Adding Extensions
 
 1. Add the extension ID to `nix/config/vscode/extensions.txt`.
-2. Run `make vscode-setup` to install it, then `make vscode-parity` to compare
-   against the historical inventory during the transition.
+2. Run `make vscode-setup` to install it on the current machine.

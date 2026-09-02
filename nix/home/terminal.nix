@@ -1,9 +1,7 @@
 { pkgs, ... }:
 
 {
-  # Home Manager owns the generated startup files. The raw source remains in
-  # the repository's chezmoi tree temporarily so the migration is reviewable,
-  # but chezmoi ignores the target paths and cannot compete for ownership.
+  # Home Manager is the sole owner of generated shell startup files.
   programs.zsh = {
     enable = true;
     autosuggestion.enable = true;

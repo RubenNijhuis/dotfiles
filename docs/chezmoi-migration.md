@@ -26,7 +26,8 @@ sourceDir = "~/Developer/personal/dotfiles/chezmoi"
   `.gnupg/`. On a file: 0600. Chezmoi enforces these on every apply.
 - **Library paths under `~/Library/...` need no encoding.** "Library"
   doesn't start with a dot, so it nests inside `chezmoi/Library/...`
-  directly. Used for ghostty and VS Code.
+  directly. The remaining Ghostty source uses this layout; VS Code is now
+  owned by Home Manager.
 
 ## Templates + machine-local data
 

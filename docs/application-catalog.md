@@ -121,21 +121,15 @@ The Nix modules are deliberately small and portable. Install a GUI app through
 Nix whenever its pinned package supports the host; keep only documented macOS
 exceptions in the platform catalog when upstream support is missing or broken.
 
-## Current application inventory: what to stop installing by default
+## Current Homebrew exceptions
 
-The existing `Brewfile.apps` is retained as an inventory during the
-transition, but it should no longer be treated as a laptop baseline. It mixes
-three browsers, development tools, personal communication, media work,
-gaming, local services, and Java versions in one automatic install.
-
-| Group | Keep as an opt-in capability, not core |
-| --- | --- |
-| Alternative browsers | Google Chrome, Firefox, Helium — Zen is the chosen desktop standard; keep any fallback explicit and temporary. |
-| Work-style communication | Slack, Linear, MeetingBar — no longer core now that the Celebratix work context is gone. |
-| Specialist development | DBeaver, gcloud CLI, Rider, Docker/OrbStack, Yaak, Arduino IDE, JDK 11/17. |
-| Creative / media | Affinity, Figma, Processing, IINA, Rekordbox, Sonos, Spotify. |
-| Gaming / leisure | Steam, Epic Games, Prism Launcher, Discord. Keep these on the Linux desktop. |
-| Local services / utilities | LM Studio, Ollama, Jellyfin, ngrok, Dropbox, Trackweight, CodexBar. Add only with a concrete use. |
+There is no catch-all GUI installer anymore. Homebrew declarations are narrow,
+opt-in capability files: `Brewfile.design`, `Brewfile.media`,
+`Brewfile.gaming`, and `Brewfile.services`. The Mac keeps Prism Launcher and
+its required Java runtime available through the gaming exception; it is not a
+baseline install on every host. Any new application must first be evaluated
+for a pinned Nix package and then placed in a named exception file only when
+macOS support is genuinely missing or broken.
 
 ## Installation rule
 

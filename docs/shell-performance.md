@@ -1,210 +1,44 @@
-# Shell Performance Optimization
+# Shell startup
 
-Documentation for shell startup performance improvements.
+The shell is Nix-first and deliberately small. Zsh is the primary interactive
+shell; Bash is a compatible fallback. Home Manager owns the startup files and
+the shared modules in `nix/config/shell/`.
 
-## Current Performance
+## What starts immediately
 
-**Optimized startup time target:** ~40-60ms on Starship (measured with `time zsh -i -c exit`)
+- A deterministic PATH: Nix profiles first, then explicit local runtime and
+  macOS exception paths, then system tools.
+- Zsh completion setup with a 20-hour `compinit` cache and the declarative
+  `fzf-tab` plugin.
+- Starship, directory environment loading, aliases, and local untracked
+  overrides.
 
-### Before Optimization
-- **Total:** ~250ms
-- **compinit:** 239ms (95% of time)
-- **compdef calls:** 57ms
-- **compdump:** 50ms
+## What is deferred or cached
 
-### After Optimization
-- **Total:** ~50ms (**5x faster**)
-- **compinit:** 10ms (cached)
-- All other operations combined: 40ms
+- `mise` initializes only when a project asks for its Ruby tooling.
+- `zoxide` initializes only when `z` or `zi` is first used.
+- Starship, Atuin, GitHub CLI, Docker, and similar `init`/completion output is
+  cached under `$XDG_CACHE_HOME/{zsh,bash}`.
 
-## Optimizations Applied
+Every cached initializer records the resolved executable target as well as its
+mtime. This matters for Nix: a profile symlink can keep the same timestamp
+while its target changes during a switch. A changed Nix package therefore
+rebuilds the cache instead of sourcing generated code that points to a retired
+store path.
 
-### 1. Completion System Caching
-**Problem:** `compinit` runs on every shell startup, regenerating completion cache.
+## Verify and recover
 
-**Solution:** Only regenerate cache once per 20 hours
-```zsh
-autoload -Uz compinit
-setopt EXTENDEDGLOB
-local zcompdump="${ZDOTDIR:-$HOME}/.zcompdump"
-if [[ -n ${zcompdump}(#qNmh-20) ]]; then
-  # Cached: use existing dump
-  compinit -C -d "$zcompdump"
-else
-  # Expired: regenerate dump
-  compinit -d "$zcompdump"
-fi
-unsetopt EXTENDEDGLOB
-```
+Use a fresh shell after `make nix-switch` and check the prompt plus basic
+commands. If a cache ever becomes suspect, run `flush-cache` from the shell
+and open a new session. The cache is disposable; it contains generated shell
+code, never personal configuration or credentials.
 
-**Impact:** Reduced compinit from 239ms to 10ms
+For a simple timing sample:
 
-### 2. Cache Homebrew Prefix
-**Problem:** `$(brew --prefix)` spawns a subprocess on every startup.
-
-**Solution:** Cache the prefix in a variable
-```zsh
-export HOMEBREW_PREFIX="${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}"
-source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-```
-
-**Impact:** Saves ~20-30ms per call (3 calls = 60-90ms saved)
-
-### 3. Background Load Syntax Highlighting
-**Problem:** Syntax highlighting loads synchronously but isn't critical for startup.
-
-**Solution:** Load in background job
-```zsh
-{
-  source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-} &!
-```
-
-**Impact:** Removes ~20ms from critical path
-
-### 4. Lazy-Load mise, zoxide, and rustup
-**Problem:** `mise activate`, `zoxide init`, and `rustup completions` run eagerly on every startup even when not needed in that session.
-
-**Solution:** Stub the commands and defer real init until first use
-```zsh
-_zsh_lazy_load_mise() {
-  unfunction mise node npm npx corepack ruby gem bundle 2>/dev/null
-  _zsh_eval_cache mise activate zsh
-}
-for cmd in mise node npm npx corepack ruby gem bundle; do
-  eval "${cmd}() { _zsh_lazy_load_mise; ${cmd} \"\$@\" }"
-done
-
-_zsh_lazy_load_zoxide() {
-  unfunction z zi __zoxide_z __zoxide_zi 2>/dev/null
-  _zsh_eval_cache zoxide init zsh
-}
-for cmd in z zi; do
-  eval "${cmd}() { _zsh_lazy_load_zoxide; ${cmd} \"\$@\" }"
-done
-
-_zsh_lazy_load_rustup() {
-  unfunction rustup cargo rustc 2>/dev/null
-  if command -v rustup >/dev/null 2>&1; then
-    _zsh_eval_cache rustup completions zsh
-  fi
-}
-for cmd in rustup cargo rustc; do
-  eval "${cmd}() { _zsh_lazy_load_rustup; ${cmd} \"\$@\" }"
-done
-```
-
-**Impact:** Removes ~30-50ms from startup when these tools aren't used in that session. First-use delay is negligible (cache hit via `_zsh_eval_cache`).
-
-### 5. Starship Prompt
-**Goal:** Keep prompt rendering fast and stable with a single backend.
-
-```zsh
-eval "$(starship init zsh)"
-```
-
-## Profiling Tools
-
-### Profile Current Shell
-```bash
-# Trace shell startup with timing
-zsh -xvlic exit 2>&1 | ts -i '%.s' | head -200
-# Or without moreutils:
-time zsh -ilc exit
-```
-
-Shows breakdown of where time is spent during startup.
-
-### Manual Profiling
-Add to top of `.zshrc`:
-```zsh
-zmodload zsh/zprof
-```
-
-Add to bottom:
-```zsh
-zprof
-```
-
-## Future Optimizations
-
-### Parallel Loading
-Could load multiple slow operations in parallel:
-```zsh
-{
-  eval "$(mise activate zsh)"
-} &
-{
-  eval "$(zoxide init zsh)"
-} &
-wait
-```
-
-**Trade-off:** Complex, may cause race conditions with prompt. Currently avoided in favor of lazy-loading.
-
-## Best Practices
-
-1. **Profile regularly** - Performance degrades over time as plugins accumulate
-2. **Cache when possible** - Avoid subprocess calls during startup
-3. **Defer non-critical loads** - Not everything needs to load immediately
-4. **Measure impact** - Always profile before and after changes
-
-## Benchmarking
-
-### Quick Test
 ```bash
 time zsh -i -c exit
 ```
 
-### Detailed Profiling
-```bash
-zsh -i -c 'zmodload zsh/zprof; source ~/.zshrc; zprof'
-```
-
-### Comparison
-```bash
-# Starship
-for i in {1..10}; do time zsh -i -c exit; done 2>&1 | grep real
-```
-
-## Cache Management
-
-### Clear Completion Cache
-```bash
-rm -f ~/.zcompdump*
-# Completions will regenerate on next shell start
-```
-
-### Force Regeneration
-```bash
-autoload -Uz compinit
-compinit -f
-```
-
-## Troubleshooting
-
-### Completions Not Working
-If completions stop working after optimization:
-```bash
-# Clear cache
-rm -f ~/.zcompdump*
-
-# Open new shell (will regenerate)
-zsh
-```
-
-### Syntax Highlighting Not Loading
-Background loading may fail if there are errors. Check manually:
-```bash
-source "${DOTFILES_HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-```
-
-### Slow Startup After System Update
-Homebrew prefix may have changed. Update `HOMEBREW_PREFIX` in `.zshrc`:
-```bash
-brew --prefix  # Check actual path
-```
-
-### Starship Warning Under TERM=dumb
-If your command runner sets `TERM=dumb`, Starship may print a warning in non-interactive checks.
-This does not affect normal Ghostty sessions (`TERM=xterm-256color`).
+Do not add a global runtime manager merely to speed up startup. An active
+project should use a Nix devShell; a temporary local runtime is the exception,
+not the baseline.

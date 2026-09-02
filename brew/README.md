@@ -1,58 +1,26 @@
 # Brewfile Management
 
-Organized Homebrew package management with split Brewfiles for better maintainability.
+Homebrew is a small escape hatch for documented macOS-only exceptions. Nix is
+the default package owner.
 
 ## Structure
 
 ```
 brew/
-├── Brewfile.cli       # CLI tools (brew formulae)
-├── Brewfile.bootstrap # empty compatibility placeholder
-├── Brewfile.design    # temporary Apple-Silicon Nix exception
-├── Brewfile.media     # temporary broken-Nix-package exception
-├── Brewfile.apps      # historical GUI inventory; never a default install
-├── Brewfile.vscode    # VS Code extensions
+├── Brewfile.cli       # formulae with no current Nix replacement
+├── Brewfile.design    # Krita and RawTherapee on Apple Silicon
+├── Brewfile.media     # HandBrake while its Nix package is broken on macOS
+├── Brewfile.gaming    # Prism Launcher and its required Java runtime
+├── Brewfile.services  # deliberately local service exceptions
 └── README.md          # This file
 ```
 
 ## Organization
 
-### Brewfile.cli
-**CLI tools:**
-- Shell & Terminal tools (zsh plugins, Starship, Atuin, fzf, zoxide, ghq, sesh)
-- Core CLI tools (bat, eza, ripgrep, etc.)
-- Development tools (fnm, pnpm, shellcheck, rust)
-- Security (gnupg, pinentry-mac)
-- System utilities (dockutil, ollama)
-
-### Brewfile.bootstrap
-
-An empty compatibility placeholder for older installer/profile references.
-Nix now owns ChezMoi (temporarily during the path migration) and the useful
-Zsh plugins. New profiles should not include this file.
-
-### Brewfile.apps
-**GUI applications:**
-- Core apps (VS Code, Chrome, Obsidian, Ghostty)
-- Fonts (Fira Code, Nerd Fonts)
-- Communication (Discord, Signal, Slack, WhatsApp)
-- Media & Entertainment (Spotify, Steam, rekordbox)
-- Creative tools (Affinity, Processing)
-- Development (Rider, DBeaver)
-
-### Nix capability applications
-
-Krita and RawTherapee are Nix-managed on Linux, but the current pinned Krita
-package does not support Apple Silicon macOS, so `Brewfile.design` is their
-documented Mac exception. HandBrake remains in `Brewfile.media` because its
-current pinned Nix package is marked broken on macOS. Revisit both exceptions
-after a Nixpkgs update. Homebrew remains only for these documented
-Nix-unavailable or Nix-broken macOS exceptions.
-
-### Brewfile.vscode
-**VS Code extensions:**
-- Language support, formatters, linters
-- Git tools, themes, keybindings
+`Brewfile.cli` covers formulae that remain practical macOS exceptions. The
+four capability files contain only the applications that cannot currently be
+provided by the pinned Nix package set on this Mac. VS Code extensions are
+declared in `nix/config/vscode/extensions.txt`, not through Homebrew.
 
 ## Commands
 
@@ -69,8 +37,8 @@ brew bundle --file=brew/Brewfile.design
 
 **Option 1: Add to Brewfile first, then install**
 ```bash
-# Edit appropriate Brewfile
-echo 'brew "wget"' >> brew/Brewfile.cli
+# Prefer a Nix profile. If no Nix package works on macOS, add the exception
+# to a named Brewfile with a comment explaining why.
 
 # Install
 brew bundle --file=brew/Brewfile.cli
@@ -78,22 +46,18 @@ brew bundle --file=brew/Brewfile.cli
 
 **Option 2: Install first, then add to Brewfile**
 ```bash
-# Install package
-brew install wget
-
-# Sync to Brewfile (interactive)
-make brew-sync
+# Audit before changing an exception manifest
+make brew-audit
 ```
 
-### Audit Brewfiles
+### Audit selected exceptions
 ```bash
 # Check for discrepancies
 make brew-audit
 ```
 
-Shows:
-- Packages installed but not in Brewfiles (orphaned)
-- Packages declared but not installed (missing)
+The audit only evaluates the selected profile's exception files. It does not
+turn every application installed on a machine into a global baseline.
 
 ### Update packages
 ```bash
@@ -107,22 +71,16 @@ brew update && brew upgrade
 ## Best Practices
 
 ### Adding Packages
-1. **Use comments** - Explain why each package exists
+1. **Use Nix first.** Add a package to the appropriate Nix profile whenever
+   the pinned cross-platform package works.
+2. **Use comments** - Explain why each Homebrew exception exists.
    ```ruby
    brew "jq"  # JSON processor for API work
    ```
 
-2. **Choose the right file**
-   - CLI tool? → `Brewfile.cli`
-   - Available in Nix? → add it to the appropriate Nix capability module
-   - Nix-unavailable specialist app? → one narrow, opt-in `Brewfile.*`
-   - Historical GUI app? → keep it in `Brewfile.apps` only as migration
-     inventory
-   - VS Code extension? → `Brewfile.vscode`
-
-3. **Keep categories organized**
-   - Add to existing category if one fits
-   - Create new category for 3+ related packages
+3. **Choose the right file.** Use `Brewfile.cli` only for formulae; place a
+   GUI app in a narrow, named capability file. VS Code extensions go in the
+   Nix-owned extension manifest.
 
 ### Removing Packages
 1. **Remove from Brewfile first**
@@ -149,7 +107,7 @@ brew doctor
 
 ## See Also
 
-- `make brew-sync` - Sync installed packages to Brewfiles
+- `make brew-sync` - Review formulae and taps; it never auto-adds GUI apps
 - `make brew-audit` - Check Brewfile sync status
 - `make update` - Update all packages
 - `ops/sync-brew.sh` - Interactive sync script

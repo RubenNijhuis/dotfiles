@@ -1,0 +1,4 @@
+# Narrow macOS gaming exception. Linux receives the equivalent launcher through
+# nix/profiles/gaming.nix; keep this opt-in so the MacBook stays lean.
+cask "prismlauncher"
+cask "zulu@17" # required by the existing Prism Minecraft instance

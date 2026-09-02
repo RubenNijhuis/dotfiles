@@ -45,8 +45,8 @@ uv is the Python package and project manager. It also manages Python versions (`
 - `launchd/`: managed launch agents and launchd contracts.
 - `local/`: machine-local, untracked override templates.
 - `profiles/`: transition-time machine profile definitions and launchd selection.
-- `brew/`: documented macOS exceptions plus historical inventories; Nix is the
-  package owner by default.
+- `brew/`: narrow, documented macOS exceptions; Nix is the package owner by
+  default.
 - `docs/runbooks/`: operational procedures.
 - `docs/reference/`: generated or canonical references.
 

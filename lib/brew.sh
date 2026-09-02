@@ -27,7 +27,7 @@ brew_entry_key_from_line() {
   local line="$1"
   local kind name normalized
 
-  if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)[[:space:]]+\"([^\"]+)\" ]]; then
+  if [[ "$line" =~ ^(brew|cask|tap|mas)[[:space:]]+\"([^\"]+)\" ]]; then
     kind="${BASH_REMATCH[1]}"
     name="${BASH_REMATCH[2]}"
     normalized="$(brew_normalize_entry_name "$kind" "$name")"

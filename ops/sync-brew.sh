@@ -22,8 +22,8 @@ Usage: $0 [--help] [--no-color] [--dry-run] [--auto]
 Sync manually installed Homebrew packages into tracked Brewfiles.
 
 Options:
-  --auto     Non-interactive: route brew→cli, cask/mas→apps, vscode→vscode,
-             tap→cli. Use from hooks/automation.
+  --auto     Non-interactive: route formulae and taps to Brewfile.cli.
+             Casks and VS Code extensions are deliberately skipped for review.
   --dry-run  Show what would be added without modifying Brewfiles.
 EOF
 }
@@ -48,14 +48,12 @@ print_status_row "Tracked Brewfiles" info "$(brew_profile_summary)"
 brew bundle dump --file="$TEMP_BREWFILE" --force
 
 # Read existing Brewfiles into arrays
-declare -a DECLARED_PACKAGES=()
 declare -a DECLARED_KEYS=()
 
-# Parse all Brewfiles (cli, apps, vscode)
+# Parse the explicitly selected exception Brewfiles.
 while IFS= read -r brewfile; do
   while IFS= read -r line; do
-    if [[ "$line" =~ ^(brew|cask|tap|vscode|mas)\ \"([^\"]+)\" ]]; then
-      DECLARED_PACKAGES+=("$line")
+    if [[ "$line" =~ ^(brew|cask|tap|mas)\ \"([^\"]+)\" ]]; then
       if key=$(brew_entry_key_from_line "$line"); then
         DECLARED_KEYS+=("$key")
       fi
@@ -115,13 +113,12 @@ append_if_missing() {
   fi
 }
 
-# Route a package line to the appropriate Brewfile by type.
+# Only generic formulae and taps can be safely routed automatically. A cask
+# needs an explicit capability decision; VS Code extensions belong in Nix.
 auto_route() {
   local line="$1"
   case "$line" in
     brew\ *|tap\ *)    printf '%s\n' "$DOTFILES/brew/Brewfile.cli" ;;
-    cask\ *|mas\ *)    printf '%s\n' "$DOTFILES/brew/Brewfile.apps" ;;
-    vscode\ *)         printf '%s\n' "$DOTFILES/brew/Brewfile.vscode" ;;
     *)                 return 1 ;;
   esac
 }
@@ -139,17 +136,20 @@ for pkg in "${NEW_PACKAGES[@]}"; do
     continue
   fi
 
-  print_subsection "Add to:"
-  print_indent "1) Brewfile.cli (CLI tools)"
-  print_indent "2) Brewfile.apps (GUI apps)"
-  print_indent "3) Brewfile.vscode (VS Code extensions)"
-  print_indent "4) Skip (don't add to any Brewfile)"
-  read -rp "Choice [1/2/3/4]: " choice
-
-  case "$choice" in
-    1) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.cli" ;;
-    2) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.apps" ;;
-    3) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.vscode" ;;
+  case "$pkg" in
+    brew\ *|tap\ *)
+      read -rp "Add this Homebrew exception to Brewfile.cli? [y/N] " choice
+      case "$choice" in
+        y|Y|yes|YES) append_if_missing "$pkg" "$DOTFILES/brew/Brewfile.cli" ;;
+        *) print_dim "Skipped" ;;
+      esac
+      ;;
+    cask\ *|mas\ *)
+      print_dim "Skipped: assess Nix first, then add a named specialist Brewfile if needed."
+      ;;
+    vscode\ *)
+      print_dim "Skipped: add the extension ID to nix/config/vscode/extensions.txt instead."
+      ;;
     *) print_dim "Skipped" ;;
   esac
   printf '\n'

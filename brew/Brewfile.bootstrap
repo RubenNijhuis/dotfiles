@@ -1,3 +1,0 @@
-# Small macOS-only bootstrap. Everything portable belongs in Nix.
-# Empty by design. Nix now owns the transition binary and shell plugins.
-# Keep this file while the legacy installer still accepts profile Brewfiles.

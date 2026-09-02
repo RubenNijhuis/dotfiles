@@ -1,0 +1,2 @@
+# Narrow macOS service exception. Re-evaluate before enabling on another host.
+cask "ngrok"

@@ -78,7 +78,9 @@ chpwd() { [[ -t 1 ]] && emulate -L zsh -o aliases && ls; }
 # retired: it adds noise without being part of the essential shell workflow.
 
 # ----- Tool initialization (eval outputs cached per binary) -----
-# Cache is stored in $XDG_CACHE_HOME/zsh/ and invalidated when the binary changes.
+# Cache is stored in $XDG_CACHE_HOME/zsh/ and keyed to the resolved executable.
+# Nix profile links have stable mtimes, so a simple `binary -nt cache` check
+# can leave generated shell code pointing to a retired store path.
 if command -v direnv >/dev/null 2>&1; then
   eval "$(direnv hook zsh)"
 fi
@@ -86,17 +88,27 @@ fi
 _zsh_eval_cache() {
   local cmd="$1"
   local cache_file="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/${cmd}.zsh"
-  if [[ ! -f "$cache_file" ]] || [[ "$(command -v "$cmd")" -nt "$cache_file" ]]; then
+  local identity_file="${cache_file}.identity"
+  local cmd_path cmd_identity
+  cmd_path="$(command -v "$cmd" 2>/dev/null)" || return 1
+  cmd_identity="${cmd_path:A}"
+
+  if [[ ! -f "$cache_file" ]] || [[ ! -f "$identity_file" ]] \
+    || [[ "$cmd_path" -nt "$cache_file" ]] \
+    || [[ "$(<"$identity_file")" != "$cmd_identity" ]]; then
     mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
     # Write atomically — two concurrent shells starting on a cold cache would
     # otherwise interleave bytes in the same file via "> cache_file".
     local tmp="${cache_file}.$$"
+    local identity_tmp="${identity_file}.$$"
     if ! "$@" > "$tmp" 2>/dev/null || [[ ! -s "$tmp" ]]; then
-      rm -f "$tmp"
+      rm -f "$tmp" "$identity_tmp"
       echo "[eval-cache] warning: ${cmd} produced empty output" >&2
       return 1
     fi
+    print -r -- "$cmd_identity" > "$identity_tmp"
     mv -f "$tmp" "$cache_file"
+    mv -f "$identity_tmp" "$identity_file"
   fi
   source "$cache_file"
 }
