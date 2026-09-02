@@ -1,7 +1,7 @@
-.PHONY: help install install-legacy update update-legacy apply diff macos ssh-setup gpg-setup \
+.PHONY: help install update apply diff macos ssh-setup gpg-setup \
 	backup brew-sync brew-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
-	hooks format vscode-setup keychain-check automation-setup remove-bloatware new-tool \
+	hooks format vscode-setup keychain-check automation-setup remove-bloatware \
 	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
 	clean clean-all restore launchd-check \
@@ -36,14 +36,8 @@ cheat: ## One-page personal cheatsheet (shadowed defaults, keybindings, shortcut
 install: ## Install the Nix-first macOS configuration
 	@bash $(DOTFILES)/install.sh
 
-install-legacy: ## Run the temporary Homebrew/ChezMoi bootstrap
-	@bash $(DOTFILES)/install.sh --legacy $(ARGS)
-
 update: ## Refresh Nix inputs and verify the configuration
-	@bash $(DOTFILES)/ops/update.sh
-
-update-legacy: ## Run broad legacy Homebrew/runtime/ChezMoi maintenance
-	@bash $(DOTFILES)/ops/update.sh --legacy $(ARGS)
+	@bash $(DOTFILES)/ops/update.sh $(ARGS)
 
 apply: ## Apply the remaining transition-owned ChezMoi paths
 	@chezmoi apply
@@ -95,9 +89,6 @@ files-init: ## Create the portable personal file structure (never moves files)
 
 remove-bloatware: ## Remove common macOS built-in apps
 	@bash $(DOTFILES)/setup/remove-bloatware.sh
-
-new-tool: ## Scaffold a new config package (usage: make new-tool NAME=<name>)
-	@bash $(DOTFILES)/setup/new-tool.sh $(NAME)
 
 # ── Backup ───────────────────────────────────────────────────────────
 

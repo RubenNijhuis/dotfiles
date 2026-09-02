@@ -26,8 +26,7 @@ cd ~/Developer/personal/dotfiles
 
 `install.sh` is the Nix-first bootstrap: it verifies and applies the flake,
 then uses Homebrew only for the small, documented macOS exceptions that the
-pinned Nix package set cannot currently provide. The prior workflow remains
-available as `make install-legacy` while ChezMoi is retired.
+pinned Nix package set cannot currently provide.
 
 ## Daily Use
 
@@ -77,7 +76,6 @@ Machine-local profile selection lives in `local/profile.env`.
 ```bash
 make help             # show all commands
 make install          # Nix-first macOS bootstrap
-make install-legacy   # temporary pre-Nix bootstrap, only for transition recovery
 make nix-check        # evaluate every supported target
 make nix-build        # build the current macOS target
 make nix-switch       # apply the current macOS target
@@ -85,7 +83,6 @@ make bootstrap-verify # strict bootstrap reliability checks
 make doctor           # full health checks
 make doctor --automation       # consolidated automation + ops status
 make update           # refresh flake inputs, check, and build without switching
-make update-legacy    # broad pre-Nix Homebrew/runtime/ChezMoi maintenance
 make maint-check      # lint + script tests
 make docs-sync        # fail if generated CLI docs are stale
 ```

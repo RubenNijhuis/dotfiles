@@ -26,5 +26,7 @@ assert_exit "bootstrap-help" 0 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --help
 assert_exit "bootstrap-bad-flag" 1 bash "$ROOT_DIR/setup/bootstrap-verify.sh" --bogus
 assert_exit "install-help" 0 bash "$ROOT_DIR/install.sh" --help
 assert_exit "install-bad-step" 1 bash "$ROOT_DIR/install.sh" --from-step 99
+assert_exit "install-legacy-removed" 1 bash "$ROOT_DIR/install.sh" --legacy
+assert_exit "update-legacy-removed" 1 bash "$ROOT_DIR/ops/update.sh" --legacy
 
 test_summary "cli-parsing"

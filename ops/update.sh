@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Refresh the Nix lockfile and verify the declared configuration.
 #
-# Legacy package managers are deliberately opt-in while the migration away from
-# Homebrew and chezmoi is in progress.
+# Homebrew remains opt-in for documented macOS-only exceptions.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,19 +14,15 @@ dotfiles_load_profile "$DOTFILES"
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] [--exceptions] [--legacy]
+Usage: $0 [--help] [--no-color] [--exceptions]
 
 Refresh Nix inputs, then evaluate and build the current configuration.
 
-By default this only updates repositories and the Nix-managed environment. It
-does not upgrade Homebrew, mise, or pnpm packages, and it never applies
-chezmoi.
+By default this only updates repositories and the Nix-managed environment.
 
 Options:
   --exceptions  Update only the documented Homebrew exceptions selected by the
                 active machine profile.
-  --legacy      Also run the pre-Nix Homebrew, mise, pnpm, and chezmoi steps.
-                This implies --exceptions.
 EOF
 }
 
@@ -69,23 +64,6 @@ update_homebrew_exceptions() {
   done < <(dotfiles_profile_brewfiles)
 
   print_status_row "Homebrew" ok "selected exceptions updated"
-}
-
-update_homebrew_legacy() {
-  print_section "Legacy Homebrew"
-  if ! command -v brew &>/dev/null; then
-    print_status_row "Homebrew" warn "not found"
-    return 1
-  fi
-
-  print_status_row "Start" warn "running broad legacy package update"
-  if brew update &>/dev/null && brew upgrade &>/dev/null && brew cleanup &>/dev/null; then
-    print_status_row "Homebrew" ok "legacy package update finished"
-    return 0
-  fi
-
-  print_status_row "Homebrew" error "legacy update failed"
-  return 1
 }
 
 update_nix_inputs() {
@@ -139,56 +117,8 @@ verify_nix_configuration() {
   return 1
 }
 
-update_runtimes() {
-  print_section "Runtimes"
-  if ! command -v mise &>/dev/null; then
-    print_status_row "mise" info "not installed"
-    return 0
-  fi
-
-  print_status_row "Start" info "upgrading managed runtimes"
-  if mise upgrade &>/dev/null; then
-    print_status_row "mise" ok "upgrade finished"
-  else
-    print_status_row "mise" warn "upgrade failed"
-  fi
-}
-
-update_global_packages() {
-  print_section "Global Packages"
-  if ! command -v pnpm &>/dev/null; then
-    print_status_row "pnpm" info "not installed"
-    return 0
-  fi
-
-  print_status_row "Start" info "updating global pnpm packages"
-  if pnpm update -g &>/dev/null; then
-    print_status_row "pnpm" ok "global packages updated"
-  else
-    print_status_row "pnpm" warn "update failed"
-  fi
-}
-
-apply_chezmoi() {
-  print_section "Config Sync"
-  print_status_row "Start" info "reapplying chezmoi source state to \$HOME"
-
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    print_status_row "chezmoi" error "not installed (brew install chezmoi)"
-    return 1
-  fi
-  if chezmoi apply 2>/dev/null; then
-    local pending
-    pending=$(chezmoi status 2>/dev/null | wc -l | xargs)
-    print_status_row "chezmoi" ok "applied (${pending} pending after)"
-    return 0
-  fi
-  print_status_row "chezmoi" error "apply failed — run: chezmoi diff"
-  return 1
-}
-
 main() {
-  local run_exceptions=false run_legacy=false
+  local run_exceptions=false
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --help|-h)
@@ -199,11 +129,6 @@ main() {
         shift
         ;;
       --exceptions)
-        run_exceptions=true
-        shift
-        ;;
-      --legacy)
-        run_legacy=true
         run_exceptions=true
         shift
         ;;
@@ -227,21 +152,14 @@ main() {
   update_nix_inputs || failures=$((failures + 1))
   verify_nix_configuration || failures=$((failures + 1))
 
-  if $run_exceptions && ! $run_legacy; then
+  if $run_exceptions; then
     update_homebrew_exceptions || failures=$((failures + 1))
-  fi
-
-  if $run_legacy; then
-    update_homebrew_legacy || failures=$((failures + 1))
-    update_runtimes || failures=$((failures + 1))
-    update_global_packages || failures=$((failures + 1))
-    apply_chezmoi || failures=$((failures + 1))
   fi
 
   printf '\n'
   if [[ $failures -gt 0 ]]; then
     print_status_row "Overall" warn "$failures step(s) had issues"
-    print_next_steps "Run: make doctor" "Review the failing Nix step before switching" "Use --legacy only for the transitional tools"
+    print_next_steps "Run: make doctor" "Review the failing Nix step before switching"
     exit 1
   fi
 

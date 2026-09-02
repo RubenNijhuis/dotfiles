@@ -31,7 +31,6 @@ exceptions. Launchd manages the remaining macOS automation.
 - `make nix-home-switch NIX_HOME_HOST=<host>` — Apply a Linux or WSL Home Manager target
 - `make update` — Refresh flake inputs and verify/build the Nix configuration
 - `make update ARGS=--exceptions` — Update only the active profile's documented Homebrew exceptions
-- `make update-legacy` — Run the old broad Homebrew/runtime/ChezMoi maintenance
 - `make apply` / `make diff` — ChezMoi transition-only commands
 - `make doctor` — Health summary + automation dashboard (default)
 - `make doctor ARGS=--full` — Deep health check suite (~15 checks)
@@ -40,7 +39,6 @@ exceptions. Launchd manages the remaining macOS automation.
 - `make clean` — Remove caches, logs, .DS_Stores
 - `make backup` — Backup dotfiles
 - `make install` — Nix-first fresh-Mac installer
-- `make install-legacy` — Temporary pre-Nix bootstrap for a transition recovery
 - `make maint-check` — Lint + test + launchd validation
 - `make help` — Show all targets (+ `help-setup`, `help-brew`, `help-launchd`, `help-test`)
 

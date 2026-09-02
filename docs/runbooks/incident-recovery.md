@@ -8,9 +8,6 @@
 
 ```bash
 ./install.sh --from-step <1-7>
-
-# The temporary pre-Nix bootstrap still has nine steps.
-./install.sh --legacy --from-step <1-9>
 ```
 
 ## Launchd Automation Failure

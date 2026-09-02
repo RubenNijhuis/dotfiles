@@ -30,7 +30,8 @@ uv is the Python package and project manager. It also manages Python versions (`
 4. Operate machine workflows via launchd (`make *-setup`, `make doctor --automation`).
 5. Maintain with `make update`, `make maint-check`, and `make docs-sync`.
    The standard update refreshes flake inputs then checks and builds Nix without
-   switching; the broad pre-Nix routine is `make update-legacy`.
+   switching. Use `make update ARGS=--exceptions` only for explicitly selected
+   macOS package exceptions.
 
 ## Directory Responsibilities
 
@@ -62,7 +63,7 @@ Transition-time behavior:
 
 - `chezmoi apply` materializes only the remaining transition-owned paths under
   `chezmoi/` into `$HOME`. It receives no new owned paths. The active profile
-  controls legacy Homebrew exceptions and automation selection, not Nix
+  controls documented Homebrew exceptions and automation selection, not Nix
   capabilities.
 - `health/doctor.sh` shows the active profile in the overview section.
 

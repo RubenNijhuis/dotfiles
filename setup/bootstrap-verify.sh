@@ -61,7 +61,7 @@ main() {
   print_header "Bootstrap Verification"
 
   run_step "Installer dry-run" \
-    bash "$DOTFILES/install.sh" --dry-run --yes --without-macos-defaults --without-ssh --without-gpg
+    bash "$DOTFILES/install.sh" --dry-run --yes --without-ssh --without-gpg
 
   run_step "CLI parsing checks" bash "$DOTFILES/tests/test-cli-parsing.sh"
   run_step "CLI contract checks" bash "$DOTFILES/tests/test-cli-contract.sh"
