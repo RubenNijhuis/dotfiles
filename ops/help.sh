@@ -19,7 +19,7 @@ $DOTFILES/Makefile; edit target descriptions there.
 Sections:
   main     — all targets grouped by Makefile section
   setup    — bootstrap and identity commands
-  brew     — Brewfile sync/audit and spicetify
+  brew     — Homebrew exception audit and Spicetify
   launchd  — automation lifecycle
   test     — verification and contract checks
 EOF

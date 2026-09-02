@@ -26,8 +26,3 @@ Index for the dotfiles documentation.
 
 - [Runbook: Backups](runbooks/backup.md)
 - [Runbook: Incident Recovery](runbooks/incident-recovery.md)
-
-## Reference
-
-- [CLI Reference](reference/cli.md) — generated command docs (`bash ops/generate-cli-reference.sh`)
-- [Reference Index](reference/README.md)

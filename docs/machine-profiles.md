@@ -2,7 +2,7 @@
 
 Machine profiles let one dotfiles repo target multiple machine roles without
 forcing each one to use the same Brewfile + automation set. The profile
-system was slimmed when the repo moved from stow to chezmoi: chezmoi handles
+system was slimmed when the repo retired Stow in favor of ChezMoi: ChezMoi handles
 config-file variance via templates, so the profile is now only responsible
 for **which package list installs** and **which launchd agents register**.
 
@@ -38,7 +38,7 @@ make profile-set PROFILE=name    # set the active profile (writes local/profile.
 Profiles currently affect:
 
 - `make install` — Brewfile selection follows the active profile
-- `make brew-audit` / `make brew-sync` — audit against the profile's Brewfiles
+- `make brew-audit` — audit the profile's explicit Homebrew exceptions
 - `make automation-setup` — installs the profile's selected launchd agents
 - `make doctor` — overview shows the active profile
 

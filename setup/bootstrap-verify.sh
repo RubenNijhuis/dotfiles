@@ -16,8 +16,7 @@ Usage: $0 [--help] [--no-color] [--skip-doctor]
 Runs bootstrap verification:
   1. install.sh dry-run
   2. script CLI tests
-  3. docs sync check
-  4. quick doctor check
+  3. quick doctor check
 EOF
 }
 
@@ -67,8 +66,6 @@ main() {
   run_step "CLI contract checks" bash "$DOTFILES/tests/test-cli-contract.sh"
   run_step "Install checkpoint checks" bash "$DOTFILES/tests/test-install-checkpoint.sh"
   run_step "Keychain requirement checks" bash "$DOTFILES/setup/check-keychain.sh" --no-color
-  run_step "Generate CLI reference" bash "$DOTFILES/ops/generate-cli-reference.sh"
-
   if $RUN_DOCTOR; then
     run_step "Doctor quick check" bash "$DOTFILES/health/doctor.sh" --quick --no-color
   else

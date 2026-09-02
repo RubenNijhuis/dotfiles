@@ -7,15 +7,15 @@ Concise, reusable examples for creating new LaunchD automations.
 Use the manager as the canonical interface:
 
 ```bash
-~/dotfiles/ops/automation/launchd-manager.sh list
-~/dotfiles/ops/automation/launchd-manager.sh install <name>
-~/dotfiles/ops/automation/launchd-manager.sh status
+make automation-list
+bash ops/automation/launchd-manager.sh install <name>
+make launchd-status
 ```
 
 For managed built-in agents, prefer:
 
 ```bash
-~/dotfiles/ops/automation/launchd-manager.sh install-all
+make launchd-install-all
 ```
 
 Operational status:
@@ -108,7 +108,7 @@ Use placeholders; they are rendered during install.
 4. Install:
 
 ```bash
-~/dotfiles/ops/automation/launchd-manager.sh install <task>
+bash ops/automation/launchd-manager.sh install <task>
 ```
 
 5. Verify:
@@ -144,4 +144,3 @@ If install fails due to permissions, rerun the command outside sandboxed tooling
 
 - `launchd/README.md`
 - `ops/automation/launchd-manager.sh`
-- `docs/reference/cli.md`

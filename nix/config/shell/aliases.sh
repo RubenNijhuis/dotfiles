@@ -42,7 +42,7 @@ alias brewup="brew autoremove &>/dev/null; brew update && brew upgrade && brew c
 # Dotfiles repo shortcuts (work from anywhere).
 # Intentionally expand the path at alias-definition time so the alias works
 # even after the helper var is unset; shellcheck SC2139 is a false positive here.
-_DOT="${DOTFILES_REPO:-$HOME/dotfiles}"
+_DOT="${DOTFILES_REPO:-$HOME/Developer/personal/dotfiles}"
 # shellcheck disable=SC2139
 alias dot="cd $_DOT"
 # shellcheck disable=SC2139

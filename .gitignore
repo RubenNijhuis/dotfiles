@@ -4,16 +4,12 @@ local/*
 !local/.gitkeep
 !local/machine.env.example
 !local/profile.env.example
-!local/dock-apps.txt.example
 !local/README.md
 *.local
 *.secret
 .env
 # Backups
 .dotfiles-backup/
-
-# Generated docs (built by ops/generate-cli-reference.sh)
-docs/reference/cli.md
 
 # SSH - keep config, ignore keys and sensitive data
 config/ssh/.ssh/id_*

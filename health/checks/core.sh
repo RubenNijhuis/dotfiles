@@ -20,9 +20,8 @@ find_git_dirs() {
     -name .git -print 2>/dev/null
 }
 
-check_stow() {
-  # Compatibility name retained for the public doctor section. This checks
-  # chezmoi source-state sync; Stow is no longer part of the setup.
+check_chezmoi() {
+  # Check the small remaining ChezMoi source-state sync surface.
   if ! command -v chezmoi >/dev/null 2>&1; then
     record_result "chezmoi" 1 "chezmoi not installed"
     add_suggestion "Apply the Nix configuration: make nix-switch"
@@ -351,7 +350,7 @@ check_developer() {
   details+="  - work: $work\n  "
   details+="  - archive: $archive"
 
-  # Detect multiple unique dotfiles clones to prevent stow ownership conflicts.
+  # Detect multiple unique dotfiles clones to prevent configuration ownership conflicts.
   local canonical_paths=""
   local unique_count=0
   local candidate canonical

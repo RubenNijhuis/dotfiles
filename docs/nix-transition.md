@@ -11,25 +11,29 @@ core in `nix/profiles/core.nix`, then imports only the capabilities it needs:
 
 | Capability | Scope | Contents |
 | --- | --- | --- |
-| `developer` | macOS, Linux, WSL | Node LTS, pnpm, GitHub CLI, formatting and measurement tools |
-| `rust`, `python`, `go` | macOS, Linux, WSL | Opt-in language environments, selected only by an active project |
+| `developer` | macOS, Linux, WSL | Nix maintenance, Node LTS, pnpm, GitHub CLI, shared formatters, and the small tooling this repository runs |
 | `writing` | macOS, Linux, WSL | Typst, Pandoc, Vale, LanguageTool |
 | `design` | macOS, Linux, WSL | image and SVG optimization tools; native apps stay platform-specific |
 | `media` | macOS, Linux, WSL | FFmpeg, SoX, yt-dlp |
 | `gaming` | Linux desktop only | Heroic, MangoHud, Prism Launcher; host owns GPU/Steam setup |
 
-The shared core is Git, search/preview, terminal/navigation, and development.
-The MacBook is the primary device and imports that core. The
-Windows desktop's WSL peer imports the same core; add `writing`, `design`, or
-`media` only when that capability is genuinely needed there. The Linux desktop
-adds the separate `gaming` capability. The Mac keeps its occasional gaming
-launcher as a narrow, opt-in Homebrew exception; WSL has no GUI games.
+Language runtimes do not have global capability modules: an active repository
+gets its own pinned `devShell`. The shared core is Git, search/preview, and
+terminal/navigation; `developer` is the small portable maintenance layer.
+[`templates/nix-project/`](../templates/nix-project/) is the minimal starting
+point for a Node project that needs one.
+The MacBook and Linux desktop also import `writing`. The Windows desktop's WSL
+peer imports only the command-line base and developer layers; its browser,
+mail, notes, and gaming applications remain native Windows applications. Add
+`design` or `media` only when that machine genuinely serves the discipline.
+The Linux desktop adds the separate `gaming` capability. The Mac keeps its
+occasional gaming launcher as a narrow, opt-in Homebrew exception.
 
 | Device role | Nix target | Deliberate difference |
 | --- | --- | --- |
-| Primary Mac | `Rubens-MacBook-Pro` | stable core; optional discipline profiles only when used |
-| Windows desktop / WSL | `rubennijhuis-windows-wsl` | same core; Windows-native GUI and games remain outside WSL |
-| Linux desktop | `rubennijhuis-linux-desktop` | core plus Linux-only gaming |
+| Primary Mac | `Rubens-MacBook-Pro` | desktop core, developer, browser, writing, and macOS apps |
+| Windows desktop / WSL | `rubennijhuis-windows-wsl` | command-line core and developer only; native Windows GUI and games stay outside WSL |
+| Linux desktop | `rubennijhuis-linux-desktop` | desktop core, developer, browser, writing, and Linux-only gaming |
 
 The corresponding native application decisions live in the
 [application catalog](application-catalog.md). It defines a portable

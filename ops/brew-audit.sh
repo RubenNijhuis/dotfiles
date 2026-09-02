@@ -141,7 +141,7 @@ TOTAL_MISSING_STRICT=$(( $(count_lines "$MISSING_TAPS") + $(count_lines "$MISSIN
 
 if [[ $TOTAL_UNDECLARED -gt 0 ]]; then
   print_warning "$TOTAL_UNDECLARED packages installed but not in Brewfiles"
-  print_dim "  Review Nix first; make brew-sync only adds formulae and taps"
+  print_dim "  Review Nix first; add only genuine macOS exceptions to a named Brewfile"
 fi
 
 if [[ $TOTAL_MISSING -gt 0 ]]; then
@@ -154,6 +154,6 @@ if [[ $TOTAL_UNDECLARED -eq 0 ]] && [[ $TOTAL_MISSING -eq 0 ]]; then
 fi
 
 if $CHECK_MODE && { [[ $TOTAL_UNDECLARED_STRICT -gt 0 ]] || [[ $TOTAL_MISSING_STRICT -gt 0 ]]; }; then
-  notify "Brew Audit" "Brewfile drift detected — run make brew-sync"
+  notify "Brew Audit" "Brewfile drift detected — review the named exceptions"
   exit 1
 fi

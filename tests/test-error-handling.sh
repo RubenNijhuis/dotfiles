@@ -91,8 +91,8 @@ test_validate_launchd_malformed() {
 # ── health/doctor.sh section filtering exits cleanly ───────────────
 
 test_doctor_section_exit_code() {
-  assert_exit "doctor-section-stow" 0 \
-    bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
+  assert_exit "doctor-section-chezmoi" 0 \
+    bash "$ROOT_DIR/health/doctor.sh" --no-color --section chezmoi
 }
 
 # ── Run all tests ───────────────────────────────────────────────────

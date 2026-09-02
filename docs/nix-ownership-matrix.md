@@ -22,7 +22,7 @@ Home Manager:
 - macOS defaults that `nix-darwin` supports: Finder, Dock, keyboard,
   trackpad, screen-capture defaults, and screen-lock policy.
 - Portable program configuration once migrated one at a time: Git, Starship,
-  Bat, ripgrep, direnv, zoxide, fzf, tmux, Yazi, Atuin, Neovim, and Ghostty.
+  Bat, ripgrep, direnv, zoxide, fzf, tmux, Yazi, Atuin, and Neovim.
 - Non-secret editor settings and extensions, through a raw configuration file
   initially where Home Manager has no useful native module.
 
@@ -49,7 +49,7 @@ application's schema.
 | Shell startup environment | Home Manager Zsh/Bash and session modules | active; legacy ChezMoi sources were removed after the handoff, while private `.pre-nix` backups remain outside Git |
 | `dot_config/spicetify/` | app-specific opt-in configuration | retain outside the core profile while Spotify theming is retained |
 | `private_dot_ssh/`, `private_dot_gnupg/`, `local.sh.tmpl` | encrypted/local only | explicitly excluded from Nix |
-| macOS defaults | `nix/darwin/defaults.nix` | active; the narrow ChezMoi script keeps only opt-in local Dock placement and Library visibility |
+| macOS defaults | `nix/darwin/defaults.nix` | active; no competing ChezMoi default script remains |
 
 ## Kept outside Nix
 
@@ -71,8 +71,8 @@ The following are intentionally local or encrypted, never plain Nix source:
 
 1. Activate the minimal darwin/Home Manager configuration successfully.
 2. Keep `nix/darwin/defaults.nix` as the sole owner for supported macOS
-   preferences; retain only the narrow ChezMoi script for settings Nix cannot
-   model cleanly.
+   preferences; keep unsupported personal choices local rather than adding a
+   competing default script.
 3. Move one coherent configuration profile at a time from chezmoi to Home
    Manager, verify its target, then stop managing that same target through
    chezmoi.

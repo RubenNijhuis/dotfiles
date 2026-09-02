@@ -1,10 +1,10 @@
-.PHONY: help install update apply diff macos ssh-setup gpg-setup \
-	backup brew-sync brew-audit \
+.PHONY: help install update apply diff ssh-setup gpg-setup \
+	backup brew-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
-	hooks format vscode-setup keychain-check automation-setup remove-bloatware \
-	lint-shell test-scripts maint-check bootstrap-verify docs-sync docs-regen \
+	hooks format vscode-setup keychain-check automation-setup \
+	lint-shell test-scripts maint-check bootstrap-verify \
 	automation-list launchd-install-all launchd-uninstall-all launchd-status \
-	clean clean-all restore launchd-check \
+	clean restore launchd-check \
 	help-setup help-brew help-launchd help-test cheat \
 	profile-list profile-show profile-set nix-check nix-check-all nix-build nix-switch nix-home-switch \
 	nix-fmt nix-adopt files-init
@@ -45,10 +45,6 @@ apply: ## Apply the remaining transition-owned ChezMoi paths
 diff: ## Preview pending transition-owned ChezMoi changes
 	@chezmoi diff
 
-macos: ## Force-rerun the remaining transition macOS script
-	@chezmoi state delete-bucket --bucket scriptState >/dev/null 2>&1 || true
-	@chezmoi apply --include scripts
-
 # ── Health & Status ──────────────────────────────────────────────────
 
 doctor: ## Quick health + automation dashboard (use --full for deep checks)
@@ -87,9 +83,6 @@ profile-set: ## Set the active machine profile (usage: make profile-set PROFILE=
 files-init: ## Create the portable personal file structure (never moves files)
 	@bash $(DOTFILES)/setup/create-files-root.sh
 
-remove-bloatware: ## Remove common macOS built-in apps
-	@bash $(DOTFILES)/setup/remove-bloatware.sh
-
 # ── Backup ───────────────────────────────────────────────────────────
 
 backup: ## Backup current dotfiles before modifications
@@ -99,9 +92,6 @@ restore: ## Restore from latest backup
 	@bash $(DOTFILES)/ops/restore-backup.sh
 
 # ── Brew ─────────────────────────────────────────────────────────────
-
-brew-sync: ## Sync manually installed packages to Brewfiles
-	@bash $(DOTFILES)/ops/sync-brew.sh
 
 brew-audit: ## Audit Brewfiles for missing or undeclared packages
 	@bash $(DOTFILES)/ops/brew-audit.sh
@@ -123,16 +113,8 @@ format: ## Format all files
 clean: ## Remove zsh caches, log files, and .DS_Stores in repo
 	@bash $(DOTFILES)/ops/clean.sh
 
-clean-all: ## Full clean: backups, Homebrew cache, and everything from 'clean'
-	@bash $(DOTFILES)/ops/clean-all.sh
-
 maint-check: ## Run maintenance validation checks in parallel
 	@bash $(DOTFILES)/ops/maint-check.sh
-
-docs-regen: ## Regenerate CLI reference documentation (idempotent — file is gitignored)
-	@bash $(DOTFILES)/ops/generate-cli-reference.sh
-
-docs-sync: docs-regen ## Alias for docs-regen (kept for backwards compatibility)
 
 # ── Nix (cross-platform foundation) ─────────────────────────────────
 

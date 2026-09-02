@@ -29,7 +29,7 @@ Options:
   --help, -h          Show this help message
 
 Sections (with --full --section):
-  stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
+  chezmoi, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
   backup, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
@@ -55,12 +55,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    stow|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
+    chezmoi|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: stow, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: chezmoi, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -241,7 +241,7 @@ run_checks() {
   [[ -z "${DOCTOR_KEEP_TMP:-}" ]] && trap 'rm -rf "${_doctor_tmp:-}"' EXIT
 
   local core=() system=() tools=()
-  should_run stow      && core+=(check_stow)
+  should_run chezmoi   && core+=(check_chezmoi)
   should_run ssh       && core+=(check_ssh)
   should_run gpg       && core+=(check_gpg)
   should_run git       && core+=(check_git)
@@ -313,11 +313,11 @@ print_summary() {
 }
 
 # ── Status mode ──────────────────────────────────────────────────────
-# Quick actionable summary: doctor health, stow, launchd, backup, docs.
+# Quick actionable summary: doctor health, ChezMoi, launchd, and backups.
 
-status_check_stow() {
-  # Compatibility name retained for the quick-status pipeline. Count only
-  # active ChezMoi targets; stale status rows can describe Nix-owned handoffs.
+status_check_chezmoi() {
+  # Count only active ChezMoi targets; stale status rows can describe Nix-owned
+  # handoffs.
   if ! command -v chezmoi >/dev/null 2>&1; then
     print_status_row "chezmoi" error "not installed"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
@@ -385,16 +385,6 @@ status_check_backup() {
     print_status_row "Backup" ok "${age_days}d ago"
   else
     print_status_row "Backup" warn "${age_days}d ago (stale)"
-    STATUS_ISSUES=$((STATUS_ISSUES + 1))
-  fi
-}
-
-status_check_docs() {
-  local ref="$DOTFILES/docs/reference/cli.md"
-  if [[ -f "$ref" ]]; then
-    print_status_row "Docs" ok "CLI reference present"
-  else
-    print_status_row "Docs" warn "CLI reference missing — run: make docs-regen"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -491,10 +481,9 @@ run_quick() {
 
   STATUS_ISSUES=0
   print_section "Today"
-  status_check_stow
+  status_check_chezmoi
   status_check_launchd
   status_check_backup
-  status_check_docs
 
   print_section "Summary"
   if [[ $STATUS_ISSUES -eq 0 ]]; then

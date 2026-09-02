@@ -13,7 +13,9 @@ for operating-system settings and desktop automation.
 
 ## Session Management
 
-tmux is the session manager. Ghostty handles terminal windowing; tmux handles session persistence, pane splits, and remote workflows. The tmux config uses Tokyo Night theming consistent with the rest of the stack.
+tmux is the session manager. The selected terminal application handles
+windowing; tmux handles session persistence, pane splits, and remote workflows.
+The tmux config uses Tokyo Night theming consistent with the rest of the stack.
 
 ## Python
 
@@ -28,7 +30,7 @@ uv is the Python package and project manager. It also manages Python versions (`
 3. Use `chezmoi apply` only for a path still marked transition-owned in the
    [ownership matrix](nix-ownership-matrix.md).
 4. Operate machine workflows via launchd (`make *-setup`, `make doctor --automation`).
-5. Maintain with `make update`, `make maint-check`, and `make docs-sync`.
+5. Maintain with `make update` and `make maint-check`.
    The standard update refreshes flake inputs then checks and builds Nix without
    switching. Use `make update ARGS=--exceptions` only for explicitly selected
    macOS package exceptions.
@@ -107,6 +109,6 @@ Install/uninstall/status is handled only via `ops/automation/launchd-manager.sh`
 1. Define scope and owner in docs.
 2. Add/extend script with contract-compliant CLI flags.
 3. Add tests under `tests/` for parsing and behavior.
-4. Update or generate docs (`bash ops/generate-cli-reference.sh` + `make docs-sync`).
+4. Update the relevant hand-written documentation when a user-facing workflow changes.
 5. For automation: add launchd template + manager compatibility + the doctor automation dashboard (`make doctor --automation`).
 6. Validate with `make maint-check` and `make bootstrap-verify`.

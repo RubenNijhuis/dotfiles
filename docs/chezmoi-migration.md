@@ -24,10 +24,6 @@ sourceDir = "~/Developer/personal/dotfiles/chezmoi"
   application-managed `.git` directory into chezmoi.
 - **`private_` prefix on a directory sets 0700.** Used for `.ssh/` and
   `.gnupg/`. On a file: 0600. Chezmoi enforces these on every apply.
-- **Library paths under `~/Library/...` need no encoding.** "Library"
-  doesn't start with a dot, so it nests inside `chezmoi/Library/...`
-  directly. The remaining Ghostty source uses this layout; VS Code is now
-  owned by Home Manager.
 
 ## Templates + machine-local data
 

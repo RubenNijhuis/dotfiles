@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Nix-first bootstrap script for a fresh Mac.
-# Usage: git clone https://github.com/<user>/dotfiles.git ~/dotfiles && cd ~/dotfiles && ./install.sh
+# Usage: git clone https://github.com/<user>/dotfiles.git ~/Developer/personal/dotfiles && cd ~/Developer/personal/dotfiles && ./install.sh
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"

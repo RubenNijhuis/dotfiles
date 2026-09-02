@@ -19,11 +19,10 @@ Runs on staged files only:
 
 ## pre-push
 
-1. Brewfile drift check (warning only)
-2. Generated docs sync — blocks push if stale
-3. Untracked shell scripts warning
-4. Large file detection (>1MB) — blocks push
-5. Branch status — blocks push to main with failures
+1. Homebrew exception drift check (warning only)
+2. Untracked shell scripts warning
+3. Large file detection (>1MB) — blocks push
+4. Branch status — blocks push to main with failures
 
 ## Bypass
 

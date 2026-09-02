@@ -14,8 +14,8 @@
 
 ```bash
 make doctor --automation
-~/dotfiles/ops/automation/launchd-manager.sh status
-~/dotfiles/ops/automation/launchd-manager.sh restart <agent>
+make launchd-status
+bash ops/automation/launchd-manager.sh restart <agent>
 ```
 
 ## Config Drift

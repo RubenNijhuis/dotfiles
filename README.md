@@ -84,7 +84,6 @@ make doctor           # full health checks
 make doctor --automation       # consolidated automation + ops status
 make update           # refresh flake inputs, check, and build without switching
 make maint-check      # lint + script tests
-make docs-sync        # fail if generated CLI docs are stale
 ```
 
 ## Documentation
@@ -93,7 +92,6 @@ make docs-sync        # fail if generated CLI docs are stale
 - Everyday assistant and application preferences: `docs/personal-application-policy.md`
 - Machine profiles: `docs/machine-profiles.md`
 - Runbooks: `docs/runbooks/`
-- Generated command reference: `docs/reference/cli.md`
 - Launchd templates and contracts: `launchd/README.md`
 
 ## Core Layout

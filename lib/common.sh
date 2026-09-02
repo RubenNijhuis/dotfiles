@@ -175,8 +175,8 @@ run_automation() {
 confirm() {
   local prompt="$1"
   local default="${2:-N}"
-  # Prefer `gum confirm` for a proper TUI (already in Brewfile.cli); fall back
-  # to plain `read` on non-TTY or when gum is missing (e.g. fresh bootstrap).
+  # Prefer `gum confirm` for a proper TUI when Nix has installed it; fall back
+  # to plain `read` on non-TTY or during a fresh bootstrap.
   if command -v gum >/dev/null 2>&1 && [[ -t 0 && -t 1 ]]; then
     if [[ "$default" =~ ^[Yy]$ ]]; then
       gum confirm --default=true "$prompt"

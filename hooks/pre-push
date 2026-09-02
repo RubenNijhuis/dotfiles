@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-push hook: validates repository health before pushing.
-# Checks run in parallel; brew drift offers interactive auto-fix on a TTY.
+# Checks run in parallel; Homebrew exceptions are review-only.
 
 set -euo pipefail
 
@@ -24,7 +24,7 @@ write_result() {
   printf '%s\n' "$msg"    > "$TMP/$name.msg"
 }
 
-# ── Check: Brewfile sync ─────────────────────────────────────────────
+# ── Check: Homebrew exceptions ───────────────────────────────────────
 check_brew() {
   if ! command -v brew >/dev/null 2>&1; then
     write_result brew ok "brew not installed — skipped"
@@ -33,9 +33,9 @@ check_brew() {
   local audit="$DOTFILES/ops/brew-audit.sh"
   [[ -x "$audit" ]] || { write_result brew ok "brew-audit not available — skipped"; return; }
   if "$audit" --check >/dev/null 2>&1; then
-    write_result brew ok "Brewfiles in sync"
+    write_result brew ok "Homebrew exceptions in sync"
   else
-    write_result brew warn "Brewfiles out of sync"
+    write_result brew warn "Homebrew exceptions need review"
   fi
 }
 
@@ -80,7 +80,6 @@ parallel_wait
 
 # ── Report results ───────────────────────────────────────────────────
 FAILED=0
-BREW_DRIFT=false
 
 report() {
   local name="$1" label="$2"
@@ -95,8 +94,7 @@ report() {
   esac
 }
 
-report brew      "Brewfile sync"
-[[ "$(cat "$TMP/brew.status" 2>/dev/null)" == "warn" ]] && BREW_DRIFT=true
+report brew      "Homebrew exceptions"
 
 report untracked "Untracked shell scripts"
 [[ -f "$TMP/untracked.list" ]] && while IFS= read -r f; do printf '  '; print_dim "$f"; done < "$TMP/untracked.list"
@@ -105,35 +103,6 @@ report large     "Large files"
 [[ -f "$TMP/large.list" ]] && while IFS= read -r f; do printf '  '; print_error "$f"; done < "$TMP/large.list"
 
 printf '\n'
-
-# ── Interactive auto-fix for brew drift ──────────────────────────────
-if $BREW_DRIFT && [[ -t 0 && -t 1 ]]; then
-  printf 'Auto-fix Brewfile drift now? [y/N] '
-  read -r response < /dev/tty || response=""
-  case "$response" in
-    [yY]|[yY][eE][sS])
-      printf '\n'
-      if bash "$DOTFILES/ops/sync-brew.sh" --auto; then
-        if [[ -n "$(git -C "$DOTFILES" status --porcelain brew/)" ]]; then
-          print_warning "Brewfiles updated — stage and amend, or commit before pushing"
-          FAILED=1
-        else
-          print_success "No changes after auto-sync"
-        fi
-      else
-        print_error "Auto-sync failed"
-        FAILED=1
-      fi
-      ;;
-    *)
-      print_dim "Skipped — run: make brew-sync"
-      ;;
-  esac
-  printf '\n'
-elif $BREW_DRIFT; then
-  print_dim "Run: bash ops/sync-brew.sh --auto"
-  printf '\n'
-fi
 
 # ── Branch status ────────────────────────────────────────────────────
 print_section "Branch status"

@@ -5,17 +5,21 @@
   # project; this is only the portable tooling used to maintain Nix and
   # JavaScript projects across macOS, Linux, and WSL.
   home.packages = with pkgs; [
-    nixfmt
-    statix
-    deadnix
-    nil
-    nixd
-    nodejs_24
-    pnpm
-    gh
     biome
+    deadnix
     dust
+    gh
+    gum
     hyperfine
     jujutsu
+    nil
+    nixd
+    nixfmt
+    nodejs_24
+    parallel
+    pnpm
+    prettier
+    shellharden
+    statix
   ];
 }

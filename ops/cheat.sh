@@ -60,10 +60,10 @@ row "fe"              "fzf-pick a file, open in \$EDITOR"
 row "proj"            "fzf-pick a project under ~/Developer, open in \$EDITOR"
 
 section "Dotfiles shortcuts (from anywhere)"
-row "dot"             "cd into ~/dotfiles"
+row "dot"             "cd into the dotfiles repository"
 row "dots"            "make doctor — health + automation dashboard"
 row "dotd"            "make doctor — full health check"
-row "dotu"            "make update — sync repos / brew / runtimes / chezmoi"
+row "dotu"            "make update — refresh repos and verify Nix"
 row "doth"            "make help"
 row "dotc"            "make cheat — this page"
 

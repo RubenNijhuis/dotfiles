@@ -46,12 +46,24 @@
           inherit system;
           config.allowUnfree = true;
         };
+      # Keep host composition static and reviewable. The shell-based machine
+      # profile selects automations only; it never changes reproducible Nix
+      # imports at evaluation time.
+      baseHomeModules = [
+        ./nix/home/common.nix
+        ./nix/profiles/core.nix
+      ];
+      developerHomeModules = baseHomeModules ++ [ ./nix/profiles/developer.nix ];
+      desktopHomeModules = developerHomeModules ++ [
+        ./nix/profiles/browser.nix
+        ./nix/profiles/desktop-core.nix
+      ];
       mkHome =
-        system: extraModules:
+        system: modules:
         home-manager.lib.homeManagerConfiguration {
           pkgs = pkgsFor system;
           extraSpecialArgs = { inherit inputs username; };
-          modules = [ ./nix/home/common.nix ] ++ extraModules;
+          inherit modules;
         };
     in
     {
@@ -66,14 +78,9 @@
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = { inherit inputs username; };
             home-manager.users.${username} = {
-              imports = [
-                ./nix/home/common.nix
-                ./nix/profiles/core.nix
-                ./nix/profiles/developer.nix
-                ./nix/profiles/browser.nix
-                ./nix/profiles/desktop-core.nix
+              imports = desktopHomeModules ++ [
                 ./nix/profiles/macos-apps.nix
-                ./nix/profiles/sync.nix
+                ./nix/profiles/writing.nix
               ];
             };
           }
@@ -81,23 +88,20 @@
       };
 
       homeConfigurations = {
-        rubennijhuis-windows-wsl = mkHome "x86_64-linux" [
-          ./nix/profiles/core.nix
-          ./nix/profiles/developer.nix
-          ./nix/profiles/browser.nix
-        ];
-        rubennijhuis-linux-desktop = mkHome "x86_64-linux" [
-          ./nix/profiles/core.nix
-          ./nix/profiles/developer.nix
-          ./nix/profiles/browser.nix
-          ./nix/profiles/desktop-core.nix
-          ./nix/profiles/gaming.nix
-          ./nix/profiles/sync.nix
-        ];
-        rubennijhuis-linux-aarch64 = mkHome "aarch64-linux" [
-          ./nix/profiles/core.nix
-          ./nix/profiles/browser.nix
-        ];
+        rubennijhuis-windows-wsl = mkHome "x86_64-linux" developerHomeModules;
+        rubennijhuis-linux-desktop = mkHome "x86_64-linux" (
+          desktopHomeModules
+          ++ [
+            ./nix/profiles/writing.nix
+            ./nix/profiles/gaming.nix
+          ]
+        );
+        rubennijhuis-linux-aarch64 = mkHome "aarch64-linux" (
+          baseHomeModules
+          ++ [
+            ./nix/profiles/browser.nix
+          ]
+        );
       };
 
       packages = forAllSystems (system: {

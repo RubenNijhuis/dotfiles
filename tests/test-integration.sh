@@ -39,28 +39,6 @@ test_clean_dry_run_safe() {
   rm -rf "$temp_home"
 }
 
-# ── clean-all.sh --dry-run is non-destructive ──────────────────────
-
-test_clean_all_dry_run_safe() {
-  local temp_home
-  temp_home="$(make_temp_home)"
-  trap 'rm -rf "$temp_home"' RETURN
-
-  # Create fake backup directories matching real backup path pattern
-  mkdir -p "$temp_home/.dotfiles-backup/20240101-120000"
-  echo "data" > "$temp_home/.dotfiles-backup/20240101-120000/file.txt"
-
-  HOME="$temp_home" bash "$ROOT_DIR/ops/clean-all.sh" --no-color --dry-run >/dev/null 2>&1
-
-  if [[ ! -d "$temp_home/.dotfiles-backup/20240101-120000" ]]; then
-    print_error "FAIL(clean-all-dry-run): backup dir was deleted"
-    TEST_FAILURES=$((TEST_FAILURES + 1))
-  fi
-
-  trap - RETURN
-  rm -rf "$temp_home"
-}
-
 # ── restore-backup.sh --dry-run is non-destructive ─────────────────
 
 test_restore_dry_run_safe() {
@@ -91,7 +69,7 @@ test_restore_dry_run_safe() {
   rm -rf "$temp_home"
 }
 
-# ── chezmoi apply then doctor --section stow (chezmoi check) ────────────
+# ── chezmoi apply then doctor --section chezmoi ──────────────────────────
 
 test_chezmoi_then_doctor() {
   if ! command -v chezmoi >/dev/null 2>&1; then
@@ -120,7 +98,7 @@ EOF
       --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
 
   assert_exit "chezmoi-then-doctor-exit" 0 \
-    env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section stow
+    env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section chezmoi
 
   trap - RETURN
   rm -rf "$temp_home" "$temp_cfg"
@@ -175,7 +153,6 @@ EOF
 # ── Run all tests ───────────────────────────────────────────────────
 
 test_clean_dry_run_safe
-test_clean_all_dry_run_safe
 test_restore_dry_run_safe
 test_chezmoi_then_doctor
 test_ops_status_uses_doctor_task_log

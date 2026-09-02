@@ -6,15 +6,15 @@ Canonical launchd automation contract for this repository.
 
 ```bash
 # Show available agents
-~/dotfiles/ops/automation/launchd-manager.sh list
+make automation-list
 
 # Install all managed agents
-~/dotfiles/ops/automation/launchd-manager.sh install-all
+make launchd-install-all
 
 # Install one agent
 
 # Show loaded status
-~/dotfiles/ops/automation/launchd-manager.sh status
+make launchd-status
 
 # Restart or remove one agent
 ```
@@ -40,7 +40,7 @@ Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
 4. Follow the contract below.
 4. Install with manager:
 ```bash
-~/dotfiles/ops/automation/launchd-manager.sh install <task-name>
+bash ops/automation/launchd-manager.sh install <task-name>
 ```
 5. Verify:
 ```bash

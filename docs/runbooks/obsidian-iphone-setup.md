@@ -1,6 +1,11 @@
-# Runbook: cross-platform Obsidian without Obsidian Sync
+# Archived proposal: Obsidian via Nextcloud/WebDAV
 
-## Decision
+> **Status: not adopted.** The active decision record is
+> [File-sync options](../file-sync-options.md); cross-device sync is parked.
+> Do not create a Nextcloud account, install a sync plugin, or move the live
+> vault based on this proposal until that decision is explicitly resumed.
+
+## Proposed design
 
 Use one local Markdown vault on every device. The current iCloud-backed vault
 is source material only; it is not the long-term sync mechanism because iCloud

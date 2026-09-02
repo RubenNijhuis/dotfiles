@@ -30,7 +30,7 @@ valuable enough to maintain.
 | Calendar | **Google Calendar as the temporary operational source; Apple Calendar on Apple devices and Thunderbird elsewhere** | Google supplies the currently available ChatGPT calendar connection; Apple Calendar supplies native Apple notifications, while Thunderbird and the web cover Windows and Linux. | Keep calendars in separate named collections, use standard invitations and `.ics` exports, and review an optional CalDAV/Nextcloud pilot before treating Google as permanent. |
 | Passwords | **KeePassXC + a KDBX vault** | Free/open-source desktop client for Windows, macOS, and Linux; the encrypted vault is a portable file rather than an account silo. | Store the KDBX vault in an encrypted, backed-up sync location; use a compatible mobile client, never this repository. |
 | Notes | **Obsidian with a Markdown vault** | The vault is plain local files and Obsidian works on macOS, Linux, Windows, iPhone, and iPad. | Keep the desktop vault under `~/Files`; use one future WebDAV/Nextcloud endpoint for cross-platform replication, never multiple sync services. |
-| Terminal | cmux on this Mac; Ghostty on macOS/Linux or Windows Terminal on Windows when chosen | The shell, prompt, Git, and editor remain the portable experience; terminal emulators are host-specific. | Nix owns the shared shell configuration. |
+| Terminal | cmux on this Mac; a native terminal selected per other device | The shell, prompt, Git, and editor remain the portable experience; terminal emulators are host-specific. | Nix owns the shared shell configuration. |
 | Editor | **VS Code** now; evaluate VSCodium later | VS Code is the smooth current GUI editor path; Neovim remains the portable terminal editor. VSCodium is worthwhile only if the required extension/debugging workflow remains intact. | Keep extensions small and project-relevant; do not copy editor profile databases between devices. |
 | Fonts | **Open Sans + Fira Code Nerd Font** | One readable proportional face for mail and documents, plus one coding face with terminal glyphs. | Nix declares both; applications may choose them but no application database is synchronized. |
 
@@ -110,7 +110,7 @@ to remain lean on the MacBook.
 
 | Capability | Portable command-line layer | Native apps, installed only where needed | Intended hosts |
 | --- | --- | --- | --- |
-| Development | Nix `development` | VS Code, Podman/Docker only when needed, DBeaver | MacBook, Linux desktop, WSL |
+| Development | Nix `developer` | VS Code, Podman/Docker only when needed, DBeaver | MacBook, Linux desktop, WSL |
 | Writing | Nix `writing` | Zen, Thunderbird, Markdown/Obsidian | Every personal computer |
 | Design | Nix `design`: asset tools; Krita and RawTherapee are Nix-managed on Linux and a documented Apple-Silicon Homebrew exception | Inkscape, GIMP, Blender | Machines used for visual work |
 | Audio & video | Nix `media`: portable media tools; HandBrake is a temporary documented macOS Homebrew exception while its pinned Nix package is broken | DaVinci Resolve, Kdenlive, Audacity, VLC | MacBook or desktop that actually handles media |

@@ -13,8 +13,8 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Run all maintenance validation checks (lint, tests, contracts, docs, and brew)
-in parallel and exit non-zero if any check fails.
+Run all maintenance validation checks (lint, tests, contracts, and Homebrew
+exceptions) in parallel and exit non-zero if any check fails.
 EOF
 }
 
@@ -33,7 +33,6 @@ STEPS=(
   "lint-shell|bash $DOTFILES/ops/lint-shell.sh"
   "test-scripts|bash $DOTFILES/tests/run-parallel.sh"
   "launchd-check|bash $DOTFILES/health/check-launchd-contracts.sh"
-  "docs-regen|bash $DOTFILES/ops/generate-cli-reference.sh"
   "brew-audit|bash $DOTFILES/ops/brew-audit.sh"
 )
 
