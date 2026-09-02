@@ -27,12 +27,6 @@ fi
 unsetopt EXTENDEDGLOB
 unset zcompdump_dir
 
-# fzf-tab: replaces menu-select with FZF fuzzy picker for completions.
-# Must be sourced after compinit and before any zstyle ':fzf-tab:*' rules.
-if [[ -f "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh" ]]; then
-  source "${XDG_DATA_HOME:-$HOME/.local/share}/zsh/plugins/fzf-tab/fzf-tab.plugin.zsh"
-fi
-
 # ----- Completion UI -----
 zmodload zsh/complist
 zstyle ':completion:*' menu select
@@ -51,14 +45,6 @@ fi
 # Keep `cd` completion focused on local/named directories, not broad path sources.
 zstyle ':completion:*:*:cd:*' tag-order local-directories directory-stack named-directories
 zstyle ':completion:*:*:cd:*' list-colors 'di=1;36'
-
-# ----- fzf-tab config -----
-# Inherit Tokyo Night colors from FZF_DEFAULT_OPTS; set layout and border.
-zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border --select-1 --exit-0
-# Use < and > to switch between completion groups (e.g. files vs commands).
-zstyle ':fzf-tab:*' switch-group '<' '>'
-# Preview directory contents with eza when completing cd.
-zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --icons --color=always $realpath 2>/dev/null'
 
 # ----- History -----
 HISTFILE=~/.zsh_history
