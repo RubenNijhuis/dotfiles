@@ -69,6 +69,7 @@
               imports = [
                 ./nix/home/common.nix
                 ./nix/profiles/core.nix
+                ./nix/profiles/developer.nix
                 ./nix/profiles/browser.nix
                 ./nix/profiles/desktop-core.nix
                 ./nix/profiles/macos-apps.nix
@@ -84,10 +85,12 @@
       homeConfigurations = {
         rubennijhuis-windows-wsl = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
+          ./nix/profiles/developer.nix
           ./nix/profiles/browser.nix
         ];
         rubennijhuis-linux-desktop = mkHome "x86_64-linux" [
           ./nix/profiles/core.nix
+          ./nix/profiles/developer.nix
           ./nix/profiles/browser.nix
           ./nix/profiles/desktop-core.nix
           ./nix/profiles/gaming.nix

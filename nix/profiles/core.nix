@@ -7,7 +7,5 @@
     ../home/editors.nix
     ../home/navigation.nix
     ../home/shell-modules.nix
-    ./development.nix
-    ./javascript.nix
   ];
 }
