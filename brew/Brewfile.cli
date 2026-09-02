@@ -1,8 +1,8 @@
 # =============================================================================
-# CLI Brewfile - Command-line tools
+# Homebrew CLI exceptions
 # =============================================================================
-# Specialist macOS apps remain in Brewfile.apps as a legacy inventory; VS Code
-# extensions are in Brewfile.vscode. New tools belong in Nix when possible.
+# Nix owns portable terminal tooling. Keep only macOS-specific or unreplaced
+# exceptions here; VS Code extensions remain in Brewfile.vscode.
 
 # -----------------------------------------------------------------------------
 # Taps
@@ -13,34 +13,24 @@ tap "steipete/tap"
 tap "yakitrak/yakitrak"
 
 # -----------------------------------------------------------------------------
-# Shell & Terminal
+# Shell and terminal exceptions
 # -----------------------------------------------------------------------------
-brew "zsh-autosuggestions"      # Fish-like autosuggestions
-brew "zsh-syntax-highlighting"  # Syntax highlighting in zsh
-brew "zsh-you-should-use"       # Reminds you of existing aliases
 brew "gum"                       # Interactive terminal UI components
 brew "ghq"                       # Git repository manager for local checkouts
 
 # -----------------------------------------------------------------------------
-# Core CLI Tools
+# CLI exceptions
 # -----------------------------------------------------------------------------
 brew "grc"           # Colorize command output
 brew "tree"          # Directory tree visualization
 brew "parallel"      # GNU parallel for concurrent job execution
-brew "gh"            # GitHub CLI
-brew "jj"            # Git-compatible VCS (jujutsu)
 brew "git-cliff"     # Conventional-commits changelog generator
 brew "difftastic"    # Syntax-aware diff (complements git-delta)
-brew "hyperfine"     # Command-line benchmarking
 # gh-dash: install via `gh extension install dlvhdr/gh-dash` (not in core).
 
-brew "dust"          # Better du (disk usage)
-
 # -----------------------------------------------------------------------------
-# Development Tools
+# Development exceptions
 # -----------------------------------------------------------------------------
-brew "bash"          # Modern bash (macOS ships with old version)
-brew "chezmoi"       # Existing home-config manager during the Nix transition
 brew "shellharden"   # Shell script hardening linter
 brew "tealdeer"      # Fast tldr client for quick command examples
 
