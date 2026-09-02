@@ -33,7 +33,7 @@ Zsh plugins. New profiles should not include this file.
 
 ### Brewfile.apps
 **GUI applications:**
-- Core apps (Claude, VS Code, Chrome, Obsidian, Ghostty)
+- Core apps (VS Code, Chrome, Obsidian, Ghostty)
 - Fonts (Fira Code, Nerd Fonts)
 - Communication (Discord, Signal, Slack, WhatsApp)
 - Media & Entertainment (Spotify, Steam, rekordbox)

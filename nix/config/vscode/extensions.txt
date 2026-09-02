@@ -1,8 +1,5 @@
 # VS Code extensions. Install with `make vscode-setup`.
 
-# AI tools
-anthropic.claude-code
-
 # Code quality and formatting
 biomejs.biome
 editorconfig.editorconfig

@@ -13,8 +13,6 @@ cask "font-symbols-only-nerd-font"  # Standalone Nerd Font icons (fallback)
 # -----------------------------------------------------------------------------
 # Core Applications
 # -----------------------------------------------------------------------------
-cask "claude"               # Claude AI desktop app
-cask "claude-code"          # Claude Code (coding assistant)
 cask "ghostty"              # Fast, feature-rich terminal
 cask "google-chrome"        # Web browser
 cask "lm-studio"            # Local LLM GUI

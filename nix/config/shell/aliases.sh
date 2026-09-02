@@ -74,10 +74,3 @@ if command -v btop >/dev/null 2>&1; then alias top="btop"; fi
 
 # Docker cleanup (OrbStack)
 alias dclean='docker system prune -af --volumes'
-
-# Claude CLI extensions are optional and machine-local. Never create a global
-# shortcut that bypasses Claude's permission prompts.
-_claude_agent="${XDG_CONFIG_HOME:-$HOME/.config}/shell/claude-agent.sh"
-# shellcheck disable=SC1090  # optional machine-local extension
-[[ -f "$_claude_agent" ]] && source "$_claude_agent"
-unset _claude_agent

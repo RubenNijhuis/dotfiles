@@ -4,9 +4,6 @@
 # Source of truth: chezmoi/Library/Application Support/Code/User/extensions.txt
 # This file must stay in sync — run `make vscode-parity` to detect drift.
 
-# AI Tools
-vscode "anthropic.claude-code"               # Claude Code AI coding assistant
-
 # Code Quality & Formatting
 vscode "biomejs.biome"                       # Fast formatter and linter (JS/TS/JSON)
 vscode "editorconfig.editorconfig"           # EditorConfig support
