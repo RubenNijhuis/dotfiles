@@ -4,7 +4,6 @@
 #
 # Provides:
 #   automation_agent_lines           — all manifest rows as "name|description"
-#   automation_default_profile_names — names with in_default_profile=yes
 #   automation_resolve_alias <input> — echoes canonical name (or input)
 #   automation_setup_targets         — all valid setup-automation.sh targets (names + aliases)
 
@@ -30,13 +29,9 @@ automation_agent_lines() {
   _automation_read_manifest | awk -F'|' '{printf "%s|%s\n", $1, $2}'
 }
 
-automation_default_profile_names() {
-  _automation_read_manifest | awk -F'|' '$3 == "yes" {print $1}'
-}
-
 automation_resolve_alias() {
   local input="$1" name alias
-  while IFS='|' read -r name _desc _default alias; do
+  while IFS='|' read -r name _desc alias; do
     [[ -z "$name" ]] && continue
     if [[ -n "$alias" && "$alias" == "$input" ]]; then
       printf '%s\n' "$name"
@@ -48,7 +43,7 @@ automation_resolve_alias() {
 
 automation_setup_targets() {
   local name alias
-  while IFS='|' read -r name _desc _default alias; do
+  while IFS='|' read -r name _desc alias; do
     [[ -z "$name" ]] && continue
     printf '%s\n' "$name"
     [[ -n "$alias" ]] && printf '%s\n' "$alias"

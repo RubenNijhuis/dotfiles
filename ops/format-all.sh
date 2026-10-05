@@ -24,10 +24,10 @@ print_header "Format All"
 # Biome formatting
 if command -v biome &>/dev/null; then
   print_section "Running Biome..."
-  biome check --write "$DOTFILES" 2>&1 | tail -1 || true
+  biome format --write "$DOTFILES"
   print_success "Biome formatting complete"
 else
-  print_warning "Biome not installed — skipping (brew install biome)"
+  print_warning "Biome not installed — enable the Nix developer profile"
 fi
 
 # Ensure shell scripts are executable

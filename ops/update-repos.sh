@@ -179,7 +179,7 @@ update_repo() {
   if [[ "$SKIP_RECENT_SECONDS" -gt 0 && -f "$gd/FETCH_HEAD" ]]; then
     local now fetch_mtime fetch_age
     now=$(date +%s)
-    fetch_mtime=$(stat -f %m "$gd/FETCH_HEAD" 2>/dev/null || echo 0)
+    fetch_mtime=$(file_mtime_epoch "$gd/FETCH_HEAD" 2>/dev/null || echo 0)
     fetch_age=$(( now - fetch_mtime ))
     if [[ $fetch_age -lt $SKIP_RECENT_SECONDS ]]; then
       skip_fetch=true
@@ -374,7 +374,7 @@ curl -sf --max-time 5 --head https://github.com &>/dev/null || { $QUIET || print
 use_cache=false
 if ! $NO_CACHE && [[ -f "$CACHE_FILE" ]]; then
   local_now=$(date +%s)
-  cache_mtime=$(stat -f %m "$CACHE_FILE" 2>/dev/null || echo 0)
+  cache_mtime=$(file_mtime_epoch "$CACHE_FILE" 2>/dev/null || echo 0)
   cache_age=$(( local_now - cache_mtime ))
   if [[ $cache_age -lt $CACHE_TTL ]]; then
     use_cache=true

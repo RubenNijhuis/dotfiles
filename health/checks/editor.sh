@@ -59,24 +59,57 @@ check_neovim() {
     add_suggestion "Apply the editor configuration: make nix-switch"
   fi
 
-  # Check lazy.nvim plugin manager
-  if [[ -d "$HOME/.local/share/nvim/lazy" ]]; then
-    local plugin_count
-    plugin_count=$(find "$HOME/.local/share/nvim/lazy" -maxdepth 1 -mindepth 1 -type d 2>/dev/null | wc -l | xargs)
-    details+="Plugins: $plugin_count installed (lazy.nvim)\n  "
+  local bootstrap
+  bootstrap=$(sed -n 's/^local lazypath = "\(\/nix\/store\/[^" ]*\)"$/\1/p' "$HOME/.config/nvim/init.lua" 2>/dev/null)
+  if [[ -n "$bootstrap" && -d "$bootstrap" ]]; then
+    details+="Plugin manager: Nix-owned\n  "
   else
-    details+="Plugins: lazy.nvim not bootstrapped\n  "
+    details+="Plugin manager: Nix bootstrap missing\n  "
     issues=$((issues + 1))
-    add_suggestion "Open nvim to bootstrap lazy.nvim plugin manager"
+    add_suggestion "Rebuild and activate the editor configuration: make nix-switch"
   fi
 
-  # Check for lazy-lock.json (ensures reproducible installs)
-  if [[ -f "$HOME/.local/state/nvim/lazy-lock.json" ]]; then
-    details+="Lock file: present"
+  local registry="$HOME/.config/nvim/nix-plugins.json"
+  if [[ -f "$registry" ]] && command -v jq >/dev/null 2>&1; then
+    local _name path invalid=0 count=0 parsers
+    while IFS=$'\t' read -r _name path; do
+      count=$((count + 1))
+      if [[ "$path" != /nix/store/* || ! -d "$path" ]]; then
+        invalid=$((invalid + 1))
+      fi
+    done < <(jq -r '.plugins | to_entries[] | [.key, .value] | @tsv' "$registry")
+    parsers=$(jq -r '.parsers' "$registry")
+    if [[ "$count" == 0 || "$parsers" != /nix/store/* || ! -d "$parsers/parser" || ! -d "$parsers/queries" ]]; then
+      invalid=$((invalid + 1))
+    fi
+    details+="Declared plugins: $count Nix-owned; $invalid invalid paths\n  Parsers/queries: $parsers"
+    [[ "$invalid" == 0 ]] || issues=$((issues + 1))
+    record_issue_count_result "Neovim" "$issues" 1 "$details"
+    return
+  fi
+
+  # Legacy generation: a lockfile alone cannot prove mutable checkouts match it.
+  local lock="$HOME/.config/nvim/lazy-lock.json"
+  local plugin_root="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/lazy"
+  local plugin commit actual missing=0 drift=0
+  if command -v jq >/dev/null 2>&1 && jq -e 'type == "object"' "$lock" >/dev/null 2>&1; then
+    while IFS=$'\t' read -r plugin commit; do
+      [[ "$plugin" == lazy.nvim ]] && continue # Nix owns this dependency now.
+      if [[ ! -d "$plugin_root/$plugin" ]]; then
+        missing=$((missing + 1))
+      else
+        actual=$(git -C "$plugin_root/$plugin" rev-parse HEAD 2>/dev/null || true)
+        [[ "$actual" == "$commit" ]] || drift=$((drift + 1))
+      fi
+    done < <(jq -r 'to_entries[] | [.key, .value.commit] | @tsv' "$lock")
+    details+="Plugin graph (still local): $missing missing, $drift differ from declared lock"
+    if [[ "$missing" != 0 || "$drift" != 0 ]]; then
+      issues=$((issues + 1))
+      add_suggestion "Migrate and test the plugin graph; do not blindly sync or delete existing checkouts"
+    fi
   else
-    details+="Lock file: missing"
+    details+="Plugin graph: cannot verify declared lock (requires jq)"
     issues=$((issues + 1))
-    add_suggestion "Run :Lazy sync in nvim to create the local plugin lock"
   fi
 
   record_issue_count_result "Neovim" "$issues" 1 "$details"

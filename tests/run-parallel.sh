@@ -8,6 +8,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/../lib/parallel.sh"
 
 TESTS=(
+  test-git-hooks.sh
+  test-nix-adopt.sh
+  test-spicetify.sh
+  test-neovim.sh
+  test-health-git.sh
+  test-vscode-setup.sh
+  test-terminal-workflow.sh
   test-idempotency.sh
   test-cli-contract.sh
   test-cli-parsing.sh

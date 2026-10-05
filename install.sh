@@ -12,9 +12,6 @@ INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
 CHECKPOINT_FILE="$HOME/.config/dotfiles-install-checkpoint"
 SELF_TEST_CHECKPOINT=false
 
-# Create directories
-mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
-
 # Source shared output helpers (lives in the git clone, always available)
 source "$DOTFILES/lib/output.sh" "$@"
 
@@ -623,7 +620,10 @@ nix_main() {
     exit 0
   fi
 
-  exec > >(tee -a "$INSTALL_LOG") 2>&1
+  if ! $DRY_RUN; then
+    mkdir -p "$(dirname "$INSTALL_LOG")" "$(dirname "$CHECKPOINT_FILE")"
+    exec > >(tee -a "$INSTALL_LOG") 2>&1
+  fi
   trap cleanup_on_error ERR
 
   show_header

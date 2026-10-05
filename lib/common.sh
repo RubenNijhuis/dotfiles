@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Shared utility helpers for dotfiles scripts.
 
-# Require a minimum bash version. macOS ships bash 3.2; Homebrew provides 5+.
+# Require a minimum bash version. macOS ships bash 3.2; Nix supplies modern Bash.
 # Usage: require_bash_version <major> [context]
 require_bash_version() {
   local required="$1"
   local context="${2:-this script}"
   if [[ "${BASH_VERSINFO[0]:-0}" -lt "$required" ]]; then
     echo "Error: $context requires bash $required+ (current: ${BASH_VERSION:-unknown})" >&2
-    echo "Install with: brew install bash" >&2
+    echo "Use the Nix core profile or nix develop .#maintenance" >&2
     exit 1
   fi
 }
@@ -91,7 +91,7 @@ acquire_lock() {
   # Remove stale locks (older than 1 hour)
   if [[ -d "$lock_dir" ]]; then
     local lock_age
-    lock_age=$(( $(date +%s) - $(stat -f %m "$lock_dir" 2>/dev/null || echo 0) ))
+    lock_age=$(( $(date +%s) - $(file_mtime_epoch "$lock_dir" 2>/dev/null || date +%s) ))
     if [[ $lock_age -gt $stale_seconds ]]; then
       rm -rf "$lock_dir"
     fi
@@ -208,8 +208,42 @@ get_preference() {
   printf '%s' "$default"
 }
 
+# Return only the completed snapshot selected by the writer, never a newer
+# directory left behind by a failed run. Reads metadata, not backup contents.
+latest_rollback_dir() {
+  local root="$HOME/.dotfiles-backup" latest
+  [[ -f "$root/latest" && ! -L "$root/latest" && ! -L "$root" ]] || return 1
+  IFS= read -r latest < "$root/latest" || return 1
+  case "$latest" in
+    "$root/"*) ;;
+    *) return 1 ;;
+  esac
+  [[ "${latest#"$root"/}" != */* && "$latest" != */. && "$latest" != */.. \
+    && -d "$latest" && ! -L "$latest" ]] || return 1
+  printf '%s\n' "$latest"
+}
+
+file_mtime_epoch() {
+  # Detect the tool, not the OS: Nix shells also use GNU stat on macOS.
+  stat -c %Y "$1" 2>/dev/null || stat -f %m "$1"
+}
+
+file_mode() {
+  stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"
+}
+
+file_mtime_display() {
+  local mtime_text
+  if mtime_text="$(stat -c %y "$1" 2>/dev/null)"; then
+    printf '%.16s\n' "$mtime_text"
+  else
+    stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$1"
+  fi
+}
+
 # Export functions so they're available in subshells (e.g. GNU parallel).
 export -f require_bash_version has_flag show_help_if_requested
 export -f require_cmd
 export -f log_msg acquire_lock notify require_network
 export -f rotate_logs run_automation confirm get_preference
+export -f latest_rollback_dir file_mtime_epoch file_mode file_mtime_display

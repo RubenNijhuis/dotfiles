@@ -6,39 +6,48 @@ on:
       - main
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   maint-check:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         timeout-minutes: 2
+        with:
+          persist-credentials: false
 
-      - name: Install dependencies
+      - name: Install Nix
+        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31
         timeout-minutes: 10
+        with:
+          github_access_token: ${{ github.token }}
+
+      - name: Check locked Nix configurations and editor
+        timeout-minutes: 20
         run: |
-          brew install bash shellcheck biome shellharden
-          # Surface the new bash 5 before macOS's stock bash 3.2 so doctor.sh
-          # (which requires bash 4+) and tests that exec it succeed.
-          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+          nix flake check --all-systems --no-build --no-write-lock-file
+          nix build .#checks.aarch64-darwin.neovim --no-link --no-write-lock-file
 
       - name: Run maintenance checks
         timeout-minutes: 5
         run: |
-          make maint-check
+          nix develop .#maintenance --no-write-lock-file --command make maint-check
 
       - name: Install dry-run
         timeout-minutes: 5
         run: |
-          bash install.sh --dry-run --yes --without-ssh --without-gpg
+          nix develop .#maintenance --no-write-lock-file --command bash install.sh --dry-run --yes --without-ssh --without-gpg
 
       - name: Lint Python
         timeout-minutes: 2
         run: |
-          python3 -m py_compile lib/validate_launchd.py
+          nix develop .#maintenance --no-write-lock-file --command python3 -m py_compile lib/validate_launchd.py
 
       - name: Biome check
         timeout-minutes: 3
         run: |
-          biome check --no-errors-on-unmatched .
+          nix develop .#maintenance --no-write-lock-file --command biome check --no-errors-on-unmatched .

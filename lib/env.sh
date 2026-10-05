@@ -55,17 +55,8 @@ dotfiles_profile_brewfiles() {
 }
 
 dotfiles_profile_automations() {
+  # Empty is an intentional choice: never expand it into all default jobs.
   local agents="${DOTFILES_PROFILE_AUTOMATIONS:-}"
-  if [[ -z "$agents" ]]; then
-    # Default from manifest (single source of truth).
-    local registry_lib
-    registry_lib="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/automation-registry.sh"
-    if [[ -f "$registry_lib" ]]; then
-      # shellcheck source=/dev/null
-      source "$registry_lib"
-      agents="$(automation_default_profile_names | tr '\n' ' ')"
-    fi
-  fi
   dotfiles_iter_words "$agents"
 }
 
@@ -85,12 +76,9 @@ dotfiles_load_env() {
   export DOTFILES_DEVELOPER_ROOT="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
   export DOTFILES_LMSTUDIO_HOME="${DOTFILES_LMSTUDIO_HOME:-$HOME/.lmstudio}"
   export DOTFILES_EDITOR="${DOTFILES_EDITOR:-nvim}"
-  if [[ ! -d "$DOTFILES_DEVELOPER_ROOT" && -z "${DOTFILES_SKIP_DIR_CHECK:-}" ]]; then
-    mkdir -p "$DOTFILES_DEVELOPER_ROOT"
-  fi
   export DOTFILES_FILES_ROOT="${DOTFILES_FILES_ROOT:-$HOME/Files}"
-  export DOTFILES_OBSIDIAN_VAULT_PATH="${DOTFILES_OBSIDIAN_VAULT_PATH:-$DOTFILES_FILES_ROOT/30 Resources/Knowledge/Ruben Knowledge}"
-  export DOTFILES_SCREENSHOTS_PATH="${DOTFILES_SCREENSHOTS_PATH:-$HOME/Desktop/Screenshots}"
+  export DOTFILES_OBSIDIAN_VAULT_PATH="${DOTFILES_OBSIDIAN_VAULT_PATH:-$DOTFILES_FILES_ROOT}"
+  export DOTFILES_SCREENSHOTS_PATH="${DOTFILES_SCREENSHOTS_PATH:-$DOTFILES_FILES_ROOT/00 Inbox/Screenshots}"
 
   if [[ -z "${DOTFILES_HOMEBREW_PREFIX:-}" ]]; then
     if command -v brew >/dev/null 2>&1; then

@@ -1,4 +1,4 @@
-.PHONY: help install update apply diff ssh-setup gpg-setup \
+.PHONY: help install update ssh-setup gpg-setup gpg-check \
 	backup brew-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup \
@@ -39,12 +39,6 @@ install: ## Install the Nix-first macOS configuration
 update: ## Refresh Nix inputs and verify the configuration
 	@bash $(DOTFILES)/ops/update.sh $(ARGS)
 
-apply: ## Apply the remaining transition-owned ChezMoi paths
-	@chezmoi apply
-
-diff: ## Preview pending transition-owned ChezMoi changes
-	@chezmoi diff
-
 # ── Health & Status ──────────────────────────────────────────────────
 
 doctor: ## Quick health + automation dashboard (use --full for deep checks)
@@ -58,8 +52,11 @@ ssh-setup: ## Generate SSH keys
 gpg-setup: ## Generate GPG key and configure Git signing
 	@bash $(DOTFILES)/setup/generate-gpg-keys.sh
 
+gpg-check: ## Test GPG signing/encryption in a disposable keyring (never real keys)
+	@bash $(DOTFILES)/tests/test-gpg-roundtrip.sh
+
 vscode-setup: ## Install VS Code extensions from extensions.txt
-	@bash $(DOTFILES)/setup/vscode-setup.sh
+	@bash $(DOTFILES)/setup/vscode-setup.sh $(ARGS)
 
 hooks: ## Enable the repository's native Git hooks
 	@git -C $(DOTFILES) config core.hooksPath hooks
@@ -124,10 +121,10 @@ PROFILE ?=
 NIX_HOME_HOST ?=
 
 nix-check: ## Evaluate the cross-platform Nix flake
-	@$(NIX) flake check
+	@$(NIX) flake check --no-build
 
 nix-check-all: ## Evaluate the Nix flake on every declared platform
-	@$(NIX) flake check --all-systems
+	@$(NIX) flake check --all-systems --no-build
 
 nix-build: ## Build the current macOS Nix configuration without switching
 	@$(NIX) build .#darwinConfigurations.$(NIX_DARWIN_HOST).system --no-link
@@ -136,14 +133,11 @@ nix-fmt: ## Format the Nix source using the pinned formatter
 	@$(NIX) fmt
 
 nix-adopt: ## Back up one named configuration profile before its Nix handoff
-	@bash $(DOTFILES)/setup/adopt-nix-configs.sh "$(PROFILE)"
+	@bash $(DOTFILES)/setup/adopt-nix-configs.sh "$(PROFILE)" $(ARGS)
 
 nix-switch: ## Apply the current macOS Nix configuration
-	@if command -v darwin-rebuild >/dev/null 2>&1; then \
-		sudo -H darwin-rebuild switch --flake .#$(NIX_DARWIN_HOST); \
-	else \
-		sudo -H $(NIX) run github:nix-darwin/nix-darwin -- switch --flake .#$(NIX_DARWIN_HOST); \
-	fi
+	@rebuild=$$($(NIX) build .#darwinConfigurations.$(NIX_DARWIN_HOST).config.system.build.darwin-rebuild --no-link --print-out-paths --no-write-lock-file) && \
+		sudo -H "$$rebuild/bin/darwin-rebuild" switch --flake .#$(NIX_DARWIN_HOST) --no-write-lock-file
 
 nix-home-switch: ## Apply a Linux/WSL Home Manager target (NIX_HOME_HOST=<name>)
 	@test -n "$(NIX_HOME_HOST)" || { echo "Usage: make nix-home-switch NIX_HOME_HOST=rubennijhuis-windows-wsl" >&2; exit 2; }

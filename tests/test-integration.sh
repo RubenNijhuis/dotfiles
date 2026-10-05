@@ -69,45 +69,11 @@ test_restore_dry_run_safe() {
   rm -rf "$temp_home"
 }
 
-# ── chezmoi apply then doctor --section chezmoi ──────────────────────────
-
-test_chezmoi_then_doctor() {
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    print_warning "integration(chezmoi-doctor): skipped (chezmoi not installed)"
-    return 0
-  fi
-
-  local temp_home temp_cfg
-  temp_home="$(make_temp_home)"
-  temp_cfg="$(mktemp -d)"
-  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
-
-  # Point chezmoi at this repo's source state, target an isolated HOME,
-  # and stub the template data so local.sh.tmpl can render.
-  cat > "$temp_cfg/chezmoi.toml" <<EOF
-sourceDir = "$ROOT_DIR/chezmoi"
-[data.machine]
-  obsidian_vault_path = "/tmp/obsidian"
-  github_username     = "test"
-[data.secrets]
-  linear_api_key   = "test"
-  nuget_auth_token = "test"
-EOF
-  HOME="$temp_home" \
-    chezmoi apply --include=files,dirs --config "$temp_cfg/chezmoi.toml" \
-      --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null 2>&1
-
-  assert_exit "chezmoi-then-doctor-exit" 0 \
-    env HOME="$temp_home" bash "$ROOT_DIR/health/doctor.sh" --no-color --section chezmoi
-
-  trap - RETURN
-  rm -rf "$temp_home" "$temp_cfg"
-}
 
 # ── ops-status uses the doctor task log, not the launchd wrapper log ───────
 
 test_ops_status_uses_doctor_task_log() {
-  local temp_home temp_bin fake_launchctl output
+  local temp_home temp_bin fake_launchctl output fixture_root
   temp_home="$(make_temp_home)"
   temp_bin="$(make_temp_home)"
   trap 'rm -rf "$temp_home" "$temp_bin"' RETURN
@@ -134,8 +100,19 @@ esac
 EOF
   chmod +x "$fake_launchctl"
 
+  # Select the doctor explicitly in a disposable repository. The real laptop
+  # no longer enables a daily doctor merely to support this test.
+  fixture_root="$temp_bin/repo"
+  mkdir -p "$fixture_root/health" "$fixture_root/ops/automation" \
+    "$fixture_root/lib" "$fixture_root/profiles"
+  cp "$ROOT_DIR/health/doctor.sh" "$fixture_root/health/"
+  cp "$ROOT_DIR/ops/automation/launchd-manager.sh" \
+    "$ROOT_DIR/ops/automation/agents.manifest" "$fixture_root/ops/automation/"
+  cp "$ROOT_DIR"/lib/*.sh "$fixture_root/lib/"
+  printf '%s\n' 'DOTFILES_PROFILE_AUTOMATIONS="dotfiles-doctor"' \
+    > "$fixture_root/profiles/personal-laptop.env"
   output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
-    bash "$ROOT_DIR/health/doctor.sh" --automation --no-color 2>&1)
+    bash "$fixture_root/health/doctor.sh" --automation --no-color 2>&1)
 
   if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor    \[OK\] loaded | out 2026-04-12 02:09"; then
     print_error "FAIL(ops-status-doctor-log): expected task log timestamp"
@@ -146,15 +123,10 @@ EOF
   rm -rf "$temp_home" "$temp_bin"
 }
 
-# profile contract check removed in chezmoi migration — chezmoi templates
-# now handle config-presence variance, and individual doctor checks
-# already validate the paths and commands that mattered.
-
 # ── Run all tests ───────────────────────────────────────────────────
 
 test_clean_dry_run_safe
 test_restore_dry_run_safe
-test_chezmoi_then_doctor
 test_ops_status_uses_doctor_task_log
 
 test_summary "integration"

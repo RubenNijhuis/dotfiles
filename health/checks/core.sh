@@ -20,47 +20,21 @@ find_git_dirs() {
     -name .git -print 2>/dev/null
 }
 
-check_chezmoi() {
-  # Check the small remaining ChezMoi source-state sync surface.
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    record_result "chezmoi" 1 "chezmoi not installed"
-    add_suggestion "Apply the Nix configuration: make nix-switch"
+check_nix() {
+  if ! command -v nix >/dev/null 2>&1; then
+    record_result "Nix" 1 "not installed"
+    add_suggestion "Bootstrap Nix: make install"
     return
   fi
-
-  # Soft warn when chezmoi isn't pointed at this repo's source state — common
-  # in CI/test sandboxes where ~/.config/chezmoi/chezmoi.toml isn't seeded.
-  local source_dir
-  source_dir="$(chezmoi source-path 2>/dev/null || echo "")"
-  if [[ -z "$source_dir" || ! -d "$source_dir" ]]; then
-    record_result "chezmoi" 1 "source dir not configured (no ~/.config/chezmoi/chezmoi.toml?)"
-    add_suggestion "echo 'sourceDir = \"$DOTFILES/chezmoi\"' > ~/.config/chezmoi/chezmoi.toml"
-    return
-  fi
-
-  # ChezMoi retains stale status rows for paths that Nix has taken over. Count
-  # only rows whose target is still in its managed-file list; applying every
-  # status row here could overwrite a completed Nix handoff.
-  local files dirs pending managed_paths status line path
-  files=$(chezmoi managed --include=files 2>/dev/null | wc -l | xargs)
-  dirs=$(chezmoi managed --include=dirs 2>/dev/null | wc -l | xargs)
-  managed_paths=$(chezmoi managed --include=files 2>/dev/null)
-  status=$(chezmoi status 2>/dev/null || true)
-  pending=0
-  while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    path="${line:3}"
-    if printf '%s\n' "$managed_paths" | grep -Fxq "$path"; then
-      pending=$((pending + 1))
+  local generation
+  for generation in /run/current-system "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"; do
+    if [[ -L "$generation" && -d "$generation" ]]; then
+      record_result "Nix" 0 "active generation: $generation"
+      return
     fi
-  done <<< "$status"
-
-  if [[ "$pending" -eq 0 ]]; then
-    record_result "chezmoi" 0 "${files} files / ${dirs} dirs remain; Nix handoff rows ignored"
-  else
-    record_result "chezmoi" 1 "${files} files / ${dirs} dirs managed; ${pending} entries differ from source"
-    add_suggestion "Review: chezmoi diff (do not apply blindly after a Nix handoff)"
-  fi
+  done
+  record_result "Nix" 1 "installed; no active system/Home Manager generation found"
+  add_suggestion "Build and activate the correct host: make nix-switch or make nix-home-switch"
 }
 
 check_ssh() {
@@ -71,7 +45,7 @@ check_ssh() {
   # Check personal key
   if [[ -f "$HOME/.ssh/id_ed25519_personal" ]]; then
     local perms
-    perms=$(stat -f "%OLp" "$HOME/.ssh/id_ed25519_personal" 2>/dev/null || echo "")
+    perms=$(file_mode "$HOME/.ssh/id_ed25519_personal" 2>/dev/null || echo "")
     if [[ "$perms" == "600" ]]; then
       details+="Personal key: ~/.ssh/id_ed25519_personal (600)\n  "
     else
@@ -94,7 +68,7 @@ check_ssh() {
     else
       details+="SSH config: Include directive missing"
       issues=$((issues + 1))
-      add_suggestion "Re-apply SSH config: chezmoi apply"
+      add_suggestion "Review SSH ownership and adoption before running make nix-switch"
     fi
   else
     details+="SSH config: missing"
@@ -183,11 +157,10 @@ check_git() {
   local issues=0
   local details=""
 
-  # Home Manager writes the global config at XDG_CONFIG_HOME/git/config rather
-  # than ~/.gitconfig. Ask Git for its resolved configuration so either valid
-  # layout is accepted.
-  if git config --global --get user.email >/dev/null 2>&1; then
-    if git config --global --get-regexp '^includeIf\..*\.path$' >/dev/null 2>&1; then
+  # Resolve both ~/.gitconfig and the XDG config, outside any repository.
+  # --global alone selects ~/.gitconfig when it exists and misses XDG settings.
+  if git -C / config --get user.email >/dev/null 2>&1; then
+    if git -C / config --get-regexp '^includeIf\..*\.path$' >/dev/null 2>&1; then
       details+="Conditional includes: configured\n  "
     else
       details+="Conditional includes: missing from resolved Git config\n  "

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.4.16/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -14,8 +14,8 @@
       "!**/.git/",
       "!**/node_modules/",
       "!**/.cache/",
-      "!**/chezmoi/dot_config/nvim/lazy-lock.json",
-      "!**/chezmoi/dot_config/nvim/lazyvim.json"
+      "!**/nix/config/nvim/lazy-lock.json",
+      "!**/nix/config/nvim/lazyvim.json"
     ]
   },
   "formatter": {
@@ -30,7 +30,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "preset": "recommended"
     }
   },
   "javascript": {
@@ -52,7 +52,7 @@
   },
   "overrides": [
     {
-      "includes": ["chezmoi/dot_config/spicetify/**"],
+      "includes": ["nix/config/spicetify/**"],
       "linter": { "enabled": false },
       "formatter": { "enabled": false }
     }

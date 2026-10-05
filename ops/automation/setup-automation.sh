@@ -21,7 +21,7 @@ Usage: $0 [--help] [--no-color] <target>
 Targets:
 EOF
   # Build target list from manifest (single source of truth).
-  while IFS='|' read -r name desc _default alias; do
+  while IFS='|' read -r name desc alias; do
     [[ -z "$name" ]] && continue
     if [[ -n "$alias" ]]; then
       printf '  %-18s %s (alias: %s)\n' "$name" "$desc" "$alias"

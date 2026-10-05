@@ -8,7 +8,7 @@ Canonical launchd automation contract for this repository.
 # Show available agents
 make automation-list
 
-# Install all managed agents
+# Install only the active profile's selected agents
 make launchd-install-all
 
 # Install one agent
@@ -21,8 +21,14 @@ make launchd-status
 
 ## Managed Agents
 
+The personal laptop selects only `update-audit`; the minimal profile selects
+none. Everything else below is available for deliberate opt-in. An empty
+automation list never enables all jobs. Changing selection does not uninstall
+or unload any existing agent; inspect and approve those exact targets separately.
+
 - `dotfiles-backup`: daily dotfiles backup at 02:00.
 - `dotfiles-doctor`: daily health check + notifications at 09:00.
+- `update-audit`: weekly update availability report at Monday 09:15.
 - `repo-update`: scheduled repository updates with notification wrapper.
 - `log-cleanup`: weekly log rotation.
 - `brew-audit`: weekly Brewfile drift detection.
@@ -119,5 +125,17 @@ If install fails with permissions, run the command outside sandboxed tooling.
 make automation-setup
 make doctor --automation
 ```
+
+## Update Policy
+
+`update-audit` runs every Monday at 09:15. It checks Nix inputs, documented
+Homebrew packages, and macOS updates, then notifies when the available updates
+or check failures change. The latest report is saved to
+`~/.local/state/dotfiles/update-audit.txt`; unchanged results stay quiet.
+It also detects when the Mac is still running a previous Nix generation after
+the repository has been updated.
+It intentionally does not install updates: Nix updates change the
+tracked lockfile and macOS updates can require a restart, so both remain an
+explicit review-and-apply step.
 
 `ops/automation/launchd-manager.sh` is the canonical command surface.

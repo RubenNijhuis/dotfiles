@@ -68,7 +68,7 @@ parse_args() {
 
 main() {
   parse_args "$@"
-  require_cmd "shellcheck" "Install shellcheck with: brew install shellcheck" || exit 1
+  require_cmd "shellcheck" "Apply the Nix core profile with make nix-switch" || exit 1
 
   files=()
   if [[ ${#LINT_TARGETS[@]} -gt 0 ]]; then
@@ -98,7 +98,7 @@ main() {
   print_section "shellharden"
   if ! command -v shellharden &>/dev/null; then
     print_warning "shellharden not installed — skipping quoting checks"
-    print_dim "Install with: brew install shellharden"
+    print_dim "Apply the Nix developer profile with make nix-switch"
   else
     local harden_failed=0
     for file in "${files[@]}"; do

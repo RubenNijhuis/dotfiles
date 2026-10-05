@@ -7,7 +7,7 @@ source "$ROOT_DIR/lib/output.sh" "$@"
 source "$ROOT_DIR/lib/test-helpers.sh"
 
 assert_exit "doctor-help" 0 bash "$ROOT_DIR/health/doctor.sh" --help
-assert_exit "doctor-full-section" 0 bash "$ROOT_DIR/health/doctor.sh" --no-color --full --section chezmoi
+assert_exit "doctor-full-section" 0 bash "$ROOT_DIR/health/doctor.sh" --no-color --full --section nix
 assert_exit "doctor-bad-section" 1 bash "$ROOT_DIR/health/doctor.sh" --section nope
 assert_exit "profile-list-help" 0 bash "$ROOT_DIR/ops/profile/list.sh" --help
 assert_exit "profile-show-help" 0 bash "$ROOT_DIR/ops/profile/show.sh" --help
@@ -25,5 +25,7 @@ assert_exit "install-help" 0 bash "$ROOT_DIR/install.sh" --help
 assert_exit "install-bad-step" 1 bash "$ROOT_DIR/install.sh" --from-step 99
 assert_exit "install-legacy-removed" 1 bash "$ROOT_DIR/install.sh" --legacy
 assert_exit "update-legacy-removed" 1 bash "$ROOT_DIR/ops/update.sh" --legacy
+assert_output_contains "update-help-activation" "does not switch the running system" \
+  bash "$ROOT_DIR/ops/update.sh" --help
 
 test_summary "cli-parsing"

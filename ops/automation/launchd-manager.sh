@@ -34,7 +34,7 @@ profile_has_agent() {
   local agent
 
   if [[ -z "$selected" ]]; then
-    return 0
+    return 1
   fi
 
   for agent in $selected; do
@@ -124,7 +124,7 @@ cmd_status() {
       local lf last_mod
       lf="$(agent_log_file "$name")"
       if [[ -f "$lf" ]]; then
-        last_mod=$(stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$lf" 2>/dev/null || echo "unknown")
+        last_mod=$(file_mtime_display "$lf" 2>/dev/null || echo "unknown")
         printf "    "; print_dim "Last: $last_mod"
       fi
     else

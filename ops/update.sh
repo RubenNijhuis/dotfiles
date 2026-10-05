@@ -17,6 +17,7 @@ usage() {
 Usage: $0 [--help] [--no-color] [--exceptions]
 
 Refresh Nix inputs, then evaluate and build the current configuration.
+Activation remains explicit; this command does not switch the running system.
 
 By default this only updates repositories and the Nix-managed environment.
 
@@ -91,8 +92,16 @@ verify_nix_configuration() {
   fi
 
   print_status_row "Check" info "evaluating all declared platforms"
-  if ! (cd "$DOTFILES" && nix flake check --all-systems); then
+  if ! (cd "$DOTFILES" && nix flake check --all-systems --no-build); then
     print_status_row "Check" error "flake evaluation failed"
+    return 1
+  fi
+
+  local system
+  system="$(nix eval --impure --raw --expr builtins.currentSystem)"
+  print_status_row "Editor" info "testing fresh-profile Neovim on ${system}"
+  if ! (cd "$DOTFILES" && nix build ".#checks.${system}.neovim" --no-link); then
+    print_status_row "Editor" error "Neovim runtime check failed; do not activate this update"
     return 1
   fi
 
@@ -104,8 +113,6 @@ verify_nix_configuration() {
       return 0
     fi
   else
-    local system
-    system="$(nix eval --impure --raw --expr builtins.currentSystem)"
     print_status_row "Build" info "building portable formatter for ${system}"
     if (cd "$DOTFILES" && nix build ".#packages.${system}.nixfmt-tree" --no-link); then
       print_status_row "Build" ok "portable Nix package builds"
@@ -163,8 +170,12 @@ main() {
     exit 1
   fi
 
-  print_status_row "Overall" ok "system update complete"
-  print_next_steps "No action needed."
+  print_status_row "Overall" ok "configuration refreshed and verified; not activated"
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    print_next_steps "Run make nix-switch to activate the verified configuration."
+  else
+    print_next_steps "Run make nix-home-switch NIX_HOME_HOST=<host> to activate your home configuration."
+  fi
 }
 
 main "$@"

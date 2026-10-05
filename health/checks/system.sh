@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 # Doctor checks: launchd, homebrew, backup checks.
-# The former check_profile_contract function was removed in the chezmoi
-# migration — chezmoi templates handle config-presence variance, and
-# individual doctor checks (check_ssh, check_developer, etc.) already
-# validate the paths/commands that mattered.
 
 check_launchd() {
   if $QUICK_MODE; then
@@ -182,22 +178,22 @@ check_backup_system() {
   BACKUP_DIR="$HOME/.dotfiles-backup"
 
   if [[ ! -d "$BACKUP_DIR" ]]; then
-    record_result "Backup System" 1 "No backups at $BACKUP_DIR"
+    record_result "Local Rollback" 1 "No snapshots at $BACKUP_DIR; off-device recovery is separate"
     add_suggestion "Create backup: make backup"
     return
   fi
 
-  LATEST_BACKUP=$(find "$BACKUP_DIR" -maxdepth 1 -type d -name "202*" | sort -r | head -n1)
+  LATEST_BACKUP=$(latest_rollback_dir || true)
 
   if [[ -n "$LATEST_BACKUP" ]]; then
-    BACKUP_AGE_DAYS=$(( ($(date +%s) - $(stat -f %m "$LATEST_BACKUP")) / 86400 ))
+    BACKUP_AGE_DAYS=$(( ($(date +%s) - $(file_mtime_epoch "$LATEST_BACKUP")) / 86400 ))
 
     if [[ $BACKUP_AGE_DAYS -gt 7 ]]; then
       details+="Recent backup: $BACKUP_AGE_DAYS days old (too old)\n  "
       issues=$((issues + 1))
       add_suggestion "Create backup: make backup"
     else
-      details+="Recent backup: $BACKUP_AGE_DAYS days ago\n  "
+      details+="Local snapshot: $BACKUP_AGE_DAYS days ago\n  "
     fi
 
     # Count total backups
@@ -216,5 +212,6 @@ check_backup_system() {
     details+="Automation: optional and not enabled"
   fi
 
-  record_issue_count_result "Backup System" "$issues" 1 "$details"
+  details+="\n  Plaintext on this disk only; not a complete or off-device backup"
+  record_issue_count_result "Local Rollback" "$issues" 1 "$details"
 }

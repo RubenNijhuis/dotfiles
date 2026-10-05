@@ -29,7 +29,7 @@ Options:
   --help, -h          Show this help message
 
 Sections (with --full --section):
-  chezmoi, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
+  nix, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
   backup, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
@@ -55,12 +55,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    chezmoi|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
+    nix|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: chezmoi, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: nix, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -241,7 +241,7 @@ run_checks() {
   [[ -z "${DOCTOR_KEEP_TMP:-}" ]] && trap 'rm -rf "${_doctor_tmp:-}"' EXIT
 
   local core=() system=() tools=()
-  should_run chezmoi   && core+=(check_chezmoi)
+  should_run nix       && core+=(check_nix)
   should_run ssh       && core+=(check_ssh)
   should_run gpg       && core+=(check_gpg)
   should_run git       && core+=(check_git)
@@ -253,7 +253,6 @@ run_checks() {
   should_run launchd   && system+=(check_launchd)
   should_run homebrew  && system+=(check_homebrew)
   should_run backup    && system+=(check_backup_system)
-  should_run shell-perf && system+=(check_shell_perf)
   run_section_parallel "$(printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${system[@]}"
 
   should_run biome    && tools+=(check_biome)
@@ -261,6 +260,10 @@ run_checks() {
   should_run neovim   && tools+=(check_neovim)
   should_run starship && tools+=(check_starship)
   run_section_parallel "$(printf '\n  %s%s── Tools ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${tools[@]}"
+  # Startup timing is not meaningful while other checks compete for CPU/I/O.
+  if should_run shell-perf; then
+    check_shell_perf
+  fi
 }
 
 print_run_context() {
@@ -313,32 +316,20 @@ print_summary() {
 }
 
 # ── Status mode ──────────────────────────────────────────────────────
-# Quick actionable summary: doctor health, ChezMoi, launchd, and backups.
+# Quick actionable summary: Nix generation, launchd, and backups.
 
-status_check_chezmoi() {
-  # Count only active ChezMoi targets; stale status rows can describe Nix-owned
-  # handoffs.
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    print_status_row "chezmoi" error "not installed"
-    STATUS_ISSUES=$((STATUS_ISSUES + 1))
-    return
+status_check_nix() {
+  local generation
+  if command -v nix >/dev/null 2>&1; then
+    for generation in /run/current-system "${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles/home-manager"; do
+      if [[ -L "$generation" && -d "$generation" ]]; then
+        print_status_row "Nix" ok "active generation: $generation"
+        return
+      fi
+    done
   fi
-  local pending=0 managed_paths status line path
-  managed_paths=$(chezmoi managed --include=files 2>/dev/null)
-  status=$(chezmoi status 2>/dev/null || true)
-  while IFS= read -r line; do
-    [[ -n "$line" ]] || continue
-    path="${line:3}"
-    if printf '%s\n' "$managed_paths" | grep -Fxq "$path"; then
-      pending=$((pending + 1))
-    fi
-  done <<< "$status"
-  if [[ "$pending" -eq 0 ]]; then
-    print_status_row "chezmoi" ok "remaining transition targets in sync"
-  else
-    print_status_row "chezmoi" warn "$pending transition entries differ — review before applying"
-    STATUS_ISSUES=$((STATUS_ISSUES + 1))
-  fi
+  print_status_row "Nix" warn "no active generation found — bootstrap or switch the correct host"
+  STATUS_ISSUES=$((STATUS_ISSUES + 1))
 }
 
 status_check_launchd() {
@@ -366,25 +357,25 @@ status_check_launchd() {
 status_check_backup() {
   local backup_dir="$HOME/.dotfiles-backup"
   if [[ ! -d "$backup_dir" ]]; then
-    print_status_row "Backup" warn "no backups found"
+    print_status_row "Rollback" warn "no local snapshots; off-device recovery separate"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
     return
   fi
 
   local latest
-  latest=$(find "$backup_dir" -maxdepth 1 -type d -name "202*" | sort -r | head -n1)
+  latest=$(latest_rollback_dir || true)
   if [[ -z "$latest" ]]; then
-    print_status_row "Backup" warn "no backups found"
+    print_status_row "Rollback" warn "no local snapshots; off-device recovery separate"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
     return
   fi
 
   local age_days
-  age_days=$(( ($(date +%s) - $(stat -f %m "$latest")) / 86400 ))
+  age_days=$(( ($(date +%s) - $(file_mtime_epoch "$latest")) / 86400 ))
   if [[ $age_days -le 7 ]]; then
-    print_status_row "Backup" ok "${age_days}d ago"
+    print_status_row "Rollback" ok "${age_days}d ago; local only, not disaster recovery"
   else
-    print_status_row "Backup" warn "${age_days}d ago (stale)"
+    print_status_row "Rollback" warn "${age_days}d ago (stale); local only"
     STATUS_ISSUES=$((STATUS_ISSUES + 1))
   fi
 }
@@ -394,7 +385,7 @@ status_check_backup() {
 _log_timestamp() {
   local log_file="$1"
   if [[ -f "$log_file" ]]; then
-    stat -f "%Sm" -t "%Y-%m-%d %H:%M" "$log_file" 2>/dev/null || echo "unknown"
+    file_mtime_display "$log_file" 2>/dev/null || echo "unknown"
   else
     echo "no log"
   fi
@@ -465,13 +456,13 @@ run_automation_dashboard() {
   print_status_row "Warnings" warn "$warn_count"
   print_status_row "Errors" error "$error_count"
 
-  print_section "Backup recency"
+  print_section "Local rollback recency (not off-device recovery)"
   local latest_backup
-  latest_backup=$(find "$HOME/.dotfiles-backup" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort | tail -1 || true)
+  latest_backup=$(latest_rollback_dir || true)
   if [[ -n "${latest_backup:-}" ]]; then
-    print_status_row "Latest backup" ok "$(basename "$latest_backup")"
+    print_status_row "Latest snapshot" info "$(basename "$latest_backup") — local plaintext only"
   else
-    print_status_row "Latest backup" warn "none found"
+    print_status_row "Latest snapshot" warn "none found"
   fi
 }
 
@@ -481,7 +472,7 @@ run_quick() {
 
   STATUS_ISSUES=0
   print_section "Today"
-  status_check_chezmoi
+  status_check_nix
   status_check_launchd
   status_check_backup
 
@@ -533,7 +524,7 @@ main() {
     printf '\n'
     run_quick
     if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
-      print_next_steps "Run: make doctor --full for the deep checks"
+      print_next_steps "Run: make doctor ARGS=--full for the deep checks"
     else
       print_next_steps "No action needed."
     fi
@@ -552,7 +543,7 @@ main() {
   printf '\n'
   if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
     print_next_steps \
-      "Run: make doctor --full for the deep checks" \
+      "Run: make doctor ARGS=--full for the deep checks" \
       "Run: make backup if backup status is stale"
   else
     print_next_steps "No action needed."

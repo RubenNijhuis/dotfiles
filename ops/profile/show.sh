@@ -15,8 +15,8 @@ usage() {
 Usage: $0 [--help] [--no-color]
 
 Show the active machine profile, its Brewfile selection, and launchd
-automations. Config files themselves are now managed by chezmoi —
-run 'chezmoi managed' to inspect that side.
+automations. Nix host imports select capability profiles and Home Manager
+owns declarative configuration; private overrides stay user-owned.
 EOF
 }
 
@@ -27,13 +27,9 @@ main() {
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Label" info "${DOTFILES_PROFILE_LABEL:-${DOTFILES_PROFILE:-unknown}}"
   print_status_row "Brewfiles" info "$(brew_profile_summary)"
-  print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}" | wc -w | xargs) selected"
-  print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-dotfiles-backup dotfiles-doctor repo-update log-cleanup brew-audit weekly-digest}"
-  if command -v chezmoi >/dev/null 2>&1; then
-    local managed
-    managed=$(chezmoi managed --include=files 2>/dev/null | wc -l | xargs)
-    print_status_row "chezmoi files" info "$managed managed"
-  fi
+  print_status_row "Automations" info "$(printf '%s' "${DOTFILES_PROFILE_AUTOMATIONS:-}" | wc -w | xargs) selected"
+  print_dim "  ${DOTFILES_PROFILE_AUTOMATIONS:-none}"
+  print_status_row "Configuration" info "Nix / Home Manager; user-owned private overrides"
 }
 
 main "$@"

@@ -13,7 +13,7 @@
 ## Launchd Automation Failure
 
 ```bash
-make doctor --automation
+make doctor ARGS=--automation
 make launchd-status
 bash ops/automation/launchd-manager.sh restart <agent>
 ```
@@ -27,8 +27,8 @@ make nix-switch     # apply the macOS configuration
 make doctor         # verify
 ```
 
-Use `chezmoi diff` and `chezmoi apply` only when the affected path is still
-marked transition-owned in the [Nix ownership matrix](../nix-ownership-matrix.md).
+ChezMoi is retired. Restore private overrides locally rather than rendering
+secrets into Nix; consult the [ownership matrix](../nix-ownership-matrix.md).
 
 ## Last-Resort Restore
 

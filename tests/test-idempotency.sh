@@ -10,56 +10,86 @@ fail() {
   exit 1
 }
 
-# Write a stub chezmoi config so templates referencing machine data + secrets
-# can render in isolated test runs. Returns the absolute config path on stdout.
-write_test_chezmoi_config() {
-  local cfg_path="$1"
-  cat > "$cfg_path" <<EOF
-sourceDir = "$ROOT_DIR/chezmoi"
-[data.machine]
-  obsidian_vault_path = "/tmp/obsidian"
-  github_username     = "test"
-[data.secrets]
-  linear_api_key   = "test"
-  nuget_auth_token = "test"
-EOF
-}
+test_empty_automation_profile() (
+  set -euo pipefail
+  LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$ROOT_DIR/ops/automation/launchd-manager.sh"
+  DOTFILES_PROFILE_AUTOMATIONS=""
+  [[ -z "$(dotfiles_profile_automations)" ]] || fail "Empty profile expanded into jobs"
+  [[ -z "$(profile_agent_infos)" ]] || fail "Empty manager profile selected jobs"
+  DOTFILES_PROFILE_AUTOMATIONS="update-audit"
+  [[ "$(dotfiles_profile_automations)" == update-audit ]] || fail "Explicit selection lost"
+  [[ "$(profile_agent_infos)" == update-audit:* ]] || fail "Manager selection mismatch"
+  [[ "$(automation_resolve_alias backup)" == dotfiles-backup ]] || fail "Backup alias mismatch"
+  [[ "$(automation_resolve_alias updates)" == update-audit ]] || fail "Update alias mismatch"
+)
+test_empty_automation_profile
 
-test_chezmoi_apply_idempotent() {
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    print_warning "idempotency(chezmoi): skipped (chezmoi not installed)"
-    return 0
+test_files_structure() (
+  set -euo pipefail
+  local fixture folder
+  fixture="$(mktemp -d)"
+  trap 'rm -rf "$fixture"' EXIT
+  export DOTFILES_FILES_ROOT="$fixture/Files"
+  export DOTFILES_PRIVATE_ROOT="$fixture/Private"
+  for _ in 1 2; do
+    bash "$ROOT_DIR/setup/create-files-root.sh" >/dev/null
+  done
+  for folder in '00 Inbox' '10 Projects' '20 Areas' '30 Resources' '40 Archive' '90 Shared'; do
+    [[ -d "$DOTFILES_FILES_ROOT/$folder" ]] || fail "Missing Files category: $folder"
+  done
+  [[ -d "$DOTFILES_PRIVATE_ROOT/Credentials/Exports" &&
+     -d "$DOTFILES_PRIVATE_ROOT/Migrations" &&
+     -d "$DOTFILES_PRIVATE_ROOT/Recovery Codes" ]] || fail "Missing technical storage"
+  [[ ! -e "$DOTFILES_PRIVATE_ROOT/Identity" ]] || fail "Created device-only identity library"
+  [[ "$(find "$DOTFILES_PRIVATE_ROOT" -type d ! -perm 700 -print)" == "" ]] || fail "Technical storage permissions"
+)
+test_files_structure
+
+test_pinned_nix_switch() (
+  set -euo pipefail
+  local preview
+  preview="$(make -n -C "$ROOT_DIR" nix-switch NIX=nix NIX_DARWIN_HOST=fixture-host)"
+  # Match Make's literal shell variable, not a variable in this test.
+  # shellcheck disable=SC2016
+  [[ "$preview" == *'.#darwinConfigurations.fixture-host.config.system.build.darwin-rebuild'* &&
+     "$preview" == *'--no-link --print-out-paths --no-write-lock-file'* &&
+     "$preview" == *'&&'* &&
+     "$preview" == *'sudo -H "$rebuild/bin/darwin-rebuild"'* &&
+     "$preview" == *'switch --flake .#fixture-host --no-write-lock-file'* ]] || fail "Unpinned activation tool"
+  [[ "$preview" != *'github:nix-darwin'* ]] || fail "Activation fetches unlocked upstream"
+)
+test_pinned_nix_switch
+
+test_formatter_failure() (
+  set -euo pipefail
+  local fixture
+  fixture="$(mktemp -d)"
+  trap 'rm -rf "$fixture"' EXIT
+  printf '#!/bin/sh\nexit 7\n' > "$fixture/biome"
+  chmod +x "$fixture/biome"
+  if PATH="$fixture:$PATH" bash "$ROOT_DIR/ops/format-all.sh" >/dev/null 2>&1; then
+    fail "Formatter errors were reported as success"
   fi
+)
+test_formatter_failure
 
-  local temp_home temp_cfg listing1 listing2
-  temp_home="$(mktemp -d)"
-  temp_cfg="$(mktemp -d)/chezmoi.toml"
-  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
-
-  write_test_chezmoi_config "$temp_cfg"
-
-  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
-    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
-
-  listing1="$(mktemp)"
-  listing2="$(mktemp)"
-  find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing1"
-
-  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
-    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
-  find "$temp_home" \( -type f -o -type l \) -print | sort > "$listing2"
-
-  if ! diff -u "$listing1" "$listing2" >/dev/null; then
-    diff -u "$listing1" "$listing2" || true
-    fail "chezmoi apply changed file set on second run"
+test_lock_metadata_failure() (
+  set -euo pipefail
+  local fixture
+  fixture="$(mktemp -d)"
+  trap 'rm -rf "$fixture"' EXIT
+  source "$ROOT_DIR/lib/common.sh"
+  mkdir "$fixture/dotfiles-metadata-failure.lock"
+  touch "$fixture/dotfiles-metadata-failure.lock/sentinel"
+  stat() { return 1; }
+  if TMPDIR="$fixture" acquire_lock metadata-failure >/dev/null 2>&1; then
+    trap 'rm -rf "$fixture"' EXIT
+    fail "Missing metadata allowed an existing lock to be removed"
   fi
+  [[ -f "$fixture/dotfiles-metadata-failure.lock/sentinel" ]] || fail "Existing lock was altered"
+)
+test_lock_metadata_failure
 
-  rm -f "$listing1" "$listing2"
-  trap - RETURN
-  rm -rf "$temp_home"
-
-  print_success "idempotency(chezmoi): passed"
-}
 
 test_launchd_manager_idempotent() {
   local temp_home temp_bin temp_state fake_launchctl manager plist hash1 hash2
@@ -139,38 +169,6 @@ EOS
   print_success "idempotency(launchd-manager): passed"
 }
 
-test_chezmoi_source_files_are_regular() {
-  # chezmoi materializes regular files (not symlinks) into $HOME — verify
-  # by applying into a fresh HOME and asserting no symlinks back into the repo.
-  if ! command -v chezmoi >/dev/null 2>&1; then
-    print_warning "idempotency(file-types): skipped (chezmoi not installed)"
-    return 0
-  fi
-
-  local temp_home temp_cfg
-  temp_home="$(mktemp -d)"
-  temp_cfg="$(mktemp -d)/chezmoi.toml"
-  trap 'rm -rf "$temp_home" "$temp_cfg"' RETURN
-
-  write_test_chezmoi_config "$temp_cfg"
-  HOME="$temp_home" chezmoi apply --include=files,dirs --config "$temp_cfg" \
-    --source "$ROOT_DIR/chezmoi" --destination "$temp_home" >/dev/null
-
-  local symlinks
-  symlinks=$(find "$temp_home" -type l 2>/dev/null | wc -l | xargs)
-  if [[ "$symlinks" -gt 0 ]]; then
-    find "$temp_home" -type l 2>&1 | head -5
-    fail "chezmoi-applied destination contains $symlinks symlink(s); expected only regular files"
-  fi
-
-  trap - RETURN
-  rm -rf "$temp_home"
-
-  print_success "idempotency(file-types): passed"
-}
-
-test_chezmoi_apply_idempotent
 test_launchd_manager_idempotent
-test_chezmoi_source_files_are_regular
 
 print_success "idempotency: all checks passed"

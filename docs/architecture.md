@@ -7,7 +7,7 @@ for operating-system settings and desktop automation.
 ## Scope
 
 - In scope: Nix-managed cross-platform packages and developer configuration,
-  a thin macOS layer, explicitly transition-owned ChezMoi paths, and macOS
+  a thin macOS layer, user-owned private overrides, and macOS
   launchd automation.
 - Out of scope: native Windows configuration; Windows is supported through WSL.
 
@@ -30,18 +30,20 @@ language-version manager.
    flake directly with `make nix-check` and `make nix-build`.
 2. Apply macOS state with `make nix-switch`; use `make nix-home-switch` for a
    Linux or WSL target.
-3. Use `chezmoi apply` only for a path still marked transition-owned in the
+3. Keep writable application state and private overrides outside Nix. See the
    [ownership matrix](nix-ownership-matrix.md).
-4. Operate machine workflows via launchd (`make *-setup`, `make doctor --automation`).
+4. Operate machine workflows via launchd (`make *-setup`, `make doctor ARGS=--automation`).
 5. Maintain with `make update` and `make maint-check`.
    The standard update refreshes flake inputs then checks and builds Nix without
    switching. Use `make update ARGS=--exceptions` only for explicitly selected
    macOS package exceptions.
 
+The opt-in `maintenance` devShell supplies the locked test tools without
+installing a machine profile: `nix develop .#maintenance --command make maint-check`.
+GitHub Actions uses that same shell, not a separate Homebrew tool list.
+
 ## Directory Responsibilities
 
-- `chezmoi/`: remaining transition-owned paths; it is not the source of truth
-  for new configuration.
 - `nix/`: shared Home Manager modules and host-specific system modules.
 - `ops/`: operational interfaces (`ops/automation/` for launchd management, plus backup and maintenance scripts).
 - `setup/`: bootstrap and provisioning scripts.
@@ -63,12 +65,10 @@ Profiles allow the repo to adapt to different machine roles without duplicating 
 - The active profile is selected per machine via `local/profile.env`.
 - If no local profile is set, the default is `personal-laptop`.
 
-Transition-time behavior:
+Profile behavior:
 
-- `chezmoi apply` materializes only the remaining transition-owned paths under
-  `chezmoi/` into `$HOME`. It receives no new owned paths. The active profile
-  controls documented Homebrew exceptions and automation selection, not Nix
-  capabilities.
+- Nix host imports select reproducible capabilities. The active shell profile
+  controls documented Homebrew exceptions and automation selection only.
 - `health/doctor.sh` shows the active profile in the overview section.
 
 Profiles remain simple shell env files so they stay readable and shell-native.
@@ -114,5 +114,5 @@ Install/uninstall/status is handled only via `ops/automation/launchd-manager.sh`
 2. Add/extend script with contract-compliant CLI flags.
 3. Add tests under `tests/` for parsing and behavior.
 4. Update the relevant hand-written documentation when a user-facing workflow changes.
-5. For automation: add launchd template + manager compatibility + the doctor automation dashboard (`make doctor --automation`).
+5. For automation: add launchd template + manager compatibility + the doctor automation dashboard (`make doctor ARGS=--automation`).
 6. Validate with `make maint-check` and `make bootstrap-verify`.
