@@ -108,48 +108,40 @@ check_gpg() {
     return
   fi
 
-  # Signing is useful, but it is an opt-in identity decision: creating a key
-  # changes external developer identity and must never be presented as a broken
-  # machine when no key has been chosen yet.
-  if ! gpg --list-secret-keys 2>/dev/null | grep -q '^sec'; then
-    record_result "GPG Configuration" 1 "Not configured (optional; create a key only when you choose to sign commits)"
-    add_suggestion "Optional: create a GPG signing identity with make gpg-setup"
+  local signing_key gpg_bin
+  signing_key="$(git -C / config --get user.signingkey 2>/dev/null || true)"
+  gpg_bin="$(git -C / config --get gpg.program 2>/dev/null || true)"
+  gpg_bin="${gpg_bin:-gpg}"
+  if [[ -z "$signing_key" ]]; then
+    record_result "GPG Configuration" 1 "No signing identity selected"
+    add_suggestion "Choose a signing identity before configuring Git signing"
     return
   fi
 
+  # Resolve the same executable and selected key as Git, not an arbitrary key
+  # or only ~/.gitconfig. Metadata only: never sign or request a passphrase in doctor.
+  if ! command -v "$gpg_bin" >/dev/null 2>&1; then
+    record_result "GPG Configuration" 2 "Configured GPG executable is unavailable"
+    add_suggestion "Restore the declared GnuPG package with make nix-switch"
+    return
+  fi
+  if ! "$gpg_bin" --batch --no-tty --with-colons --list-secret-keys "$signing_key" 2>/dev/null | grep -q '^sec:'; then
+    record_result "GPG Configuration" 2 "Selected signing key is not available on this device"
+    add_suggestion "Restore/provision the selected private key securely; Nix does not contain it"
+    return
+  fi
+
+  local details="Selected signing key: available\n  Git uses OpenPGP signing"
   local issues=0
-  local details=""
-
-  # Check if GPG key exists
-  if gpg --list-secret-keys &>/dev/null; then
-    local key_id
-    key_id=$(gpg --list-secret-keys --keyid-format=long 2>/dev/null | grep sec | head -1 | awk '{print $2}' | cut -d'/' -f2)
-    details+="Secret key: $key_id\n  "
-  fi
-
-  # Check Git signing config
-  if git config --global user.signingkey &>/dev/null; then
-    details+="Git signing: enabled\n  "
-  else
-    details+="Git signing: not configured\n  "
-    issues=$((issues + 1))
-    add_suggestion "Configure GPG signing: make gpg-setup"
-  fi
-
-  # Validate pinentry-mac path matches actual Homebrew prefix
-  if [[ -f "$HOME/.gnupg/gpg-agent.conf" ]]; then
+  local agent_config="${GNUPGHOME:-$HOME/.gnupg}/gpg-agent.conf"
+  if [[ -f "$agent_config" ]]; then
     local pinentry_path
-    pinentry_path=$(grep "^pinentry-program" "$HOME/.gnupg/gpg-agent.conf" 2>/dev/null | awk '{print $2}')
-    if [[ -n "$pinentry_path" ]] && [[ ! -f "$pinentry_path" ]]; then
-      details+="⚠ pinentry-mac not found at $pinentry_path\n  "
-      add_suggestion "Fix pinentry path in ~/.gnupg/gpg-agent.conf (check brew --prefix)"
+    pinentry_path=$(grep "^pinentry-program" "$agent_config" 2>/dev/null | awk '{print $2}')
+    if [[ -n "$pinentry_path" ]] && [[ ! -x "$pinentry_path" ]]; then
+      details+="\n  Pinentry is unavailable"
+      issues=$((issues + 1))
+      add_suggestion "Restore the declared pinentry package for this platform"
     fi
-  fi
-
-  # Test GPG sign (warning only)
-  if ! echo "test" | gpg --clear-sign &>/dev/null; then
-    details+="⚠ GPG test sign failed"
-    add_suggestion "Check GPG agent: pkill gpg-agent && gpgconf --launch gpg-agent"
   fi
 
   if [[ $issues -eq 0 ]]; then

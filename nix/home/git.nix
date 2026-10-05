@@ -13,7 +13,7 @@ in
       user = {
         name = identity.fullName;
         email = identity.publicEmail;
-        signingKey = "~/.ssh/id_ed25519_personal.pub";
+        signingKey = identity.gpgSigningKey;
       };
 
       commit.gpgSign = true;
@@ -41,7 +41,10 @@ in
         hunk-header-decoration-style = "blue box";
       };
 
-      gpg.format = "ssh";
+      gpg = {
+        format = "openpgp";
+        program = lib.getExe pkgs.gnupg;
+      };
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;

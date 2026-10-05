@@ -70,7 +70,7 @@ Options:
   --with-ssh                    Generate SSH keys
   --without-ssh                 Skip SSH key generation
   --with-gpg                    Generate GPG key
-  --without-gpg                 Skip GPG key generation
+  --without-gpg                 Skip GPG signing-key readiness check
   --no-color                    Disable colored output
   --self-test-checkpoint        Run checkpoint/resume logic tests and exit
   --help, -h                    Show this help message
@@ -583,7 +583,7 @@ collect_nix_preferences() {
   printf '%s\n' "----------------------------------------"
 
   SETUP_SSH=$(resolve_preference "$SSH_PREF" "no" "Generate SSH keys for Git?")
-  SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Generate GPG key for commit signing?")
+  SETUP_GPG=$(resolve_preference "$GPG_PREF" "no" "Check restored GPG signing key?")
 
   if ! $NON_INTERACTIVE; then
     if ! prompt_yes_no "Proceed with Nix-first installation? [Y/n] " "Y"; then

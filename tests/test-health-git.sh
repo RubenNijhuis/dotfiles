@@ -7,16 +7,21 @@ source "$repo_root/health/checks/core.sh"
 developer_root() { printf '/nonexistent-dotfiles-health-test\n'; }
 add_suggestion() { :; }
 record_result() { actual_result="$2"; }
+signing_format=ssh
 # shellcheck disable=SC2329 # Invoked indirectly by the sourced check_git.
 git() {
   [[ "$1" == -C && "$2" == / && "$3" == config ]] || return 9
   case "$4" in
     --get)
-      if [[ "${5:-}" == gpg.format ]]; then
-        printf 'ssh\n'
-      else
-        [[ "$test_case" != missing-identity ]]
-      fi
+      case "${5:-}" in
+        gpg.format) printf '%s\n' "$signing_format" ;;
+        user.signingkey)
+          [[ "$test_case" != missing-selection ]] || return 1
+          printf 'selected-fingerprint\n'
+          ;;
+        gpg.program) return 1 ;;
+        *) [[ "$test_case" != missing-identity ]] ;;
+      esac
       ;;
     --get-regexp) [[ "$test_case" != missing-includes ]] ;;
     *) return 9 ;;
@@ -44,11 +49,52 @@ check_gpg
 unset -f gpg
 echo 'PASS: SSH Git signing does not require a second GPG identity'
 
-# Recovery checks run in a disposable repository; no real index, keys, or
-# network operations. A missing upstream must never look like a saved copy.
-unset -f git
 fixture=$(mktemp -d)
 trap 'rm -rf "$fixture"' EXIT
+export GNUPGHOME="$fixture/gnupg"
+signing_format=openpgp
+get_preference() { printf 'yes\n'; }
+# shellcheck disable=SC2329 # Invoked indirectly by the sourced check_gpg.
+gpg() {
+  [[ "$*" == '--batch --no-tty --with-colons --list-secret-keys selected-fingerprint' ]] || {
+    echo 'FAIL: GPG health attempted signing or inspected an unrelated key' >&2
+    return 9
+  }
+  [[ "$test_case" != missing-key ]] || return 1
+  printf 'sec:u:255:22:fixture-key:::::::::\n'
+}
+for test_case in available missing-selection missing-key; do
+  expected_result=0
+  [[ "$test_case" != missing-selection ]] || expected_result=1
+  [[ "$test_case" != missing-key ]] || expected_result=2
+  actual_result=-1
+  check_gpg
+  [[ "$actual_result" == "$expected_result" ]] || {
+    printf 'FAIL: GPG health case %s returned %s\n' "$test_case" "$actual_result"
+    exit 1
+  }
+done
+export -f git gpg
+export signing_format test_case
+for test_case in available missing-selection missing-key; do
+  expected_result=0
+  [[ "$test_case" == available ]] || expected_result=1
+  if bash "$repo_root/setup/generate-gpg-keys.sh" --no-color >/dev/null 2>&1; then
+    actual_result=0
+  else
+    actual_result=$?
+  fi
+  [[ "$actual_result" == "$expected_result" ]] || {
+    printf 'FAIL: GPG setup case %s returned %s\n' "$test_case" "$actual_result"
+    exit 1
+  }
+done
+unset -f gpg git
+echo 'PASS: OpenPGP health checks only the selected key metadata without signing'
+echo 'PASS: GPG setup checks readiness without key generation or Git configuration writes'
+
+# Recovery checks run in a disposable repository; no real index, keys, or
+# network operations. A missing upstream must never look like a saved copy.
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_NOSYSTEM=1
 git -C "$fixture" init --quiet
 git -C "$fixture" config user.name Fixture

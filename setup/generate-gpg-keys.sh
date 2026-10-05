@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Generate GPG key for commit signing
-
+# Check the Nix-selected identity; never create or export private keys.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -11,12 +10,11 @@ usage() {
   cat <<EOF
 Usage: $0 [--help] [--no-color]
 
-Generate a GPG key for commit signing and configure Git to use it.
+Check that the selected OpenPGP signing key is available on this device.
+Provision private keys securely yourself; Nix owns Git configuration.
 EOF
 }
-
 show_help_if_requested usage "$@"
-
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --no-color) shift ;;
@@ -24,104 +22,21 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-PERSONAL_EMAIL=$(git config --file ~/.gitconfig-personal user.email 2>/dev/null || echo "")
-GIT_USER=$(git config user.name 2>/dev/null || echo "")
-
-echo "GPG Key Generation for Commit Signing"
-echo "======================================"
-echo ""
-
-# Check if GPG is installed
-if ! command -v gpg &>/dev/null; then
-    echo "Error: GPG is not installed. Apply the Nix SSH/GPG configuration with 'make nix-switch' first."
-    exit 1
+signing_key="$(git -C / config --get user.signingkey 2>/dev/null || true)"
+gpg_bin="$(git -C / config --get gpg.program 2>/dev/null || true)"
+gpg_bin="${gpg_bin:-gpg}"
+if [[ "$(git -C / config --get gpg.format 2>/dev/null || true)" != openpgp || -z "$signing_key" ]]; then
+  print_error "Select an OpenPGP fingerprint in nix/lib/identity.nix, then apply make nix-switch."
+  exit 1
 fi
-
-# Check if pinentry-mac is installed
-BREW_PREFIX="${HOMEBREW_PREFIX:-$(brew --prefix 2>/dev/null || echo /opt/homebrew)}"
-if [[ ! -f "$BREW_PREFIX/bin/pinentry-mac" ]]; then
-    echo "Warning: pinentry-mac not found. Installing..."
-    brew install pinentry-mac
+if ! command -v "$gpg_bin" >/dev/null 2>&1; then
+  print_error "The declared GnuPG executable is missing; apply make nix-switch."
+  exit 1
 fi
-
-# Check if a GPG key already exists
-EXISTING_KEYS=$(gpg --list-secret-keys --keyid-format=long "$PERSONAL_EMAIL" 2>/dev/null || echo "")
-
-if [[ -n "$EXISTING_KEYS" ]]; then
-    echo "Found existing GPG key for $PERSONAL_EMAIL:"
-    echo "$EXISTING_KEYS"
-    echo ""
-    read -rp "Use this existing key? [Y/n] " use_existing
-
-    if [[ "${use_existing:-Y}" =~ ^[Yy]$ ]]; then
-        KEY_ID=$(echo "$EXISTING_KEYS" | grep sec | awk '{print $2}' | cut -d'/' -f2 | head -1)
-        echo "Using existing key: $KEY_ID"
-    else
-        echo "Please generate a new key manually with: gpg --full-generate-key"
-        exit 0
-    fi
-else
-    echo "Generating new GPG key..."
-    echo ""
-    read -rp "Name [$GIT_USER]: " name
-    name="${name:-$GIT_USER}"
-    read -rp "Email [$PERSONAL_EMAIL]: " email
-    email="${email:-$PERSONAL_EMAIL}"
-
-    # Generate key with batch mode.
-    # %no-protection: batch mode requires this; add a passphrase after with:
-    #   gpg --edit-key <KEY_ID>  →  passwd
-    gpg --batch --generate-key <<EOF
-Key-Type: RSA
-Key-Length: 4096
-Subkey-Type: RSA
-Subkey-Length: 4096
-Name-Real: $name
-Name-Email: $email
-Expire-Date: 2y
-%no-protection
-%commit
-EOF
-
-    # Get the key ID
-    KEY_ID=$(gpg --list-secret-keys --keyid-format=long "$email" | grep sec | awk '{print $2}' | cut -d'/' -f2)
-    echo "✓ GPG key generated: $KEY_ID"
+if ! "$gpg_bin" --batch --no-tty --with-colons --list-secret-keys "$signing_key" 2>/dev/null | grep -q '^sec:'; then
+  print_error "Restore/provision the selected private key securely on this device."
+  print_info "Do not generate a replacement identity or put private keys in Nix."
+  exit 1
 fi
-
-echo ""
-echo "Configuring Git to use GPG key..."
-
-# Update gitconfig files with the key ID
-# For personal config
-if grep -q "signingkey = #" ~/.gitconfig-personal 2>/dev/null; then
-    sed -i '' "s/signingkey = #.*/signingkey = $KEY_ID/" ~/.gitconfig-personal
-    echo "✓ Updated ~/.gitconfig-personal with signing key"
-elif ! grep -q "signingkey" ~/.gitconfig-personal 2>/dev/null; then
-    # Add signingkey if it doesn't exist
-    echo "	signingkey = $KEY_ID" >> ~/.gitconfig-personal
-    echo "✓ Added signing key to ~/.gitconfig-personal"
-fi
-
-# For work config (use same key since user chose single key approach)
-if [[ -f ~/.gitconfig-work ]]; then
-    if grep -q "signingkey = #" ~/.gitconfig-work 2>/dev/null; then
-        sed -i '' "s/signingkey = #.*/signingkey = $KEY_ID/" ~/.gitconfig-work
-        echo "✓ Updated ~/.gitconfig-work with signing key"
-    elif ! grep -q "signingkey" ~/.gitconfig-work 2>/dev/null; then
-        echo "	signingkey = $KEY_ID" >> ~/.gitconfig-work
-        echo "✓ Added signing key to ~/.gitconfig-work"
-    fi
-fi
-
-echo ""
-echo "GPG setup complete!"
-echo ""
-echo "Next steps:"
-echo "  1. Export your public key and add to GitHub:"
-echo "     gpg --armor --export $KEY_ID | pbcopy"
-echo "     Then go to: GitHub Settings → SSH and GPG keys → New GPG key"
-echo ""
-echo "  2. Test with a signed commit:"
-echo "     cd ~/personal/test-repo"
-echo "     git commit --allow-empty -S -m 'Test signed commit'"
-echo "     git log --show-signature -1"
+print_success "The selected OpenPGP key is available; Git configuration stays Nix-owned."
+print_info "This is a metadata check, not an unlock, signed-commit test, or GitHub registration check."

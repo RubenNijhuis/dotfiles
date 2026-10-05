@@ -52,7 +52,7 @@ app-audit: ## Read installed app versions and detect duplicate bundles (ARGS=--c
 ssh-setup: ## Generate SSH keys
 	@bash $(DOTFILES)/setup/generate-ssh-keys.sh
 
-gpg-setup: ## Generate GPG key and configure Git signing
+gpg-setup: ## Check readiness of the Nix-selected GPG signing key
 	@bash $(DOTFILES)/setup/generate-gpg-keys.sh
 
 gpg-check: ## Test GPG signing/encryption in a disposable keyring (never real keys)
