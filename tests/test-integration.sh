@@ -114,6 +114,11 @@ EOF
   output=$(HOME="$temp_home" PATH="$temp_bin:$PATH" \
     bash "$fixture_root/health/doctor.sh" --automation --no-color 2>&1)
 
+  if ! printf '%s' "$output" | /usr/bin/grep -q 'Profile.*personal-laptop'; then
+    print_error "FAIL(ops-status-profile): selected profile missing from header"
+    TEST_FAILURES=$((TEST_FAILURES + 1))
+  fi
+
   if ! printf '%s' "$output" | /usr/bin/grep -q "dotfiles-doctor    \[OK\] loaded | out 2026-04-12 02:09"; then
     print_error "FAIL(ops-status-doctor-log): expected task log timestamp"
     TEST_FAILURES=$((TEST_FAILURES + 1))
@@ -125,8 +130,38 @@ EOF
 
 # ── Run all tests ───────────────────────────────────────────────────
 
+test_shell_perf_reporting() {
+  (
+    source "$ROOT_DIR/health/checks/system.sh"
+    QUICK_MODE=false
+    # shellcheck disable=SC2329 # Invoked indirectly by check_shell_perf.
+    python3() {
+      [[ "$sample" != failed ]] || return 1
+      printf '%s\n' "$sample"
+    }
+    # shellcheck disable=SC2329 # Invoked indirectly by check_shell_perf.
+    record_result() { actual_status="$2"; }
+    # shellcheck disable=SC2329 # Invoked indirectly by check_shell_perf.
+    add_suggestion() { [[ "$1" != *'-xv'* ]]; }
+    for sample in 100 250 450 failed; do
+      case "$sample" in
+        100) expected_status=0 ;;
+        250|failed) expected_status=1 ;;
+        450) expected_status=2 ;;
+      esac
+      actual_status=-1
+      check_shell_perf
+      [[ "$actual_status" == "$expected_status" ]] || exit 1
+    done
+  ) || {
+    print_error "FAIL(shell-perf): incorrect result or unsafe tracing suggestion"
+    TEST_FAILURES=$((TEST_FAILURES + 1))
+  }
+}
+
 test_clean_dry_run_safe
 test_restore_dry_run_safe
 test_ops_status_uses_doctor_task_log
+test_shell_perf_reporting
 
 test_summary "integration"

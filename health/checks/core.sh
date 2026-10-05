@@ -94,6 +94,13 @@ check_ssh() {
 
 check_gpg() {
 
+  # SSH signing is already a complete Git signing choice. Do not demand a
+  # second identity or invoke the unrelated GPG keyring/signing machinery.
+  if [[ "$(git -C / config --get gpg.format 2>/dev/null || true)" == ssh ]]; then
+    record_result "GPG Configuration" 0 "Git uses SSH signing; GPG is not required for Git"
+    return
+  fi
+
   local gpg_pref
   gpg_pref="$(get_preference "PREF_SETUP_GPG")"
   if [[ "$gpg_pref" == "no" ]]; then

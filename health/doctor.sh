@@ -483,9 +483,6 @@ run_automation_dashboard() {
 }
 
 run_quick() {
-  source "$SCRIPT_DIR/../lib/env.sh"
-  dotfiles_load_env "$DOTFILES"
-
   STATUS_ISSUES=0
   print_section "Today"
   status_check_nix
@@ -505,6 +502,12 @@ run_quick() {
 
 main() {
   parse_args "$@"
+
+  # Load the selected profile before printing non-full mode headers.
+  if ! $FULL_MODE; then
+    source "$SCRIPT_DIR/../lib/env.sh"
+    dotfiles_load_env "$DOTFILES"
+  fi
 
   # --full: deep health-check suite (existing behavior)
   if $FULL_MODE; then

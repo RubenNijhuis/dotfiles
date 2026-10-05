@@ -11,7 +11,13 @@ record_result() { actual_result="$2"; }
 git() {
   [[ "$1" == -C && "$2" == / && "$3" == config ]] || return 9
   case "$4" in
-    --get) [[ "$test_case" != missing-identity ]] ;;
+    --get)
+      if [[ "${5:-}" == gpg.format ]]; then
+        printf 'ssh\n'
+      else
+        [[ "$test_case" != missing-identity ]]
+      fi
+      ;;
     --get-regexp) [[ "$test_case" != missing-includes ]] ;;
     *) return 9 ;;
   esac
@@ -28,6 +34,15 @@ for test_case in complete missing-identity missing-includes; do
   }
 done
 echo 'PASS: Git health checks resolve configuration outside repositories'
+
+# This guard must not inspect keys, request a passphrase, or try a GPG signature.
+# shellcheck disable=SC2329 # Must remain uncalled by check_gpg with SSH signing.
+gpg() { echo 'FAIL: SSH signing touched the GPG keyring' >&2; exit 9; }
+actual_result=-1
+check_gpg
+[[ "$actual_result" == 0 ]]
+unset -f gpg
+echo 'PASS: SSH Git signing does not require a second GPG identity'
 
 # Recovery checks run in a disposable repository; no real index, keys, or
 # network operations. A missing upstream must never look like a saved copy.

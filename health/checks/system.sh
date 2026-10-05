@@ -138,28 +138,36 @@ check_shell_perf() {
     return
   fi
 
-  # Measure zsh startup time (average of 3 runs for stability)
-  # Use python3 for portable millisecond timestamps (macOS date lacks %N)
-  local total_ms=0
+  # One monotonic timer excludes Python's own startup from the shell timing.
+  # Suppress shell output: private overrides must never enter the health log.
   local runs=3
-  for _ in $(seq 1 $runs); do
-    local start_ms end_ms elapsed_ms
-    start_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
-    zsh -i -c exit 2>/dev/null
-    end_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
-    elapsed_ms=$((end_ms - start_ms))
-    total_ms=$((total_ms + elapsed_ms))
-  done
-  local avg_ms=$((total_ms / runs))
+  local avg_ms
+  if ! avg_ms=$(python3 - "$runs" <<'PY'
+import subprocess
+import sys
+import time
+
+samples = []
+for _ in range(int(sys.argv[1])):
+    start = time.perf_counter()
+    subprocess.run(["zsh", "-i", "-c", "exit"], check=True,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    samples.append((time.perf_counter() - start) * 1000)
+print(round(sum(samples) / len(samples)))
+PY
+  ); then
+    record_result "Shell Performance" 1 "Startup measurement failed; performance not verified"
+    return
+  fi
 
   local details="Average startup: ${avg_ms}ms (${runs} runs)"
 
   if [[ $avg_ms -gt 300 ]]; then
     record_result "Shell Performance" 2 "$details — exceeds 300ms threshold"
-    add_suggestion "Profile shell startup: zsh -xvlic exit 2>&1 | head -100"
+    add_suggestion "Profile shell function timings with zprof; avoid tracing private overrides"
   elif [[ $avg_ms -gt 200 ]]; then
     record_result "Shell Performance" 1 "$details — exceeds 200ms threshold"
-    add_suggestion "Profile shell startup: zsh -xvlic exit 2>&1 | head -100"
+    add_suggestion "Profile shell function timings with zprof; avoid tracing private overrides"
   else
     record_result "Shell Performance" 0 "$details"
   fi
