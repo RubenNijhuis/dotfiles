@@ -5,7 +5,7 @@ set -euo pipefail
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
   echo "Usage: $0"
-  echo "Creates the standard Files and Private directories without moving data."
+  echo "Creates synced-document folders and local credential/rollback folders; never moves data."
   exit 0
 fi
 
@@ -41,11 +41,11 @@ mkdir -p \
 
 mkdir -p \
   "$private_root/Credentials/Exports" \
-  "$private_root/Identity" \
+  "$private_root/Migrations" \
   "$private_root/Recovery Codes"
 chmod 700 "$private_root" "$private_root/Credentials" \
-  "$private_root/Credentials/Exports" "$private_root/Identity" \
+  "$private_root/Credentials/Exports" "$private_root/Migrations" \
   "$private_root/Recovery Codes"
 
 printf 'Personal file structure is ready at %s\n' "$files_root"
-printf 'Private local-only structure is ready at %s\n' "$private_root"
+printf 'Local credential/rollback structure is ready at %s\n' "$private_root"

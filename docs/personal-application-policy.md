@@ -18,6 +18,21 @@ available.
 | RAW photographs | RawTherapee | Apple Photos for library viewing | Treat photo libraries as personal data. |
 | Video editing | DaVinci Resolve | HandBrake for graphical conversion | Do not use command-line media conversion unless explicitly requested. |
 
+## Raycast application launchers
+
+The preferred application keywords are declared in
+`nix/home/raycast.nix`. Home Manager installs them as Raycast Script Commands
+under `~/.config/raycast/script-commands/`.
+
+On each Mac, add that directory once in **Raycast Settings → Extensions →
+Script Commands**. Raycast then indexes changes automatically. Do not commit a
+`.rayconfig` export: it is encrypted but can bundle private Raycast data such
+as clipboard history and AI chats, and it is not a reviewable declarative
+configuration.
+
+Remove matching native application aliases from Raycast after registering the
+directory so Root Search does not show duplicate launchers.
+
 ## Assistant rules
 
 1. Use the preferred application first. If it cannot do the job, say why and

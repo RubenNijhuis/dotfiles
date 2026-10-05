@@ -24,11 +24,17 @@ tooling. It is not a document store. Large media libraries, virtual machines,
 downloads, caches, application support folders, and backups also stay outside
 `~/Files` unless they are deliberate, curated assets.
 
-`~/Private` is the separate, local-only holding area for sensitive files that
-must never enter ordinary file synchronization: identity scans, password
-manager exports, recovery codes, and confidential exports. It is owner-only
-on Unix systems, but that is not encryption; it must still be included in an
-encrypted backup plan and kept out of cloud-sync roots.
+Private personal records also belong in the iCloud-backed `~/Files` tree,
+classified by purpose: legal and identity documents in `20 Areas/Legal & Records`,
+financial records in `20 Areas/Finance & Business`, employment records in
+`20 Areas/Career & Employment`, and historical material in `40 Archive`.
+Sensitivity alone is not a reason to create a device-only document library.
+
+`~/Private` remains local technical storage for credential exports, keys, and
+migration/rollback material, not the canonical home for personal records.
+Do not upload that entire folder: it can contain secrets and duplicate vaults.
+Owner-only permissions are not encryption; recovery copies need a separate
+encrypted backup plan. Passwords and passkeys belong in Apple Passwords.
 
 ## Folder rules
 
@@ -40,6 +46,10 @@ encrypted backup plan and kept out of cloud-sync roots.
 | `30 Resources` | Reference PDFs, manuals, reusable assets, research, reading | The only copy of a critical record |
 | `40 Archive` | Completed projects and inactive reference material, preserving its prior structure | Disposable clutter |
 | `90 Shared` | Intentionally shared material with a clearly selected sync policy | Secrets, passwords, device backups, or application databases |
+
+Syncing between your own devices is not sharing with other people. Private
+records stay in their normal category, not `90 Shared`; do not enable public
+links or other people's access without explicit approval.
 
 Use dates as `YYYY-MM-DD` when chronology matters, e.g.
 `2026-08-31 travel-insurance-policy.pdf`. Keep names human-readable; do not
@@ -57,7 +67,7 @@ DOTFILES_FILES_AREAS
 DOTFILES_FILES_RESOURCES
 DOTFILES_FILES_ARCHIVE
 DOTFILES_FILES_SHARED
-DOTFILES_PRIVATE_ROOT    # defaults to ~/Private; never sync this root
+DOTFILES_PRIVATE_ROOT    # defaults to ~/Private; local credentials/technical rollback
 ```
 
 On macOS and Linux, use the default `~/Files`. On Windows, use
@@ -72,9 +82,9 @@ under `/mnt/c`.
 Synchronization is not backup. The eventual system has three independent
 layers:
 
-1. **Working copy** — the local `~/Files` folder.
-2. **Sync** — an intentionally selected transport, initially one small test
-   folder rather than the entire history.
+1. **Working copy** — `~/Files`, kept downloaded on this Mac.
+2. **Sync** — iCloud Drive for the current Mac/iPhone/iPad setup, using the
+   actual Obsidian app container and one Files tree.
 3. **Encrypted backup** — a versioned backup kept separately from the sync
    provider.
 
@@ -92,22 +102,16 @@ Use one owner and one transport for each kind of data:
 | Data | Canonical owner | Cross-device method |
 | --- | --- | --- |
 | Nix, dotfiles, scripts, templates | Git repository | Git clone/pull; never a file-sync folder |
-| Ordinary active documents in `~/Files` | local working copy | Syncthing between trusted personal devices |
-| Large media and archives | selected subfolders | opt-in Syncthing replication only where storage allows |
-| Secrets and private configuration | encrypted source only | `sops` + `age` through Git, introduced after recovery keys are planned |
-| Recovery copies | encrypted backup repository | Restic to local and offsite destinations |
+| Documents, notes, and curated media in `~/Files` | one iCloud Drive/Obsidian/Files tree | iCloud Drive on Apple devices; stable `~/Files` symlink on Mac |
+| Passwords and passkeys | Apple Passwords | supported iCloud Keychain sync; never plaintext files or Nix |
+| Private personal records | purpose-based folders in `~/Files` | same iCloud tree; no public or shared access by default |
+| Keys, plaintext credential exports, technical rollback | local `~/Private` or app-owned storage | secure provisioning/encrypted recovery, not ordinary file sync |
+| Recovery copies | independent encrypted backup | deferred; iCloud and the local migration copy are not substitutes |
 | App databases, caches, browser profiles, VM data | device-local | application-supported sync only, if needed |
 
-The first sync pilot should be one small, low-risk folder—not the whole home
-directory or all of `~/Files`. Enable Syncthing staggered versioning before
-adding real work. After testing offline edits, a conflict, and recovery from a
-deletion, expand one folder at a time. Use Restic independently: sync makes
-files available, while a tested encrypted backup makes them recoverable.
-
-For Windows, run Syncthing against the native `C:\Users\<you>\Files` tree;
-WSL accesses it at `/mnt/c/Users/<you>/Files` when Windows applications need
-the same documents. Keep Linux project repositories and package data outside
-that mounted tree.
+See [file-sync options](file-sync-options.md) for the current handoff, reconnect
+instructions, and Windows/Linux limitations. Do not run two sync engines on
+the same live vault. Keep repositories and package data outside synced files.
 
 ## Current consolidation queue
 
@@ -123,8 +127,9 @@ not by one broad move:
 3. **Developer:** keep active repositories in `~/Developer` and use Git for
    synchronization. Classify old non-repository material before moving it into
    `~/Files/40 Archive`; do not sync build outputs or dependency directories.
-4. **Private:** retain as a local-only boundary until an encrypted backup and
-   recovery procedure exists. It is never a general Syncthing folder.
+4. **Private:** classify durable personal documents into the normal synced
+   Files categories after reviewing exact targets. Keep credential exports,
+   keys, and technical migration copies local; do not sync this root wholesale.
 
 Before any irreversible cleanup, create a mapping manifest and verify copies
 or hashes for duplicated material. Former-employer and legal material need an
@@ -132,15 +137,16 @@ explicit retention decision; they are not part of an automated cleanup.
 
 ## Adoption sequence
 
-1. Run `make files-init` on each device. It creates the empty structure and
-   changes nothing else.
+1. On another Mac, reconnect the existing iCloud Files tree first. Use
+   `make files-init` for a new local tree or missing structural folders only;
+   it does not configure sync.
 2. Point the file manager sidebar at `~/Files` and keep Downloads as a source
    for `00 Inbox`, not as permanent storage.
 3. Inventory existing folders by category and move only copies or clearly
    classified groups, verifying each move before deleting an original.
-4. Pilot Syncthing on one small folder with versioning enabled; test a restore
-   and a conflicting offline edit before expanding it.
-5. Add Restic encrypted, versioned backups before relying on the new
-   structure; verify with an actual restore into a temporary folder.
+4. Verify the initial iCloud upload and mobile note editing in both directions.
+   Keep the Mac copy downloaded; Windows/Linux editing needs a separate plan.
+5. When backup work resumes, add independent encrypted, versioned backups
+   and verify an actual restore into a temporary folder.
 
 No mass move or cloud migration is part of the initializer.

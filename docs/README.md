@@ -16,6 +16,7 @@ Index for the dotfiles documentation.
 
 ## Tool Configuration
 
+- [cmux](cmux.md) — Nix-owned terminal preferences, shortcuts, and adoption
 - [EditorConfig](editorconfig.md) — consistent coding styles across editors
 - [Git Hooks](git-hooks.md) — pre-commit and other repo hooks
 - [VS Code](vscode.md) — editor settings and extensions
@@ -25,3 +26,4 @@ Index for the dotfiles documentation.
 
 - [Runbook: Backups](runbooks/backup.md)
 - [Runbook: Incident Recovery](runbooks/incident-recovery.md)
+- [Runbook: New Mac Recovery](runbooks/new-mac-recovery.md)
