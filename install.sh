@@ -3,7 +3,7 @@
 # Usage: git clone https://github.com/<user>/dotfiles.git ~/Developer/personal/dotfiles && cd ~/Developer/personal/dotfiles && ./install.sh
 set -euo pipefail
 
-DOTFILES="$(cd "$(dirname "$0")" && pwd)"
+DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$DOTFILES/lib/env.sh"
 dotfiles_load_env "$DOTFILES"
 source "$DOTFILES/lib/brew.sh"
@@ -382,9 +382,18 @@ run_step() {
 step_detect_system() {
   print_success "OS: $OS ($ARCH)"
   if [[ "$OS" != "Darwin" ]]; then
-    print_error "Unsupported OS: $OS. This repository is macOS-only."
+    print_error "Unsupported OS: $OS. This bootstrap is macOS-only; Linux/WSL use Home Manager."
     exit 1
   fi
+
+  if [[ "$ARCH" != "arm64" || "$(id -un)" != "rubennijhuis" ]]; then
+    print_error "This Mac target requires Apple Silicon and the rubennijhuis user."
+    print_info "Adapt the flake's host/user configuration before installing on a different machine."
+    exit 1
+  fi
+
+  # Validate the complete exception selection before installing or switching.
+  brew_declared_taps "$DOTFILES" >/dev/null || return 1
 
   local missing=0
   local cmd
@@ -478,36 +487,8 @@ step_install_homebrew() {
   print_success "Homebrew ready"
 }
 
-trust_declared_taps() {
-  # Homebrew requires explicit trust for third-party taps before bundle
-  # will load their formulae. Trust every currently-installed tap plus
-  # every `tap "..."` line in the profile's Brewfiles. Covers both fresh
-  # installs and existing machines with leftover taps. Idempotent —
-  # `brew trust` on an already-trusted tap is a no-op.
-  local brewfile_name brewfile_path tap
-  local -a taps=()
-
-  while IFS= read -r tap; do
-    [[ -n "$tap" ]] && taps+=("$tap")
-  done < <(brew tap 2>/dev/null)
-
-  while IFS= read -r brewfile_name; do
-    brewfile_path="$DOTFILES/brew/$brewfile_name"
-    [[ -f "$brewfile_path" ]] || continue
-    while IFS= read -r tap; do
-      taps+=("$tap")
-    done < <(awk -F'"' '/^tap "/{print $2}' "$brewfile_path")
-  done < <(dotfiles_profile_brewfiles)
-
-  local unique_tap
-  for unique_tap in $(printf '%s\n' "${taps[@]}" | sort -u); do
-    brew trust "$unique_tap" >/dev/null 2>&1 || \
-      print_warning "Could not trust tap: $unique_tap"
-  done
-}
-
 step_install_packages() {
-  trust_declared_taps
+  brew_trust_declared_taps "$DOTFILES" || return 1
   local brewfile_name brewfile_path
   while IFS= read -r brewfile_name; do
     brewfile_path="$DOTFILES/brew/$brewfile_name"
@@ -557,13 +538,13 @@ step_install_lix() {
 
 step_verify_nix_configuration() {
   print_status_row "Nix" info "$(nix --version)"
-  make -C "$DOTFILES" nix-check
-  make -C "$DOTFILES" nix-build
+  make -C "$DOTFILES" nix-check || return 1
+  make -C "$DOTFILES" nix-build || return 1
   print_success "Locked Nix configuration builds"
 }
 
 step_apply_nix_configuration() {
-  make -C "$DOTFILES" nix-switch
+  make -C "$DOTFILES" nix-switch || return 1
   print_success "Nix configuration applied"
 }
 
@@ -680,4 +661,6 @@ run_post_install_health_check() {
   fi
 }
 
-nix_main "$@"
+if [[ "${DOTFILES_INSTALL_SOURCE_ONLY:-0}" != "1" ]]; then
+  nix_main "$@"
+fi

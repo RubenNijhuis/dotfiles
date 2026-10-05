@@ -65,6 +65,7 @@ main() {
   run_step "CLI parsing checks" bash "$DOTFILES/tests/test-cli-parsing.sh"
   run_step "CLI contract checks" bash "$DOTFILES/tests/test-cli-contract.sh"
   run_step "Install checkpoint checks" bash "$DOTFILES/tests/test-install-checkpoint.sh"
+  run_step "Isolated bootstrap contracts" bash "$DOTFILES/tests/test-bootstrap-contract.sh"
   run_step "Keychain requirement checks" bash "$DOTFILES/setup/check-keychain.sh" --no-color
   if $RUN_DOCTOR; then
     run_step "Doctor quick check" bash "$DOTFILES/health/doctor.sh" --quick --no-color

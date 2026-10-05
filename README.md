@@ -8,13 +8,18 @@ Nix-first, cross-platform personal environment with a thin macOS layer.
 
 Before the first Nix activation:
 
-1. Update macOS to the latest release (System Settings > General > Software Update).
-2. Install Xcode Command Line Tools if absent:
+1. This Mac target requires Apple Silicon and the local username `rubennijhuis`.
+   Adapt the flake first for another username or architecture.
+2. Update macOS to the latest release (System Settings > General > Software Update).
+3. Install Xcode Command Line Tools if absent:
    ```bash
    xcode-select --install
    ```
    Wait for the GUI installer to finish. If already installed, use Software
    Update for updates; do not routinely delete the existing toolchain.
+4. Reconnect the existing iCloud-backed `~/Files` vault before writing personal
+   files. Follow the [recovery runbook](docs/runbooks/new-mac-recovery.md); the
+   installer neither restores iCloud nor creates a replacement vault.
 
 ### Install
 
@@ -80,6 +85,7 @@ Machine-local profile selection lives in `local/profile.env`.
 - Architecture and conventions: `docs/architecture.md`
 - Everyday assistant and application preferences: `docs/personal-application-policy.md`
 - Machine profiles: `docs/machine-profiles.md`
+- Writing and local exports: `docs/writing-workflow.md`
 - Runbooks: `docs/runbooks/`
 - Launchd templates and contracts: `launchd/README.md`
 

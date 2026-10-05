@@ -47,4 +47,23 @@ brew_profile_summary() {
   printf '%s\n' "$selection"
 }
 
-export -f brewfile_paths brew_normalize_entry_name brew_entry_key_from_line brew_profile_summary
+brew_declared_taps() {
+  local brewfile
+  while IFS= read -r brewfile; do
+    [[ -f "$brewfile" ]] || { printf 'Missing Brewfile: %s\n' "$brewfile" >&2; return 1; }
+    awk -F'"' '/^tap "/{print $2}' "$brewfile"
+  done < <(brewfile_paths "${1:-${DOTFILES:-}}")
+}
+
+brew_trust_declared_taps() {
+  # Installed leftovers do not grant permission to trust third-party code.
+  local taps tap
+  taps="$(brew_declared_taps "${1:-${DOTFILES:-}}")" || return 1
+  while IFS= read -r tap; do
+    [[ -n "$tap" ]] || continue
+    brew trust --tap "$tap" || return 1
+  done < <(printf '%s\n' "$taps" | sort -u)
+}
+
+export -f brewfile_paths brew_normalize_entry_name brew_entry_key_from_line brew_profile_summary \
+  brew_declared_taps brew_trust_declared_taps

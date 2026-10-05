@@ -45,7 +45,7 @@ parse_args() {
 }
 
 parse_args "$@"
-if ! dotfiles_profile_brewfiles | grep -q .; then
+if ! dotfiles_profile_brewfiles | grep -q . && ! command -v brew >/dev/null 2>&1; then
   print_header "Brewfile Audit"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Result" ok "no Homebrew exceptions selected; Nix owns this profile"
@@ -93,7 +93,7 @@ count_lines() {
 
 # -- Gather installed state --
 # Exclude default homebrew/* taps — they don't need Brewfile entries
-INSTALLED_TAPS=$(brew tap | grep -v '^homebrew/' | sort)
+INSTALLED_TAPS=$(brew tap | sed '/^homebrew\//d' | sort)
 # Use brew leaves to get only explicitly installed formulae (not transitive deps)
 # Strip tap prefixes (e.g. "user/tap/pkg" → "pkg") to match Brewfile short names
 INSTALLED_FORMULAE=$(brew leaves --installed-on-request 2>/dev/null | sed 's|.*/||' | sort)

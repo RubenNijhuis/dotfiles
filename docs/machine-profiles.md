@@ -51,6 +51,12 @@ services such as LM Studio and a WebDAV-backed Obsidian sync are opt-in:
 add them to a machine-local profile only after the corresponding application
 and data location exist on that machine.
 
+This Mac's exception selection restores Prism/Java, Mac pinentry, Krita,
+RawTherapee, and HandBrake. These are already installed, not a recommendation
+to put creative tools on every host. `minimal` selects none. Installed packages
+outside either selection remain visible in the audit, never silently adopted
+or removed. The installer trusts only taps explicitly declared by that profile.
+
 ## File Layout
 
 ```text

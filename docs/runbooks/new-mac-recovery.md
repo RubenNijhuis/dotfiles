@@ -54,14 +54,19 @@ employer data simply because a repository has no upstream.
 
 ## Rebuild
 
-1. Update macOS, install Xcode Command Line Tools, clone this repository to
-   `~/Developer/personal/dotfiles`, then run `./install.sh`.
-2. Run `make nix-build`, `make nix-switch`, and `make doctor`.
-3. Reconnect the existing iCloud Drive/Obsidian/Files vault, enable **Keep
+1. Use an Apple-Silicon Mac with local username `rubennijhuis`; another username
+   or architecture requires adapting the flake first. Update macOS, install
+   Xcode Command Line Tools, and clone this repository to
+   `~/Developer/personal/dotfiles`.
+2. Reconnect the existing iCloud Drive/Obsidian/Files vault, enable **Keep
    Downloaded**, and recreate the `~/Files` symlink following the
    [guarded reconnect instructions](../file-sync-options.md#reconnect-on-another-mac).
    Restore `~/Private` separately from a verified encrypted backup. Do not
-   restore a second Files tree over the live synced vault blindly.
+   restore a second Files tree over the live synced vault blindly. Do this before
+   writing notes or screenshots to `~/Files`; installation never downloads the vault.
+3. Run `./install.sh`. It installs/verifies Nix, builds and applies the locked
+   Mac configuration, then restores the selected Homebrew exceptions. A second
+   `make nix-switch` is unnecessary unless configuration changed. Run `make doctor`.
 4. Recreate device-bound state manually: Apple Account, FileVault, Touch ID,
    Wi-Fi, privacy permissions, and required Keychain entries.
 5. Sign into application-supported sync deliberately: Zen/Twilight, Signal,
@@ -74,6 +79,8 @@ employer data simply because a repository has no upstream.
 ## Verify
 
 - `make nix-check-all`, `make bootstrap-verify`, and `make doctor ARGS=--full` pass.
+- Bootstrap checks include mocked tap trust, profile drift, host/user rejection,
+  and failed-build boundaries; they are not a real clean-Mac installation test.
 - Thunderbird opens the signed-in account; Zen opens the intended synced
   profile; Obsidian opens `~/Files`.
 - Calendar notifications work on Apple devices and the operational calendar is

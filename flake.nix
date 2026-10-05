@@ -141,6 +141,27 @@
                 touch $out
               '';
         }
+        // nixpkgs.lib.optionalAttrs (editorHome.xdg.dataFile ? "pandoc/defaults/report-docx.yaml") {
+          writing =
+            pkgs.runCommand "writing-smoke"
+              {
+                nativeBuildInputs = with pkgs; [
+                  bash
+                  pandoc
+                  typst
+                  languagetool
+                  jq
+                  unzip
+                ];
+                TYPST_FONT_PATHS = "${pkgs.open-sans}/share/fonts";
+              }
+              ''
+                bash ${inputs.self}/tests/test-writing.sh \
+                  ${editorHome.xdg.dataFile."pandoc/defaults/report-docx.yaml".source} \
+                  ${editorHome.xdg.dataFile."pandoc/defaults/report-pdf.yaml".source}
+                touch $out
+              '';
+        }
       );
 
       packages = forAllSystems (system: {
