@@ -15,7 +15,7 @@ recovery codes, private addresses, or account databases in this repository.
 | --- | --- | --- |
 | Developer identity | Name and public contact address above | Nix, currently applied to Git |
 | Apple Account | Same display name; iCloud stays Apple-device specific | Apple Account settings |
-| Operational calendar | One account, not duplicated with iCloud | Calendar provider, then Apple Calendar and Thunderbird |
+| Operational calendar | Apple Calendar on Apple devices, backed by the chosen synced calendar account | iCloud or another deliberately selected provider; no parallel copies of events |
 | Mail | `contact@rubennijhuis.com` as public-facing address | Thunderbird account settings and mail provider |
 | Browser | Zen profile and Zen Sync are user-owned | Zen, never Nix |
 | ChatGPT/Codex | Same display name; preferred-app policy | ChatGPT/Codex settings |
@@ -31,7 +31,8 @@ recovery codes, private addresses, or account databases in this repository.
 - Zen: Nix manages the application; profile, Sync, history, and logins remain
   local and user-controlled.
 
-## Next manual action
+## Calendar handoff
 
-Rename or confirm the Google account address, then connect that one account
-with Calendar enabled on each device. Do not create parallel copies of events.
+Google is not a required calendar provider. Verify the intended iCloud calendar
+is selected for new events and notifications work on the phone and watch.
+The audit above is historical, not proof that every account remains configured.

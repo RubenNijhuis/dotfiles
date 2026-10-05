@@ -241,9 +241,26 @@ file_mtime_display() {
   fi
 }
 
+# Read local Git metadata only. Remote-tracking refs may be stale; never fetch
+# or publish as a side effect of a health check. Output: ahead, behind, changes.
+repo_recovery_counts() {
+  local repo="$1" counts changes ahead behind
+  counts=$(git -C "$repo" rev-list --left-right --count 'HEAD...@{upstream}' 2>/dev/null) || return 1
+  IFS=$'\t ' read -r ahead behind <<< "$counts"
+  [[ "$ahead" =~ ^[0-9]+$ && "$behind" =~ ^[0-9]+$ ]] || return 1
+  changes=$(GIT_OPTIONAL_LOCKS=0 git -C "$repo" status --porcelain=v1 2>/dev/null) || return 1
+  if [[ -n "$changes" ]]; then
+    changes=$(printf '%s\n' "$changes" | wc -l | tr -d '[:space:]')
+  else
+    changes=0
+  fi
+  printf '%s\t%s\t%s\n' "$ahead" "$behind" "$changes"
+}
+
 # Export functions so they're available in subshells (e.g. GNU parallel).
 export -f require_bash_version has_flag show_help_if_requested
 export -f require_cmd
 export -f log_msg acquire_lock notify require_network
 export -f rotate_logs run_automation confirm get_preference
 export -f latest_rollback_dir file_mtime_epoch file_mode file_mtime_display
+export -f repo_recovery_counts

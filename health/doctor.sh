@@ -316,7 +316,7 @@ print_summary() {
 }
 
 # ── Status mode ──────────────────────────────────────────────────────
-# Quick actionable summary: Nix generation, launchd, and backups.
+# Quick actionable summary: Nix, configuration recovery, launchd, and rollback.
 
 status_check_nix() {
   local generation
@@ -330,6 +330,22 @@ status_check_nix() {
   fi
   print_status_row "Nix" warn "no active generation found — bootstrap or switch the correct host"
   STATUS_ISSUES=$((STATUS_ISSUES + 1))
+}
+
+status_check_repo_recovery() {
+  local counts ahead behind changes
+  if ! counts=$(repo_recovery_counts "$DOTFILES"); then
+    print_status_row "Config recovery" warn "Git/upstream unavailable; remote recovery not verified"
+    STATUS_ISSUES=$((STATUS_ISSUES + 1))
+    return
+  fi
+  IFS=$'\t' read -r ahead behind changes <<< "$counts"
+  if [[ "$ahead" == 0 && "$changes" == 0 ]]; then
+    print_status_row "Config recovery" info "no local-only changes; remote status based on last check ($behind behind)"
+  else
+    print_status_row "Config recovery" warn "$ahead commits ahead, $changes changed entries; review and save remotely (last checked refs)"
+    STATUS_ISSUES=$((STATUS_ISSUES + 1))
+  fi
 }
 
 status_check_launchd() {
@@ -473,6 +489,7 @@ run_quick() {
   STATUS_ISSUES=0
   print_section "Today"
   status_check_nix
+  status_check_repo_recovery
   status_check_launchd
   status_check_backup
 

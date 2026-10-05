@@ -3,6 +3,20 @@
 Nix restores software and supported settings. It does not restore personal
 data, secrets, accounts, or device trust.
 
+## Everyday loss protection
+
+No reset is planned. The current priorities are uploaded durable files in the
+existing iCloud Files tree and remotely saved Git configuration. `make doctor`
+reports local-only dotfiles commits and uncommitted entries using cached remote
+refs; it does not contact GitHub, push, move files, or verify iCloud uploads.
+An active Nix generation is not evidence its source is saved remotely.
+
+Passwords already synced through Apple Passwords are not a local-only gap.
+Private SSH/GPG keys, deployment state, and app-owned project data need their
+own recovery method; never upload plaintext credentials with ordinary files.
+Keep repositories and dependencies outside iCloud and use supported app
+exports for creative projects. Independent backup work remains deferred.
+
 ## Before erasing the old Mac
 
 1. Confirm an **encrypted off-device backup** of `~/Files` and `~/Private`.
