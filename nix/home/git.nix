@@ -1,4 +1,4 @@
-{ ... }:
+{ lib, pkgs, ... }:
 
 let
   identity = import ../lib/identity.nix;
@@ -13,7 +13,11 @@ in
       user = {
         name = identity.fullName;
         email = identity.publicEmail;
+        signingKey = "~/.ssh/id_ed25519_personal.pub";
       };
+
+      commit.gpgSign = true;
+      tag.gpgSign = true;
 
       core = {
         excludesFile = "~/.config/git/ignore";
@@ -37,8 +41,7 @@ in
         hunk-header-decoration-style = "blue box";
       };
 
-      gpg.program = "gpg";
-      credential.helper = "osxkeychain";
+      gpg.format = "ssh";
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
@@ -69,6 +72,9 @@ in
         auto = true;
         strategy = "incremental";
       };
+    }
+    // lib.optionalAttrs pkgs.stdenv.hostPlatform.isDarwin {
+      credential.helper = "osxkeychain";
     };
 
     ignores = [

@@ -1,5 +1,0 @@
-[settings]
-experimental = false
-
-[tools]
-ruby = "latest"

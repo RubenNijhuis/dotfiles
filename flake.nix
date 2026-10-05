@@ -15,8 +15,8 @@
     };
 
     # Zen Twilight is an intentional, separately profiled preview channel for
-    # experimenting across macOS and Linux. The stable macOS release remains
-    # installed independently as a rollback path.
+    # experimenting across macOS and Linux. Browser profile data stays local
+    # and is never part of this flake.
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -67,7 +67,7 @@
           inherit modules;
         };
     in
-    {
+    rec {
       darwinConfigurations.Rubens-MacBook-Pro = darwin.lib.darwinSystem {
         system = "aarch64-darwin";
         specialArgs = { inherit inputs username; };
@@ -82,6 +82,7 @@
               imports = desktopHomeModules ++ [
                 ./nix/profiles/macos-apps.nix
                 ./nix/profiles/writing.nix
+                ./nix/profiles/leisure.nix
               ];
             };
           }
@@ -105,13 +106,50 @@
         );
       };
 
+      # Force the actual host configurations, not only package/devShell outputs.
+      # Cross-platform evaluation uses --no-build; build the current host alone.
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = pkgsFor system;
+          homes = nixpkgs.lib.filterAttrs (
+            _: home: home.pkgs.stdenv.hostPlatform.system == system
+          ) homeConfigurations;
+          editorHome =
+            if system == "aarch64-darwin" then
+              darwinConfigurations.Rubens-MacBook-Pro.config.home-manager.users.${username}
+            else
+              (builtins.head (builtins.attrValues homes)).config;
+        in
+        nixpkgs.lib.mapAttrs (_: home: home.activationPackage) homes
+        // nixpkgs.lib.optionalAttrs (system == "aarch64-darwin") {
+          macos = darwinConfigurations.Rubens-MacBook-Pro.system;
+        }
+        // {
+          neovim =
+            pkgs.runCommand "neovim-smoke"
+              {
+                nativeBuildInputs = [
+                  pkgs.bash
+                  pkgs.neovim
+                  pkgs.gitMinimal
+                  pkgs.lua-language-server
+                ];
+              }
+              ''
+                bash ${inputs.self}/tests/test-neovim.sh ${editorHome.home.file.".config/nvim".source} --smoke
+                touch $out
+              '';
+        }
+      );
+
       packages = forAllSystems (system: {
         nixfmt-tree = (pkgsFor system).nixfmt-tree;
       });
 
-      # A temporary, opt-in compatibility shell for existing projects whose
-      # declared Node range excludes the shared Node 24 baseline. New projects
-      # should pin their own devShell instead of growing the global profile.
+      # Opt-in environments: the same locked maintenance tools locally/in CI,
+      # plus a narrow Node 22 compatibility shell for older projects. New
+      # projects should pin their own shell, not grow the global profile.
       devShells = forAllSystems (
         system:
         let
@@ -119,6 +157,17 @@
           yarn = pkgs.yarn.override { nodejs = pkgs.nodejs_22; };
         in
         {
+          maintenance = pkgs.mkShell {
+            packages = with pkgs; [
+              bashInteractive
+              biome
+              git
+              gnumake
+              python3
+              shellcheck
+              shellharden
+            ];
+          };
           node22 = pkgs.mkShell {
             packages = [
               pkgs.nodejs_22
@@ -129,5 +178,10 @@
       );
 
       formatter = forAllSystems (system: (pkgsFor system).nixfmt-tree);
+
+      templates.node = {
+        path = ./templates/nix-project;
+        description = "Pinned Node/pnpm environment for a new code project";
+      };
     };
 }

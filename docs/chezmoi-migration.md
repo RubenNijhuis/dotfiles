@@ -1,46 +1,38 @@
-# chezmoi migration
+# ChezMoi retirement
 
-Chezmoi owns the remaining home-configuration source state under `chezmoi/`.
-The live ownership and Nix handoff status are maintained only in the
-[Nix ownership matrix](nix-ownership-matrix.md), so this document stays
-focused on chezmoi-specific mechanics. Its machine-local configuration is:
+ChezMoi is retired. Nix/Home Manager is the sole declarative configuration
+owner; applications and the user own their writable/private state. The old
+source tree, package, Make targets, health checks, and template tests are gone.
+The current contract is the [Nix ownership matrix](nix-ownership-matrix.md).
 
-```toml
-sourceDir = "~/Developer/personal/dotfiles/chezmoi"
-```
+## Ownership and recovery
 
-## Edge cases learned
+- SSH/GPG preferences live in `nix/home/ssh-and-gpg.nix` and `nix/config/`.
+  Keys, trust databases, known hosts, and agent sessions remain local.
+  The five original preference files remain as adjacent `.pre-nix` backups.
+- Spotify's reusable TokyoNight files and CLI belong to the opt-in
+  `nix/profiles/leisure.nix`. This Mac imports it; WSL and other hosts do not
+  receive Spotify theming unless explicitly selected. The two theme originals
+  remain as adjacent `.pre-nix` backups.
+- `config-xpui.ini`, custom apps, Spotify backups, and account data remain
+  writable and application-owned. Edit theme source in `nix/config/spicetify/`;
+  `spicetify color` cannot edit the read-only Nix palette.
+- `~/.config/shell/local.sh` stays user-owned, with mode 0600 and unchanged
+  contents. Bash/Zsh source it optionally; it is never rendered into Nix.
+  Restore it locally on a new machine, never through Git.
+- Global Mise/Ruby activation is retired. No Ruby manifest was found in the
+  active personal/work code scan. A future Ruby project should pin a devShell;
+  Ruby 4.0.5 was moved recoverably to Trash after approval. Older Node/Yarn
+  installations remain for existing project compatibility.
 
-- **0-byte source files are silently skipped** unless you prefix with
-  `empty_` (so `.hushlogin` → `empty_dot_hushlogin`).
-- **Anything in `chezmoi/` maps to `$HOME`.** Putting `README.md` in the
-  source state would copy it to `~/README.md` on apply. Doc lives in
-  `docs/` instead.
-- **`~/.config/chezmoi/chezmoi.toml` is machine-local**, not committed.
-  Each machine needs `sourceDir = "<absolute path to this repo>/chezmoi"`.
-- **Executable bits use a filename prefix.** `executable_foo.sh` in the
-  source state becomes `~/foo.sh` with `+x`.
-- **Nested `.git` directories are not source state.** Do not copy an
-  application-managed `.git` directory into chezmoi.
-- **`private_` prefix on a directory sets 0700.** Used for `.ssh/` and
-  `.gnupg/`. On a file: 0600. Chezmoi enforces these on every apply.
+The approved local-only migration archive is:
+`~/Private/Migrations/2026-10-03-chezmoi-retirement/`.
+It contains the old `chezmoi/` configuration (possibly secret values) and
+`mise/config.toml`. Keep it private and include it in an encrypted off-device
+backup when available. Do not restore it as active ChezMoi ownership.
 
-## Templates + machine-local data
-
-`chezmoi/dot_config/shell/local.sh.tmpl` is the first tracked template.
-It renders into `~/.config/shell/local.sh` using values from
-`~/.config/chezmoi/chezmoi.toml`:
-
-```toml
-sourceDir = "~/Developer/personal/dotfiles/chezmoi"
-
-[data.machine]
-  obsidian_vault_path = "/Users/.../obsidian-store"
-[data.secrets]
-  linear_api_key = "..."
-```
-
-The template references `{{ .machine.* }}` and `{{ .secrets.* }}`. The
-structure is version-controlled; only the values stay machine-local.
-Add new machine-specific shell config by extending the .tmpl and
-adding the corresponding entry under `[data.machine]` or `[data.secrets]`.
+After any restore or adoption, run `make nix-switch` and verify links and
+actual executable versions. `make gpg-check` tests signing/encryption using
+disposable keys only; it does not prove compatibility with personal keys or
+replace a real recovery test. Mac pinentry remains a documented Homebrew
+exception until Nix supplies a suitable version.

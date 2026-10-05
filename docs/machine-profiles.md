@@ -2,9 +2,8 @@
 
 Machine profiles let one dotfiles repo target multiple machine roles without
 forcing each one to use the same Brewfile + automation set. The profile
-system was slimmed when the repo retired Stow in favor of ChezMoi: ChezMoi handles
-config-file variance via templates, so the profile is now only responsible
-for **which package list installs** and **which launchd agents register**.
+system selects only **documented Homebrew exceptions** and **launchd agents**.
+Nix host imports select declarative configuration and capability profiles.
 
 > The long-term, cross-platform capability model is in
 > [the Nix transition](nix-transition.md#capability-profiles). These legacy
@@ -44,8 +43,8 @@ Profiles currently affect:
 
 The portable core is selected by the Nix host target, not these legacy
 profiles. See [Nix transition](nix-transition.md#capability-profiles) for the
-cross-platform capability model. ChezMoi only manages the paths that remain
-explicitly transition-owned.
+cross-platform capability model. ChezMoi is retired; private overrides remain
+user-owned, outside Nix and Git.
 
 The personal-laptop profile keeps only general maintenance automations. Local
 services such as LM Studio and a WebDAV-backed Obsidian sync are opt-in:
@@ -70,12 +69,13 @@ DOTFILES_PROFILE="personal-laptop"
 
 ## Profile Definition Format
 
-Each profile is a shell env file with two relevant keys:
+Each profile is a shell env file with four relevant keys:
 
 - `DOTFILES_PROFILE` — canonical name (must match filename without `.env`)
 - `DOTFILES_PROFILE_LABEL` — human-readable
 - `DOTFILES_PROFILE_BREWFILES` — space-separated list of `Brewfile.*` to apply
-- `DOTFILES_PROFILE_AUTOMATIONS` — space-separated list of launchd agent names
+- `DOTFILES_PROFILE_AUTOMATIONS` — space-separated launchd agent names; empty
+  means none, not all. The personal laptop selects only `update-audit`.
 
 Example (`profiles/minimal.env`):
 
@@ -83,7 +83,7 @@ Example (`profiles/minimal.env`):
 DOTFILES_PROFILE="minimal"
 DOTFILES_PROFILE_LABEL="Minimal"
 DOTFILES_PROFILE_BREWFILES=""
-DOTFILES_PROFILE_AUTOMATIONS="dotfiles-backup dotfiles-doctor log-cleanup brew-audit weekly-digest"
+DOTFILES_PROFILE_AUTOMATIONS=""
 ```
 
 ## Creating A New Profile
@@ -114,6 +114,5 @@ make doctor             # health + automation dashboard
 
 The profile system used to also declare "required commands / paths /
 keychain items" as a machine-readiness contract. Those checks have been
-removed — chezmoi templates conditionally apply config based on tool
-availability, and the individual doctor checks (`check_ssh`,
+removed — Nix host imports select configurations, and the individual doctor checks (`check_ssh`,
 `check_developer`, etc.) already validate the paths that matter.

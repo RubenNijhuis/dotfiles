@@ -13,37 +13,69 @@ fe() {
     [[ -n "$file" ]] && ${=EDITOR:-nvim} "${file}"
 }
 
-# Quick project launcher (fd + fzf)
-proj() {
-    local project dev_root
-    dev_root="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+# Optional, Nix-owned platform integration (absent on Linux/WSL).
+# shellcheck disable=SC1091
+[[ ! -f "$HOME/.config/shell/cmux.sh" ]] || source "$HOME/.config/shell/cmux.sh"
 
-    if ! command -v fd >/dev/null 2>&1; then
-        echo "fd is not installed."
+# Choose a repository, or open an explicit directory. Worktrees use .git files.
+proj() {
+    local project dev_root dir ts editor
+    if [[ $# -gt 1 || "${1:-}" == "--help" ]]; then
+        echo "Usage: proj [directory]"
+        return 0
+    fi
+    if [[ $# -eq 1 ]]; then
+        project="$1"
+    else
+        dev_root="${DOTFILES_DEVELOPER_ROOT:-$HOME/Developer}"
+        if ! command -v fd >/dev/null 2>&1 || ! command -v fzf >/dev/null 2>&1; then
+            echo "proj: fd and fzf are required for the picker." >&2
+            return 1
+        fi
+        project=$(fd --hidden --no-ignore --type d --type f --glob '.git' \
+            --prune --max-depth 6 "$dev_root" \
+            | sed 's|/\.git/*$||' \
+            | while IFS= read -r dir; do
+                ts=$(git -C "$dir" log -1 --format='%ct' 2>/dev/null) || ts=0
+                printf '%s\t%s\n' "$ts" "$dir"
+            done \
+            | sort -t$'\t' -k1 -nr \
+            | cut -f2- \
+            | fzf --prompt='project> ' --height=80% --layout=reverse --no-sort)
+        [[ -n "$project" ]] || return 0
+    fi
+    if [[ ! -d "$project" ]]; then
+        printf 'proj: directory not found: %s\n' "$project" >&2
         return 1
     fi
-
-    # Find git repos, sort by most recently modified (commit timestamp)
-    project=$(fd --type d --hidden --no-ignore --glob '.git' "$dev_root" --max-depth 5 \
-        | sed 's|/\.git/*$||' \
-        | while read -r dir; do
-            ts=$(git -C "$dir" log -1 --format='%ct' 2>/dev/null || echo 0)
-            printf '%s\t%s\n' "$ts" "$dir"
-        done \
-        | sort -t$'\t' -k1 -nr \
-        | cut -f2 \
-        | fzf --prompt='project> ' --height=80% --layout=reverse \
-            --with-nth=-1 --delimiter='/' \
-            --no-sort)
-    [[ -n "$project" && -d "$project" ]] || return
-
-    cd "${project}" || return
-
-    local editor="${EDITOR:-nvim}"
+    project=$(builtin cd -- "$project" && pwd -P) || return
+    if [[ -n "${CMUX_WORKSPACE_ID:-}" ]] && command -v cmux >/dev/null 2>&1; then
+        cmux new-workspace --cwd "$project" --name "${project##*/}" --focus true
+        return $?
+    fi
+    builtin cd -- "$project" || return
+    editor="${EDITOR:-nvim}"
     case "$editor" in
-        vim|nvim|nano|vi|emacs) $editor . ;;
-        *) $editor --new-window . ;;
+        vim|nvim|nano|vi|emacs) "$editor" . ;;
+        *) "$editor" --new-window . ;;
     esac
+}
+
+# Explicit completion notifications; preserve the command's arguments and status.
+notify-run() {
+    local result label
+    if [[ $# -eq 0 ]]; then
+        echo "Usage: notify-run command [arguments...]" >&2
+        return 2
+    fi
+    label="${1##*/}"
+    if "$@"; then result=0; else result=$?; fi
+    if [[ -n "${CMUX_WORKSPACE_ID:-}" ]] && command -v cmux >/dev/null 2>&1; then
+        # Avoid copying arguments (which can contain secrets) into notifications.
+        cmux notify --title "$label finished" --body "Exit status: $result" \
+            >/dev/null 2>&1 || true
+    fi
+    return "$result"
 }
 
 # Create new project with template

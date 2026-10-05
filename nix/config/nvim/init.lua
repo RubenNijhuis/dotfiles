@@ -1,18 +1,7 @@
--- Nix-owned bootstrap for lazy.nvim
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = "https://github.com/folke/lazy.nvim.git"
-  local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
-  if vim.v.shell_error ~= 0 then
-    vim.api.nvim_echo({
-      { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
-      { out, "WarningMsg" },
-      { "\nPress any key to exit..." },
-    }, true, {})
-    vim.fn.getchar()
-    os.exit(1)
-  end
-end
+-- Home Manager substitutes this public dependency during the Nix build.
+-- Never clone a mutable plugin manager at editor startup.
+local lazypath = "@lazy_nvim@"
+assert(vim.uv.fs_stat(lazypath), "Nix lazy.nvim is missing; rebuild the editor configuration")
 vim.opt.rtp:prepend(lazypath)
 
 -- Set leader key before loading plugins

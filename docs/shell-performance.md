@@ -15,7 +15,7 @@ the shared modules in `nix/config/shell/`.
 
 ## What is deferred or cached
 
-- `mise` initializes only when a project asks for its Ruby tooling.
+- Global Mise activation is retired; project runtimes use explicit devShells.
 - `zoxide` initializes only when `z` or `zi` is first used.
 - Starship, Atuin, GitHub CLI, Docker, and similar `init`/completion output is
   cached under `$XDG_CACHE_HOME/{zsh,bash}`.

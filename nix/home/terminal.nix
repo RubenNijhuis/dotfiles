@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   # Home Manager is the sole owner of generated shell startup files.

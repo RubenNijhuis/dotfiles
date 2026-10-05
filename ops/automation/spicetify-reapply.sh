@@ -37,7 +37,7 @@ parse_args() {
 
 spotify_app_path() {
   # Prefer the path spicetify is configured against; fall back to /Applications.
-  local cfg="$HOME/.config/spicetify/config-xpui.ini"
+  local cfg="${SPICETIFY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/spicetify}/config-xpui.ini"
   local resources
   if [[ -f "$cfg" ]]; then
     resources="$(awk -F'=' '/^spotify_path/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2; exit}' "$cfg" || true)"
@@ -57,7 +57,7 @@ read_spotify_version() {
 }
 
 read_backup_version() {
-  local cfg="$HOME/.config/spicetify/config-xpui.ini"
+  local cfg="${SPICETIFY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/spicetify}/config-xpui.ini"
   [[ -f "$cfg" ]] || return 1
   awk -F'=' '
     /^\[Backup\]/ {inblock=1; next}
@@ -68,7 +68,7 @@ read_backup_version() {
 
 main() {
   parse_args "$@"
-  require_cmd spicetify "Install with: brew install spicetify-cli"
+  require_cmd spicetify "Enable nix/profiles/leisure.nix and switch the appropriate Nix host"
 
   local app spotify_v backup_v
   app="$(spotify_app_path)"

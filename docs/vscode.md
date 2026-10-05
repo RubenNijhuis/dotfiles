@@ -1,8 +1,9 @@
 # VS Code Configuration
 
 Settings and the extension manifest live in `nix/config/vscode/`. Home Manager
-links both into VS Code's native macOS location. The Nix manifest is the sole
-tracked extension list.
+links settings into VS Code's native location on graphical desktop hosts.
+The repository manifest is the sole tracked extension list; the setup command
+installs its extensions through VS Code, not Nix. WSL uses native Windows VS Code.
 
 ## Design Choices
 
@@ -27,9 +28,16 @@ tracked extension list.
 ```bash
 make nix-switch     # materialize the Nix-owned settings
 make vscode-setup   # install extensions from the manifest
+make vscode-setup ARGS=--check    # read-only check; non-zero if anything is missing
+make vscode-setup ARGS=--dry-run  # preview missing installs
 ```
 
 ## Adding Extensions
 
 1. Add the extension ID to `nix/config/vscode/extensions.txt`.
 2. Run `make vscode-setup` to install it on the current machine.
+
+Already-installed extensions are skipped; failures return a non-zero status.
+Unlisted extensions are never automatically uninstalled. The manifest declares
+IDs, not immutable versions: marketplace extensions and their updates remain
+an explicit application-managed exception to Nix reproducibility.

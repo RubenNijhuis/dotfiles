@@ -108,15 +108,6 @@ _zsh_eval_cache() {
 # cold-cache race where `<tool> init` momentarily produced empty output), we must
 # NOT leave the command undefined — for zoxide that would flood every `cd` (aliased
 # to `z`) with errors for the life of a persistent shell. A new shell retries.
-_zsh_lazy_load_mise() {
-  unfunction mise ruby gem bundle 2>/dev/null
-  _zsh_eval_cache mise activate zsh || return 1  # binaries still resolve via PATH
-}
-for cmd in mise ruby gem bundle; do
-  eval "${cmd}() { _zsh_lazy_load_mise; ${cmd} \"\$@\" }"
-done
-unset cmd
-
 _zsh_lazy_load_zoxide() {
   unfunction z zi __zoxide_z __zoxide_zi 2>/dev/null
   if ! _zsh_eval_cache zoxide init zsh; then

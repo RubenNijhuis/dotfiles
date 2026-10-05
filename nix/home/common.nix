@@ -25,9 +25,6 @@
       jq
       shellcheck
       yq-go
-      # Temporary migration tool: Nix owns the binary while the final small
-      # set of transition-owned paths is moved out of ChezMoi.
-      chezmoi
     ])
     # macOS registers these system-wide below. Linux and WSL receive the same
     # deliberately small typography baseline through Home Manager.

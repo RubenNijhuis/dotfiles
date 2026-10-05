@@ -1,0 +1,4 @@
+# Mac-only exception: pinned Nix pinentry_mac is 1.1.1.1; the installed
+# Homebrew helper is 1.3.1.1. Revisit when Nix catches up; do not downgrade it.
+# SSH/GnuPG configuration and the GnuPG binary belong to Nix.
+brew "pinentry-mac"

@@ -33,7 +33,7 @@ echo ""
 
 # Check if GPG is installed
 if ! command -v gpg &>/dev/null; then
-    echo "Error: GPG is not installed. Run 'brew install gnupg pinentry-mac' first."
+    echo "Error: GPG is not installed. Apply the Nix SSH/GPG configuration with 'make nix-switch' first."
     exit 1
 fi
 

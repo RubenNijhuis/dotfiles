@@ -20,8 +20,8 @@ shopt -s autocd 2>/dev/null
 shopt -s cdspell
 shopt -s dirspell 2>/dev/null
 
-# Nix-first PATH shared with Zsh. Mise remains available for runtimes selected
-# per project, while Homebrew is a fallback rather than the default source.
+# Nix-first PATH shared with Zsh. Project runtimes use explicit devShells;
+# Homebrew is a fallback rather than the default source.
 source ~/.config/shell/path.sh
 
 # Shared shell modules (bash-compatible)
@@ -72,7 +72,6 @@ fi
 
 _bash_eval_cache zoxide init bash 2>/dev/null || true
 _bash_eval_cache atuin init bash --disable-up-arrow 2>/dev/null || true
-_bash_eval_cache mise activate bash 2>/dev/null || true
 
 # FZF completion and file/directory pickers are provided by the installed fzf.
 # Keep Ctrl-R free for Atuin's history search.

@@ -26,9 +26,9 @@ profile. The first declarative macOS settings module is
 
 ## Transition rule
 
-The supported preferences are owned by `nix/darwin/defaults.nix`. Remaining
-ChezMoi paths are security- or application-specific transition state; they do
-not write macOS user-interface preferences already represented in Nix.
+The supported preferences are owned by `nix/darwin/defaults.nix`. ChezMoi is
+retired; applications and private local overrides must not compete with those
+declarative macOS preferences.
 
 ## Future additions, reviewed one category at a time
 

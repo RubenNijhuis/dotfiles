@@ -6,12 +6,14 @@
   # JavaScript projects across macOS, Linux, and WSL.
   home.packages = with pkgs; [
     biome
+    bash-language-server
     deadnix
     dust
     gh
     gum
     hyperfine
     jujutsu
+    lua-language-server
     nil
     nixd
     nixfmt
@@ -20,6 +22,8 @@
     pnpm
     prettier
     shellharden
+    shfmt
     statix
+    stylua
   ];
 }

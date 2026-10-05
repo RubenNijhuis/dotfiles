@@ -8,9 +8,8 @@ source "$SCRIPT_DIR/../lib/output.sh" "$@"
 source "$SCRIPT_DIR/../lib/env.sh"
 dotfiles_load_env "$DOTFILES"
 
-SPICETIFY_DIR="$HOME/.config/spicetify"
-SPICETIFY_CONFIG="$SPICETIFY_DIR/config-xpui.ini"
-SPOTIFY_APP="/Applications/Spotify.app"
+SPICETIFY_DIR="${SPICETIFY_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/spicetify}"
+SPICETIFY_CONFIG_FILE="$SPICETIFY_DIR/config-xpui.ini"
 
 usage() {
   cat <<EOF
@@ -21,23 +20,35 @@ EOF
 }
 
 require_spicetify() {
-  require_cmd "spicetify" "Install with: brew install spicetify-cli" || exit 1
+  require_cmd "spicetify" "Enable nix/profiles/leisure.nix and switch the appropriate Nix host" || exit 1
+}
+
+config_value() {
+  [[ -f "$SPICETIFY_CONFIG_FILE" ]] || return 0
+  awk -v section="$1" -v key="$2" '
+    /^[[:space:]]*\[/ { block=$0; gsub(/^[[:space:]]*\[|\][[:space:]]*$/, "", block); next }
+    block == section && index($0, "=") {
+      name=substr($0, 1, index($0, "=")-1)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", name)
+      if (name == key) {
+        value=substr($0, index($0, "=")+1)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+        print value; exit
+      }
+    }
+  ' "$SPICETIFY_CONFIG_FILE"
 }
 
 current_theme() {
-  spicetify config current_theme 2>/dev/null || echo "unknown"
+  config_value Setting current_theme
 }
 
 current_scheme() {
-  spicetify config color_scheme 2>/dev/null || echo "unknown"
+  config_value Setting color_scheme
 }
 
 current_apps() {
-  spicetify config custom_apps 2>/dev/null || echo ""
-}
-
-backup_state() {
-  spicetify backup status 2>&1 || true
+  config_value AdditionalOptions custom_apps
 }
 
 theme_root() {
@@ -53,18 +64,20 @@ print_status() {
   printf '\n'
 
   local issues=0
+  local spotify_path
+  spotify_path="$(config_value Setting spotify_path)"
 
-  if [[ -d "$SPOTIFY_APP" ]]; then
-    print_status_row "Spotify app" ok "$SPOTIFY_APP"
+  if [[ -n "$spotify_path" && -d "$spotify_path" ]]; then
+    print_status_row "Spotify resources" ok "$spotify_path"
   else
-    print_status_row "Spotify app" error "missing from /Applications"
+    print_status_row "Spotify resources" error "configured spotify_path is missing or unavailable"
     issues=$((issues + 1))
   fi
 
-  if [[ -L "$SPICETIFY_CONFIG" ]]; then
-    print_status_row "Config" ok "symlinked to repo config"
-  elif [[ -f "$SPICETIFY_CONFIG" ]]; then
-    print_status_row "Config" warn "local file is not repo-managed"
+  if [[ -f "$SPICETIFY_CONFIG_FILE" && ! -L "$SPICETIFY_CONFIG_FILE" ]]; then
+    print_status_row "Config" ok "writable, application-owned runtime state"
+  elif [[ -L "$SPICETIFY_CONFIG_FILE" ]]; then
+    print_status_row "Config" warn "runtime configuration should be a writable local file"
     issues=$((issues + 1))
   else
     print_status_row "Config" error "missing"
@@ -78,7 +91,7 @@ print_status() {
   if [[ -f "$theme_path/user.css" && -f "$theme_path/color.ini" ]]; then
     print_status_row "Theme" ok "$theme_name / $scheme_name"
   else
-    print_status_row "Theme" error "$theme_name is missing repo-managed files"
+    print_status_row "Theme" error "$theme_name is missing theme files"
     issues=$((issues + 1))
   fi
 
@@ -87,7 +100,7 @@ print_status() {
   if [[ -n "$custom_apps" ]]; then
     print_status_row "Custom apps" info "$custom_apps"
   else
-    print_status_row "Custom apps" warn "none configured"
+    print_status_row "Custom apps" info "none configured (optional)"
   fi
 
   if [[ "$custom_apps" == *"marketplace"* ]]; then
@@ -99,23 +112,24 @@ print_status() {
     fi
   fi
 
-  local backup_output
-  backup_output="$(backup_state)"
-  if printf '%s' "$backup_output" | grep -q "A backup is available"; then
-    print_status_row "Backup" ok "available"
+  local backup_version
+  backup_version="$(config_value Backup version)"
+  if [[ -n "$backup_version" ]]; then
+    print_status_row "Backup metadata" info "$backup_version (not a restore test)"
   else
-    print_status_row "Backup" warn "no reusable backup reported"
+    print_status_row "Backup metadata" warn "no version recorded"
   fi
 
   print_next_steps \
     "Run: make spicetify-apply to re-apply the current theme" \
-    "Run: chezmoi apply if repo-managed Spicetify files drifted"
+    "Run: make nix-switch to restore Nix-owned theme files; runtime configuration stays local"
 
   [[ $issues -eq 0 ]]
 }
 
 apply_spicetify() {
   require_spicetify
+  require_writable_spotify
   print_header "Applying Spicetify"
   print_dim "Re-applies the current theme and custom apps without changing tracked config defaults."
   printf '\n'
@@ -137,6 +151,7 @@ apply_spicetify() {
 
 restore_spicetify() {
   require_spicetify
+  require_writable_spotify
   print_header "Restoring Spotify"
   print_dim "Restores the pre-Spicetify Spotify backup."
   printf '\n'
@@ -149,6 +164,21 @@ restore_spicetify() {
 
   print_status_row "Restore" error "restore failed"
   return 1
+}
+
+require_writable_spotify() {
+  local resources resolved
+  resources="$(config_value Setting spotify_path)"
+  [[ -n "$resources" && -d "$resources" ]] || {
+    print_error "Configure spotify_path for the installed Spotify application first"; return 1;
+  }
+  resolved="$(cd "$resources" && pwd -P)"
+  case "$resolved" in
+    /nix/store|/nix/store/*) print_error "Refusing to patch an immutable Nix-store application"; return 1 ;;
+  esac
+  [[ -f "$SPICETIFY_CONFIG_FILE" && ! -L "$SPICETIFY_CONFIG_FILE" && -w "$SPICETIFY_CONFIG_FILE" ]] || {
+    print_error "Spicetify needs a writable, application-owned config-xpui.ini"; return 1;
+  }
 }
 
 main() {

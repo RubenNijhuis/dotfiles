@@ -4,10 +4,17 @@
 set -euo pipefail
 
 profile="${1:-}"
+usage="Usage: $0 {git|ssh-gpg|spicetify|search|terminal|cmux|navigation|terminal-apps|editor|shell-modules|shell} [--dry-run]"
 if [[ "$profile" == "--help" || "$profile" == "-h" ]]; then
-  echo "Usage: $0 {git|search|terminal|navigation|terminal-apps|editor|shell-modules|shell}"
+  echo "$usage"
   exit 0
 fi
+dry_run=false
+if [[ $# -gt 2 || ( $# -eq 2 && "$2" != --dry-run ) ]]; then
+  echo "$usage" >&2
+  exit 2
+fi
+[[ "${2:-}" != --dry-run ]] || dry_run=true
 
 case "$profile" in
   git)
@@ -19,6 +26,21 @@ case "$profile" in
     fi
     files=("$HOME/.gitconfig" "$HOME/.gitconfig-personal" "$HOME/.gitignore_global")
     ;;
+  ssh-gpg)
+    files=(
+      "$HOME/.ssh/config"
+      "$HOME/.ssh/config.d/common.conf"
+      "$HOME/.ssh/config.d/personal.conf"
+      "$HOME/.gnupg/gpg.conf"
+      "$HOME/.gnupg/gpg-agent.conf"
+    )
+    ;;
+  spicetify)
+    files=(
+      "$HOME/.config/spicetify/Themes/TokyoNight/color.ini"
+      "$HOME/.config/spicetify/Themes/TokyoNight/user.css"
+    )
+    ;;
   search)
     files=(
       "$HOME/.config/ripgrep/ripgreprc"
@@ -28,6 +50,9 @@ case "$profile" in
     ;;
   terminal)
     files=("$HOME/.config/starship.toml" "$HOME/.config/atuin/config.toml")
+    ;;
+  cmux)
+    files=("$HOME/.config/ghostty/config" "$HOME/.config/cmux/cmux.json")
     ;;
   navigation)
     files=(
@@ -67,31 +92,43 @@ case "$profile" in
     )
     ;;
   *)
-    echo "Usage: $0 {git|search|terminal|navigation|terminal-apps|editor|shell-modules|shell}" >&2
+    echo "$usage" >&2
     exit 2
     ;;
 esac
 
+# Preflight every target before moving any file; a later backup collision must
+# not leave an earlier target partially adopted. Broken symlinks count as files.
+pending=()
 for source_file in "${files[@]}"; do
-  [[ -e "$source_file" ]] || continue
+  [[ -e "$source_file" || -L "$source_file" ]] || continue
   source_target="$(readlink "$source_file" 2>/dev/null || true)"
   if [[ "$source_target" == /nix/store/* ]]; then
     echo "Already Nix-owned: $source_file"
     continue
   fi
   backup_file="${source_file}.pre-nix"
-  if [[ -e "$backup_file" ]]; then
+  if [[ -e "$backup_file" || -L "$backup_file" ]]; then
     echo "Refusing to overwrite existing backup: $backup_file" >&2
     exit 1
   fi
-  mv "$source_file" "$backup_file"
-  echo "Preserved $source_file as $backup_file"
+  pending+=("$source_file")
 done
+
+for source_file in "${pending[@]}"; do
+  if "$dry_run"; then
+    echo "Would preserve $source_file as ${source_file}.pre-nix"
+  else
+    mv "$source_file" "${source_file}.pre-nix"
+    echo "Preserved $source_file as ${source_file}.pre-nix"
+  fi
+done
+"$dry_run" && exit 0
 
 if [[ "$profile" == "git" ]]; then
   echo
   echo "Active global Git configuration:"
-  git config --global --list --show-origin
+  git -C / config --show-origin --get-regexp '^(user\.|includeIf\.)'
 fi
 
 if [[ "$profile" == "navigation" && -d "$HOME/.tmux/plugins" ]]; then

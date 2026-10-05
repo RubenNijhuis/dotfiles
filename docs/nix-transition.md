@@ -16,12 +16,25 @@ core in `nix/profiles/core.nix`, then imports only the capabilities it needs:
 | `design` | macOS, Linux, WSL | image and SVG optimization tools; native apps stay platform-specific |
 | `media` | macOS, Linux, WSL | FFmpeg, SoX, yt-dlp |
 | `gaming` | Linux desktop only | Heroic, MangoHud, Prism Launcher; host owns GPU/Steam setup |
+| `leisure` | opt-in macOS/Linux; active on this Mac | Spicetify CLI and reusable TokyoNight theme; Spotify runtime state stays writable and local |
 
 Language runtimes do not have global capability modules: an active repository
 gets its own pinned `devShell`. The shared core is Git, search/preview, and
 terminal/navigation; `developer` is the small portable maintenance layer.
 [`templates/nix-project/`](../templates/nix-project/) is the minimal starting
-point for a Node project that needs one. Until an older project receives its
+point for a Node project that needs one, including its own lock file:
+
+```bash
+# Run inside the specific code project, not ~/Files or the home directory.
+nix flake init -t ~/Developer/personal/dotfiles#node
+nix develop
+```
+
+Review the project's engine/packageManager requirements first. The template
+provides Node 24 and the pinned Nixpkgs pnpm, not an arbitrary exact pnpm version
+requested by a particular repository. Commit both flake files to that project;
+update its lock independently. It adds no automatic directory hooks or services.
+Until an older project receives its
 own flake on its own branch, this repository offers one narrow compatibility
 shell without changing the Node 24 default:
 
@@ -58,9 +71,9 @@ The reasoning behind this structure and the staged migration plan are in
 | --- | --- | --- |
 | Portable desktop apps | Home Manager | Home Manager where the pinned package supports the host |
 | Specialist macOS apps | documented Homebrew/manual exception | revisit after each Nixpkgs update |
-| Existing dotfiles | Nix or ChezMoi by path | Home Manager, one program at a time |
+| Declarative dotfiles | Home Manager | Home Manager; ChezMoi is retired |
 | Cross-platform CLI packages | Home Manager | Home Manager |
-| Per-project runtimes | temporary local mise state where an active project needs it | project `devShell`s; use Nix-provided tools rather than a global mutable runtime manager on a new machine |
+| Per-project runtimes | pinned devShells; old installed toolchains retained only as local rollback state | project `devShell`s; no global mutable runtime manager |
 | macOS defaults and launch agents | nix-darwin / launchd plists | nix-darwin / Home Manager where supported |
 | Secrets | Keychain and machine-local config | Keychain and machine-local config |
 
@@ -91,8 +104,10 @@ paths are broadly readable on the machine.
    make nix-switch
    ```
 
-`make nix-switch` bootstraps nix-darwin through Lix if `darwin-rebuild` is not
-yet installed; later switches use the installed command. The Mac configuration
+`make nix-switch` builds and uses the rebuild tool from this flake's locked
+nix-darwin input, including on the first activation. It does not fetch an
+unlocked upstream rebuild tool or rewrite the lock during activation. Lix/Nix
+itself is provisioned by the installer. The Mac configuration
 includes its shared CLI and supported desktop application profiles. It does not
 uninstall Homebrew packages automatically. It takes over only files explicitly
 declared by the active Home Manager modules; the ownership matrix records each
@@ -124,7 +139,7 @@ Windows path.
 
 ## Migration rule
 
-For each program, build the Home Manager replacement, activate it, then stop
-ChezMoi from managing that target and verify the resulting file and command
-resolution. Raw source files may remain in the repository when a Nix module
-consumes them. Do not allow both managers to write the same path.
+For each program, build the Home Manager replacement, preserve approved
+existing files before activation, then verify links and command resolution.
+Raw public source belongs in `nix/config/`; writable runtime state and secrets
+stay outside the store. ChezMoi is retired. Keep one owner per path.

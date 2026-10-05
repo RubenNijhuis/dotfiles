@@ -1,15 +1,16 @@
 # Homebrew exceptions
 
 Nix is the default package owner. This directory records only applications
-that the pinned Nix package set cannot currently provide on Apple Silicon
-macOS. It is not a general package inventory or a second installer.
+that the pinned Nix package set cannot currently provide suitably on Apple
+Silicon macOS. It is not a general package inventory or a second installer.
 
 ```text
 brew/
 ├── Brewfile.design    # Krita and RawTherapee
 ├── Brewfile.media     # HandBrake
 ├── Brewfile.gaming    # Prism Launcher and its Java runtime
-└── Brewfile.services  # deliberately chosen local-service exception
+├── Brewfile.services  # deliberately chosen local-service exception
+└── Brewfile.security  # newer Mac pinentry; GnuPG itself is Nix-owned
 ```
 
 Each file is an explicit capability choice. Install one only when the Mac
@@ -21,7 +22,9 @@ brew bundle --file=brew/Brewfile.design
 
 Before adding an exception, verify that the pinned Nix package does not work
 on this host, use a named capability file, and write a short reason beside the
-entry. Do not add generic CLI tools here; put portable tooling in a Nix profile
+entry. The security exception avoids downgrading pinentry-mac from the
+installed 1.3.1.1 to pinned Nix 1.1.1.1; reassess when Nix catches up.
+Do not add generic CLI tools here; put portable tooling in a Nix profile
 or use a project `devShell`.
 
 `make brew-audit` checks the exception files selected by the local machine
