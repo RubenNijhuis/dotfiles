@@ -20,6 +20,7 @@ TESTS=(
   test-cli-parsing.sh
   test-install-checkpoint.sh
   test-bootstrap-contract.sh
+  test-app-audit.sh
   test-error-handling.sh
   test-backup-restore.sh
   test-integration.sh

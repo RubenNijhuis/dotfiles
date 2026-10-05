@@ -17,6 +17,7 @@ core in `nix/profiles/core.nix`, then imports only the capabilities it needs:
 | `media` | macOS, Linux, WSL | FFmpeg, SoX, yt-dlp |
 | `gaming` | Linux desktop only | Heroic, MangoHud, Prism Launcher; host owns GPU/Steam setup |
 | `leisure` | opt-in macOS/Linux; active on this Mac | Spicetify CLI and reusable TokyoNight theme; Spotify runtime state stays writable and local |
+| `network-tools` | opt-in; selected only on this Mac | Signal CLI, Tailscale CLI, ngrok; no services or account state |
 
 Language runtimes do not have global capability modules: an active repository
 gets its own pinned `devShell`. The shared core is Git, search/preview, and

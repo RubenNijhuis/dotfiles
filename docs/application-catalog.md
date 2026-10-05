@@ -63,23 +63,45 @@ pinned Nix set or Homebrew during its audit. Keep it; record a new package
 owner only after verifying a replacement. Reassess exceptions when updating
 the Nix pin, rather than importing the entire installed Homebrew inventory.
 
-## Installed state still outside the restore definition
+## Native restore boundaries
 
 Read-only inventory on 2026-10-05, excluding Apple system apps and game-library
 launchers. This is a recovery/ownership list, not an uninstall request:
 
 | Area | Existing manually managed applications |
 | --- | --- |
-| Communication | WhatsApp, Slack, Discord, Zoom, ChatGPT |
+| Communication | WhatsApp, Slack, Discord; the app named ChatGPT is retained as-is pending identity review |
 | Creative work | DaVinci Resolve and Blackmagic utilities, Affinity, Figma, rekordbox and Pioneer updater, Processing |
-| Leisure | Spotify, Steam, CrossOver; retain existing games and saves |
+| Leisure | Spotify, Steam; retain existing games and saves |
 | Platform and legacy tooling | Xcode, Python 3.11 GUI tools, OneMenu |
 | Alternative browsers | Chrome, Arc, Brave, Pale Moon; Zen Twilight remains preferred |
 
-Some may have a suitable Nix package, while others need an app-store/vendor
-installer or deliberate writable installation (Spotify/Spicetify). Choose which
-are still wanted before expanding the baseline. A Nix build does not recreate
-these apps, licenses, sign-ins, media libraries, or app-local work automatically.
+Zoom and CrossOver are now declared in this Mac's Nix layer; neither is added
+to Linux, WSL, or the portable core. The pinned Zoom package needs a small
+override to preserve its vendor signature: stripping the packaged binaries
+invalidates it. Verify signed bundles outside the restrictive tool sandbox,
+which can produce false signature failures for otherwise valid applications.
+
+Do not make a huge installer by assuming every old app is still wanted. Use
+this restore matrix for the retained native apps, without copying their databases:
+
+| Apps | Restore path / reason not in the Nix baseline |
+| --- | --- |
+| WhatsApp, Slack, Discord | Official app installer/updater for now: installed versions 26.39.21, 4.51.191, 0.0.414 are newer than the pin's 2.26.31.27, 4.51.180, 0.0.413. Recheck at the next Nix update; do not downgrade. |
+| App named ChatGPT | Its bundle ID is `com.openai.codex`. Preserve this actual app and use its supported updater until a matching replacement is verified; filename alone does not establish identity. |
+| Spotify | Official writable installation (currently 1.3.3.264); Spicetify must not patch a Nix-store app. The pin is also older (1.2.98.301). |
+| Steam | Native Mac Steam installer; the pinned Steam derivation is not a supported Darwin package. Game saves and Cloud status are separate. |
+| Resolve / Blackmagic tools | [Blackmagic support installers](https://www.blackmagicdesign.com/support/); the pinned Resolve is Linux-only. Restore exported projects and source media separately. Companion tools are installer components, not independent baseline apps. |
+| Affinity / Figma | Official vendor installers; no matching native Mac package in the pin. `figma-linux` is not the Mac client. [Figma downloads](https://www.figma.com/downloads/). |
+| rekordbox / Pioneer tools | [rekordbox installer](https://rekordbox.com/en/download/) and hardware-specific vendor updates. Keep libraries/licenses outside Nix; do not silently replace version 6 with a newer major version. |
+| Processing / Python 3.11 GUI tools | Retained legacy vendor installs, not current global runtime requirements. The pinned Processing is Linux-only; put future Python environments in their own code projects. |
+| Xcode / OneMenu | Xcode via Apple's supported installer/App Store; [OneMenu vendor installer](https://coffeebreak.software/one-menu/). No verified Nix equivalent for OneMenu. |
+| Chrome / Arc / Brave / Pale Moon | Retained compatibility/legacy browsers, not chosen defaults. Chrome's installed build is newer than the pin; Arc/Pale Moon have no matching package; Brave is available for an explicit later migration. Never import browser profiles into Nix. |
+
+This inventory is not a claim that each app is needed or that it is fully
+recoverable. Licenses, sign-ins, media libraries, and app-local work need their
+own supported recovery paths. Re-evaluate temporary version exceptions when
+updating the Nix pin rather than adding bespoke overrides for every GUI app.
 
 Seven Homebrew entries remain outside this Mac's selection:
 
@@ -88,17 +110,25 @@ Seven Homebrew entries remain outside this Mac's selection:
 - `postgresql@17`, `redis`: no running Homebrew service; preserve data first.
   Redis still has a `dump.rdb`. Future active projects should use their own
   environment/database, not make these global restore requirements.
-- `signal-cli`, `tailscale`: the locked Nix set has matching versions (0.14.8
-  and 1.102.5) on Apple Silicon. Establish their actual use and daemon/account
-  requirements before migrating; they are not part of the lean global profile.
-- `ngrok` cask and `ngrok/ngrok` tap: the installed cask is from `homebrew/cask`,
-  not that third-party tap. Nix has 3.39.10 versus the installed 3.39.11;
-  do not downgrade or trust the leftover tap automatically.
+- `signal-cli`, `tailscale`, `ngrok`: verified Nix replacements are declared in
+  the opt-in `network-tools` capability, selected only on this Mac. Versions
+  remain 0.14.8, 1.102.5, and 3.39.11; ngrok has a checksum-pinned Mac-only
+  override until the upstream package catches up. No accounts are imported and
+  no daemons are started. Homebrew copies stay pending until activation and
+  exact removal approval; preserve their state, not duplicate package ownership.
+- `ngrok/ngrok`: the installed cask belongs to `homebrew/cask`, not this unused
+  third-party tap. Its removal still needs exact approval; never trust it by default.
 
 OrbStack also has two app bundles at `/Applications/OrbStack.app` and
 `~/Applications/Home Manager Apps/OrbStack.app`, both reporting 2.2.3. The
 Home Manager copy is the declared owner. The root bundle's origin and removal
 need separate review; do not delete a protected bundle or running VM state blindly.
+
+Run `make app-audit` to read installed bundle IDs, versions, and paths without
+launching or changing apps. `make app-audit ARGS=--check` fails on multiple real
+bundles with the same ID; symlink aliases and repeated roots are deduplicated.
+It checks the main app folders and one level of vendor subfolders, not app
+internals or every disk. A duplicate is a review finding, not permission to delete.
 
 The writing profile's practical usage is in [Writing workflow](writing-workflow.md).
 

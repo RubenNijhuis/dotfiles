@@ -83,6 +83,7 @@
                 ./nix/profiles/macos-apps.nix
                 ./nix/profiles/writing.nix
                 ./nix/profiles/leisure.nix
+                ./nix/profiles/network-tools.nix
               ];
             };
           }
@@ -124,6 +125,22 @@
         nixpkgs.lib.mapAttrs (_: home: home.activationPackage) homes
         // nixpkgs.lib.optionalAttrs (system == "aarch64-darwin") {
           macos = darwinConfigurations.Rubens-MacBook-Pro.system;
+          network-tools =
+            let
+              tools =
+                (import ./nix/profiles/network-tools.nix {
+                  inherit pkgs;
+                  lib = pkgs.lib;
+                }).home.packages;
+              ngrok = nixpkgs.lib.findFirst (tool: tool.pname == "ngrok") null tools;
+            in
+            pkgs.runCommand "network-tools-smoke" { nativeBuildInputs = tools; } ''
+              # Version queries only: no account access, messages, tunnels, or daemons.
+              signal-cli --version | grep -Fx 'signal-cli ${pkgs.signal-cli.version}'
+              tailscale version | head -n 1 | grep -Fx '${pkgs.tailscale.version}'
+              ngrok version | grep -Fx 'ngrok version ${ngrok.version}'
+              touch $out
+            '';
         }
         // {
           neovim =

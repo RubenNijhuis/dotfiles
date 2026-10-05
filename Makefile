@@ -1,5 +1,5 @@
 .PHONY: help install update ssh-setup gpg-setup gpg-check \
-	backup brew-audit \
+	backup brew-audit app-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup \
 	lint-shell test-scripts maint-check bootstrap-verify \
@@ -43,6 +43,9 @@ update: ## Refresh Nix inputs and verify the configuration
 
 doctor: ## Quick health + automation dashboard (use --full for deep checks)
 	@bash $(DOTFILES)/health/doctor.sh $(ARGS)
+
+app-audit: ## Read installed app versions and detect duplicate bundles (ARGS=--check)
+	@bash $(DOTFILES)/ops/app-audit.sh $(ARGS)
 
 # ── Setup (one-time) ────────────────────────────────────────────────
 
