@@ -1,6 +1,6 @@
 # Git Hooks
 
-Hooks live in `hooks/` and are symlinked into `.git/hooks/` via `make hooks`.
+Hooks live in `hooks/`; `make hooks` selects them with `core.hooksPath`.
 
 ## pre-commit
 
@@ -9,8 +9,8 @@ Runs on staged files only:
 1. `shellcheck -x` on staged shell scripts (via `lint-shell.sh`)
 2. Auto-fix missing executable bit on `.sh` files (re-stages)
 3. Shebang validation (`#!/usr/bin/env bash`)
-4. Biome format on staged JS/TS/JSON (auto-fixes and re-stages)
-5. Secret detection — blocks commit (AWS keys, Stripe keys, GitHub tokens, Linear tokens, Slack tokens, private keys, api_key/api_secret patterns)
+4. Biome format on staged JS/TS/JSON (successful fixes are re-staged; unresolved errors block the commit)
+5. Secret detection on added lines — blocks commit (AWS keys, Stripe keys, GitHub tokens, Linear tokens, Slack tokens, private keys, credential assignment patterns); removals are allowed
 
 ## commit-msg
 
