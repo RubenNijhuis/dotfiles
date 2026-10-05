@@ -108,6 +108,24 @@ Nextcloud does not require self-hosting, but self-hosting adds maintenance.
 
 ## Reconnect on another Mac
 
+### Two-device acceptance test
+
+Use one non-secret note in `00 Inbox`, not a password, real research source,
+or private record. Record a Mac marker, confirm it appears in the phone's
+existing Files vault, then add a distinct phone marker and confirm it returns
+to the Mac. Check the same note after an offline edit and reconnection without
+editing it simultaneously on both devices. Mobile access and a placeholder-free
+local scan alone do not establish completed uploads or two-way sync.
+
+For Apple Calendar, choose a specific iCloud calendar as the new-event default
+instead of “Selected calendar”. Use a clearly labelled, non-sensitive test
+event with no attendees to verify appearance and notifications on both devices;
+do not alter existing appointments. Browser Sync should not become a second
+password store alongside Apple Passwords: review bookmarks/tabs/extension
+choices in the actual signed-in browser, not by copying profile databases.
+
+### Restore the stable Mac path
+
 Sign into the same Apple Account, enable iCloud Drive, and wait for the actual
 Obsidian app container and Files vault to appear. Enable **Keep Downloaded**.
 Then recreate the stable path only if it does not already exist:

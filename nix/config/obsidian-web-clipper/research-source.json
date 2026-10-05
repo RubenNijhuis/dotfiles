@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "Research source",
+  "behavior": "create",
+  "noteNameFormat": "{{date|date:\"YYYY-MM-DD\"}} - {{title|safe_name}}",
+  "path": "00 Inbox",
+  "triggers": [],
+  "properties": [
+    { "name": "title", "value": "{{title}}", "type": "text" },
+    { "name": "source", "value": "{{url}}", "type": "text" },
+    { "name": "author", "value": "{{author}}", "type": "text" },
+    { "name": "publisher", "value": "{{site}}", "type": "text" },
+    { "name": "published", "value": "{{published}}", "type": "text" },
+    {
+      "name": "retrieved",
+      "value": "{{time|date:\"YYYY-MM-DDTHH:mm:ssZ\"}}",
+      "type": "text"
+    },
+    { "name": "status", "value": "unreviewed", "type": "text" }
+  ],
+  "noteContentFormat": "## My notes\n\n## Verification\n\n- [ ] Check the author and publication date against the page.\n- [ ] Check claims against original sources.\n- [ ] File this under the relevant project's Sources folder, or Resources if reusable.\n\n## Captured source material\n\n{{content}}\n"
+}

@@ -1,4 +1,6 @@
 {
+  "telemetry.telemetryLevel": "off",
+  "gitlens.telemetry.enabled": false,
   "editor.fontFamily": "FiraCode Nerd Font, Symbols Nerd Font Mono, monospace",
   "terminal.integrated.fontFamily": "FiraCode Nerd Font, Symbols Nerd Font Mono",
   "editor.fontLigatures": true,

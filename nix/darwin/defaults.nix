@@ -72,11 +72,26 @@
         DSDontWriteUSBStores = true;
       };
       "com.apple.finder" = {
-        NewWindowTarget = "PfHm";
-        NewWindowTargetPath = "file:///Users/${username}/";
+        NewWindowTarget = "PfLo";
+        NewWindowTargetPath = "file:///Users/${username}/Files/";
       };
       "com.microsoft.VSCode".ApplePressAndHoldEnabled = false;
     };
+  };
+
+  networking.applicationFirewall = {
+    enable = true;
+    enableStealthMode = true;
+  };
+
+  # This laptop is a client, not a remotely accessible SSH server.
+  services.openssh.enable = false;
+
+  # Home Manager owns the cached completion setup and Starship prompt.
+  programs.zsh = {
+    enableGlobalCompInit = false;
+    enableBashCompletion = false;
+    promptInit = "";
   };
 
   security.pam.services.sudo_local.touchIdAuth = true;
