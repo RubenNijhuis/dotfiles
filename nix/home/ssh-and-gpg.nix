@@ -60,5 +60,25 @@ in
       pinentry-program ${pinentryPath}
     '';
   };
-  # No new launchd/systemd service, key import, agent restart, or keyring link.
+  # A single login task uses the existing macOS agent/Keychain. It loads only
+  # the personal key, never every saved identity. GPG still enforces its cache
+  # lifetime; no passphrase or private key enters the store.
+  launchd.agents.personal-keys = lib.mkIf isDarwin {
+    enable = true;
+    config = {
+      ProgramArguments = [
+        (toString (
+          pkgs.writeShellScript "personal-keys" ''
+            ${pkgs.gnupg}/bin/gpgconf --launch gpg-agent
+            if [[ -f ${lib.escapeShellArg "${config.home.homeDirectory}/.ssh/id_ed25519_personal"} ]]; then
+              SSH_ASKPASS_REQUIRE=never /usr/bin/ssh-add -q --apple-use-keychain \
+                ${lib.escapeShellArg "${config.home.homeDirectory}/.ssh/id_ed25519_personal"} </dev/null
+            fi
+          ''
+        ))
+      ];
+      RunAtLoad = true;
+      ProcessType = "Background";
+    };
+  };
 }

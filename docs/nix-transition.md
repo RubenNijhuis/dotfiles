@@ -35,6 +35,11 @@ Review the project's engine/packageManager requirements first. The template
 provides Node 24 and the pinned Nixpkgs pnpm, not an arbitrary exact pnpm version
 requested by a particular repository. Commit both flake files to that project;
 update its lock independently. It adds no automatic directory hooks or services.
+Databases belong in that project's container configuration, with explicit
+persistent volumes and a documented export/restore path. Do not sync a running
+database volume through iCloud or add global PostgreSQL/Redis services to the
+laptop baseline. Container images and development runtimes are pinned and
+updated by each project, independently of this dotfiles lock.
 Until an older project receives its
 own flake on its own branch, this repository offers one narrow compatibility
 shell without changing the Node 24 default:

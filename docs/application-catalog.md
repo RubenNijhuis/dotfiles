@@ -103,26 +103,25 @@ recoverable. Licenses, sign-ins, media libraries, and app-local work need their
 own supported recovery paths. Re-evaluate temporary version exceptions when
 updating the Nix pin rather than adding bespoke overrides for every GUI app.
 
-Seven Homebrew entries remain outside this Mac's selection:
+The approved Homebrew exit batch completed on 2026-10-05: duplicate `gnupg`,
+`signal-cli`, `tailscale`, and `ngrok`, plus the unused `ngrok/ngrok` tap,
+were removed after Nix activation and version checks. GPG's existing keyring
+was retained and its agent restarted under Nix. Network accounts/state remain
+app-owned; installing these CLIs does not enable services.
 
-- `gnupg`: Nix already supplies the active binary; no installed Homebrew
-  reverse dependency was reported. Its duplicate removal still needs approval.
-- `postgresql@17`, `redis`: no running Homebrew service; preserve data first.
-  Redis still has a `dump.rdb`. Future active projects should use their own
-  environment/database, not make these global restore requirements.
-- `signal-cli`, `tailscale`, `ngrok`: verified Nix replacements are declared in
-  the opt-in `network-tools` capability, selected only on this Mac. Versions
-  remain 0.14.8, 1.102.5, and 3.39.11; ngrok has a checksum-pinned Mac-only
-  override until the upstream package catches up. No accounts are imported and
-  no daemons are started. Homebrew copies stay pending until activation and
-  exact removal approval; preserve their state, not duplicate package ownership.
-- `ngrok/ngrok`: the installed cask belongs to `homebrew/cask`, not this unused
-  third-party tap. Its removal still needs exact approval; never trust it by default.
+Global `postgresql@17` and `redis` binaries were also removed. Neither Homebrew
+service was running; their data/configuration was retained, including Redis's
+checksum-verified `dump.rdb`. Future databases belong in project containers
+with explicit persistent volumes and backup/export instructions, not in the
+global laptop installer.
 
-OrbStack also has two app bundles at `/Applications/OrbStack.app` and
-`~/Applications/Home Manager Apps/OrbStack.app`, both reporting 2.2.3. The
-Home Manager copy is the declared owner. The root bundle's origin and removal
-need separate review; do not delete a protected bundle or running VM state blindly.
+The old `/Applications` copies of OrbStack, Zoom, and CrossOver were moved to
+`~/Private/System Migration/Application Archives.noindex/2026-10-05/` after
+activation and verification. Their sole installed owner is now
+`~/Applications/Home Manager Apps/`. OrbStack's six previously running
+containers were restarted; VM data, privileged helper, CrossOver bottles,
+licenses, and Zoom account data were not removed. The archive is recoverable,
+local-only rollback state, not freed disk space or an off-device backup.
 
 Run `make app-audit` to read installed bundle IDs, versions, and paths without
 launching or changing apps. `make app-audit ARGS=--check` fails on multiple real
