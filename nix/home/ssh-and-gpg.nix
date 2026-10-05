@@ -17,6 +17,8 @@ let
 in
 {
   home.packages = [
+    # Portable recovery-file encryption; keys and passphrases stay outside Nix.
+    pkgs.age
     pkgs.gnupg
   ]
   ++ lib.optionals (!isDarwin) [

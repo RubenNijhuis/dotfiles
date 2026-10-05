@@ -17,6 +17,30 @@ own recovery method; never upload plaintext credentials with ordinary files.
 Keep repositories and dependencies outside iCloud and use supported app
 exports for creative projects. Independent backup work remains deferred.
 
+### Verified on this Mac (2026-10-05)
+
+- Photos has iCloud Photos enabled, uses Optimise Mac Storage, and reported a
+  recent successful sync. This is not a full offline copy or an independent backup.
+- Thunderbird's local mail stores contain only empty Outbox/Trash files. Its
+  local calendar databases and Personal Address Books were empty in all three
+  profiles. The active Collected Addresses database has pending WAL data and
+  remains unverified; server-side retention is not established by these checks.
+- A supported Resolve project export was created and its ZIP integrity verified
+  under `~/Private/System Migration/Resolve Exports/2026-10-05/`. Source media
+  and a successful import still need separate verification; `.drp` excludes media.
+- Five selected personal-code snapshots were saved under
+  `~/Private/System Migration/Code Recovery/2026-10-05/`. Offline restores passed
+  Git integrity, working-file comparisons, and staged/unstaged status checks.
+  They include Git history and tracked/non-ignored untracked files, not ignored
+  dependencies or `.env` files. These copies are still on this disk only.
+- Steam has eight files in its local `remote` folders (about 94 KB). Those names
+  do not prove Steam Cloud upload; saves elsewhere remain outside this inventory.
+
+Do not infer remote protection from these local tests. Other repositories,
+ignored secrets, Photo Booth media, app-local contacts/calendars, and private
+archives remain distinct recovery targets. Never publish WIP or upload archived
+employer data simply because a repository has no upstream.
+
 ## Before erasing the old Mac
 
 1. Confirm an **encrypted off-device backup** of `~/Files` and `~/Private`.

@@ -37,3 +37,25 @@ be reviewed and unpacked separately; even a preview never extracts them.
 
 For reset/loss recovery, follow [New Mac Recovery](new-mac-recovery.md): an
 encrypted off-device backup and a verified restore remain necessary.
+
+## Encrypted recovery files
+
+Nix supplies `age` on the shared SSH/security layer; credentials are never Nix
+inputs. Use a separately retained recovery passphrase, not the SSH key stored
+inside the backup. [age's documentation](https://github.com/FiloSottile/age#passphrases)
+describes interactive passphrase encryption. Enter it in a trusted terminal,
+never in chat, an argument, a script, or an environment variable.
+
+For an explicitly reviewed file set, stream the archive into `age --passphrase`
+with `pipefail`, an owner-only local destination, and no plaintext staging file.
+Use a new filename and refuse overwrites. Verify decryption and a restore
+locally before copying **only the encrypted file** to the approved cloud
+destination. Keep that recovery password accessible on another trusted device
+and arrange an offline fallback; iCloud Passwords alone cannot recover a lost
+Apple Account. An encrypted file synced to iCloud is still not an independent,
+versioned backup of the whole computer.
+
+Git bundles preserve committed history, not current working files. Code
+snapshots need both, plus staged changes and tracked deletions. Ignore build
+dependencies, but recover necessary ignored secrets separately. Preserve live
+repositories and use an offline temporary restore to validate the snapshot.
