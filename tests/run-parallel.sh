@@ -13,6 +13,7 @@ TESTS=(
   test-spicetify.sh
   test-neovim.sh
   test-health-git.sh
+  test-health-security.sh
   test-vscode-setup.sh
   test-terminal-workflow.sh
   test-idempotency.sh

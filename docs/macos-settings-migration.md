@@ -13,6 +13,9 @@ profile. The first declarative macOS settings module is
   exceptions are not reset, and this does not enable remote-access services.
 - New Finder windows open `~/Files`. Sidebar favourites remain Finder-owned.
 - Remote Login (SSH server) is disabled. Outbound SSH remains available.
+- Screen Sharing and SSH launchd jobs are disabled and unloaded at Nix
+  activation; Apple's system plists stay untouched. Re-enabling remote access
+  requires a deliberate policy change, not an unattended exception.
 - Home Manager alone initializes Zsh completion and the Starship prompt;
   nix-darwin's duplicate global initialization is disabled.
 - Home Manager shell, terminal, Git, editor, command-line programs, and other
@@ -56,11 +59,57 @@ Review remote-login/screen-sharing switches and browser passkey-site access
 on each Mac. TCC permissions and account Sync choices remain device/app-owned;
 do not grant them through scripts or copy their databases into Git.
 
-Verified on this Mac on 2026-10-05: Remote Login and remote-user full-disk
-access are off. Screen Sharing remains on at the user's request because a
-session was connected. Passkey-site access is off for Arc, Brave, and Chrome;
+Verified on this Mac on 2026-10-07: Screen Sharing is off after user-approved
+shutdown; TCP 22/5900/3283 and UDP 5900/3283 have no listeners. Remote
+Management, Remote Login, and Remote Application Scripting are off in Sharing.
+Remote Management and application scripting remain device-owned switches;
+the Nix activation enforces Screen Sharing and SSH off. Remote-user full-disk
+access was off at the 2026-10-05 review. Passkey-site access is off for Arc, Brave, and Chrome;
 Zen/Twilight retains access. These choices do not remove stored passkeys.
 Finder favourites include Files, 00 Inbox, 10 Projects, and Developer.
+
+`make doctor` checks disabled remote-access jobs, actual listening sockets,
+and macOS update status; `make doctor ARGS="--full --section security"` isolates
+these checks. Socket inspection failure is an unknown state, never proof of
+closed ports. Routine checks use Apple's cached update catalog without network
+requests, prompting, or installation; major upgrades are not treated as missing
+same-major security updates. Tahoe older than 26.6.1 is explicitly flagged for
+[CVE-2026-65400](https://support.apple.com/en-us/148170). A green check is not
+a complete security audit or a guarantee that cached update metadata is fresh.
+
+macOS itself is Apple-owned, not upgraded by `nix-switch`. On 2026-10-07 this
+Mac still runs 26.5.2 and offers Tahoe 26.7.1; installation/restart is deferred
+to the user tonight. Automatic update preferences do not prove patches were
+installed. Screen Sharing was previously left on by request; that exception
+has now been revoked.
+
+The new Nix generation activated successfully from cmux on 2026-10-07 after
+the user granted App Management. Home Manager's app-copy step and the remote
+access policy both completed; `/run/current-system` points to the built
+generation. Keep App Management on for the terminal used for activation;
+do not bypass Home Manager's permission check.
+
+The 2026-10-07 permission review found no enabled Full Disk Access grants.
+Accessibility is enabled for Codex Computer Use, OneMenu, and Raycast.
+Screen recording remains enabled for Arc, Brave, Codex Computer Use, Discord,
+Slack, and Zen/Twilight; Discord also has Input Monitoring. The user approved
+revoking Arc/Brave/Slack recording and Discord input access; applying these
+changes is waiting for macOS Touch ID authorization.
+AirDrop is Contacts Only; AirPlay Receiver is Current User with a password.
+Preserve Handoff rather than disabling all Apple cross-device services.
+
+Network review: Screen Sharing/SSH ports are closed. Other wildcard TCP
+listeners belong to Control Center (5000/7000), rapportd (49152), and Spotify
+(57621); wildcard binding alone does not establish internet exposure. The
+remaining observed TCP listeners are loopback-only. OrbStack was stopped,
+so container port mappings remain unverified. The generic `sh` background
+items are Nix/installer/key-loader jobs, not unidentified cleanup targets.
+The three Xcode Git maintenance agents had no registered repositories and
+were unloaded after approval. Their byte-identical plists are preserved in
+`~/Private/Migrations/2026-10-07-git-maintenance-retirement/`; restore by copying
+them back to `~/Library/LaunchAgents/` and bootstrapping the three user jobs.
+Nix Git and its automatic maintenance settings are unchanged. Do not reset
+macOS's background-item database.
 
 Normal screenshots go to the iCloud-backed `~/Files/00 Inbox/Screenshots`.
 For a deliberate private capture, press **Control-Shift-Command-4** and select

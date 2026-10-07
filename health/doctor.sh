@@ -30,7 +30,7 @@ Options:
 
 Sections (with --full --section):
   nix, ssh, gpg, git, shell, developer, runtime, launchd, homebrew,
-  backup, biome, tmux, neovim, starship, shell-perf
+  backup, security, biome, tmux, neovim, starship, shell-perf
 USAGE
 }
 
@@ -55,12 +55,12 @@ usage() { _doctor_usage; }
 
 validate_section() {
   case "$1" in
-    nix|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|biome|tmux|neovim|starship|shell-perf)
+    nix|ssh|gpg|git|shell|developer|runtime|launchd|homebrew|backup|security|biome|tmux|neovim|starship|shell-perf)
       return 0
       ;;
     *)
       print_error "Unknown section: $1"
-      print_info "Valid sections: nix, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, biome, tmux, neovim, starship, shell-perf"
+      print_info "Valid sections: nix, ssh, gpg, git, shell, developer, runtime, launchd, homebrew, backup, security, biome, tmux, neovim, starship, shell-perf"
       return 1
       ;;
   esac
@@ -253,6 +253,7 @@ run_checks() {
   should_run launchd   && system+=(check_launchd)
   should_run homebrew  && system+=(check_homebrew)
   should_run backup    && system+=(check_backup_system)
+  should_run security  && system+=(check_security)
   run_section_parallel "$(printf '\n  %s%s── System ──%s\n' "${DIM}" "${BLUE}" "${NC}")" "${system[@]}"
 
   should_run biome    && tools+=(check_biome)
@@ -489,6 +490,12 @@ run_quick() {
   status_check_repo_recovery
   status_check_launchd
   status_check_backup
+  # Reuse the same read-only security checks in the everyday summary.
+  if [[ "$(uname -s)" == Darwin ]]; then
+    source "$DOTFILES/health/checks/security.sh"
+    check_security
+    STATUS_ISSUES=$((STATUS_ISSUES + WARNINGS + ERRORS))
+  fi
 
   print_section "Summary"
   if [[ $STATUS_ISSUES -eq 0 ]]; then
@@ -514,6 +521,7 @@ main() {
     source "$SCRIPT_DIR/checks/core.sh"
     source "$SCRIPT_DIR/checks/system.sh"
     source "$SCRIPT_DIR/checks/editor.sh"
+    source "$SCRIPT_DIR/checks/security.sh"
 
     print_header "System Health Check"
     print_dim "Use this when you want a deeper read on machine health, config drift, and tooling."
@@ -544,7 +552,7 @@ main() {
     printf '\n'
     run_quick
     if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
-      print_next_steps "Run: make doctor ARGS=--full for the deep checks"
+      print_next_steps "${SUGGESTIONS[@]}" "Run: make doctor ARGS=--full for the deep checks"
     else
       print_next_steps "No action needed."
     fi
@@ -563,6 +571,7 @@ main() {
   printf '\n'
   if [[ ${STATUS_ISSUES:-0} -gt 0 ]]; then
     print_next_steps \
+      "${SUGGESTIONS[@]}" \
       "Run: make doctor ARGS=--full for the deep checks" \
       "Run: make backup if backup status is stale"
   else

@@ -87,6 +87,18 @@
   # This laptop is a client, not a remotely accessible SSH server.
   services.openssh.enable = false;
 
+  # Apple owns these socket-activated jobs; do not replace its launchd plists.
+  # Disabling persists across boots; bootout also closes existing listeners.
+  system.activationScripts.postActivation.text = ''
+    echo "disabling inbound screen sharing and remote login..."
+    for service in com.apple.screensharing com.openssh.sshd; do
+      /bin/launchctl disable "system/$service"
+      if /bin/launchctl print "system/$service" >/dev/null 2>&1; then
+        /bin/launchctl bootout "system/$service"
+      fi
+    done
+  '';
+
   # Home Manager owns the cached completion setup and Starship prompt.
   programs.zsh = {
     enableGlobalCompInit = false;
