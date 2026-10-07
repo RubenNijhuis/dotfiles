@@ -91,10 +91,10 @@ do not bypass Home Manager's permission check.
 
 The 2026-10-07 permission review found no enabled Full Disk Access grants.
 Accessibility is enabled for Codex Computer Use, OneMenu, and Raycast.
-Screen recording remains enabled for Arc, Brave, Codex Computer Use, Discord,
-Slack, and Zen/Twilight; Discord also has Input Monitoring. The user approved
-revoking Arc/Brave/Slack recording and Discord input access; applying these
-changes is waiting for macOS Touch ID authorization.
+After user-approved cleanup, screen recording is off for Arc, Brave, and
+Slack; it remains enabled for Codex Computer Use, Discord, and Zen/Twilight.
+Discord Input Monitoring is off and Discord was quit/reopened to apply the
+change. The permission lists were rechecked; no Input Monitoring grants remain.
 AirDrop is Contacts Only; AirPlay Receiver is Current User with a password.
 Preserve Handoff rather than disabling all Apple cross-device services.
 
