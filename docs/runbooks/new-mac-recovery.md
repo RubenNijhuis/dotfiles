@@ -39,7 +39,7 @@ local clone does not require deleting its remote history.
 | Native checks | Neovim fresh-profile smoke, writing/export and network-tool checks passed. Personal accounts and AI clients were not used. |
 | Cross-platform | All declared Mac/Linux/WSL outputs evaluated successfully; this is not a Linux build or a clean-device installation test. |
 | Maintenance / apps | All maintenance checks passed; no duplicate bundle IDs in the inspected app directories. |
-| Source protection | Live remote main equals local HEAD; uncommitted/untracked changes remain local. No commit, push or input update performed. |
+| Source protection | Reviewed maintenance changes were committed and pushed as `a893537` through the verified GitHub SSH connection. The OpenPGP signature verified successfully. Recheck Git status for subsequent work; an active Nix generation alone does not prove remote source coverage. |
 | Remote access / OS | Screen Sharing and SSH disabled, with no listeners on the checked ports. macOS update/restart remains pending. |
 
 For remaining file coverage and private iCloud sharing boundaries, use the

@@ -49,7 +49,7 @@ Execution boundaries:
 | Local vault | Finder shows Files and its displayed descendants as Kept Downloaded. Metadata scan: 3,270 regular files, about 3.10 GB logical, no dataless flags, `.icloud` placeholders, symlinks or scan errors. | Local availability confirmed, not complete remote coverage. Phone two-way/offline test remains open. |
 | Loose documents | SHA-256 review of 35 intake/output files found 18 with identical filed copies and 17 without one in Files. All three Desktop documents and the reviewed employment outputs have identical filed copies. | Preserve originals pending exact approval; recent downloads, two screenshots and three research outputs need filing review. A matching name alone was insufficient for one downloaded PDF. |
 | Original Files copy | Of 2,997 scanned regular files, 2,991 have byte-identical live copies. Six do not: two media files, three Obsidian settings files and an earlier reading index. | Retain pending review; these counts exclude `.git` directories and Finder marker files. No archive was removed. |
-| Dotfiles source | A live read-only remote-reference check confirms HEAD equals remote main. Local changed/untracked entries remain. | No commit or push performed. Those changes are not remotely protected. |
+| Dotfiles source | The earlier read-only audit found local changes despite HEAD matching remote main. Those reviewed changes were subsequently committed and pushed as `a893537`. | No Nix input update or file upload was performed. Recheck Git status for changes made after this snapshot. |
 
 The targeted Documents review found 72 files below the local work-output folder;
 most are previews or supporting material, not new durable deliverables. The two

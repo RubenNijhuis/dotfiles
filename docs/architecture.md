@@ -13,16 +13,17 @@ for operating-system settings and desktop automation.
 
 ## Session Management
 
-tmux is the session manager. The selected terminal application handles
-windowing; tmux handles session persistence, pane splits, and remote workflows.
-The tmux config uses Tokyo Night theming consistent with the rest of the stack.
+Use cmux for everyday Mac windows and panes. tmux remains available for
+persistent terminal sessions and remote workflows; there is no requirement
+to nest every cmux session inside tmux. Shared terminal configuration uses
+Tokyo Night styling.
 
 ## Project runtimes
 
-Language runtimes are project-local. Give an active project a pinned Nix
-`devShell`; use Python tools such as uv inside that shell only when the project
-needs them. The shared profile does not carry a global Python, asdf, or other
-language-version manager.
+Project runtime requirements belong in pinned `devShell`s. The opt-in developer
+profile supplies Node/pnpm for everyday maintenance, not a runtime guarantee for
+every repository. Use tools such as uv inside the relevant project environment;
+there is no baseline Python or mutable language-version manager.
 
 ## Lifecycle
 

@@ -46,10 +46,10 @@ profiles. See [Nix transition](nix-transition.md#capability-profiles) for the
 cross-platform capability model. ChezMoi is retired; private overrides remain
 user-owned, outside Nix and Git.
 
-The personal-laptop profile keeps only general maintenance automations. Local
-services such as LM Studio and a WebDAV-backed Obsidian sync are opt-in:
-add them to a machine-local profile only after the corresponding application
-and data location exist on that machine.
+The personal-laptop profile selects only the read-only update report. Repo
+pulls, backups, cleanup and local servers remain explicit opt-ins. Obsidian
+uses the existing iCloud vault; these profiles do not configure another sync
+transport.
 
 This Mac's exception selection restores Prism/Java, Mac pinentry, Krita,
 RawTherapee, and HandBrake. These are already installed, not a recommendation
@@ -111,10 +111,13 @@ DOTFILES_PROFILE_AUTOMATIONS=""
 ```bash
 cp local/profile.env.example local/profile.env
 make profile-set PROFILE=personal-laptop
-make install            # bootstrap transition tooling on a new Mac
-make nix-switch         # apply the Nix-managed macOS configuration
+make install            # install and activate Nix, then selected Mac exceptions
 make doctor             # health + automation dashboard
 ```
+
+Reconnect the existing Files vault first, following the
+[recovery runbook](runbooks/new-mac-recovery.md). A second `make nix-switch`
+is needed only after configuration changes, not immediately after installation.
 
 ## Design Notes
 
