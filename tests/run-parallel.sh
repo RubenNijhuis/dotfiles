@@ -22,6 +22,7 @@ TESTS=(
   test-install-checkpoint.sh
   test-bootstrap-contract.sh
   test-app-audit.sh
+  test-storage-audit.py
   test-error-handling.sh
   test-backup-restore.sh
   test-integration.sh
@@ -31,7 +32,10 @@ TMP="$(parallel_tmpdir tests)"
 trap 'rm -rf "$TMP"' EXIT
 
 for t in "${TESTS[@]}"; do
-  parallel_spawn "$TMP" "$t" bash "$SCRIPT_DIR/$t"
+  case "$t" in
+    *.py) parallel_spawn "$TMP" "$t" python3 "$SCRIPT_DIR/$t" ;;
+    *) parallel_spawn "$TMP" "$t" bash "$SCRIPT_DIR/$t" ;;
+  esac
 done
 parallel_wait
 

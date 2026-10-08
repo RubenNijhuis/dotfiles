@@ -20,8 +20,11 @@ these Git-flake commands; a local `path:.` flake can evaluate untracked files.
 ## Migration state
 
 The full Home Manager generation now owns these files, including the cmux CLI
-helper. Prior configurations remain at `~/.config/cmux/cmux.json.pre-nix`,
-`~/.config/shell/cmux.sh.pre-nix`, and `~/.config/shell/functions.sh.pre-cmux`.
+helper. The `cmux/cmux.json.pre-nix` and `shell/cmux.sh.pre-nix` backups now
+live under `~/Private/Migrations/2026-10-07-pre-nix-consolidation/`.
+The earlier `~/.config/shell/functions.sh.pre-cmux` link remains in place.
+See [storage maintenance](storage-maintenance.md) for the archive inventory
+and the standalone cmux helper payload preserved for rollback.
 GC roots from the earlier targeted handoff remain under
 `~/.local/state/nix/gcroots/`; they are no longer the active ownership mechanism.
 Existing shells can load the update with `source ~/.config/shell/functions.sh`.

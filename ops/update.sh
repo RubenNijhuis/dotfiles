@@ -19,24 +19,13 @@ Usage: $0 [--help] [--no-color] [--exceptions]
 Refresh Nix inputs, then evaluate and build the current configuration.
 Activation remains explicit; this command does not switch the running system.
 
-By default this only updates repositories and the Nix-managed environment.
+By default this only refreshes the Nix-managed environment. It never pulls
+your code projects; use ops/update-repos.sh deliberately for that workflow.
 
 Options:
   --exceptions  Update only the documented Homebrew exceptions selected by the
                 active machine profile.
 EOF
-}
-
-update_repos() {
-  print_section "Repositories"
-  print_status_row "Start" info "checking local repositories for upstream changes"
-
-  if bash "$DOTFILES/ops/update-repos.sh" --compact ${NO_COLOR:+--no-color}; then
-    print_status_row "Result" ok "repository scan complete"
-    return 0
-  fi
-  print_status_row "Result" warn "repository updates had issues"
-  return 1
 }
 
 update_homebrew_exceptions() {
@@ -148,28 +137,23 @@ main() {
   done
 
   print_header "System Update"
+  if $run_exceptions; then
+    update_homebrew_exceptions
+    return
+  fi
+
   print_dim "Nix-first refresh: inputs, evaluation, and a build without switching."
   printf '\n'
 
-  local failures=0
-
-  # A repository pull may change the flake, so the Nix operations must follow
-  # it and run sequentially against one coherent checkout.
-  update_repos || failures=$((failures + 1))
-  update_nix_inputs || failures=$((failures + 1))
-  verify_nix_configuration || failures=$((failures + 1))
-
-  if $run_exceptions; then
-    update_homebrew_exceptions || failures=$((failures + 1))
+  # Do not verify an old lockfile after a failed refresh or mutate unrelated
+  # repositories as a side effect of updating this machine's configuration.
+  if ! update_nix_inputs || ! verify_nix_configuration; then
+    print_status_row "Overall" error "update incomplete; not activated"
+    print_next_steps "Review the failing Nix step before switching."
+    return 1
   fi
 
   printf '\n'
-  if [[ $failures -gt 0 ]]; then
-    print_status_row "Overall" warn "$failures step(s) had issues"
-    print_next_steps "Run: make doctor" "Review the failing Nix step before switching"
-    exit 1
-  fi
-
   print_status_row "Overall" ok "configuration refreshed and verified; not activated"
   if [[ "$(uname -s)" == "Darwin" ]]; then
     print_next_steps "Run make nix-switch to activate the verified configuration."

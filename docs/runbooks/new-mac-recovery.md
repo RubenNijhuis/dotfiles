@@ -17,6 +17,35 @@ own recovery method; never upload plaintext credentials with ordinary files.
 Keep repositories and dependencies outside iCloud and use supported app
 exports for creative projects. Independent backup work remains deferred.
 
+Recovery priorities are deliberately lean: Nix configuration source, code worth
+retaining on GitHub, and durable personal files in iCloud come first. Rebuildable
+caches and ordinary application state are best-effort, not a reason to retain
+every migration copy. Private SSH/GPG keys, ignored project configuration and
+creative source material need an explicit restore-or-recreate decision; Apple
+Passwords does not imply coverage of arbitrary local secrets. This policy is
+not blanket permission to delete files or publish unfinished code.
+
+Before retiring a local repository, verify all local branches against live
+remote history, then separately review tracked/untracked changes, tags,
+stashes and ignored files. A clean worktree or cached upstream ref alone is
+insufficient. Keep old GitHub repositories archived by default; removing a
+local clone does not require deleting its remote history.
+
+### Current verification — 2026-10-08
+
+| Check | Result |
+| --- | --- |
+| Locked Mac build | Full system build passed and returned the exact active `/run/current-system` generation; no switch needed or performed. |
+| Native checks | Neovim fresh-profile smoke, writing/export and network-tool checks passed. Personal accounts and AI clients were not used. |
+| Cross-platform | All declared Mac/Linux/WSL outputs evaluated successfully; this is not a Linux build or a clean-device installation test. |
+| Maintenance / apps | All maintenance checks passed; no duplicate bundle IDs in the inspected app directories. |
+| Source protection | Live remote main equals local HEAD; uncommitted/untracked changes remain local. No commit, push or input update performed. |
+| Remote access / OS | Screen Sharing and SSH disabled, with no listeners on the checked ports. macOS update/restart remains pending. |
+
+For remaining file coverage and private iCloud sharing boundaries, use the
+[single sync/filing report](../file-sync-options.md#read-only-audit-results--2026-10-08).
+Exact sensitive-file uploads and destructive batches remain approval-gated.
+
 ### Verified on this Mac (2026-10-05)
 
 - Photos has iCloud Photos enabled, uses Optimise Mac Storage, and reported a

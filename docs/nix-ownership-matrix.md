@@ -33,6 +33,11 @@ under `nix/config/`. “Native” means Home Manager has a useful declarative op
 “raw file” means Nix can own the file verbatim without pretending it knows the
 application's schema.
 
+On this Mac, 21 approved `.pre-nix` backups from `~/.config/` have been
+consolidated under `~/Private/Migrations/2026-10-07-pre-nix-consolidation/`.
+Other migration backups are not implied to have moved; see the exact inventory
+and recovery caveat in [storage maintenance](storage-maintenance.md).
+
 | Source / concern | Nix representation | State |
 | --- | --- | --- |
 | Git, global ignore | Home Manager Git module | active; prior files are `.pre-nix` backups |

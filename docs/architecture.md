@@ -35,8 +35,9 @@ language-version manager.
 4. Operate machine workflows via launchd (`make *-setup`, `make doctor ARGS=--automation`).
 5. Maintain with `make update` and `make maint-check`.
    The standard update refreshes flake inputs then checks and builds Nix without
-   switching. Use `make update ARGS=--exceptions` only for explicitly selected
-   macOS package exceptions.
+   switching or pulling unrelated code projects. Use `make update ARGS=--exceptions`
+   to update only explicitly selected macOS package exceptions, without changing
+   the Nix lockfile. Repository pulls use `ops/update-repos.sh` separately.
 
 The opt-in `maintenance` devShell supplies the locked test tools without
 installing a machine profile: `nix develop .#maintenance --command make maint-check`.

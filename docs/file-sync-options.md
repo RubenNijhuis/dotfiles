@@ -6,6 +6,87 @@ Independent backup work is deferred at the user's request. This does not make
 sync a backup. Identify the exact source and destination and obtain approval
 before moving existing files or enabling additional cloud-data categories.
 
+## Execution plan — 2026-10-08
+
+This is a plan, not authorization to upload, bulk-move, delete, publish code,
+accept licences, or restart the Mac. Keep one Files tree and one sync owner;
+extend the existing setup rather than create another migration framework.
+
+| Order | Work | Completion evidence |
+| --- | --- | --- |
+| 1. Verify protection | Check iCloud capacity, pending uploads/errors, Keep Downloaded, a Mac -> iPhone -> Mac note test and controlled offline edit. Review local/remote dotfiles state without pushing. | Recorded sync status, passing test and an explicit list of remaining loss-protection gaps. |
+| 2. File durable work | Metadata-first review of Documents/Desktop/Downloads, curated creative exports and migration copies. Prepare exact approved destinations in the existing Files tree. | Approved copies verified locally and remotely; unresolved items on a short review list, not a second live vault. |
+| 3. Retire leftovers | Start with the pending ~4.72 GiB disposable batch. Compare old Files/Obsidian copies and review browser/code/database recovery material separately. | Every deleted batch approved and verified; retained archives contain identified unique recovery data. |
+| 4. Reduce technical stores | Remove identified iOS 17.2/17.5 runtimes through Apple tooling; review simulator cache. Prepare exact Nix generation/root pruning and GC. Inspect OrbStack images/containers/volumes before suggesting removals. | Active Nix generation and needed database/project volumes preserved; actual results measured. |
+| 5. Keep it maintainable | Supported Shortcuts/creative-project exports, scoped native Apple sync checks, non-secret settings in existing Nix modules, updated recovery instructions. | Portable exports correctly filed and clear ownership; proposed weekly Inbox/monthly read-only drift reviews. |
+
+Execution boundaries:
+
+- Copy approved cloud-bound files first; verify fidelity and remote availability
+  before separately approving removal of originals. Exclude active downloads.
+- Fix note links through Obsidian where relevant. Project subfolders belong
+  inside a named project, following [the filing rules](personal-file-system.md).
+- Private-record policy clarified on 2026-10-08: ordinary legal, employment
+  and financial documents may use iCloud-backed Files provided they are not
+  accessible to family members. Verify sharing and obtain approval for exact
+  cloud-bound records. Never upload plaintext credentials or app databases.
+- Preserve unique notes, browser data, code, databases and creative exports until
+  coverage is verified. A Migration folder name alone is not a deletion rule.
+- npm/pnpm, games and saves stay excluded. No blanket OrbStack prune, disk-image
+  deletion or manual Nix-store removal. Xcode licence acceptance belongs to the
+  user; the macOS security update/restart remains separately user-scheduled.
+- No scheduled deletion, watcher, auto-upload, backup job or automation is
+  installed by this plan. Independent encrypted backup remains deferred, not
+  completed; keep the loss exposure visible rather than treating sync as backup.
+- Revisit Windows/Linux when available. Do not layer another sync engine onto
+  the live vault or promise iCloud Obsidian reliability on Windows.
+
+### Read-only audit results — 2026-10-08
+
+| Check | Verified result | Limit / next action |
+| --- | --- | --- |
+| Capacity and settings | System Settings: 2 TB plan, 720.5 GB used; Drive and Obsidian sync on, Optimize Storage on, Desktop & Documents sync off. | No settings changed; quota displays are not per-file upload proof. |
+| Local vault | Finder shows Files and its displayed descendants as Kept Downloaded. Metadata scan: 3,270 regular files, about 3.10 GB logical, no dataless flags, `.icloud` placeholders, symlinks or scan errors. | Local availability confirmed, not complete remote coverage. Phone two-way/offline test remains open. |
+| Loose documents | SHA-256 review of 35 intake/output files found 18 with identical filed copies and 17 without one in Files. All three Desktop documents and the reviewed employment outputs have identical filed copies. | Preserve originals pending exact approval; recent downloads, two screenshots and three research outputs need filing review. A matching name alone was insufficient for one downloaded PDF. |
+| Original Files copy | Of 2,997 scanned regular files, 2,991 have byte-identical live copies. Six do not: two media files, three Obsidian settings files and an earlier reading index. | Retain pending review; these counts exclude `.git` directories and Finder marker files. No archive was removed. |
+| Dotfiles source | A live read-only remote-reference check confirms HEAD equals remote main. Local changed/untracked entries remain. | No commit or push performed. Those changes are not remotely protected. |
+
+The targeted Documents review found 72 files below the local work-output folder;
+most are previews or supporting material, not new durable deliverables. The two
+reviewed chat workspace folders contained only Git metadata, and the reviewed
+legacy documents folder contained no regular files. Creative-app directories
+were left app-managed. No private filenames or document contents are stored in
+this report; comparisons read locally available files without requesting cloud
+downloads. No upload, move, deletion or sync-setting change was made.
+
+Next: approve exact intake copies under the private-record policy below, then
+verify remote availability before any separately approved original cleanup.
+The phone edit, deletion approvals, licence acceptance and any restart require
+user participation; other inspection and small repository work can continue.
+
+### Private records and family access
+
+Family Sharing shares iCloud+ capacity, not access to each member's documents;
+everyone must use their own Apple Account. Storage usage can be visible to family
+members. Access to files requires separate sharing or access to the account/device.
+See [Apple's Family Sharing guidance](https://support.apple.com/en-gb/108783) and
+[personal-safety guide](https://help.apple.com/pdf/personal-safety/en_CA/personal-safety-user-guide-en_CA.pdf).
+
+On 2026-10-08, Finder's Shared view showed **0 items** and the Files folder's
+context menu offered Share, not Manage Shared Folder. No sharing was found in
+these controls; this is not an exhaustive audit of every app's collaboration
+settings or proof that nobody else has account/device access. Keep Files and
+private-record destination folders unshared; items inside a shared parent inherit
+access. The name `90 Shared` does not itself grant anyone access.
+
+Advanced Data Protection was **Off**. Standard iCloud Drive encryption retains
+keys with Apple; family privacy is not the same as end-to-end encryption against
+the provider. Advanced Data Protection can protect Drive contents with keys held
+by trusted devices, but requires a recovery plan and remains deferred. Do not
+promise exclusive decryption, change security settings or upload additional
+sensitive records under that stronger assumption. See
+[Apple's encryption overview](https://support.apple.com/en-gb/102651).
+
 ## Decision criteria
 
 The chosen system must preserve this same portable tree on every device:

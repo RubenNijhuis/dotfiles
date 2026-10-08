@@ -29,6 +29,9 @@ classified by purpose: legal and identity documents in `20 Areas/Legal & Records
 financial records in `20 Areas/Finance & Business`, employment records in
 `20 Areas/Career & Employment`, and historical material in `40 Archive`.
 Sensitivity alone is not a reason to create a device-only document library.
+The user reaffirmed this on 2026-10-08, conditional on no family access. Keep
+these folders unshared and review exact uploads; see the
+[family-access and encryption boundary](file-sync-options.md#private-records-and-family-access).
 
 `~/Private` remains local technical storage for credential exports, keys, and
 migration/rollback material, not the canonical home for personal records.

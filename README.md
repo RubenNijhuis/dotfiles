@@ -51,6 +51,11 @@ make bootstrap-verify # bootstrap reliability checks
 make help         # complete command list
 ```
 
+`make update` never pulls your code projects. To update the selected Homebrew
+exceptions only, use `make update ARGS=--exceptions`; it leaves Nix inputs
+unchanged. Repository pulls remain a separate, deliberate operation through
+`bash ops/update-repos.sh`.
+
 The CLI is designed to stay compact while still showing that work is happening. Long-running commands should stream progress in a condensed dashboard style instead of going silent.
 
 ## Machine Profiles

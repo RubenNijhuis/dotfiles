@@ -1,5 +1,5 @@
 .PHONY: help install update ssh-setup gpg-setup gpg-check \
-	backup brew-audit app-audit \
+	backup brew-audit app-audit storage-audit \
 	doctor spicetify-status spicetify-apply spicetify-restore \
 	hooks format vscode-setup keychain-check automation-setup \
 	lint-shell test-scripts maint-check bootstrap-verify \
@@ -46,6 +46,9 @@ doctor: ## Quick health + automation dashboard (use --full for deep checks)
 
 app-audit: ## Read installed app versions and detect duplicate bundles (ARGS=--check)
 	@bash $(DOTFILES)/ops/app-audit.sh $(ARGS)
+
+storage-audit: ## Review allocated storage without reading contents or deleting data
+	@python3 $(DOTFILES)/ops/storage-audit.py $(ARGS)
 
 # ── Setup (one-time) ────────────────────────────────────────────────
 

@@ -12,6 +12,7 @@ Index for the dotfiles documentation.
 - [Personal File System](personal-file-system.md) — durable file placement, sync, and backup policy
 - [File-sync options](file-sync-options.md) — iCloud, Nextcloud, Syncthing, and cross-platform tradeoffs
 - [macOS Settings Migration](macos-settings-migration.md) — declarative macOS settings coverage
+- [Storage Maintenance](storage-maintenance.md) — read-only sizes and approval-bounded cleanup
 - [Shell Performance](shell-performance.md) — startup time optimisation
 
 ## Tool Configuration

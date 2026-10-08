@@ -59,6 +59,29 @@ Review remote-login/screen-sharing switches and browser passkey-site access
 on each Mac. TCC permissions and account Sync choices remain device/app-owned;
 do not grant them through scripts or copy their databases into Git.
 
+### Reproducible permission policy
+
+`nix/profiles/macos-apps.nix` saves the reviewed manual permission checklist as
+`~/.config/dotfiles/macos-permissions.txt` on each configured Mac. Nix owns the
+desired policy and restore instructions, **not** the live privacy grants. Review
+app identities before approving; an installed checklist is not verification that
+its permissions were applied.
+
+Apple's [Privacy Preferences Policy Control documentation](https://support.apple.com/guide/deployment/privacy-preferences-policy-control-payload-settings-dep38df53c2a/web)
+requires device management to deploy privacy payloads. Some permissions can be
+managed that way, but camera, microphone, and screen-recording access cannot
+simply be pre-granted. This Mac is not MDM-enrolled (checked 2026-10-07); adding
+management infrastructure solely for these switches is outside this lean setup.
+Do not use unsupported defaults keys, edit TCC databases, disable SIP, or reset
+all permissions. A targeted permission reset is not a persistent denial policy.
+
+On 2026-10-07 Arc and Brave camera/microphone switches were turned off and
+verified in System Settings. Other apps' camera/microphone grants were unchanged.
+The repeated VS Code Local Network rows remain unresolved historical entries:
+the app inventory found one real VS Code bundle, with its vendor designated
+signing requirement. Do not infer that Nix caused the repeated rows or reset
+working permissions without evidence.
+
 Verified on this Mac on 2026-10-07: Screen Sharing is off after user-approved
 shutdown; TCP 22/5900/3283 and UDP 5900/3283 have no listeners. Remote
 Management, Remote Login, and Remote Application Scripting are off in Sharing.
@@ -82,6 +105,12 @@ Mac still runs 26.5.2 and offers Tahoe 26.7.1; installation/restart is deferred
 to the user tonight. Automatic update preferences do not prove patches were
 installed. Screen Sharing was previously left on by request; that exception
 has now been revoked.
+
+Rechecked on 2026-10-08: the Mac still runs 26.5.2 (25F84); the deferred
+installation has not happened. The security check again confirms Screen
+Sharing/SSH disabled and no TCP 22/5900/3283 or UDP 5900/3283 listeners, but
+fails the macOS-update check. Closing the service does not replace installing
+the security update. No update or restart was initiated during cleanup.
 
 The new Nix generation activated successfully from cmux on 2026-10-07 after
 the user granted App Management. Home Manager's app-copy step and the remote

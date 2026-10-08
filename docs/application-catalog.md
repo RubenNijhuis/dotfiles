@@ -74,7 +74,7 @@ launchers. This is a recovery/ownership list, not an uninstall request:
 | Creative work | DaVinci Resolve and Blackmagic utilities, Affinity, Figma, rekordbox and Pioneer updater, Processing |
 | Leisure | Spotify, Steam; retain existing games and saves |
 | Platform and legacy tooling | Xcode, Python 3.11 GUI tools, OneMenu |
-| Alternative browsers | Chrome, Arc, Brave, Pale Moon; Zen Twilight remains preferred |
+| Alternative browsers | Chrome remains for compatibility; Zen Twilight remains preferred. Arc, Brave and Pale Moon app bundles were retired on 2026-10-07. |
 
 Zoom and CrossOver are now declared in this Mac's Nix layer; neither is added
 to Linux, WSL, or the portable core. The pinned Zoom package needs a small
@@ -96,12 +96,27 @@ this restore matrix for the retained native apps, without copying their database
 | rekordbox / Pioneer tools | [rekordbox installer](https://rekordbox.com/en/download/) and hardware-specific vendor updates. Keep libraries/licenses outside Nix; do not silently replace version 6 with a newer major version. |
 | Processing / Python 3.11 GUI tools | Retained legacy vendor installs, not current global runtime requirements. The pinned Processing is Linux-only; put future Python environments in their own code projects. |
 | Xcode / OneMenu | Xcode via Apple's supported installer/App Store; [OneMenu vendor installer](https://coffeebreak.software/one-menu/). No verified Nix equivalent for OneMenu. |
-| Chrome / Arc / Brave / Pale Moon | Retained compatibility/legacy browsers, not chosen defaults. Chrome's installed build is newer than the pin; Arc/Pale Moon have no matching package; Brave is available for an explicit later migration. Never import browser profiles into Nix. |
+| Chrome | Retained for compatibility, not the default. Its installed build is newer than the pin; recheck before migrating. Never import browser profiles into Nix. |
 
 This inventory is not a claim that each app is needed or that it is fully
 recoverable. Licenses, sign-ins, media libraries, and app-local work need their
 own supported recovery paths. Re-evaluate temporary version exceptions when
 updating the Nix pin rather than adding bespoke overrides for every GUI app.
+
+On 2026-10-07 the approved `/Applications/Arc.app`, `/Applications/Brave Browser.app`,
+and `/Applications/Pale Moon.app` bundles were moved to
+`~/Private/System Migration/Application Archives.noindex/2026-10-07-retired-browsers/`.
+Their bundle IDs/versions were verified in the archive and they no longer appear
+in the active app inventory. The app bundles are recoverable; this archive does
+not free their storage. After separate approval, the three profiles formerly at
+`~/Library/Application Support/{Arc,BraveSoftware,Pale Moon}` were moved into
+the archive's owner-only `Profiles/` folder. The original folders are absent;
+each move preserved the directory's filesystem identity. The six reviewed
+cache/preferences remnants were subsequently moved into the archive's
+owner-only `Remnants/` folder and verified absent from their original locations.
+Zen, Safari and
+Chrome remain installed. No browser databases were inspected or imported into
+this repository.
 
 The approved Homebrew exit batch completed on 2026-10-05: duplicate `gnupg`,
 `signal-cli`, `tailscale`, and `ngrok`, plus the unused `ngrok/ngrok` tap,

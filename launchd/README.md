@@ -12,11 +12,14 @@ make automation-list
 make launchd-install-all
 
 # Install one agent
+bash ops/automation/launchd-manager.sh install update-audit
 
 # Show loaded status
 make launchd-status
 
 # Restart or remove one agent
+bash ops/automation/launchd-manager.sh restart update-audit
+bash ops/automation/launchd-manager.sh uninstall update-audit
 ```
 
 ## Managed Agents
@@ -43,8 +46,7 @@ Installation renders local paths from placeholders (`__DOTFILES__`, `__HOME__`).
 1. Create script: `ops/<task-name>.sh`.
 2. Make it executable: `chmod +x ops/<task-name>.sh`.
 3. Create plist template: `launchd/com.user.<task-name>.plist`.
-4. Follow the contract below.
-4. Install with manager:
+4. Follow the contract below and install with the manager:
 ```bash
 bash ops/automation/launchd-manager.sh install <task-name>
 ```
@@ -123,7 +125,7 @@ If install fails with permissions, run the command outside sandboxed tooling.
 
 ```bash
 make automation-setup
-make doctor --automation
+make doctor ARGS=--automation
 ```
 
 ## Update Policy
