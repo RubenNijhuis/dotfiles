@@ -1,22 +1,29 @@
 {
   "schemaVersion": "0.1.0",
-  "name": "Research source",
+  "name": "Journalistiek - Webbron",
   "behavior": "create",
   "noteNameFormat": "{{date|date:\"YYYY-MM-DD\"}} - {{title|safe_name}}",
   "path": "00 Inbox",
+  "vault": "Files",
   "triggers": [],
   "properties": [
-    { "name": "title", "value": "{{title}}", "type": "text" },
-    { "name": "source", "value": "{{url}}", "type": "text" },
-    { "name": "author", "value": "{{author}}", "type": "text" },
-    { "name": "publisher", "value": "{{site}}", "type": "text" },
-    { "name": "published", "value": "{{published}}", "type": "text" },
+    { "name": "type", "value": "bron", "type": "text" },
+    { "name": "soort", "value": "webartikel", "type": "text" },
+    { "name": "url", "value": "{{url}}", "type": "text" },
+    { "name": "auteur", "value": "{{author}}", "type": "text" },
+    { "name": "medium", "value": "{{site}}", "type": "text" },
     {
-      "name": "retrieved",
-      "value": "{{time|date:\"YYYY-MM-DDTHH:mm:ssZ\"}}",
-      "type": "text"
+      "name": "gepubliceerd",
+      "value": "{{published|date:\"YYYY-MM-DD\"}}",
+      "type": "date"
     },
-    { "name": "status", "value": "unreviewed", "type": "text" }
+    {
+      "name": "geraadpleegd",
+      "value": "{{date|date:\"YYYY-MM-DD\"}}",
+      "type": "date"
+    },
+    { "name": "leesstatus", "value": "ongelezen", "type": "text" },
+    { "name": "dossier", "value": "", "type": "text" }
   ],
-  "noteContentFormat": "## My notes\n\n## Verification\n\n- [ ] Check the author and publication date against the page.\n- [ ] Check claims against original sources.\n- [ ] File this under the relevant project's Sources folder, or Resources if reusable.\n\n## Captured source material\n\n{{content}}\n"
+  "noteContentFormat": "## Samenvatting in mijn eigen woorden\n\n## Bruikbaar voor mijn artikel\n- **Welke bewering ondersteunt deze bron?**\n- **Wat bewijst deze bron niet?**\n\n## Geselecteerde passages\n{{highlights}}\n\n## Exacte citaten en vindplaatsen\n<!-- Controleer de letterlijke tekst, spreker en context bij de originele bron. -->\n\n## Oorspronkelijke bronnen\n\n## Nog controleren\n- [ ]\n\n## Eigen interpretatie\n\n## Bewaarde webtekst\n{{content}}"
 }

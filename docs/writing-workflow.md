@@ -10,6 +10,29 @@ It supplies two shared export presets, not another editor, a cloud checker,
 or an always-running service. Native Windows applications are a separate layer;
 WSL's lean developer target does not yet import the writing profile.
 
+## Settings and templates
+
+Obsidian's writable `.obsidian` settings and `30 Resources/Templates` already
+belong to the iCloud-backed Files vault. Keep one live copy; do not symlink
+those files into the read-only Nix store or import workspace/bookmark state
+into Git. The current baseline uses Open Sans, relative Markdown links,
+`00 Inbox` for new notes, and sibling `Attachments` folders.
+
+The Nix Web Clipper import template matches the vault's source schema:
+`type: bron`, `url`, `auteur`, `medium`, `geraadpleegd`, `leesstatus`, and
+`dossier`. On a new browser, import
+`~/.config/obsidian-web-clipper/research-source.json` through the extension.
+Keep existing configured templates; import is not automatic and should not
+create a second competing capture workflow.
+
+HandBrake's [supported preset export/import](https://handbrake.fr/docs/en/latest/advanced/custom-presets.html)
+is the boundary for reusable conversion settings. No custom preset file was
+found at its documented Mac location on 2026-10-09; do not invent a preset
+collection to back up. If a reusable preset becomes necessary, export it to
+`~/Files/30 Resources/Media/Presets/`, not an app database or a machine-specific
+path in Nix. Resolve project exports and source media belong to their specific
+project, while reusable non-secret settings may be version-controlled separately.
+
 ## Export a draft
 
 After activating Nix, from the specific project folder:

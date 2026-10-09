@@ -9,10 +9,10 @@ This is an installation policy, never authorization to uninstall an app.
 | Task | Preferred app | Configuration boundary |
 | --- | --- | --- |
 | Browser | Zen Twilight on this Mac; Zen on other desktops | Nix supplies the desktop browser. Sessions, extensions, passwords, and supported browser sync remain app-owned. |
-| Email | Thunderbird | IMAP/OAuth accounts are set up per device. Never synchronize its profile database. Apple Mail may remain the iPhone client. |
+| Email | Thunderbird | Nix supplies telemetry-off and changeable Open Sans/density/GPC defaults without managing profiles. IMAP/OAuth accounts remain device-owned. Never synchronize its profile database. Apple Mail may remain the iPhone client. |
 | Calendar | Apple Calendar on Apple devices; Thunderbird elsewhere | Keep one source per calendar. This Mac currently has iCloud and local calendars; Google is not a mandatory provider. Configure accounts and alerts separately from Nix. |
 | Passwords | Apple Passwords / iCloud Keychain | The current single source of truth. Credentials, passkeys, recovery codes, and exports never belong in Nix or this repository. |
-| Notes | Obsidian, plain Markdown under `~/Files` | On this Mac, `~/Files` points to the Files vault in Obsidian's iCloud container. Preserve the same taxonomy; iPhone two-way sync still needs its device test. Windows/Linux sync is a separate decision, not an automatic WebDAV migration. |
+| Notes | Obsidian, plain Markdown under `~/Files` | Vault settings and templates travel with the existing iCloud Files vault; do not replace them with read-only Nix links. Nix supplies the matching Web Clipper import template. Mobile access is user-confirmed; a controlled two-way/offline check is separate. Windows/Linux sync remains a separate decision. |
 | Code | VS Code; Neovim in the terminal | Nix owns shared settings and Neovim plugins. VS Code extension IDs are declared, but their versions remain marketplace-managed. |
 | Terminal | cmux on this Mac; native terminal elsewhere | Shell, Git, prompt, and navigation are shared; the terminal windowing app is host-specific. |
 | Private messaging | Signal | Sign in/link each device through the app. Keep its database local. |

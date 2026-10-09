@@ -40,6 +40,7 @@ and recovery caveat in [storage maintenance](storage-maintenance.md).
 
 | Source / concern | Nix representation | State |
 | --- | --- | --- |
+| Thunderbird baseline | `nix/home/thunderbird.nix`; package defaults and supported telemetry policy | profiles, account sign-ins, mail, contacts and calendars stay app-owned; never replace `profiles.ini` |
 | Git, global ignore | Home Manager Git module | active; prior files are `.pre-nix` backups |
 | ripgrep, Bat, and the selected Bat theme | native Home Manager modules plus a raw theme file | active; prior files are `.pre-nix` backups |
 | cmux and rendering preferences | `nix/home/cmux.nix` + `nix/config/ghostty/config` | active through the full Home Manager generation; updates use `make nix-switch`. New machines can adopt with `make nix-adopt PROFILE=cmux`. Sessions remain local. |
