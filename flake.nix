@@ -195,6 +195,14 @@
           yarn = pkgs.yarn.override { nodejs = pkgs.nodejs_22; };
         in
         {
+          developer-extras = pkgs.mkShell {
+            packages = with pkgs; [
+              hyperfine
+              jujutsu
+              nil
+              nixd
+            ];
+          };
           maintenance = pkgs.mkShell {
             packages = with pkgs; [
               bashInteractive

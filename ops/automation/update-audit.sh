@@ -14,6 +14,11 @@ if ! require_network; then
   exit 0
 fi
 
+if ! command -v dotfiles-timeout >/dev/null 2>&1; then
+  print_error "Update audit requires the Nix timeout helper; activate with make nix-switch"
+  exit 1
+fi
+
 lock_dir="${TMPDIR:-/tmp}/dotfiles-update-audit.lock"
 cleanup() {
   rm -f "$lock_dir/pid" "$lock_dir/flake.lock" "$lock_dir/nix.log" "$lock_dir/report"
@@ -38,6 +43,11 @@ trap 'exit 143' TERM
 available=()
 failed=()
 
+run_bounded() {
+  # GNU timeout also terminates child processes; no detached watchdog sleeps.
+  dotfiles-timeout --kill-after=5s "$@"
+}
+
 check_nix() {
   local nix_bin temporary_lock changes desired_system current_system
   nix_bin="$(command -v nix || true)"
@@ -46,7 +56,7 @@ check_nix() {
 
   temporary_lock="$lock_dir/flake.lock"
 
-  if "$nix_bin" flake update --flake "$DOTFILES" --output-lock-file "$temporary_lock" >"$lock_dir/nix.log" 2>&1; then
+  if run_bounded 180s "$nix_bin" flake update --flake "$DOTFILES" --output-lock-file "$temporary_lock" >"$lock_dir/nix.log" 2>&1; then
     if [[ ! -s "$temporary_lock" ]]; then
       failed+=("Nix check produced no lockfile")
     elif ! cmp -s "$DOTFILES/flake.lock" "$temporary_lock"; then
@@ -56,7 +66,7 @@ check_nix() {
       available+=("Nix inputs: ${changes//$'\n'/, }")
     fi
   else
-    failed+=("Nix check")
+    failed+=("Nix check (failed or exceeded 180s)")
     cat "$lock_dir/nix.log" >&2
   fi
 
@@ -64,7 +74,7 @@ check_nix() {
 
   # A refreshed lockfile can be current while the running Mac is still old.
   if [[ "$(uname -s)" == Darwin && -d /run/current-system ]]; then
-    if desired_system="$("$nix_bin" eval --raw --no-write-lock-file \
+    if desired_system="$(run_bounded 60s "$nix_bin" eval --raw --no-write-lock-file \
       "$DOTFILES#darwinConfigurations.${NIX_DARWIN_HOST:-Rubens-MacBook-Pro}.system.outPath" 2>>"$lock_dir/nix.log")"; then
       current_system="$(cd /run/current-system && pwd -P)"
       if [[ "$desired_system" != "$current_system" ]]; then
@@ -82,8 +92,8 @@ check_homebrew() {
   brew_bin="$(command -v brew || true)"
   [[ -n "$brew_bin" ]] || return
 
-  if ! outdated="$("$brew_bin" outdated --verbose 2>/dev/null)"; then
-    failed+=("Homebrew check")
+  if ! outdated="$(run_bounded 30s "$brew_bin" outdated --verbose 2>/dev/null)"; then
+    failed+=("Homebrew check (failed or exceeded 30s)")
   elif [[ -n "$outdated" ]]; then
     available+=("Homebrew packages:" "$outdated")
   fi
@@ -91,10 +101,10 @@ check_homebrew() {
 
 check_macos() {
   local output
-  if ! output="$(/usr/sbin/softwareupdate --list 2>&1)"; then
-    failed+=("macOS check")
+  if ! output="$(run_bounded 30s /usr/sbin/softwareupdate --list --no-scan 2>&1)"; then
+    failed+=("macOS cached check (failed or exceeded 30s)")
   elif grep -q '^\* Label:' <<< "$output"; then
-    available+=("Apple software:" "$(sed -n 's/^\* Label: /  /p' <<< "$output")")
+    available+=("Apple software (cached catalog):" "$(sed -n 's/^\* Label: /  /p' <<< "$output")")
   elif ! grep -q "No new software available" <<< "$output"; then
     failed+=("Unrecognised macOS update response")
   fi

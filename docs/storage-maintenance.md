@@ -25,9 +25,10 @@ volume change, not a per-file reclaimed-space guarantee.
 
 After separate approval, system generations 1–54 were permanently retired
 through `nix-env --profile /nix/var/nix/profiles/system --delete-generations`.
-Generation 55 remains current and is the only retained system generation.
-There is no immediate system-generation rollback; restoring an older setup
-requires rebuilding it and may need downloads. Unused store paths are collected
+Generation 55 was the only retained system generation immediately after cleanup.
+The subsequent developer-profile refactor activated generation 56, retaining 55
+as its rollback. Generations 1–54 require rebuilding and may need downloads.
+Unused store paths are collected
 through Nix's root-aware garbage collector, never by manually deleting store
 directories. Current profiles, project roots and running-process roots remain
 protected.

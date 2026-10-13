@@ -11,11 +11,7 @@
     dust
     gh
     gum
-    hyperfine
-    jujutsu
     lua-language-server
-    nil
-    nixd
     nixfmt
     nodejs_24
     parallel
@@ -26,4 +22,6 @@
     statix
     stylua
   ];
+  # Experiments and unconfigured Nix language servers are available through
+  # `nix develop .#developer-extras`, without installing them on every host.
 }

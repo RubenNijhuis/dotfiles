@@ -57,6 +57,16 @@ mail, notes, and gaming applications remain native Windows applications. Add
 The Linux desktop adds the separate `gaming` capability. The Mac keeps its
 occasional gaming launcher as a narrow, opt-in Homebrew exception.
 
+The default developer profile has 16 direct packages. Optional benchmarking,
+Jujutsu and Nix language-server experiments do not grow that baseline:
+
+```bash
+nix develop .#developer-extras
+```
+
+This shell supplies Hyperfine, Jujutsu, `nil` and `nixd` on supported hosts.
+It does not configure editor integrations or install them globally.
+
 | Device role | Nix target | Deliberate difference |
 | --- | --- | --- |
 | Primary Mac | `Rubens-MacBook-Pro` | desktop core, developer, browser, writing, and macOS apps |

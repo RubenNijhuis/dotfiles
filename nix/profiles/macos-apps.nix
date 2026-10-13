@@ -39,6 +39,10 @@ in
   # These applications are intentionally macOS-only. Their configuration and
   # account state remain app-managed, while Nix owns the installation.
   home.packages = [
+    # Only expose the timeout helper, not GNU replacements for macOS utilities.
+    (pkgs.writeShellScriptBin "dotfiles-timeout" ''
+      exec ${pkgs.coreutils}/bin/timeout "$@"
+    '')
     pkgs.cmux
     pkgs.orbstack
     pkgs.raycast

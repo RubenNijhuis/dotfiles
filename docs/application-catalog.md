@@ -28,7 +28,7 @@ or notes application.
 | Capability | Declared portable tools | Native apps when needed |
 | --- | --- | --- |
 | Core | Git, shell, search/preview, navigation, terminal tools, Neovim | None required for a headless host. |
-| Development | Nix maintenance, Node 24/pnpm, formatters, GitHub CLI, Jujutsu, selected language servers | VS Code; OrbStack on this Mac. Pin other runtimes and package-manager requirements in each active project. |
+| Development | Nix maintenance, Node 24/pnpm, formatters, GitHub CLI, Bash/Lua language servers | VS Code; OrbStack on this Mac. Pin other runtimes and package-manager requirements in each active project. |
 | Writing | Pandoc, Typst, Vale, LanguageTool | Obsidian for notes/drafts; a document editor only when its format or workflow is needed. |
 | Design | Image/SVG optimization; Krita and RawTherapee on supported Linux hosts | Krita for illustration; RawTherapee for photos; existing Affinity/Figma remain optional, not a portable requirement. |
 | Media | FFmpeg, SoX, yt-dlp as optional supporting tools | HandBrake for file-to-file conversion; DaVinci Resolve for video and its audio workflow. Audacity for standalone audio editing if needed. No serious music-production stack by default. |
@@ -41,6 +41,12 @@ command-line only; its GUI apps and games run natively on Windows. The Linux
 desktop adds its gaming capability. Design/media modules are opt-in rather
 than installed everywhere. See [Nix transition](nix-transition.md) for exact
 host composition.
+
+Jujutsu, Hyperfine and the unconfigured `nil`/`nixd` language servers are opt-in
+through `nix develop .#developer-extras` in this repository. Gum stays in the
+baseline because the existing confirmation prompts use it. Biome/Prettier,
+GNU Parallel and the shell tools remain because editor and maintenance commands
+actually call them; the two formatters cover different file types.
 
 ## Package exceptions
 
@@ -87,7 +93,7 @@ this restore matrix for the retained native apps, without copying their database
 
 | Apps | Restore path / reason not in the Nix baseline |
 | --- | --- |
-| WhatsApp, Slack, Discord | Official app installer/updater for now: installed versions 26.39.21, 4.51.191, 0.0.414 are newer than the pin's 2.26.31.27, 4.51.180, 0.0.413. Recheck at the next Nix update; do not downgrade. |
+| WhatsApp, Slack, Discord | Official app installer/updater for now: installed versions 26.40.20, 4.51.191, 0.0.414 are newer than the pin's 2.26.31.27, 4.51.180, 0.0.413 (rechecked 2026-10-13). Recheck at the next Nix update; do not downgrade. |
 | App named ChatGPT | Its bundle ID is `com.openai.codex`. Preserve this actual app and use its supported updater until a matching replacement is verified; filename alone does not establish identity. |
 | Spotify | Official writable installation (currently 1.3.3.264); Spicetify must not patch a Nix-store app. The pin is also older (1.2.98.301). |
 | Steam | Native Mac Steam installer; the pinned Steam derivation is not a supported Darwin package. Game saves and Cloud status are separate. |
@@ -103,20 +109,10 @@ recoverable. Licenses, sign-ins, media libraries, and app-local work need their
 own supported recovery paths. Re-evaluate temporary version exceptions when
 updating the Nix pin rather than adding bespoke overrides for every GUI app.
 
-On 2026-10-07 the approved `/Applications/Arc.app`, `/Applications/Brave Browser.app`,
-and `/Applications/Pale Moon.app` bundles were moved to
-`~/Private/System Migration/Application Archives.noindex/2026-10-07-retired-browsers/`.
-Their bundle IDs/versions were verified in the archive and they no longer appear
-in the active app inventory. The app bundles are recoverable; this archive does
-not free their storage. After separate approval, the three profiles formerly at
-`~/Library/Application Support/{Arc,BraveSoftware,Pale Moon}` were moved into
-the archive's owner-only `Profiles/` folder. The original folders are absent;
-each move preserved the directory's filesystem identity. The six reviewed
-cache/preferences remnants were subsequently moved into the archive's
-owner-only `Remnants/` folder and verified absent from their original locations.
-Zen, Safari and
-Chrome remain installed. No browser databases were inspected or imported into
-this repository.
+Arc, Brave and Pale Moon were retired with approval, including their reviewed
+profiles and remnants. Zen, Safari and Chrome remain installed. The old browser
+archives were subsequently retired on 2026-10-13; do not rely on them for recovery.
+See [Storage maintenance](storage-maintenance.md) for the exact cleanup history.
 
 The approved Homebrew exit batch completed on 2026-10-05: duplicate `gnupg`,
 `signal-cli`, `tailscale`, and `ngrok`, plus the unused `ngrok/ngrok` tap,
@@ -130,13 +126,14 @@ checksum-verified `dump.rdb`. Future databases belong in project containers
 with explicit persistent volumes and backup/export instructions, not in the
 global laptop installer.
 
-The old `/Applications` copies of OrbStack, Zoom, and CrossOver were moved to
-`~/Private/System Migration/Application Archives.noindex/2026-10-05/` after
-activation and verification. Their sole installed owner is now
-`~/Applications/Home Manager Apps/`. OrbStack's six previously running
-containers were restarted; VM data, privileged helper, CrossOver bottles,
-licenses, and Zoom account data were not removed. The archive is recoverable,
-local-only rollback state, not freed disk space or an off-device backup.
+OrbStack, Zoom and CrossOver now have one installed owner:
+`~/Applications/Home Manager Apps/`. Their old `/Applications` copies and migration
+archives were retired; VM data, privileged helpers, CrossOver bottles, licenses
+and account data were not removed. The 2026-10-13 app audit found no duplicate
+bundle IDs in its inspected roots, and the Homebrew audit found no undeclared
+top-level installs. Krita's Homebrew installer revision was updated to 5.3.4.1
+(the app still reports 5.3.4), and the retained Kerberos dependency to 1.22.2_2.
+Homebrew remains limited to documented exceptions and their dependencies.
 
 Run `make app-audit` to read installed bundle IDs, versions, and paths without
 launching or changing apps. `make app-audit ARGS=--check` fails on multiple real

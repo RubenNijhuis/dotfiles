@@ -131,13 +131,24 @@ make doctor ARGS=--automation
 ## Update Policy
 
 `update-audit` runs every Monday at 09:15. It checks Nix inputs, documented
-Homebrew packages, and macOS updates, then notifies when the available updates
-or check failures change. The latest report is saved to
+Homebrew packages, and Apple's cached update catalog, then notifies when
+available updates or check failures change. The latest report is saved to
 `~/.local/state/dotfiles/update-audit.txt`; unchanged results stay quiet.
 It also detects when the Mac is still running a previous Nix generation after
 the repository has been updated.
 It intentionally does not install updates: Nix updates change the
 tracked lockfile and macOS updates can require a restart, so both remain an
 explicit review-and-apply step.
+
+The Nix-owned `dotfiles-timeout` helper bounds input checks to 180 seconds,
+activation-status evaluation to 60 seconds, and each Homebrew/Apple check to
+30 seconds, with a five-second termination grace period. A timeout is a failed
+check, never “up to date”. Apple's cached list is labelled as such; review
+Software Update for a fresh scan. No update or restart is performed by the audit.
+
+Rechecked on 2026-10-13 through the installed LaunchAgent: exit 0, active
+configuration matched, and the tracked lockfile was unchanged. Homebrew can
+report a version mismatch even when the installed version is newer; compare
+versions before upgrading, rather than treating every result as a safe update.
 
 `ops/automation/launchd-manager.sh` is the canonical command surface.
