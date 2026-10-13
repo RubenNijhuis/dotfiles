@@ -37,6 +37,15 @@ reported by Nix (about 10.39 GiB). The active system path remained present.
 Collected builds are permanently removed and may need downloading/rebuilding;
 this is separate from the user's Trash cleanup.
 
+At Ruben's subsequent request, `~/Developer/personal/projects/SimRacingCenter`
+and `PortfolioFinal` were moved to recoverable Trash, preserving their directory
+identities. Allocation before the moves was about 446 MiB combined; Trash was
+not emptied, so this is not reclaimed space. The nested SRC-API repository's
+five modified files remain in the moved checkout; its GitHub remote is unchanged.
+`ThreeJS/journey` was retained and its directory identity rechecked.
+Nix generation 57 is now active with the outdated global Bun fallback retired
+from the shared shell PATH; Bun's files and the project-installed runtime remain.
+
 Run the read-only size review from the repository:
 
 ```sh

@@ -108,8 +108,8 @@ global npm/pnpm/Yarn installs.
 | Project | Manager / decision |
 | --- | --- |
 | Personal website | Already pnpm 12.8.1; verified that selection and left its active workspace unchanged. Bun is its project-installed research runtime, not a competing installer. |
-| PortfolioFinal; ThreeJS journey | Added explicit pnpm 12.3.4 pins. Frozen lock checks passed; the application graphs are unchanged, with pnpm's tool-lock document added. These folders have no Git repository; changes remain local. |
-| SimRacingCenter | Retained its explicit pnpm 9.1.2 compatibility pin; not upgraded or validated in this pass. |
+| ThreeJS journey | Kept with an explicit pnpm 12.3.4 pin. Frozen lock check passed; the application graph is unchanged, with pnpm's tool-lock document added. This folder has no Git repository; changes remain local. |
+| PortfolioFinal; SimRacingCenter | Subsequently retired to recoverable Trash at Ruben's request. The nested SRC-API checkout and its five modified files were preserved; its GitHub remote was not deleted. |
 | TypeScript Decorators / Exercises | Historical pnpm 6-format lock / dependency-free exercise manifest respectively; left unchanged, not modernized just for uniformity. |
 | Portfolio22 | Retained npm: existing manifest edits, legacy Gatsby 4/node-sass 7 and its authoritative npm lock require a separate runtime/dependency migration. |
 | Roodjongeren; Mijnrood | Retained Yarn 1.22.22: shared CI/container workflows and existing edits are not laptop-wide package-manager migrations. |
