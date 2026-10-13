@@ -17,6 +17,16 @@ own recovery method; never upload plaintext credentials with ordinary files.
 Keep repositories and dependencies outside iCloud and use supported app
 exports for creative projects. Independent backup work remains deferred.
 
+Retirement update — 2026-10-13: the historical Code Recovery, Resolve Exports
+and other approved System Migration rollback folders were moved to recoverable
+Trash. They are no longer restore prerequisites or protected backup copies;
+the dated observations below are historical. Mave archives and the Obsidian
+snapshots containing Mave notes remain untouched. See
+[the exact retirement record](../storage-maintenance.md#latest-retirement--2026-10-13).
+Earlier system generations 1–54 were also retired after approval; only current
+generation 55 remains. Recover an older configuration from Git history and
+rebuild it rather than expecting an installed rollback generation.
+
 Recovery priorities are deliberately lean: Nix configuration source, code worth
 retaining on GitHub, and durable personal files in iCloud come first. Rebuildable
 caches and ordinary application state are best-effort, not a reason to retain

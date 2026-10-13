@@ -1,5 +1,41 @@
 # Storage maintenance
 
+## Latest retirement — 2026-10-13
+
+After exact approval, `cv-editor`, `LefVideo.drp`, and `Movies/Main.mov` were
+moved to recoverable Trash. The two remaining `pbase` recovery copies had
+already been retired the same way.
+
+Ten folders under `~/Private/System Migration/` were subsequently moved to
+Trash: Git Signing, Code Recovery, Zen Profile Backups, Nix Adoption Backups,
+Resolve Exports, Application Config Archives, LaunchAgent Archives,
+Application Archives.noindex, Runtime Archives, and Database Archives.
+Their source locations were verified absent. This supersedes the retention
+decisions in the older reviews below; these snapshots are not durable recovery
+inputs. The batch included historical browser profiles and a cold database.
+
+Obsidian Vault Backups remains because it contains Mave notes. Mave is archived
+and excluded from further cleanup. Live apps, repositories, Files, SSH/GPG
+keyrings, npm/pnpm and games were untouched. The agent did not empty Trash;
+moving files there does not reclaim storage or provide an off-device backup.
+The user subsequently reported emptying Trash on 2026-10-13; do not rely on
+those retired copies for recovery. Available space was then measured at
+177.17 GiB, compared with 164.67 GiB before retirement. This is an observed
+volume change, not a per-file reclaimed-space guarantee.
+
+After separate approval, system generations 1–54 were permanently retired
+through `nix-env --profile /nix/var/nix/profiles/system --delete-generations`.
+Generation 55 remains current and is the only retained system generation.
+There is no immediate system-generation rollback; restoring an older setup
+requires rebuilding it and may need downloads. Unused store paths are collected
+through Nix's root-aware garbage collector, never by manually deleting store
+directories. Current profiles, project roots and running-process roots remain
+protected.
+Collection completed: 20,379 store paths deleted, with 10,637.69 MiB freed
+reported by Nix (about 10.39 GiB). The active system path remained present.
+Collected builds are permanently removed and may need downloading/rebuilding;
+this is separate from the user's Trash cleanup.
+
 Run the read-only size review from the repository:
 
 ```sh
