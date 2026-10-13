@@ -96,6 +96,39 @@ The reasoning behind this structure and the staged migration plan are in
 Never put a secret in `flake.nix`, `flake.lock`, or a Nix module: Nix store
 paths are broadly readable on the machine.
 
+## JavaScript manager audit — 2026-10-13
+
+pnpm is the default for new personal projects, not a forced replacement inside
+third-party frameworks or shared repositories. Nix owns the global Node
+24.21.0/pnpm 12.3.4 launchers; each project owns its exact manager and lockfile.
+npm remains part of Node for compatibility. Prefer Nix for shared CLIs and
+project devDependencies for JavaScript-specific tools, rather than mutable
+global npm/pnpm/Yarn installs.
+
+| Project | Manager / decision |
+| --- | --- |
+| Personal website | Already pnpm 12.8.1; verified that selection and left its active workspace unchanged. Bun is its project-installed research runtime, not a competing installer. |
+| PortfolioFinal; ThreeJS journey | Added explicit pnpm 12.3.4 pins. Frozen lock checks passed; the application graphs are unchanged, with pnpm's tool-lock document added. These folders have no Git repository; changes remain local. |
+| SimRacingCenter | Retained its explicit pnpm 9.1.2 compatibility pin; not upgraded or validated in this pass. |
+| TypeScript Decorators / Exercises | Historical pnpm 6-format lock / dependency-free exercise manifest respectively; left unchanged, not modernized just for uniformity. |
+| Portfolio22 | Retained npm: existing manifest edits, legacy Gatsby 4/node-sass 7 and its authoritative npm lock require a separate runtime/dependency migration. |
+| Roodjongeren; Mijnrood | Retained Yarn 1.22.22: shared CI/container workflows and existing edits are not laptop-wide package-manager migrations. |
+| Symfexit theme | Retained npm: develop/tests/rebuild helpers use npm/npx and its separate Dream2Nix build consumes package-lock.json. |
+| Website workflow prototypes; generated PureScript output | Historical comparison material / generated output; excluded from migration. Mave archives remain untouched. |
+
+Normal pnpm uses `~/.local/share/pnpm/store/v11`. A restrictive agent sandbox
+can fall back to `node_modules/.pnpm-store`; do not mistake that for the user's
+global configuration. Do not cloud-sync package stores or dependency directories.
+The old `~/Library/pnpm/global/5` contains cloc, Expo, EAS, pnpm 9 and Turbo
+(about 251 MiB); the old Yarn global manifest names create-r3f-app. Their shims
+are outside the current PATH. The older home Bun runtime and a Homebrew npm
+library also remain. The old Bun 1.1.29 was removed from the shared shell PATH,
+not deleted; the research app's pnpm-selected Bun 1.4.2 was verified. From the
+website root use `pnpm --filter @rubennijhuis/research-api exec bun --version`
+or its existing research scripts, not an unqualified root-level Bun command.
+This audit did not delete, upgrade, or prune legacy installs or npm/pnpm caches.
+Removal needs a separate exact approval.
+
 ## First installation
 
 1. Install a Nix implementation for macOS. The nix-darwin project recommends

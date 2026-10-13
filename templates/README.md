@@ -23,5 +23,18 @@ declaration; this is application-managed tooling, not an exact Nix package pin.
 Provision it while online before relying on offline use. Do not disable
 signature verification or rewrite a project's version to match the global one.
 
+Use pnpm by default for new personal JavaScript projects. Set an exact
+`packageManager` version in `package.json` and commit `pnpm-lock.yaml`.
+pnpm 12 can add a separate package-manager document to that lock; retain it
+alongside the application graph. Use `pnpm install --frozen-lockfile` for
+reproducible installs and `pnpm exec` for project-installed tools. Prefer a
+pinned devDependency over repeatedly fetching an unpinned `npx`/`pnpm dlx` tool.
+
+Before converting npm/Yarn, inspect CI, containers, framework helpers and Nix
+derivations. `pnpm import` translates compatible locks, not runtimes; verify
+the dependency graph and actual workflow before retiring the old lock with
+approval. Keep an exception for an integration that still requires its original
+manager. Never alias npm/yarn to pnpm or remove npm from Node's installation.
+
 Automatic entry is optional: only if using direnv, copy `.envrc.example` to
 `.envrc`, inspect it, then run `direnv allow`. No hook is enabled by default.

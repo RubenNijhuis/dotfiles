@@ -135,9 +135,6 @@ if command -v gh >/dev/null 2>&1; then
   _zsh_eval_cache gh completion -s zsh
 fi
 
-# Bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
-
 if command -v docker >/dev/null 2>&1; then
   _zsh_eval_cache docker completion zsh
 fi
