@@ -9,11 +9,9 @@ The current contract is the [Nix ownership matrix](nix-ownership-matrix.md).
 
 - SSH/GPG preferences live in `nix/home/ssh-and-gpg.nix` and `nix/config/`.
   Keys, trust databases, known hosts, and agent sessions remain local.
-  The five original preference files remain as adjacent `.pre-nix` backups.
 - Spotify's reusable TokyoNight files and CLI belong to the opt-in
   `nix/profiles/leisure.nix`. This Mac imports it; WSL and other hosts do not
-  receive Spotify theming unless explicitly selected. The two theme originals
-  remain as adjacent `.pre-nix` backups.
+  receive Spotify theming unless explicitly selected.
 - `config-xpui.ini`, custom apps, Spotify backups, and account data remain
   writable and application-owned. Edit theme source in `nix/config/spicetify/`;
   `spicetify color` cannot edit the read-only Nix palette.
@@ -25,11 +23,12 @@ The current contract is the [Nix ownership matrix](nix-ownership-matrix.md).
   Ruby 4.0.5 was moved recoverably to Trash after approval. Older Node/Yarn
   installations remain for existing project compatibility.
 
-The approved local-only migration archive is:
-`~/Private/Migrations/2026-10-03-chezmoi-retirement/`.
-It contains the old `chezmoi/` configuration (possibly secret values) and
-`mise/config.toml`. Keep it private and include it in an encrypted off-device
-backup when available. Do not restore it as active ChezMoi ownership.
+Historical local-only archives are not installation dependencies. The dated
+ChezMoi retirement folder still exists on this Mac (metadata checked
+2026-10-13); its contents were not read. It may contain secrets, so do not copy
+it into Git or restore it as an active configuration owner. Adjacent `.pre-nix`
+files must not be assumed present. Exact retention decisions belong in
+[storage maintenance](storage-maintenance.md), not the installation workflow.
 
 After any restore or adoption, run `make nix-switch` and verify links and
 actual executable versions. `make gpg-check` tests signing/encryption using

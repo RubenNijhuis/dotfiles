@@ -16,6 +16,9 @@ profile. The first declarative macOS settings module is
 - Screen Sharing and SSH launchd jobs are disabled and unloaded at Nix
   activation; Apple's system plists stay untouched. Re-enabling remote access
   requires a deliberate policy change, not an unattended exception.
+- The old Lix installer repair hook is disabled/unloaded only when its
+  executable is absent; the daemon, volume-mount service and hook plist remain.
+  Restoring the installer does not automatically re-enable a retired hook.
 - Home Manager alone initializes Zsh completion and the Starship prompt;
   nix-darwin's duplicate global initialization is disabled.
 - Home Manager shell, terminal, Git, editor, command-line programs, and other
@@ -39,15 +42,10 @@ The supported preferences are owned by `nix/darwin/defaults.nix`. ChezMoi is
 retired; applications and private local overrides must not compete with those
 declarative macOS preferences.
 
-## Future additions, reviewed one category at a time
-
-1. Finder sidebar and Dock apps after selecting the lean everyday app core.
-2. Keyboard modifier mappings and Control Center preferences if their
-   hardware-specific constraints are understood.
-3. Homebrew ownership through nix-darwin after the Homebrew catalog is
-   reduced and observed.
-4. Exported Shortcuts for durable manual workflows; use Shortcuts first for
-   user-facing automation, and avoid hidden background file watchers.
+New preferences need a demonstrated use and a supported restore path.
+Do not snapshot whole application preference domains: they can contain account
+identifiers, cloud state and device-specific data. Use Shortcuts first for
+user-facing automation; avoid hidden background file watchers.
 
 ## Privacy and manual capture
 
@@ -75,70 +73,67 @@ management infrastructure solely for these switches is outside this lean setup.
 Do not use unsupported defaults keys, edit TCC databases, disable SIP, or reset
 all permissions. A targeted permission reset is not a persistent denial policy.
 
-On 2026-10-07 Arc and Brave camera/microphone switches were turned off and
-verified in System Settings. Other apps' camera/microphone grants were unchanged.
-The repeated VS Code Local Network rows remain unresolved historical entries:
-the app inventory found one real VS Code bundle, with its vendor designated
-signing requirement. Do not infer that Nix caused the repeated rows or reset
-working permissions without evidence.
+The 2026-10-07 manual review disabled retired browsers' camera/microphone and
+passkey-site access; screen recording remained enabled for Codex Computer Use,
+Discord and Zen/Twilight. Input Monitoring had no grants. Accessibility,
+AirDrop, AirPlay and Handoff choices remain device-owned; this historical
+review is not proof of their current state. Repeated permission/background
+rows do not prove duplicate installed apps. Never reset those databases just
+to tidy their display. Keep App Management enabled for the terminal used for
+activation; do not bypass Home Manager's permission check.
 
-Verified on this Mac on 2026-10-07: Screen Sharing is off after user-approved
-shutdown; TCP 22/5900/3283 and UDP 5900/3283 have no listeners. Remote
-Management, Remote Login, and Remote Application Scripting are off in Sharing.
-Remote Management and application scripting remain device-owned switches;
-the Nix activation enforces Screen Sharing and SSH off. Remote-user full-disk
-access was off at the 2026-10-05 review. Passkey-site access is off for Arc, Brave, and Chrome;
-Zen/Twilight retains access. These choices do not remove stored passkeys.
-Finder favourites include Files, 00 Inbox, 10 Projects, and Developer.
+### Current settings and background audit — 2026-10-13
 
-`make doctor` checks disabled remote-access jobs, actual listening sockets,
-and macOS update status; `make doctor ARGS="--full --section security"` isolates
-these checks. Socket inspection failure is an unknown state, never proof of
-closed ports. Routine checks use Apple's cached update catalog without network
-requests, prompting, or installation; major upgrades are not treated as missing
-same-major security updates. Tahoe older than 26.6.1 is explicitly flagged for
-[CVE-2026-65400](https://support.apple.com/en-us/148170). A green check is not
-a complete security audit or a guarantee that cached update metadata is fresh.
+- Stored Finder destination, screenshot destination/file target, Dock autohide,
+  spelling correction, immediate screen-lock password and network/USB Finder
+  metadata preferences match the Nix baseline. Reading a preference does not
+  verify every corresponding GUI behaviour.
+- Firewall and stealth mode are enabled. Screen Sharing and SSH jobs are
+  disabled; no TCP 22/5900/3283 or UDP 5900/3283 listeners were found.
+- FigmaAgent, Raycast's backend and the active website research API listen on
+  loopback only. Apple's Control Center (5000/7000) and rapportd (63710) bind
+  more broadly; these are not Screen Sharing, and the audit does not establish
+  internet reachability. Preserve the chosen continuity features.
+- Apple's socket-activated FTP proxy owns loopback port 8021, with zero runs;
+  it is not an exposed FTP server or a dangling third-party process.
+- OrbStack is stopped and Docker sockets are absent. Container forwarding
+  remains unverified; do not start containers merely to complete an audit.
+- The old `systems.lix.nix-installer.nix-hook` job waits for the absent
+  `/nix/lix-installer`. It is separate from the healthy Nix daemon and store
+  mount service. Its automatic shell-repair purpose is documented in the
+  [installer source](https://git.lix.systems/lix-project/lix-installer/src/branch/main/src/action/macos/create_nix_hook_service.rs).
+  Its exact retirement was approved and saved as a guarded Nix activation
+  policy; the healthy-installer case is untouched. Doctor's launchd section
+  warns when this job is loaded without its executable; Doctor never disables it.
+  Generation 60 applied the policy: the job is disabled and no longer loaded;
+  its plist remains in place, and the daemon/store-mount service are unchanged.
+  Re-enabling it after restoring a trusted installer requires a deliberate
+  `sudo launchctl enable system/systems.lix.nix-installer.nix-hook` and bootstrap
+  of the retained plist, not a whole-Nix reinstall.
+- Google and Oracle updater executables still have corresponding installed
+  applications; their idle state is not an orphan diagnosis. Two empty
+  Keystone plists are inert debris, not running jobs. No files were removed.
 
-macOS itself is Apple-owned, not upgraded by `nix-switch`. On 2026-10-07 this
-Mac still runs 26.5.2 and offers Tahoe 26.7.1; installation/restart is deferred
-to the user tonight. Automatic update preferences do not prove patches were
-installed. Screen Sharing was previously left on by request; that exception
-has now been revoked.
+`make doctor ARGS="--full --section security"` checks remote-access policy,
+listening sockets and Apple's cached update catalog without installing updates.
+An inspection failure means unknown, not closed or up to date. macOS is still
+26.5.2 (25F84); update/restart remains deferred and is not performed by Nix.
+A clean listener audit is not a full security audit or evidence of patching.
 
-Rechecked on 2026-10-08: the Mac still runs 26.5.2 (25F84); the deferred
-installation has not happened. The security check again confirms Screen
-Sharing/SSH disabled and no TCP 22/5900/3283 or UDP 5900/3283 listeners, but
-fails the macOS-update check. Closing the service does not replace installing
-the security update. No update or restart was initiated during cleanup.
+### Application settings boundary
 
-The new Nix generation activated successfully from cmux on 2026-10-07 after
-the user granted App Management. Home Manager's app-copy step and the remote
-access policy both completed; `/run/current-system` points to the built
-generation. Keep App Management on for the terminal used for activation;
-do not bypass Home Manager's permission check.
+VS Code's shared settings are Nix-linked; all 22 declared extension IDs are
+installed. Marketplace versions and eight unlisted language extensions remain
+app-owned. See [the editor setup](vscode.md); no extensions were removed.
+The current HTTP/HTTPS handlers select Zen and mailto selects Thunderbird.
+Raycast's preferred-app scripts are Nix-linked; its hotkey and directory
+registration remain editable app settings, not a copied database.
 
-The 2026-10-07 permission review found no enabled Full Disk Access grants.
-Accessibility is enabled for Codex Computer Use, OneMenu, and Raycast.
-After user-approved cleanup, screen recording is off for Arc, Brave, and
-Slack; it remains enabled for Codex Computer Use, Discord, and Zen/Twilight.
-Discord Input Monitoring is off and Discord was quit/reopened to apply the
-change. The permission lists were rechecked; no Input Monitoring grants remain.
-AirDrop is Contacts Only; AirPlay Receiver is Current User with a password.
-Preserve Handoff rather than disabling all Apple cross-device services.
-
-Network review: Screen Sharing/SSH ports are closed. Other wildcard TCP
-listeners belong to Control Center (5000/7000), rapportd (49152), and Spotify
-(57621); wildcard binding alone does not establish internet exposure. The
-remaining observed TCP listeners are loopback-only. OrbStack was stopped,
-so container port mappings remain unverified. The generic `sh` background
-items are Nix/installer/key-loader jobs, not unidentified cleanup targets.
-The three Xcode Git maintenance agents had no registered repositories and
-were unloaded after approval. Their byte-identical plists are preserved in
-`~/Private/Migrations/2026-10-07-git-maintenance-retirement/`; restore by copying
-them back to `~/Library/LaunchAgents/` and bootstrapping the three user jobs.
-Nix Git and its automatic maintenance settings are unchanged. Do not reset
-macOS's background-item database.
+OneMenu's non-secret native preferences currently record automatic updates
+and launch at login on, its window manager off, and spacing 0.5. These are
+restore reference values, not a supported stable export contract or evidence
+that writing a preference recreates login-item registration. Recreate them
+through OneMenu on a new Mac; keep account/CloudKit state outside the repo.
 
 Normal screenshots go to the iCloud-backed `~/Files/00 Inbox/Screenshots`.
 For a deliberate private capture, press **Control-Shift-Command-4** and select

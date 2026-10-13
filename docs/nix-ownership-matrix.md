@@ -33,30 +33,30 @@ under `nix/config/`. “Native” means Home Manager has a useful declarative op
 “raw file” means Nix can own the file verbatim without pretending it knows the
 application's schema.
 
-On this Mac, 21 approved `.pre-nix` backups from `~/.config/` have been
-consolidated under `~/Private/Migrations/2026-10-07-pre-nix-consolidation/`.
-Other migration backups are not implied to have moved; see the exact inventory
-and recovery caveat in [storage maintenance](storage-maintenance.md).
+Migration copies are historical rollback material, not installation inputs.
+Do not expect adjacent `.pre-nix` files or restore a retired configuration
+owner. See [storage maintenance](storage-maintenance.md) for exact retirements
+and the [new-Mac checklist](runbooks/new-mac-recovery.md) for recovery.
 
 | Source / concern | Nix representation | State |
 | --- | --- | --- |
 | Thunderbird baseline | `nix/home/thunderbird.nix`; package defaults and supported telemetry policy | profiles, account sign-ins, mail, contacts and calendars stay app-owned; never replace `profiles.ini` |
-| Git, global ignore | Home Manager Git module | active; prior files are `.pre-nix` backups |
-| ripgrep, Bat, and the selected Bat theme | native Home Manager modules plus a raw theme file | active; prior files are `.pre-nix` backups |
+| Git, global ignore | Home Manager Git module | active; private signing keys and authentication remain outside Git |
+| ripgrep, Bat, and the selected Bat theme | native Home Manager modules plus a raw theme file | active |
 | cmux and rendering preferences | `nix/home/cmux.nix` + `nix/config/ghostty/config` | active through the full Home Manager generation; updates use `make nix-switch`. New machines can adopt with `make nix-adopt PROFILE=cmux`. Sessions remain local. |
-| Starship, Atuin | `nix/home/terminal.nix` | active; prior files are `.pre-nix` backups |
-| tmux, Yazi, fzf, zoxide, sesh | `nix/home/navigation.nix` | active; prior files are `.pre-nix` backups. TPM is replaced with pinned Nix plugins; Yazi has portable open/clipboard fallbacks. |
-| Btop, LazyGit | `nix/home/terminal-apps.nix` | active; prior files are `.pre-nix` backups. Btop's exit-time config writes are disabled; existing shell aliases remain in place. |
-| Eza theme | `nix/home/terminal-apps.nix` raw file | active; existing shell aliases remain in place |
+| Starship, Atuin | `nix/home/terminal.nix` | active; history and account state remain app-owned |
+| tmux, Yazi, fzf, zoxide, sesh | `nix/home/navigation.nix` | active; TPM is replaced with pinned Nix plugins; Yazi has portable open/clipboard fallbacks |
+| Btop, LazyGit | `nix/home/terminal-apps.nix` | active; Btop's exit-time config writes are disabled |
+| Eza theme | `nix/home/terminal-apps.nix` raw file | active |
 | Neovim | `nix/home/editors.nix` + `editor-plugins.nix` | Nix owns the binary, bootstrap, plugin graph, native completion library, and selected compiled parsers/queries. Extras are declared once in `lazyvim.json`. Bash/Lua tools and formatters come from the developer profile; other language tools belong in project environments. Mason is a manual fallback, not an automatic installer. Copilot remains enabled but sign-in is private/app-owned. |
 | VS Code settings and extension manifest | `nix/home/vscode.nix` + `nix/config/vscode/` | settings apply on graphical desktop hosts; extensions install through `make vscode-setup` because marketplace binaries remain application-managed state. |
 | Raycast preferred-application launchers | `nix/home/raycast.nix` Script Commands | active on macOS after the command directory is registered once in Raycast; private Raycast state and `.rayconfig` exports remain outside Git. |
 | `.hushlogin`, repository Git hooks | `nix/home/editors.nix` + `make hooks` | active; neither needs ChezMoi ownership. |
-| Global Mise/Ruby | retired; future projects use pinned devShells | global config archived locally; shell hooks and shim PATH removed. Ruby 4.0.5 moved recoverably to Trash; older Node/Yarn installs remain for project compatibility. |
+| Global Mise/Ruby | retired; future projects use pinned devShells | shell hooks and shim PATH removed; historical installs are not baseline restore requirements |
 | Shared shell modules | `nix/home/shell-modules.nix` raw files | active; startup files consume these links |
-| Shell startup environment | Home Manager Zsh/Bash and session modules | active; legacy ChezMoi sources were removed after the handoff, while private `.pre-nix` backups remain outside Git |
-| Spotify theming | `nix/profiles/leisure.nix` + `nix/config/spicetify/` | active on this Mac: CLI 2.45.3 and TokyoNight files; original theme files are `.pre-nix` backups. Runtime config, custom apps, and Spotify backups stay writable/app-owned. |
-| SSH/GPG preferences | `nix/home/ssh-and-gpg.nix` + `nix/config/{ssh,gpg}/` | active and verified; originals preserved as `.pre-nix`. GnuPG is Nix-owned; newer Mac pinentry remains a documented Homebrew exception. See [retirement and recovery](chezmoi-migration.md). |
+| Shell startup environment | Home Manager Zsh/Bash and session modules | active; legacy ChezMoi sources are retired |
+| Spotify theming | `nix/profiles/leisure.nix` + `nix/config/spicetify/` | CLI and TokyoNight files are declarative; runtime config, custom apps, and Spotify backups stay writable/app-owned |
+| SSH/GPG preferences | `nix/home/ssh-and-gpg.nix` + `nix/config/{ssh,gpg}/` | GnuPG is Nix-owned; newer Mac pinentry remains a documented Homebrew exception. Keys and trust state are not recreated by activation. |
 | SSH private keys, GPG keyrings, private shell override | encrypted/local only | secrets and mutable trust state are excluded from Nix; `~/.config/shell/local.sh` remains unchanged, user-owned, and mode 0600 |
 | macOS defaults | `nix/darwin/defaults.nix` | active; no competing ChezMoi default script remains |
 
@@ -76,9 +76,10 @@ The following are intentionally local or encrypted, never plain Nix source:
 - Shortcuts' internal database. Export approved personal shortcuts as
   `.shortcut` files for backup; use Shortcuts itself to import them.
 
-## Migration order
+## Adoption and restore
 
-1. Activate the minimal darwin/Home Manager configuration successfully.
+1. Follow the [new-Mac checklist](runbooks/new-mac-recovery.md) for installation;
+   activation is not a personal-data restore.
 2. Keep `nix/darwin/defaults.nix` as the sole owner for supported macOS
    preferences; keep unsupported personal choices local rather than adding a
    competing default script.

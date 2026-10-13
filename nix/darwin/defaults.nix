@@ -97,6 +97,17 @@
         /bin/launchctl bootout "system/$service"
       fi
     done
+
+    # Approved retirement of a repair hook whose installer is missing.
+    # Leave its plist, Nix daemon and store mount alone. Fresh installations
+    # with a working installer keep their automatic shell-repair hook.
+    if [ ! -x /nix/lix-installer ]; then
+      service=systems.lix.nix-installer.nix-hook
+      /bin/launchctl disable "system/$service"
+      if /bin/launchctl print "system/$service" >/dev/null 2>&1; then
+        /bin/launchctl bootout "system/$service"
+      fi
+    fi
   '';
 
   # Home Manager owns the cached completion setup and Starship prompt.

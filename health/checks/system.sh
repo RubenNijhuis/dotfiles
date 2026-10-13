@@ -70,6 +70,14 @@ check_launchd() {
   fi
 
   record_issue_count_result "LaunchD Agents" "$issues" 1 "$details"
+
+  # A retained installer repair job can wait forever after its binary is gone.
+  # Diagnose only; it is separate from the Nix daemon and volume-mount service.
+  if [[ "$(uname -s)" == Darwin && ! -x /nix/lix-installer ]] &&
+    launchctl print system/systems.lix.nix-installer.nix-hook >/dev/null 2>&1; then
+    record_result "Nix installer hook" 1 "Loaded repair job; /nix/lix-installer is unavailable"
+    add_suggestion "Review only systems.lix.nix-installer.nix-hook before approved retirement; leave Nix daemon and store mount untouched"
+  fi
 }
 
 check_homebrew() {
