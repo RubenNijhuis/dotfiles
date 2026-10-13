@@ -11,7 +11,6 @@ let
     "catppuccin"
     "conform.nvim"
     "copilot.lua"
-    "crates.nvim"
     "diffview.nvim"
     "flash.nvim"
     "friendly-snippets"
@@ -36,7 +35,6 @@ let
     "nvim-ts-autotag"
     "persistence.nvim"
     "plenary.nvim"
-    "rustaceanvim"
     "snacks.nvim"
     "todo-comments.nvim"
     "tokyonight.nvim"
@@ -50,7 +48,6 @@ let
     p: with p; [
       bash
       c
-      c_sharp
       css
       diff
       html
@@ -67,8 +64,6 @@ let
       python
       query
       regex
-      ruby
-      rust
       scss
       svelte
       toml

@@ -14,7 +14,7 @@ usage() {
 Usage: $0 [--help] [--no-color] [--check] [--dry-run]
 
 Install VS Code extensions declared in nix/config/vscode/extensions.txt.
-Skips extensions that are already installed.
+Skips registered extensions with a readable package.json.
 --check reports missing extensions without installing; exits 1 on drift.
 --dry-run previews missing installs without changing VS Code.
 Undeclared extensions are left untouched. Installation failures exit 1.
@@ -50,6 +50,24 @@ if ! installed_extensions=$(code --list-extensions); then
 fi
 installed_extensions=$(printf '%s\n' "$installed_extensions" | tr '[:upper:]' '[:lower:]')
 
+# 0 = readable payload; 1 = verified missing; 2 = inspection unavailable.
+# Do not turn permission failures or unsupported CLI inspection into reinstalls.
+extension_payload() {
+  local location root
+  location=$(code --locate-extension "$1") || return 2
+  [[ "$location" == /* && "$location" != *$'\n'* ]] || return 2
+  root=$(dirname "$location")
+  [[ -d "$root" && -r "$root" && -x "$root" ]] || return 2
+  if [[ -e "$location" || -L "$location" ]]; then
+    [[ -d "$location" && -r "$location" && -x "$location" ]] || return 2
+  fi
+  if [[ -e "$location/package.json" || -L "$location/package.json" ]]; then
+    [[ -f "$location/package.json" && -r "$location/package.json" ]] || return 2
+    return 0
+  fi
+  return 1
+}
+
 print_section "Checking VS Code extension manifest"
 failed=0
 total=0
@@ -63,16 +81,31 @@ while read -r ext _ || [[ -n "$ext" ]]; do
     continue
   fi
   total=$((total + 1))
+  install_args=(--install-extension "$ext")
   if printf '%s\n' "$installed_extensions" | grep -Fxq "$ext"; then
-    continue
+    payload_status=0
+    extension_payload "$ext" || payload_status=$?
+    case "$payload_status" in
+      0) continue ;;
+      1) install_args+=(--force) ;;
+      *) print_error "Cannot inspect extension payload: $ext"
+         failed=$((failed + 1)); continue ;;
+    esac
   fi
   missing=$((missing + 1))
   if $CHECK_ONLY || $DRY_RUN; then
     print_warning "Missing: $ext"
     continue
   fi
-  if ! code --install-extension "$ext" >/dev/null 2>&1; then
+  if ! code "${install_args[@]}" >/dev/null 2>&1; then
     print_error "Failed: $ext"
+    failed=$((failed + 1))
+    continue
+  fi
+  if ! installed_extensions=$(code --list-extensions | tr '[:upper:]' '[:lower:]') ||
+     ! printf '%s\n' "$installed_extensions" | grep -Fxq "$ext" ||
+     ! extension_payload "$ext"; then
+    print_error "Install could not be verified: $ext"
     failed=$((failed + 1))
   fi
 done < "$EXTENSIONS_FILE"

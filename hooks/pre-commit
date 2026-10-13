@@ -65,8 +65,10 @@ if [[ -n "$STAGED_BIOME" ]] && command -v biome &>/dev/null; then
   fixed=0
   while IFS= read -r file; do
     [[ -f "$file" ]] || continue
-    if ! biome check "$file" &>/dev/null; then
-      if biome check --write "$file" &>/dev/null; then
+    # Honour biome.json exclusions without treating an ignored file as broken.
+    # Parse/lint failures for included files must still block the commit.
+    if ! biome check --no-errors-on-unmatched "$file" &>/dev/null; then
+      if biome check --write --no-errors-on-unmatched "$file" &>/dev/null; then
         git add "$file"
         fixed=$((fixed + 1))
       else

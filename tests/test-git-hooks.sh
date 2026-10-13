@@ -38,4 +38,13 @@ printf '{}\n' > fixture.json
 git add fixture.json
 assert_exit "formatter-failure-blocked" 1 env PATH="$fixture/bin:$PATH" bash "$ROOT_DIR/hooks/pre-commit"
 
+# Real configured exclusions are not errors; included malformed JSON still is.
+if command -v biome >/dev/null 2>&1; then
+  printf '{"files":{"includes":["**","!fixture.json"]}}\n' > biome.json
+  assert_exit "configured-exclusion-allowed" 0 bash "$ROOT_DIR/hooks/pre-commit"
+  printf '{invalid json\n' > included.json
+  git add included.json
+  assert_exit "included-parse-error-blocked" 1 bash "$ROOT_DIR/hooks/pre-commit"
+fi
+
 test_summary "git-hooks"

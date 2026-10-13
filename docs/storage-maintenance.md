@@ -54,6 +54,25 @@ Allocation before retirement was about 251 MiB; Trash was not emptied.
 Current Nix launchers, project dependencies, npm/pnpm caches and the current
 `~/.local/share/pnpm/store/v11` remain untouched. Portfolio22 is explicitly kept.
 
+The approved legacy-tool batch subsequently completed: six VS Code language
+extensions (Ruby, Go, Zig, C# Dev Kit, C# and .NET runtime) were uninstalled
+through the application. Their unregistered payload directories remain for
+VS Code's deferred cleanup; no app restart or manual purge was performed.
+Two unregistered Claude extension directories, versions 2.1.289 and 2.1.292,
+were moved to recoverable Trash with their identities preserved.
+
+Oracle's Java 8 browser plugin/updater/control panel/system support and the
+Python.org 3.11 apps/framework/14 verified command symlinks were moved to
+`~/.Trash/Legacy Java8 and Python3.11 - 2026-10-13/`. All 20 original paths
+are absent and all destination identities match. The retained owner-only
+`RESTORE.txt` maps each item back; original ownership and installer receipts
+remain intact. Only the Java 8 updater was disabled/unloaded. Prism's JDK 22
+and Zulu 17, Processing/Cropper, Apple tools and user-level Oracle state remain.
+Trash was not emptied: the approximately 553 MiB runtime batch and 465 MiB
+Claude batch measurements precede the moves, not a claim of reclaimed space.
+Neovim's unused C#/Ruby/Rust selections, two Rust plugins and three parsers
+were retired from Nix; generation 61 is active. No project code was removed.
+
 Run the read-only size review from the repository:
 
 ```sh

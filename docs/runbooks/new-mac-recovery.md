@@ -21,7 +21,7 @@ synced or restored by Apple Passwords. Do not upload that entire folder.
 
 ## Current baseline
 
-Checked on 2026-10-13: this Mac uses generation **60** and the repository's
+Checked on 2026-10-13: this Mac uses generation **61** and the repository's
 GitHub remote uses **SSH**. Earlier approved migration copies and generations
 1–54 were retired; do not treat old Code Recovery, browser, database or
 configuration migration folders as restore sources. Mave archives remain
