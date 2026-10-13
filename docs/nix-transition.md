@@ -100,10 +100,19 @@ paths are broadly readable on the machine.
 
 pnpm is the default for new personal projects, not a forced replacement inside
 third-party frameworks or shared repositories. Nix owns the global Node
-24.21.0/pnpm 12.3.4 launchers; each project owns its exact manager and lockfile.
+24.21.0/pnpm 12.9.0 launchers after the input refresh; each project owns its exact
+manager and lockfile. The website's pnpm 12.8.1 and ThreeJS's 12.3.4 pins remain
+unchanged rather than following this machine's launcher version.
 npm remains part of Node for compatibility. Prefer Nix for shared CLIs and
 project devDependencies for JavaScript-specific tools, rather than mutable
 global npm/pnpm/Yarn installs.
+
+The same-day input refresh updated Home Manager, Nixpkgs and Zen. All declared
+platforms evaluated, the fresh-profile Neovim check passed, and the Mac build
+was activated as generation 58. Installed versions include Thunderbird 157.0.1,
+Signal 8.29.0, Raycast 2.6.3.0 and Zoom 7.2.2; the refreshed Zen still reports
+1.24t. The inspected app roots have no duplicate bundle IDs, Thunderbird's
+profile registration is unchanged, and no macOS update/restart was performed.
 
 | Project | Manager / decision |
 | --- | --- |
@@ -111,7 +120,7 @@ global npm/pnpm/Yarn installs.
 | ThreeJS journey | Kept with an explicit pnpm 12.3.4 pin. Frozen lock check passed; the application graph is unchanged, with pnpm's tool-lock document added. This folder has no Git repository; changes remain local. |
 | PortfolioFinal; SimRacingCenter | Subsequently retired to recoverable Trash at Ruben's request. The nested SRC-API checkout and its five modified files were preserved; its GitHub remote was not deleted. |
 | TypeScript Decorators / Exercises | Historical pnpm 6-format lock / dependency-free exercise manifest respectively; left unchanged, not modernized just for uniformity. |
-| Portfolio22 | Retained npm: existing manifest edits, legacy Gatsby 4/node-sass 7 and its authoritative npm lock require a separate runtime/dependency migration. |
+| Portfolio22 | Explicitly kept at Ruben's request. Retained npm: existing manifest edits, legacy Gatsby 4/node-sass 7 and its authoritative npm lock require a separate runtime/dependency migration. |
 | Roodjongeren; Mijnrood | Retained Yarn 1.22.22: shared CI/container workflows and existing edits are not laptop-wide package-manager migrations. |
 | Symfexit theme | Retained npm: develop/tests/rebuild helpers use npm/npx and its separate Dream2Nix build consumes package-lock.json. |
 | Website workflow prototypes; generated PureScript output | Historical comparison material / generated output; excluded from migration. Mave archives remain untouched. |
@@ -119,15 +128,16 @@ global npm/pnpm/Yarn installs.
 Normal pnpm uses `~/.local/share/pnpm/store/v11`. A restrictive agent sandbox
 can fall back to `node_modules/.pnpm-store`; do not mistake that for the user's
 global configuration. Do not cloud-sync package stores or dependency directories.
-The old `~/Library/pnpm/global/5` contains cloc, Expo, EAS, pnpm 9 and Turbo
-(about 251 MiB); the old Yarn global manifest names create-r3f-app. Their shims
-are outside the current PATH. The older home Bun runtime and a Homebrew npm
-library also remain. The old Bun 1.1.29 was removed from the shared shell PATH,
+After exact approval, the old `~/Library/pnpm/global/5` (about 251 MiB) and its
+six wrappers were moved to `~/.Trash/Legacy-pnpm-globals-2026-10-13/`, preserving
+their filesystem identities. Current Nix tools, project dependencies, package
+caches and the current pnpm store were untouched; Trash was not emptied.
+The old Yarn global manifest names create-r3f-app. The older home Bun runtime
+and a Homebrew npm library also remain. The old Bun 1.1.29 was removed from the shared shell PATH,
 not deleted; the research app's pnpm-selected Bun 1.4.2 was verified. From the
 website root use `pnpm --filter @rubennijhuis/research-api exec bun --version`
 or its existing research scripts, not an unqualified root-level Bun command.
-This audit did not delete, upgrade, or prune legacy installs or npm/pnpm caches.
-Removal needs a separate exact approval.
+No npm/pnpm cache pruning was performed; further removal needs exact approval.
 
 ## First installation
 

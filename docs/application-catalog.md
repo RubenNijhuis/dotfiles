@@ -60,7 +60,7 @@ actually call them; the two formatters cover different file types.
 
 The personal-laptop profile selects design/media exceptions to restore the
 creative apps already installed here. Minimal and other machines remain lean.
-On 2026-10-05 a real RawTherapee Nix build failed on its Linux-only `libselinux`
+On 2026-10-13 a refreshed RawTherapee Nix build still failed on Linux-only `libselinux`
 dependency despite permissive package metadata; HandBrake is marked broken on
 Darwin and Krita is Linux-only. Keep those exceptions until builds actually work.
 
@@ -93,7 +93,8 @@ this restore matrix for the retained native apps, without copying their database
 
 | Apps | Restore path / reason not in the Nix baseline |
 | --- | --- |
-| WhatsApp, Slack, Discord | Official app installer/updater for now: installed versions 26.40.20, 4.51.191, 0.0.414 are newer than the pin's 2.26.31.27, 4.51.180, 0.0.413 (rechecked 2026-10-13). Recheck at the next Nix update; do not downgrade. |
+| WhatsApp, Slack | Official app installer/updater for now: installed versions 26.40.20 and 4.51.191 are newer than the refreshed pin's 2.26.31.27 and 4.51.180 (rechecked 2026-10-13). Do not downgrade. |
+| Discord | The refreshed Nix 0.0.414 matches the installed version and builds, but strict bundle verification fails on added module resources; the native app passes. Retain the vendor installation, without re-signing or bypassing macOS protections just to migrate it. |
 | App named ChatGPT | Its bundle ID is `com.openai.codex`. Preserve this actual app and use its supported updater until a matching replacement is verified; filename alone does not establish identity. |
 | Spotify | Official writable installation (currently 1.3.3.264); Spicetify must not patch a Nix-store app. The pin is also older (1.2.98.301). |
 | Steam | Native Mac Steam installer; the pinned Steam derivation is not a supported Darwin package. Game saves and Cloud status are separate. |

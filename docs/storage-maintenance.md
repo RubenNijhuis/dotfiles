@@ -46,6 +46,14 @@ five modified files remain in the moved checkout; its GitHub remote is unchanged
 Nix generation 57 is now active with the outdated global Bun fallback retired
 from the shared shell PATH; Bun's files and the project-installed runtime remain.
 
+After separate exact approval, `~/Library/pnpm/global/5` and the six wrappers
+`cloc`, `eas`, `expo`, `pnpm`, `pnpx`, and `turbo` under `~/Library/pnpm/` were
+moved into `~/.Trash/Legacy-pnpm-globals-2026-10-13/{global,wrappers}/`.
+Their filesystem identities were preserved and original paths verified absent.
+Allocation before retirement was about 251 MiB; Trash was not emptied.
+Current Nix launchers, project dependencies, npm/pnpm caches and the current
+`~/.local/share/pnpm/store/v11` remain untouched. Portfolio22 is explicitly kept.
+
 Run the read-only size review from the repository:
 
 ```sh
