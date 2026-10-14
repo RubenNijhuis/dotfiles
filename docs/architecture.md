@@ -27,10 +27,11 @@ there is no baseline Python or mutable language-version manager.
 
 ## Lifecycle
 
-1. On a fresh Mac, use the Nix-first `make install`, or evaluate and build the
-   flake directly with `make nix-check` and `make nix-build`.
-2. Apply macOS state with `make nix-switch`; use `make nix-home-switch` for a
-   Linux or WSL target.
+1. On a fresh Mac, follow the [new-Mac recovery checklist](runbooks/new-mac-recovery.md).
+   Its installer checks, builds and applies the locked configuration; a second
+   switch is needed only after configuration changes.
+2. For later changes, check/build before applying macOS state with
+   `make nix-switch`. Linux/WSL uses the [Home Manager activation](nix-transition.md#linux-and-windows).
 3. Keep writable application state and private overrides outside Nix. See the
    [ownership matrix](nix-ownership-matrix.md).
 4. Operate machine workflows via launchd (`make *-setup`, `make doctor ARGS=--automation`).

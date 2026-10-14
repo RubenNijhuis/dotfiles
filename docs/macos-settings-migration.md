@@ -1,8 +1,9 @@
-# macOS settings migration
+# macOS settings policy and audit evidence
 
-Nix should own durable, repeatable preferences—not every byte of the user
-profile. The first declarative macOS settings module is
-`nix/darwin/defaults.nix`.
+`nix/darwin/defaults.nix` owns supported, repeatable preferences. For the
+restore sequence use the [new-Mac checklist](runbooks/new-mac-recovery.md);
+for app-specific exports and sync use the [application catalog](application-catalog.md).
+Dated audits below record earlier checks, not live verification of this Mac.
 
 ## Nix-owned settings
 
@@ -120,14 +121,16 @@ An inspection failure means unknown, not closed or up to date. macOS is still
 26.5.2 (25F84); update/restart remains deferred and is not performed by Nix.
 A clean listener audit is not a full security audit or evidence of patching.
 
-### Application settings boundary
+### Application settings audit — 2026-10-13
 
-VS Code's shared settings are Nix-linked; all 22 declared extension IDs are
-installed. Marketplace versions and eight unlisted language extensions remain
-app-owned. See [the editor setup](vscode.md); no extensions were removed.
-The current HTTP/HTTPS handlers select Zen and mailto selects Thunderbird.
-Raycast's preferred-app scripts are Nix-linked; its hotkey and directory
-registration remain editable app settings, not a copied database.
+VS Code's shared settings are Nix-linked; its extension IDs are declared while
+marketplace versions remain app-owned. The subsequent approved retirement
+removed six unlisted language extensions and preserved Lua/Nginx; see
+[the editor setup](vscode.md) for the verified outcome. HTTP/HTTPS handlers
+selected Zen and mailto selected Thunderbird at this audit. Raycast's
+preferred-app scripts were Nix-linked; its hotkey and directory registration
+remain editable app settings. Current restore instructions belong in the
+[application catalog](application-catalog.md).
 
 OneMenu's non-secret native preferences currently record automatic updates
 and launch at login on, its window manager off, and spacing 0.5. These are

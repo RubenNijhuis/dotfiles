@@ -13,10 +13,13 @@ dotfiles_load_env "$DOTFILES"
 LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
 MANAGER="$DOTFILES/ops/automation/launchd-manager.sh"
+STRICT=false
 
 usage() {
   cat <<EOF
-Usage: $0 [--help] [--no-color] <target>
+Usage: $0 [--help] [--no-color] [--strict] <target>
+
+--strict makes a selected job's unavailable prerequisite fail setup-all.
 
 Targets:
 EOF
@@ -41,6 +44,7 @@ TARGET=""
 for arg in "$@"; do
   case "$arg" in
     --no-color) ;;
+    --strict) STRICT=true ;;
     *)
       if printf '%s\n' "$_valid_targets" | grep -qx "$arg"; then
         TARGET="$arg"
@@ -69,18 +73,19 @@ setup_agent() {
 }
 
 if [[ "$TARGET" == "setup-all" ]]; then
+  # Capture validation first: process substitution would hide its exit status.
+  selected_agents=$(automation_profile_agents) || exit 1
   print_header "Setting Up All Automations"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   ok=0 fail=0 skip=0
-  while IFS= read -r agent_info; do
-    [[ -n "$agent_info" ]] || continue
-    IFS=':' read -r agent _desc <<< "$agent_info"
-    if precheck "$agent" 2>/dev/null; then
-      if setup_agent "$agent"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
+  while IFS= read -r agent; do
+    [[ -n "$agent" ]] || continue
+    if precheck "$agent"; then
+      if "$MANAGER" install "$agent"; then ok=$((ok + 1)); else fail=$((fail + 1)); fi
     else
-      skip=$((skip + 1))
+      if $STRICT; then fail=$((fail + 1)); else skip=$((skip + 1)); fi
     fi
-  done < <(profile_agent_infos)
+  done <<< "$selected_agents"
   printf '\n'
   print_success "Installed: $ok"
   if [[ $skip -gt 0 ]]; then print_info "Skipped: $skip (optional)"; fi

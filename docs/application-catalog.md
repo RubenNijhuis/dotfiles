@@ -113,6 +113,37 @@ recoverable. Licenses, sign-ins, media libraries, and app-local work need their
 own supported recovery paths. Re-evaluate temporary version exceptions when
 updating the Nix pin rather than adding bespoke overrides for every GUI app.
 
+### Settings and work recovery
+
+Recovery review on 2026-10-14 read bundle metadata and selected non-secret
+preferences only. Nix already restores Raycast's preferred-app Script Commands;
+no supported portable configuration was established for the remaining native
+settings below. Keep those settings editable in their apps rather than linking
+whole preference folders or databases into Git.
+
+| App | What to restore after installation |
+| --- | --- |
+| OneMenu 2.8.0 | In the app, enable automatic updates and launch at login; disable its window manager; retain spacing `0.5`. These are observed reference values, not a stable configuration API. Login-item registration and Accessibility consent must be recreated on each Mac. No supported settings export was found on the [vendor page](https://coffeebreak.software/one-menu/). |
+| Raycast 2.6.3.0 | Register `~/.config/raycast/script-commands/` in Settings → Extensions → Script Commands; restore the launcher hotkey and appearance through Settings. The observed global hotkey is Command-Space and appearance follows macOS. [Script Commands](https://manual.raycast.com/script-commands) are the supported plain-file boundary. For other preferences, the [native export](https://manual.raycast.com/import-export) is encrypted but can include clipboard history, AI chats and private extension state; export only after reviewing the exact scope. Import only the required categories, then verify the directory and hotkey. |
+| Krita | If custom brushes, palettes or workspaces are actually used, create/import selected `.bundle` resources through Settings → Manage Resource Libraries. Export custom keyboard shortcuts separately. Preserve editable `.kra` source files; the resource database is not the restore artifact. [Resources](https://docs.krita.org/en/reference_manual/resource_management.html), [shortcut export](https://docs.krita.org/en/reference_manual/preferences/shortcut_settings.html). |
+| RawTherapee | Preserve original photos with their `.pp3` editing sidecars and any deliberately saved processing profiles. Re-enter UI/theme/monitor preferences on the destination machine; a display-specific profile is not a portable default. [Sidecars and profiles](https://rawpedia.rawtherapee.com/The_Image_Editor_Tab), [preferences](https://rawpedia.rawtherapee.com/Preferences). |
+| HandBrake | Export/import only custom presets through the preset pane; select the preferred default after import. Presets restore conversion rules, not input media or completed output. No `UserPresets.json` was found at the documented Mac path during this review, so no personal preset is assumed. [Custom presets](https://handbrake.fr/docs/en/1.11.0/advanced/custom-presets.html). |
+| Resolve | Use the installed version's native project export/archive and restore operations; retain original media and confirm the restored project has no offline assets. A project-only export is not proof that its media is included. Retain any deliberately exported projects and media; do not assume the retired migration folder is a backup or copy a live project-library database into Git. Use the matching manual from [Blackmagic support](https://www.blackmagicdesign.com/support/). |
+| Affinity / Figma | Retain editable local source documents; restore app/account access separately. Affinity 3's whole-settings export was not verified, so do not apply older Affinity 2 restore instructions to it. Figma's [Save local copy](https://help.figma.com/hc/en-us/articles/8403626871063-Save-a-local-copy-of-files) preserves a file snapshot but omits comments and version history; reimport creates a new file. |
+| rekordbox 6 | Use File → Library → Backup Library / Restore Library, with music included where needed. Preserve that music and keep its backup folder alongside the library backup. Restore version 6 deliberately; hardware settings and licences remain app-owned. [Version 6 manual](https://cdn.rekordbox.com/files/20230316171900/rekordbox6.7.0_manual_EN.pdf). |
+| Steam | Sign in through Steam; verify Cloud support and completed synchronization for each retained game. The developer decides which saves/settings are covered; global Cloud being enabled does not establish recovery for every game. Preserve local saves until a restore is tested. [Steam Cloud](https://help.steampowered.com/en/faqs/view/68D2-35AB-09A9-7678). |
+| Prism Launcher | Preserve each retained instance's worlds, mods, options and resource packs through an explicitly reviewed instance export; check its file selection includes saves. The [native ZIP exporter](https://github.com/PrismLauncher/PrismLauncher/blob/develop/launcher/ui/dialogs/ExportInstanceDialog.cpp) honors file exclusions. [ZIP import](https://prismlauncher.org/wiki/getting-started/command-line-interface/) does not restore account sign-in or a working Java path. Select a compatible runtime per instance after import; retain the Oracle 22 global / Zulu 17 Minecraft 1.20.1 distinction below. |
+| CrossOver | Export the selected retained bottle with Bottle → Export to Archive, then restore its `.cxarchive` with Import Bottle Archive. Inspect external save locations separately; licence activation stays app-owned. [Supported bottle recovery](https://support.codeweavers.com/2-common-actions/2-archiving-and-restoring-a-bottle). |
+
+These are prepared restore handoffs, not completed exports or tested restores.
+Native app exports and cloud uploads need an exact scope and explicit approval.
+For approved non-secret reusable presets, use `~/Files/30 Resources/<App>/`;
+keep project exports with their specific project under `~/Files/10 Projects/`
+or its existing archive. Private Raycast exports, licences and account material
+belong under `~/Private/`, outside Git and cloud-sync folders. Games, saves,
+creative libraries, Mave archives and paused project databases remain retained.
+Independent backup remains a separate deferred decision.
+
 Audacity is not installed in the inspected app roots or declared in this setup;
 it is an optional standalone-audio editor, not an unfinished requirement.
 Resolve already supplies the preferred video/audio workflow. The Nix design
@@ -147,7 +178,7 @@ top-level installs. Krita's Homebrew installer revision was updated to 5.3.4.1
 (the app still reports 5.3.4), and the retained Kerberos dependency to 1.22.2_2.
 Homebrew remains limited to documented exceptions and their dependencies.
 
-Gaming-runtime check on 2026-10-13: Prism's global Java path uses the retained
+Gaming-runtime check on 2026-10-14: Prism's global Java path uses the retained
 Oracle JDK 22, while the Minecraft 1.20.1 instance explicitly uses Zulu 17.
 Preserve both; `Brewfile.gaming` restores Zulu 17, not the Oracle JDK. Recreate
 any other required game runtime deliberately through its supported installer

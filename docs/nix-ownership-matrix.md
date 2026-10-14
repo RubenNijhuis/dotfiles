@@ -1,8 +1,9 @@
 # Nix ownership matrix
 
-This is the transition contract for this repository.  Nix should describe
-reproducible machine state, while personal data, secrets, and application
-databases remain outside it.
+This is the current ownership contract. Nix describes reproducible software
+and supported preferences; applications and the user own mutable/private state.
+Use the [new-Mac checklist](runbooks/new-mac-recovery.md) for the restore order
+and the [application catalog](application-catalog.md) for app-specific handoffs.
 
 ## Direct Nix ownership
 
@@ -10,8 +11,9 @@ These are safe to make declarative and portable through the flake and
 Home Manager:
 
 - Nix itself, flakes, caches, and trusted build settings.
-- CLI packages and capability profiles: development, JavaScript, writing,
-  design, media, gaming, and optional language toolchains.
+- CLI packages and selected capability profiles: developer, writing, design,
+  media, gaming, leisure and network tools. Each project owns its runtime pins
+  and dependency lockfiles; a global package is not a project's runtime guarantee.
 - Portable desktop applications where the pinned package supports the host:
   Zen Twilight, Thunderbird, Obsidian, Signal, VS Code, Krita, and
   RawTherapee. Zen Twilight is a deliberately chosen preview channel; Zen
@@ -21,12 +23,12 @@ Home Manager:
   Apple-Silicon Mac until the pinned Nix packages work here.
 - macOS defaults that `nix-darwin` supports: Finder, Dock, keyboard,
   trackpad, screen-capture defaults, and screen-lock policy.
-- Portable program configuration once migrated one at a time: Git, Starship,
+- Portable program configuration: Git, Starship,
   Bat, ripgrep, direnv, zoxide, fzf, tmux, Yazi, Atuin, and Neovim.
-- Non-secret editor settings and extensions, through a raw configuration file
-  initially where Home Manager has no useful native module.
+- Non-secret editor settings and extension IDs. VS Code marketplace payloads
+  and versions remain app-managed; Neovim plugins/parsers are pinned in Nix.
 
-## Original repository coverage
+## Current configuration coverage
 
 The former ChezMoi source tree is retired; reusable configuration now lives
 under `nix/config/`. “Native” means Home Manager has a useful declarative option;
@@ -49,7 +51,7 @@ and the [new-Mac checklist](runbooks/new-mac-recovery.md) for recovery.
 | Btop, LazyGit | `nix/home/terminal-apps.nix` | active; Btop's exit-time config writes are disabled |
 | Eza theme | `nix/home/terminal-apps.nix` raw file | active |
 | Neovim | `nix/home/editors.nix` + `editor-plugins.nix` | Nix owns the binary, bootstrap, plugin graph, native completion library, and selected compiled parsers/queries. Extras are declared once in `lazyvim.json`. Bash/Lua tools and formatters come from the developer profile; other language tools belong in project environments. Mason is a manual fallback, not an automatic installer. Copilot remains enabled but sign-in is private/app-owned. |
-| VS Code settings and extension manifest | `nix/home/vscode.nix` + `nix/config/vscode/` | settings apply on graphical desktop hosts; extensions install through `make vscode-setup` because marketplace binaries remain application-managed state. |
+| VS Code settings and extension manifest | `nix/home/vscode.nix` + `nix/config/vscode/` | settings apply on graphical desktop hosts; the installer reconciles extension IDs when its selected Nix host owns those settings. `make vscode-setup` remains the manual reconciliation command; marketplace binaries/versions remain application-managed state. |
 | Raycast preferred-application launchers | `nix/home/raycast.nix` Script Commands | active on macOS after the command directory is registered once in Raycast; private Raycast state and `.rayconfig` exports remain outside Git. |
 | `.hushlogin`, repository Git hooks | `nix/home/editors.nix` + `make hooks` | active; neither needs ChezMoi ownership. |
 | Global Mise/Ruby | retired; future projects use pinned devShells | shell hooks and shim PATH removed; historical installs are not baseline restore requirements |
@@ -76,15 +78,16 @@ The following are intentionally local or encrypted, never plain Nix source:
 - Shortcuts' internal database. Export approved personal shortcuts as
   `.shortcut` files for backup; use Shortcuts itself to import them.
 
-## Adoption and restore
+## Changes to ownership
 
 1. Follow the [new-Mac checklist](runbooks/new-mac-recovery.md) for installation;
    activation is not a personal-data restore.
 2. Keep `nix/darwin/defaults.nix` as the sole owner for supported macOS
    preferences; keep unsupported personal choices local rather than adding a
    competing default script.
-3. Adopt one coherent configuration profile at a time into Home Manager only
-   after an approved recoverable backup; verify actual links and executables.
+3. For an existing conflicting configuration, adopt one coherent profile into
+   Home Manager after an approved recoverable backup; verify actual links and
+   executables.
 4. Move editor and application settings as explicit raw `home.file` entries
    only after a backup and collision check.
 5. Prefer Nix for every package available in the pinned cross-platform package

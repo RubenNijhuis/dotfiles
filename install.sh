@@ -7,6 +7,7 @@ DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$DOTFILES/lib/env.sh"
 dotfiles_load_env "$DOTFILES"
 source "$DOTFILES/lib/brew.sh"
+source "$DOTFILES/lib/automation-registry.sh"
 DEVELOPER_ROOT="$DOTFILES_DEVELOPER_ROOT"
 INSTALL_LOG="$HOME/.cache/dotfiles-install.log"
 CHECKPOINT_FILE="$HOME/.config/dotfiles-install-checkpoint"
@@ -15,7 +16,7 @@ SELF_TEST_CHECKPOINT=false
 # Source shared output helpers (lives in the git clone, always available)
 source "$DOTFILES/lib/output.sh" "$@"
 
-TOTAL_STEPS=7
+TOTAL_STEPS=8
 CURRENT_STEP=0
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -38,6 +39,7 @@ STEP_NAMES=(
   "Applying the Nix configuration"
   "Installing documented macOS exceptions"
   "Final local setup"
+  "Reconciling editor extensions and selected automations"
 )
 
 detect_brew_binary() {
@@ -366,13 +368,13 @@ run_step() {
   if [[ $CURRENT_STEP -lt $target_step ]]; then
     step_begin "${STEP_NAMES[$((target_step - 1))]}"
     if $DRY_RUN; then
-      if [[ "$target_step" -eq 1 ]]; then
-        "$handler"
+      if [[ "$target_step" -eq 1 || "$target_step" -eq 8 ]]; then
+        "$handler" || return 1
       else
         print_info "DRY RUN: would execute step logic"
       fi
     else
-      "$handler"
+      "$handler" || return 1
       save_checkpoint
     fi
     step_done
@@ -394,6 +396,7 @@ step_detect_system() {
 
   # Validate the complete exception selection before installing or switching.
   brew_declared_taps "$DOTFILES" >/dev/null || return 1
+  automation_profile_agents >/dev/null || return 1
 
   local missing=0
   local cmd
@@ -448,7 +451,7 @@ check_macos_and_clt_freshness() {
 
 step_install_xcode_clt() {
   if ! xcode-select -p &>/dev/null; then
-    xcode-select --install
+    xcode-select --install || return 1
     if [[ -t 0 ]]; then
       echo "Press enter after Xcode CLT finishes installing."
       read -r
@@ -470,11 +473,12 @@ step_install_xcode_clt() {
 }
 
 step_install_homebrew() {
-  local brew_bin=""
+  local brew_bin="" brew_installer brew_env
   brew_bin="$(detect_brew_binary || true)"
 
   if [[ -z "$brew_bin" ]]; then
-    /bin/bash -c "$(curl --max-time 120 -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew_installer=$(curl --max-time 120 -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) || return 1
+    /bin/bash -c "$brew_installer" || return 1
     brew_bin="$(detect_brew_binary || true)"
   fi
 
@@ -483,7 +487,8 @@ step_install_homebrew() {
     exit 1
   fi
 
-  eval "$("$brew_bin" shellenv)"
+  brew_env=$("$brew_bin" shellenv) || return 1
+  eval "$brew_env" || return 1
   print_success "Homebrew ready"
 }
 
@@ -493,7 +498,7 @@ step_install_packages() {
   while IFS= read -r brewfile_name; do
     brewfile_path="$DOTFILES/brew/$brewfile_name"
     print_status_row "Brewfile" info "$brewfile_name"
-    install_brew_bundle "$brewfile_path"
+    install_brew_bundle "$brewfile_path" || return 1
   done < <(dotfiles_profile_brewfiles)
   print_success "Packages installed"
 }
@@ -502,6 +507,7 @@ print_install_summary() {
   print_section "Install Summary"
   print_status_row "Profile" info "${DOTFILES_PROFILE:-unknown}"
   print_status_row "Brewfiles" info "$(brew_profile_summary)"
+  print_status_row "Automations" info "${DOTFILES_PROFILE_AUTOMATIONS:-none}"
   print_status_row "SSH keys" info "$SETUP_SSH"
   print_status_row "GPG key" info "$SETUP_GPG"
   print_status_row "Install log" info "$INSTALL_LOG"
@@ -516,19 +522,21 @@ profile_has_brew_exceptions() {
 }
 
 step_install_lix() {
+  local nix_version
   if command -v nix >/dev/null 2>&1; then
-    print_success "$(nix --version)"
+    nix_version=$(nix --version) || return 1
+    print_success "$nix_version"
     return
   fi
 
   print_info "Installing Lix with the supported installer"
-  curl -sSf -L https://install.lix.systems/lix | sh -s -- install
+  curl -sSf -L https://install.lix.systems/lix | sh -s -- install || return 1
 
   # The installer updates shell startup files. Load its canonical location so
   # this run can continue without requiring a new terminal.
   if [[ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
     # shellcheck disable=SC1091
-    source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh || return 1
   fi
   command -v nix >/dev/null 2>&1 || {
     print_error "Lix installed, but nix is not available in this shell. Open a new terminal and rerun ./install.sh."
@@ -537,7 +545,9 @@ step_install_lix() {
 }
 
 step_verify_nix_configuration() {
-  print_status_row "Nix" info "$(nix --version)"
+  local nix_version
+  nix_version=$(nix --version) || return 1
+  print_status_row "Nix" info "$nix_version"
   make -C "$DOTFILES" nix-check || return 1
   make -C "$DOTFILES" nix-build || return 1
   print_success "Locked Nix configuration builds"
@@ -555,8 +565,8 @@ step_install_brew_exceptions() {
   fi
 
   print_info "Installing only the profile's documented macOS exceptions"
-  step_install_homebrew
-  step_install_packages
+  step_install_homebrew || return 1
+  step_install_packages || return 1
 }
 
 step_finish_nix_install() {
@@ -564,18 +574,63 @@ step_finish_nix_install() {
            "$DEVELOPER_ROOT/personal/experiments" \
            "$DEVELOPER_ROOT/personal/learning" \
            "$DEVELOPER_ROOT/work/clients" \
-           "$DEVELOPER_ROOT/archive"
+           "$DEVELOPER_ROOT/archive" || return 1
   print_success "Created developer structure at $DEVELOPER_ROOT"
 
   if [[ "$SETUP_SSH" == "yes" ]]; then
-    bash "$DOTFILES/setup/generate-ssh-keys.sh"
+    bash "$DOTFILES/setup/generate-ssh-keys.sh" || return 1
   fi
   if [[ "$SETUP_GPG" == "yes" ]]; then
-    bash "$DOTFILES/setup/generate-gpg-keys.sh"
+    bash "$DOTFILES/setup/generate-gpg-keys.sh" || return 1
   fi
 
-  git -C "$DOTFILES" config core.hooksPath "$DOTFILES/hooks"
+  git -C "$DOTFILES" config core.hooksPath "$DOTFILES/hooks" || return 1
   print_success "Git hooks enabled for this repository"
+}
+
+step_reconcile_selected_setup() {
+  local selected_agents desktop_editor nix_host home_target editor_profile editor_settings
+  selected_agents=$(automation_profile_agents) || return 1
+
+  if $DRY_RUN; then
+    print_info "DRY RUN: would reconcile declared extensions if the selected Nix host manages VS Code settings"
+    print_info "DRY RUN: would install profile automations: ${selected_agents:-none}"
+    return
+  fi
+
+  # The shell profile selects operational jobs, not desktop capabilities. Ask
+  # the same Nix host as make nix-switch; do not adopt an ambient editor CLI.
+  nix_host="${NIX_DARWIN_HOST:-Rubens-MacBook-Pro}"
+  home_target="$DOTFILES#darwinConfigurations.$nix_host.config.home-manager.users.rubennijhuis"
+  desktop_editor=$(nix eval --offline --no-write-lock-file --json \
+    "$home_target.home.file" \
+    --apply 'files: builtins.hasAttr "Library/Application Support/Code/User/settings.json" files') || return 1
+  case "$desktop_editor" in
+    true)
+      editor_settings="$HOME/Library/Application Support/Code/User/settings.json"
+      if [[ ! -L "$editor_settings" || ! -r "$editor_settings" ]]; then
+        print_error "Managed VS Code settings are missing; apply the selected Nix host before resuming step 8"
+        return 1
+      fi
+      # Use the selected host's built CLI even if this bootstrap shell still
+      # has its pre-activation PATH. Never install another editor as a fallback.
+      editor_profile=$(nix eval --offline --no-write-lock-file --raw "$home_target.home.path.outPath") || return 1
+      if [[ ! -x "$editor_profile/bin/code" ]]; then
+        print_error "The selected Nix host's VS Code CLI is missing; build/apply that host before resuming step 8"
+        return 1
+      fi
+      PATH="$editor_profile/bin:$PATH" \
+        bash "$DOTFILES/setup/vscode-setup.sh" --no-color || return 1
+      ;;
+    false) print_success "VS Code configuration is not selected by the Nix host" ;;
+    *) print_error "Could not determine the Nix host's VS Code selection"; return 1 ;;
+  esac
+
+  if [[ -n "$selected_agents" ]]; then
+    bash "$DOTFILES/ops/automation/setup-automation.sh" --no-color --strict setup-all || return 1
+  else
+    print_success "No operational automations selected for this profile"
+  fi
 }
 
 collect_nix_preferences() {
@@ -628,6 +683,7 @@ nix_main() {
   # Runtimes and app configuration belong to Nix modules or their respective
   # applications, not this installer.
   run_step 7 step_finish_nix_install
+  run_step 8 step_reconcile_selected_setup
 
   if ! $DRY_RUN; then
     rm -f "$CHECKPOINT_FILE"

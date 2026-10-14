@@ -49,3 +49,20 @@ automation_setup_targets() {
     [[ -n "$alias" ]] && printf '%s\n' "$alias"
   done < <(_automation_read_manifest)
 }
+
+# Validate the complete profile before a caller installs anything. Keep the
+# profile's order and deduplicate selections without expanding an empty list.
+automation_profile_agents() {
+  local manifest selected agent seen=" "
+  manifest=$(_automation_read_manifest) || return 1
+  selected="${DOTFILES_PROFILE_AUTOMATIONS:-}"
+  for agent in $selected; do
+    if ! printf '%s\n' "$manifest" | awk -F'|' '{print $1}' | grep -Fxq "$agent"; then
+      printf 'Unknown profile automation: %s\n' "$agent" >&2
+      return 1
+    fi
+    case "$seen" in *" $agent "*) continue ;; esac
+    seen="$seen$agent "
+    printf '%s\n' "$agent"
+  done
+}

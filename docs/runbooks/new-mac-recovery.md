@@ -19,14 +19,16 @@ iCloud-backed Files tree. Local `~/Private` remains for credentials, technical
 secrets and any material deliberately kept local; it is not automatically
 synced or restored by Apple Passwords. Do not upload that entire folder.
 
-## Current baseline
+## Historical migration checkpoint
 
-Checked on 2026-10-13: this Mac uses generation **61** and the repository's
-GitHub remote uses **SSH**. Earlier approved migration copies and generations
+Checked on 2026-10-13: generation **61** was active and the repository's
+GitHub remote used **SSH**. This is a dated checkpoint, not a required generation
+for a new Mac. Earlier approved migration copies and generations
 1–54 were retired; do not treat old Code Recovery, browser, database or
 configuration migration folders as restore sources. Mave archives remain
 untouched. Use Git history to recover older configuration source, not an
-assumed installed rollback generation.
+assumed installed rollback generation. Exact retirements and storage outcomes
+remain in [storage maintenance](../storage-maintenance.md).
 
 `make doctor` reports local-only dotfiles commits and uncommitted entries
 against cached remote refs. It does not contact GitHub, push work, or verify
@@ -48,15 +50,27 @@ proves all retained work is remotely saved.
    ```sh
    git clone https://github.com/RubenNijhuis/dotfiles.git ~/Developer/personal/dotfiles
    cd ~/Developer/personal/dotfiles
+   make profile-list
+   # Optional: select another intended operational profile before installing.
+   # make profile-set PROFILE=minimal
    ./install.sh
    ```
 
    The initial HTTPS clone needs no provisioned SSH identity. The installer
    installs/verifies Lix/Nix, checks and builds the locked Mac configuration,
    applies it, then installs the selected documented Homebrew exceptions.
-   It creates the Developer structure and enables repository hooks. A second
-   `make nix-switch` is unnecessary unless configuration changed. Re-run the
-   installer to resume a failed checkpoint, then open a new terminal.
+   Its final step reconciles declared VS Code extensions when the selected
+   Nix host owns the editor settings, then installs only the active operational
+   profile's selected automation jobs. The laptop selects the update report;
+   the minimal profile selects no jobs. Marketplace versions remain app-owned.
+   The default operational profile is `personal-laptop`; profile selection
+   controls native exceptions and operational setup, while Nix host imports
+   select the declarative capabilities. It creates the Developer structure
+   and enables repository hooks. A second `make nix-switch` is unnecessary
+   unless configuration changed. Re-run the installer to resume a failed
+   checkpoint, then open a new terminal. A failure in final setup leaves step 7
+   complete: plain `./install.sh` resumes, or use `./install.sh --from-step 8`
+   to rerun editor/automation setup explicitly.
 4. Restore/provision private SSH and GPG keys securely, never through Nix or
    ordinary plaintext iCloud files. Git's public signing identifier is in
    `nix/lib/identity.nix`; private keys are not. `make gpg-setup` checks the
@@ -73,11 +87,12 @@ proves all retained work is remotely saved.
    Thunderbird, Signal, Obsidian and Apple Calendar. Follow the
    [application catalog](../application-catalog.md) for native exceptions,
    licences and app-owned state. Keep a single intended profile per app.
-7. Run `make vscode-setup` for the declared marketplace extensions and
-   `make automation-setup` for only the active profile's selected jobs.
-   Register Raycast's Script Commands directory once. Import any retained
-   personal Shortcuts through Shortcuts itself. These steps are not performed
-   by the main installer; avoid blanket installation of every launchd job.
+7. Complete the native app handoffs: register Raycast's Script Commands
+   directory once and import retained personal Shortcuts through Shortcuts
+   itself. Follow the catalog's [settings and work recovery](../application-catalog.md#settings-and-work-recovery)
+   for useful OneMenu, creative-app and gaming preferences. Editor/automation
+   setup already ran in the installer; `make vscode-setup` and
+   `make automation-setup` remain available for deliberate reconciliation later.
 
 ## Remaining manual recovery boundaries
 

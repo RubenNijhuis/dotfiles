@@ -1,5 +1,40 @@
 # Storage maintenance
 
+This record preserves exact approved actions and the measurements made at the
+time. Later dated outcomes supersede earlier holds and retention decisions;
+old inventory and generation numbers are not current restore guarantees. Use
+the [new-Mac checklist](runbooks/new-mac-recovery.md) for recovery and the
+[ownership matrix](nix-ownership-matrix.md) for configuration ownership.
+
+## Approved cache cleanup — 2026-10-13
+
+The latest approval supersedes the earlier npm/pnpm hold. Apple's `simctl`
+removed exactly iOS 17.2 (21C62) and iOS 17.5 (21F79); the runtime registry is
+empty and their image files are absent. No Xcode licence was accepted. The
+generated user Simulator `Caches/dyld` directory was cleared; devices stayed.
+Native pnpm pruning reduced the current v11 store from 11.7 GB to 6.7 GB and
+the legacy v3 store to 8 KiB. A temporary matching pnpm 9.2 tool handled the
+Mave-referenced legacy store and was then removed; archived code stayed intact.
+The approved npm/pnpm download caches and Homebrew downloads were cleared.
+These are permanent cache removals: future installs/builds may need downloads.
+Available space subsequently measured 230.6 GB of 494.4 GB, about 31.7 GB more
+than the audit baseline; shared APFS extents prevent per-folder saving claims.
+The running research app still returned HTTP 200. Spotify/Zen cache-only app
+actions remain pending; OrbStack's subsequently approved cleanup is below.
+
+## OrbStack cache cleanup — 2026-10-14
+
+After exact approval, native Docker cleanup emptied the local OrbStack builder
+cache and removed only `rubennijhuis-com_web_next` and
+`rubennijhuis-com_web_node_modules`, both unattached generated-data volumes.
+Identity comparisons verified all 21 images and 13 stopped containers intact;
+the other 11 volumes, including the anonymous PostgreSQL database, remain.
+The allocated VM image fell from 40.1 GB to 23.2 GB after asynchronous space
+reclamation; available space measured 246.8 GB of 494.4 GB, about 15.8 GB more
+than the immediate baseline. Logical cache/volume sizes are not additive
+physical savings. Removed build/dependency data is not recoverable from Trash;
+future builds/installations recreate it and may require downloads.
+
 ## Latest retirement — 2026-10-13
 
 After exact approval, `cv-editor`, `LefVideo.drp`, and `Movies/Main.mov` were
@@ -43,7 +78,7 @@ identities. Allocation before the moves was about 446 MiB combined; Trash was
 not emptied, so this is not reclaimed space. The nested SRC-API repository's
 five modified files remain in the moved checkout; its GitHub remote is unchanged.
 `ThreeJS/journey` was retained and its directory identity rechecked.
-Nix generation 57 is now active with the outdated global Bun fallback retired
+Nix generation 57 was active at this stage with the outdated global Bun fallback retired
 from the shared shell PATH; Bun's files and the project-installed runtime remain.
 
 After separate exact approval, `~/Library/pnpm/global/5` and the six wrappers
@@ -73,7 +108,9 @@ Claude batch measurements precede the moves, not a claim of reclaimed space.
 Neovim's unused C#/Ruby/Rust selections, two Rust plugins and three parsers
 were retired from Nix; generation 61 is active. No project code was removed.
 
-Run the read-only size review from the repository:
+## Read-only size review
+
+Run the review from the repository:
 
 ```sh
 make storage-audit
@@ -139,6 +176,9 @@ cleanup. No scheduled deletions or automatic pruning are installed.
 
 ## Cleanup review — 2026-10-07
 
+Historical review: the approved 2026-10-13 cleanup and retirement outcomes above
+supersede its npm/pnpm hold, Simulator blockage and migration-copy retention.
+
 The Mac had about 168 GiB available; there is no urgent reason to remove
 application data. The selected complete measurements were:
 
@@ -176,6 +216,9 @@ profiles are not package-cache cleanup targets. The three retired browsers'
 profiles were separately archived with approval; see the application catalog.
 
 ## Follow-up cleanup — 2026-10-07
+
+Historical review: archive locations below record the moves made then. Later
+approved retirements above determine whether they remain recovery sources.
 
 The follow-up review found these exact candidates, without opening their data:
 
@@ -270,6 +313,10 @@ by this cleanup. The completed one-use administrator script was removed from
 its temporary directory; all migration archives remain intact.
 
 ## Simulator and rollback retirement review — 2026-10-08
+
+Historical review: the approved 2026-10-13 outcomes above supersede the pending
+Simulator and generation decisions below. Preserve the measured candidate list
+as evidence, not a new cleanup authorization.
 
 The user wants simulator data and redundant rollback copies retired. Exact
 permanent-deletion batches still need confirmation; no blanket migration-folder

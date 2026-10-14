@@ -1,7 +1,9 @@
-# Nix transition
+# Nix environment and migration evidence
 
 The Nix configuration lives at the repository root so macOS, Linux, and WSL
-share the same pinned inputs and Home Manager package set.
+share the same pinned inputs and Home Manager package set. For installation,
+use the [new-Mac checklist](runbooks/new-mac-recovery.md); for current owners,
+use the [ownership matrix](nix-ownership-matrix.md).
 
 ## Capability profiles
 
@@ -57,8 +59,8 @@ mail, notes, and gaming applications remain native Windows applications. Add
 The Linux desktop adds the separate `gaming` capability. The Mac keeps its
 occasional gaming launcher as a narrow, opt-in Homebrew exception.
 
-The default developer profile has 16 direct packages. Optional benchmarking,
-Jujutsu and Nix language-server experiments do not grow that baseline:
+Optional benchmarking, Jujutsu and Nix language-server experiments use a
+separate shell:
 
 ```bash
 nix develop .#developer-extras
@@ -78,25 +80,27 @@ The corresponding native application decisions live in the
 everyday core—rather than trying to make every platform install the same
 large GUI list.
 
-The reasoning behind this structure and the staged migration plan are in
+The reasoning behind this structure and the original staged migration plan are in
 [Nix setup research: durable patterns to adopt](nix-research-takeaways.md).
 
-## Ownership during the transition
+## Linux and Windows
 
-| Concern | Current owner | Planned owner |
-| --- | --- | --- |
-| Portable desktop apps | Home Manager | Home Manager where the pinned package supports the host |
-| Specialist macOS apps | documented Homebrew/manual exception | revisit after each Nixpkgs update |
-| Declarative dotfiles | Home Manager | Home Manager; ChezMoi is retired |
-| Cross-platform CLI packages | Home Manager | Home Manager |
-| Per-project runtimes | pinned devShells; old installed toolchains retained only as local rollback state | project `devShell`s; no global mutable runtime manager |
-| macOS defaults and launch agents | nix-darwin / launchd plists | nix-darwin / Home Manager where supported |
-| Secrets | Keychain and machine-local config | Keychain and machine-local config |
+Use the same flake with standalone Home Manager on Linux or inside WSL:
 
-Never put a secret in `flake.nix`, `flake.lock`, or a Nix module: Nix store
-paths are broadly readable on the machine.
+```bash
+make nix-home-switch NIX_HOME_HOST=rubennijhuis-windows-wsl
+```
+
+Use `NIX_HOME_HOST=rubennijhuis-linux-desktop` for an x86_64 Linux desktop
+with gaming, or `NIX_HOME_HOST=rubennijhuis-linux-aarch64` for ARM Linux.
+Native Windows remains outside the Nix support boundary; WSL is the supported
+Windows path. A successful Mac build does not verify Linux runtime behaviour.
 
 ## JavaScript manager audit — 2026-10-13
+
+The following is preserved migration evidence. Its installed versions and
+local inventory describe that date; use the current lockfile, project manifests
+and executable checks when making a new runtime decision.
 
 pnpm is the default for new personal projects, not a forced replacement inside
 third-party frameworks or shared repositories. Nix owns the global Node
@@ -137,68 +141,20 @@ and a Homebrew npm library also remain. The old Bun 1.1.29 was removed from the 
 not deleted; the research app's pnpm-selected Bun 1.4.2 was verified. From the
 website root use `pnpm --filter @rubennijhuis/research-api exec bun --version`
 or its existing research scripts, not an unqualified root-level Bun command.
-No npm/pnpm cache pruning was performed; further removal needs exact approval.
+No npm/pnpm cache pruning was performed as part of that runtime-manager audit.
+The subsequent exact approved cache cleanup supersedes that hold; its verified
+outcomes are in [storage maintenance](storage-maintenance.md). Further removal
+still requires exact approval.
 
-## First installation
+## Existing configuration collisions
 
-1. Install a Nix implementation for macOS. The nix-darwin project recommends
-   the Lix installer because it provides a supported uninstall path.
-2. From this repository, inspect the locked evaluation and build:
+The installer provisions Lix/Nix and builds/applies the locked configuration.
+`make nix-switch` uses the rebuild tool from this flake's locked nix-darwin
+input without refreshing the lock. Activation takes over only declared paths;
+it does not uninstall unrelated Homebrew packages.
 
-   ```bash
-   make nix-check
-   make nix-build
-   ```
-
-   Before changing shared modules that affect Linux or WSL too, use the
-   cross-platform check:
-
-   ```bash
-   make nix-check-all
-   ```
-
-3. Apply the macOS configuration:
-
-   ```bash
-   make nix-switch
-   ```
-
-`make nix-switch` builds and uses the rebuild tool from this flake's locked
-nix-darwin input, including on the first activation. It does not fetch an
-unlocked upstream rebuild tool or rewrite the lock during activation. Lix/Nix
-itself is provisioned by the installer. The Mac configuration
-includes its shared CLI and supported desktop application profiles. It does not
-uninstall Homebrew packages automatically. It takes over only files explicitly
-declared by the active Home Manager modules; the ownership matrix records each
-handoff and the small list of macOS package exceptions.
-
-If this Mac already has `/etc/pam.d/sudo_local` from a prior Touch ID setup,
-preserve it once before the first switch so Nix can take over that exact file:
-
-```bash
-sudo -H mv /etc/pam.d/sudo_local /etc/pam.d/sudo_local.before-nix-darwin
-make nix-switch
-```
-
-The renamed file is a recoverable pre-Nix backup; nix-darwin then writes the
-same enabled Touch ID rule from `nix/darwin/defaults.nix`.
-
-## Linux and Windows
-
-Use the same flake with standalone Home Manager on Linux or inside WSL:
-
-```bash
-make nix-home-switch NIX_HOME_HOST=rubennijhuis-windows-wsl
-```
-
-Use `NIX_HOME_HOST=rubennijhuis-linux-desktop` for an x86_64 Linux desktop
-with gaming, or `NIX_HOME_HOST=rubennijhuis-linux-aarch64` for ARM Linux.
-Native Windows remains outside the Nix support boundary; WSL is the supported
-Windows path.
-
-## Migration rule
-
-For each program, build the Home Manager replacement, preserve approved
-existing files before activation, then verify links and command resolution.
-Raw public source belongs in `nix/config/`; writable runtime state and secrets
-stay outside the store. ChezMoi is retired. Keep one owner per path.
+An existing `/etc/pam.d/sudo_local` can conflict with the first Touch ID
+activation. Inspect the exact file and agree a recoverable, non-overwriting
+backup before handing it to `nix/darwin/defaults.nix`. Do not routinely rename
+it on every install or restore a retired configuration owner. For other
+collisions, follow the [ownership change rules](nix-ownership-matrix.md#changes-to-ownership).

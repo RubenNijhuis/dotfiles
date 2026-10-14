@@ -10,7 +10,8 @@ Before the first Nix activation:
 
 1. This Mac target requires Apple Silicon and the local username `rubennijhuis`.
    Adapt the flake first for another username or architecture.
-2. Update macOS to the latest release (System Settings > General > Software Update).
+2. Choose a supported macOS release. Schedule any OS update/restart separately;
+   the installer does not perform it.
 3. Install Xcode Command Line Tools if absent:
    ```bash
    xcode-select --install
@@ -30,8 +31,10 @@ cd ~/Developer/personal/dotfiles
 ```
 
 `install.sh` is the Nix-first bootstrap: it verifies and applies the flake,
-then uses Homebrew only for the small, documented macOS exceptions that the
-pinned Nix package set cannot currently provide.
+then installs the documented macOS exceptions, reconciles declared VS Code
+extensions when the selected Nix host includes editor settings, and installs
+the active operational profile's selected automation jobs. The default laptop
+profile selects the update report; the minimal profile selects no jobs.
 
 ## Daily Use
 
@@ -78,7 +81,7 @@ Current profile behavior:
 - `make doctor` shows the active profile in its overview
 - `make install` is Nix-first; `make brew-audit` reviews the documented
   macOS exceptions. Homebrew is limited to those exceptions.
-- `make automation-setup` installs only the active profile's selected jobs:
+- The installer and `make automation-setup` install only the active profile's selected jobs:
   the laptop selects the update report; the minimal profile selects none.
 - `make doctor ARGS=--automation` shows which profile the automation dashboard reflects
 
@@ -87,12 +90,11 @@ Machine-local profile selection lives in `local/profile.env`.
 
 ## Documentation
 
-- Architecture and conventions: `docs/architecture.md`
-- Everyday assistant and application preferences: `docs/personal-application-policy.md`
-- Machine profiles: `docs/machine-profiles.md`
-- Writing and local exports: `docs/writing-workflow.md`
-- Runbooks: `docs/runbooks/`
-- Launchd templates and contracts: `launchd/README.md`
+Start with the [documentation index](docs/README.md). The
+[new-Mac recovery checklist](docs/runbooks/new-mac-recovery.md) owns the complete
+restore sequence; the [ownership matrix](docs/nix-ownership-matrix.md) defines
+what Nix, applications and the user manage. Dated cleanup and migration audits
+are retained as evidence, not additional installation instructions.
 
 ## Core Layout
 
