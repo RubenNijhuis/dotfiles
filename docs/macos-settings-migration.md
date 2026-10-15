@@ -171,6 +171,10 @@ See [Obsidian's template instructions](https://obsidian.md/help/web-clipper/temp
 On this Mac the template is imported, targets Files explicitly, and is the
 fallback template. A public-page capture into Inbox passed on 2026-10-05;
 missing author/publication metadata stayed empty rather than being invented.
-Browser Sync was reviewed but left off: Zen/Twilight is not signed in. Choose
-the account and sync categories before uploading browser data; Apple Passwords
-remains the credential source of truth.
+The 2026-10-15 local-profile review still found no configured browser Sync
+account or completed sync. Browser password saving is disabled; iCloud Passwords,
+AdBlock and Obsidian Web Clipper are active. Choose the account and categories
+before enabling Sync or uploading browser data. The user chose to keep browser
+Sync off on 2026-10-15. Keep password sync off while
+Apple Passwords remains the credential source of truth; review history and
+open-tab sharing separately. No sign-in or browser export was performed.

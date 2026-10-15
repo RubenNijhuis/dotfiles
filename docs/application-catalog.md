@@ -64,6 +64,13 @@ On 2026-10-13 a refreshed RawTherapee Nix build still failed on Linux-only `libs
 dependency despite permissive package metadata; HandBrake is marked broken on
 Darwin and Krita is Linux-only. Keep those exceptions until builds actually work.
 
+Update gate on 2026-10-15: retain Nixpkgs `8edc0c7`. The proposed `ca16594`
+pin failed to build Sesh's Go Mockery dependency (Go export-data incompatibility).
+Separately, both retained Obsidian 1.13.7 and proposed 1.14.4 have the same
+ad-hoc bundle-signature limitation under native strict verification; this is
+not a new update regression. Do not disable tests or signature checks to force
+the package-set update through.
+
 OneMenu is a manual Mac-only exception: no suitable package was found in the
 pinned Nix set or Homebrew during its audit. Keep it; record a new package
 owner only after verifying a replacement. Reassess exceptions when updating
@@ -137,6 +144,15 @@ whole preference folders or databases into Git.
 
 These are prepared restore handoffs, not completed exports or tested restores.
 Native app exports and cloud uploads need an exact scope and explicit approval.
+The 2026-10-15 follow-up found no custom Krita, RawTherapee or HandBrake
+resources at the inspected conventional paths, so no speculative preset export
+is needed. Actual local saves exist for Factorio, Oxygen Not Included,
+Civilization VI, Papers, Please and ISLANDERS; their completed Steam Cloud
+synchronization was not verified. The two inspected Prism instances had no
+world saves. Preserve live save locations and use a reviewed copy/export, not
+Nix links or a blanket copy of a launcher's databases.
+The user chose to keep game saves local on 2026-10-15; no recovery snapshot or
+cloud upload was made.
 For approved non-secret reusable presets, use `~/Files/30 Resources/<App>/`;
 keep project exports with their specific project under `~/Files/10 Projects/`
 or its existing archive. Private Raycast exports, licences and account material

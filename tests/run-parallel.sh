@@ -14,6 +14,7 @@ TESTS=(
   test-neovim.sh
   test-health-git.sh
   test-health-security.sh
+  test-automation-health.sh
   test-vscode-setup.sh
   test-terminal-workflow.sh
   test-idempotency.sh

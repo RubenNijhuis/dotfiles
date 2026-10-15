@@ -433,45 +433,86 @@ _log_status() {
   fi
 }
 
+# launchd's latest run is authoritative; append-only stderr may contain old errors.
+_agent_run_status() {
+  local snapshot="$1" out_log="${2:-}" err_log="${3:-}" report="${4:-}" state runs exit_code signal
+  state=$(awk '$1 == "state" && $2 == "=" { print $3; exit }' <<< "$snapshot")
+  runs=$(awk '$1 == "runs" && $2 == "=" { print $3; exit }' <<< "$snapshot")
+  exit_code=$(awk '$1 == "last" && $2 == "exit" && $3 == "code" { print $5; exit }' <<< "$snapshot")
+  signal=$(awk '$1 == "last" && $2 == "terminating" && $3 == "signal" { print $5; exit }' <<< "$snapshot")
+  if [[ "$state" == running ]]; then
+    echo 'info|running; previous result is not current'
+  elif [[ "$runs" == 0 ]]; then
+    echo 'warn|not run yet'
+  elif [[ ! "$runs" =~ ^[0-9]+$ ]]; then
+    echo 'warn|no completed run result available'
+  elif [[ "$exit_code" == 0 ]]; then
+    if [[ -n "$report" && ! -s "$report" ]]; then
+      echo 'warn|last run exited 0; no update report'
+    elif [[ -n "$report" ]] && grep -q '^Checks failed:' "$report"; then
+      echo 'error|update report contains failed checks'
+    elif [[ -n "$err_log" && -s "$err_log" && "$err_log" -nt "$out_log" ]]; then
+      echo 'warn|last run exited 0; newer stderr needs review'
+    else
+      echo 'ok|last run succeeded'
+    fi
+  elif [[ "$exit_code" =~ ^-?[0-9]+$ ]]; then
+    printf 'error|last run exited %s\n' "$exit_code"
+  elif [[ -n "$signal" ]]; then
+    printf 'error|last run terminated by signal %s\n' "$signal"
+  else
+    echo 'warn|no completed run result available'
+  fi
+}
+
 run_automation_dashboard() {
   LAUNCHD_MANAGER_SOURCE_ONLY=1 source "$DOTFILES/ops/automation/launchd-manager.sh"
 
   print_section "Automation Dashboard"
   local loaded_count=0 warn_count=0 error_count=0
   local agent_info name desc loaded_state out_log err_log
-  local out_status out_detail err_status err_detail
+  local out_status out_detail err_status err_detail snapshot report_file
   while IFS= read -r agent_info; do
     IFS=':' read -r name desc <<< "$agent_info"
     out_log="$(agent_log_file "$name")"
     err_log="$(agent_error_log_file "$name")"
 
-    if is_agent_loaded "$name"; then
+    if snapshot=$(launchctl print "$(launchd_domain)/$(agent_label "$name")" 2>/dev/null); then
       loaded_state="loaded"
       loaded_count=$((loaded_count + 1))
+      report_file=""
+      if [[ "$name" == update-audit ]]; then
+        report_file="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles/update-audit.txt"
+      fi
+      IFS='|' read -r out_status out_detail <<< "$(_agent_run_status "$snapshot" "$out_log" "$err_log" "$report_file")"
     else
       loaded_state="not loaded"
-      warn_count=$((warn_count + 1))
+      out_status=warn out_detail="no loaded job status"
     fi
 
-    IFS='|' read -r out_status out_detail <<< "$(_log_status "$out_log")"
     IFS='|' read -r err_status err_detail <<< "$(_log_status "$err_log")"
+    if [[ "$out_status" == ok && "$err_status" == error ]]; then
+      err_detail="historical errors; newer run succeeded"
+    fi
 
-    if [[ "$out_status" == "error" || "$err_status" == "error" ]]; then
+    if [[ "$out_status" == error ]]; then
       error_count=$((error_count + 1))
-    elif [[ "$loaded_state" != "loaded" || "$out_status" == "warn" || "$err_status" == "warn" ]]; then
+    elif [[ "$out_status" == warn ]]; then
       warn_count=$((warn_count + 1))
     fi
 
-    print_status_row "$name" "${out_status}" "$loaded_state | out $(_log_timestamp "$out_log") ($out_detail) | err $(_log_timestamp "$err_log") ($err_detail)"
+    print_status_row "$name" "${out_status}" "$loaded_state | $out_detail | out $(_log_timestamp "$out_log") | err $(_log_timestamp "$err_log") ($err_detail)"
     print_dim "    $desc"
   done < <(profile_agent_infos)
 
   printf '\n'
-  local selected_count
+  local selected_count warn_status=ok error_status=ok
   selected_count=$(profile_agent_infos | grep -c . || true)
+  if [[ $warn_count -gt 0 ]]; then warn_status=warn; fi
+  if [[ $error_count -gt 0 ]]; then error_status=error; fi
   print_status_row "Loaded agents" info "${loaded_count}/${selected_count}"
-  print_status_row "Warnings" warn "$warn_count"
-  print_status_row "Errors" error "$error_count"
+  print_status_row "Warnings" "$warn_status" "$warn_count"
+  print_status_row "Errors" "$error_status" "$error_count"
 
   print_section "Local rollback recency (not off-device recovery)"
   local latest_backup
@@ -579,4 +620,6 @@ main() {
   fi
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi
